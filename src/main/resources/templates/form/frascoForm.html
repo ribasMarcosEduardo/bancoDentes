@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(
+          ~{::title},
+          ~{::#frascoConteudo},
+          ~{},  ~{}   )}">
+
+<head>
+    <title>Cadastro de Frasco</title>
+</head>
+
+<body>
+<div id="frascoConteudo" class="py-5">
+
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="bi bi-beaker fs-4 me-3"></i>
+                    <h1 class="h4 mb-0">Cadastro de Frasco</h1>
+                </div>
+                <div class="card-body p-4">
+
+                    <form th:action="@{/frasco}" th:object="${frascoDTO}" method="post" class="mt-4">
+                        <input type="hidden" th:field="*{codFrasco}"/>
+
+                        <h5 class="mb-3 text-primary">Dados do Frasco</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="datCad" class="form-label fw-bold">Data de Cadastro:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
+                                    <input type="datetime-local" th:field="*{datCad}" id="datCad" class="form-control"
+                                           required/>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="datManutencao" class="form-label fw-bold">Data de Manutenção</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                                    <input type="datetime-local" th:field="*{datManutencao}" id="datManutencao"
+                                           class="form-control" readonly/>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="my-2"/>
+
+                        <h5 class="mb-3 mt-4 text-primary">Características do Dente</h5>
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <label for="nomeDente" class="form-label fw-bold">Nome do Dente:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-type"></i></span>
+                                    <select th:field="*{nomeDente}" id="nomeDente" class="form-select" required>
+                                        <option value="">-- Selecione o Nome do Dente --</option>
+                                        <option th:each="nome : ${T(bancoDentes.model.enumModels.NomeDente).values()}"
+                                                th:value="${nome.name()}" th:text="${nome}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4" id="maxilarContainer">
+                                <label for="maxilar" class="form-label fw-bold">Maxilar:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-grip-horizontal"></i></span>
+                                    <select th:field="*{maxilar}" id="maxilar" class="form-select" required>
+                                        <option value="">-- Selecione o Maxilar --</option>
+                                        <option th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}"
+                                                th:value="${m}" th:text="${m}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4" id="posicaoContainer" style="display: none;">
+                                <label class="form-label fw-bold d-block">Posição:</label>
+                                <div class="p-2 border rounded">
+                                    <div id="molarCheckboxes">
+                                        <strong>Molar:</strong>
+                                        <div class="form-check form-check-inline" th:each="pos : ${new int[]{1,2,3}}">
+                                            <input class="form-check-input" type="checkbox" th:field="*{posicao}"
+                                                   th:value="${pos}" th:id="'pos_' + ${pos}">
+                                            <label class="form-check-label" th:for="'pos_' + ${pos}"
+                                                   th:text="${pos}"></label>
+                                        </div>
+                                    </div>
+                                    <div id="preMolarCheckboxes">
+                                        <strong>Pré-Molar:</strong>
+                                        <div class="form-check form-check-inline"
+                                             th:each="pos : ${new int[]{14,15,24,25,34,35,44,45}}">
+                                            <input class="form-check-input" type="checkbox" th:field="*{posicao}"
+                                                   th:value="${pos}" th:id="'pos_' + ${pos}">
+                                            <label class="form-check-label" th:for="'pos_' + ${pos}"
+                                                   th:text="${pos}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-2"/>
+                        <h5 class="mb-3 mt-4 text-primary">Estado e Quantidade</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="estadoDente" class="form-label fw-bold">Estado do Dente:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-heart-pulse-fill"></i></span>
+                                    <select th:field="*{estadoDente}" id="estadoDente" class="form-select" required>
+                                        <option value="">-- Selecione o Estado --</option>
+                                        <option th:each="estado : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
+                                                th:value="${estado.name()}" th:text="${estado}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="quantidade" class="form-label fw-bold">Quantidade:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                    <input type="number" th:field="*{quantidade}" id="quantidade" class="form-control"
+                                           required min="1"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4"/>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/frasco/painel}" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i>
+                                Cancelar</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Salvar Frasco
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = {
+                datCad: document.getElementById('datCad'),
+                datManutencao: document.getElementById('datManutencao'),
+                nomeDente: document.getElementById('nomeDente'),
+                maxilarContainer: document.getElementById('maxilarContainer'),
+                maxilar: document.getElementById('maxilar'),
+                posicaoContainer: document.getElementById('posicaoContainer'),
+                molarCheckboxes: document.getElementById('molarCheckboxes'),
+                preMolarCheckboxes: document.getElementById('preMolarCheckboxes'),
+                checkboxes: document.querySelectorAll('#posicaoContainer input[type="checkbox"]')
+            };
+
+            const calcularDataManutencao = () => {
+                const dataCadastro = new Date(elements.datCad.value);
+                if (isNaN(dataCadastro)) {
+                    elements.datManutencao.value = '';
+                    return;
+                }
+                dataCadastro.setFullYear(dataCadastro.getFullYear() + 1);
+                elements.datManutencao.value = dataCadastro.toISOString().slice(0, 16);
+            };
+
+            const atualizarCampos = () => {
+                const valor = elements.nomeDente.value.trim();
+                const isEndo = valor === 'ENDO';
+                const isMolar = valor === 'MOLAR';
+                const isPreMolar = valor === 'PRE_MOLAR';
+
+                elements.maxilarContainer.style.display = isEndo ? 'none' : 'block';
+                elements.maxilar.required = !isEndo;
+                if (isEndo) elements.maxilar.value = '';
+
+                elements.posicaoContainer.style.display = isMolar || isPreMolar ? 'block' : 'none';
+                elements.molarCheckboxes.style.display = isMolar ? 'block' : 'none';
+                elements.preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
+                elements.checkboxes.forEach(cb => cb.checked = false);
+            };
+
+            elements.datCad.addEventListener('change', calcularDataManutencao);
+            elements.nomeDente.addEventListener('change', atualizarCampos);
+            calcularDataManutencao();
+            atualizarCampos();
+        });
+    </script>
+
+
+</div>
+</body>
+</html>
