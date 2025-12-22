@@ -14,6 +14,22 @@
 <body>
 <div id="painelConteudo" class="py-5">
 
+  <div class="row justify-content-center mb-3">
+    <div class="col-md-10 col-lg-8">
+      <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${mensagemSucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${mensagemErro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
   <div class="card card-body mb-4 shadow-sm">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="h2">Painel de Frascos</h1>
@@ -100,3 +116,18 @@
 </div>
 </body>
 </html>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      var alerts = document.querySelectorAll('.alert');
+
+      alerts.forEach(function(alert) {
+          setTimeout(function() {
+
+              var bsAlert = new bootstrap.Alert(alert);
+              bsAlert.close();
+
+          }, 5000); // <--- Ajuste o tempo aqui (3000 = 3s, 5000 = 5s)
+      });
+  });
+</script>

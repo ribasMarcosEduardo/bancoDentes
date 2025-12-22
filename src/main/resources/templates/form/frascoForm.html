@@ -12,12 +12,31 @@
 <body>
 <div id="frascoConteudo" class="py-5">
 
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-10 col-lg-8">
+            <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span th:text="${mensagemSucesso}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${mensagemErro}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white d-flex align-items-center">
                     <i class="bi bi-beaker fs-4 me-3"></i>
-                    <h1 class="h4 mb-0">Cadastro de Frasco</h1>
+                    <h1 class="h4 mb-0"
+                        th:text="${frascoDTO.codFrasco != null} ? 'Cadastro do Frasco #' + ${frascoDTO.identificacao} : 'Cadastro de Frasco'">
+                        Cadastro de Frasco
+                    </h1>
                 </div>
                 <div class="card-body p-4">
 
@@ -30,8 +49,11 @@
                                 <label for="datCad" class="form-label fw-bold">Data de Cadastro:</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
-                                    <input type="datetime-local" th:field="*{datCad}" id="datCad" class="form-control"
-                                           required/>
+                                    <input type="date"
+                                           class="form-control"
+                                           id="datCad"
+                                           name="datCad"
+                                           th:value="${frascoDTO.datCad != null ? #temporals.format(frascoDTO.datCad, 'yyyy-MM-dd') : ''}">
                                 </div>
                             </div>
                             <div class="col-md-6 mb-4">
@@ -181,6 +203,21 @@
             calcularDataManutencao();
             atualizarCampos();
         });
+
+  document.addEventListener("DOMContentLoaded", function() {
+      var alerts = document.querySelectorAll('.alert');
+
+      alerts.forEach(function(alert) {
+          setTimeout(function() {
+
+              var bsAlert = new bootstrap.Alert(alert);
+              bsAlert.close();
+
+          }, 5000); // <--- Ajuste o tempo aqui (3000 = 3s, 5000 = 5s)
+      });
+  });
+
+
     </script>
 
 

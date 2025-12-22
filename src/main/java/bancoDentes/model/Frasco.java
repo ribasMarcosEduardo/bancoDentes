@@ -1,5 +1,6 @@
 package bancoDentes.model;
 
+import bancoDentes.exception.FrascoException;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
 import bancoDentes.model.enumModels.NomeDente;
@@ -18,6 +19,7 @@ import java.util.List;
 @Table(name = "FRASCO")
 public class Frasco {
 
+    // Tabela e colunas
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODFRASCO")
@@ -47,4 +49,18 @@ public class Frasco {
     @Column(name = "QUANTIDADE", nullable = false)
     private Long quantidade;
 
+    @Column(name = "IDENTIFICACAO", nullable = true)
+    private  String identificacao;
+
+    // Método que gera a identificação do frasco
+    public void gerarIdentificacao() {
+        if (codFrasco == null) {
+            throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
+        }
+        if (nomDente == null) {
+            throw new FrascoException("Impossível gerar etiqueta: Tipo de dente não informado.");
+        }
+
+        this.identificacao = String.format("%s-%s", nomDente.getSigla(), codFrasco);
+    }
 }

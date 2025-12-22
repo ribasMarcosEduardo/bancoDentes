@@ -13,8 +13,10 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0" th:text="${frasco.nomDente}">Nome do Dente</h5>
+                    <h5 class="card-title mb-0" th:text="${frasco.identificacao}">Nome do Dente</h5>
                     <span class="badge bg-secondary rounded-pill" th:text="'ID: ' + ${frasco.codFrasco}">ID</span>
                 </div>
+
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         <li th:if="${frasco.maxilar != null}" class="list-group-item"><strong>Maxilar:</strong> <span
@@ -34,13 +36,29 @@
 
                     </ul>
                 </div>
-                <div class="card-footer text-end">
-                    <a class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+
+                <div class="card-footer d-flex justify-content-end gap-2">
+                    <a th:href="@{/frasco/editar/{id}(id=${frasco.codFrasco})}"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Editar Frasco">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <form method="post"
+                          th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codFrasco})}"
+                          onsubmit="return confirm('Tem certeza que deseja excluir este frasco?');">
+
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Excluir">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
                 </div>
+
             </div>
         </div>
     </div>
-
     <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info mt-4" role="alert">
         <h4 class="alert-heading">Nenhum frasco encontrado!</h4>
         <p>Ainda não há frascos cadastrados no sistema ou nenhum item corresponde ao filtro selecionado.</p>
