@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="blocos(frascos)">
+<div th:fragment="blocos(frascos, exibirAcoes)">
 
     <div th:if="${!#lists.isEmpty(frascos)}" id="cardsContainer" class="row g-4">
         <div th:each="frasco : ${frascos}"
@@ -13,7 +13,7 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0" th:text="${frasco.nomDente}">Nome do Dente</h5>
-                    <h5 class="card-title mb-0" th:text="${frasco.identificacao}">Nome do Dente</h5>
+                    <h5 class="card-title mb-0" th:text="${frasco.identificacao}">Identificação</h5>
                     <span class="badge bg-secondary rounded-pill" th:text="'ID: ' + ${frasco.codFrasco}">ID</span>
                 </div>
 
@@ -27,17 +27,21 @@
                         <li class="list-group-item"><strong>Quantidade:</strong> <span
                                 th:text="${frasco.quantidade}"></span></li>
                         <li class="list-group-item text-muted">
-                            <small>Cadastrado em: <span
-                                    th:text="${#temporals.format(frasco.datCad, 'dd/MM/yyyy HH:mm')}"></span></small>
-                            <br>
-                            <small>Manutenção em: <span
-                                    th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yyyy HH:mm')}"></span></small>
+                            <div class="d-flex flex-column mb-2">
+                                <small style="font-size: 0.75rem;">Cadastrado em:</small>
+                                <strong style="font-size: 0.85rem;" th:text="${#temporals.format(frasco.datCad, 'dd/MM/yyyy HH:mm')}"></strong>
+                            </div>
+
+                            <div class="d-flex flex-column">
+                                <small style="font-size: 0.75rem;">Manutenção em:</small>
+                                <strong style="font-size: 0.85rem;" th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yyyy HH:mm')}"></strong>
+                            </div>
                         </li>
 
                     </ul>
                 </div>
 
-                <div class="card-footer d-flex justify-content-end gap-2">
+                <div class="card-footer d-flex justify-content-end gap-2" th:if="${exibirAcoes}">
                     <a th:href="@{/frasco/editar/{id}(id=${frasco.codFrasco})}"
                        class="btn btn-sm btn-outline-primary"
                        title="Editar Frasco">

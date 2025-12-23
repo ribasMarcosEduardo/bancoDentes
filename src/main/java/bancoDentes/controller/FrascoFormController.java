@@ -5,7 +5,9 @@ import bancoDentes.model.Frasco;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
 import bancoDentes.model.enumModels.NomeDente;
+import bancoDentes.repository.FrascoRepository;
 import bancoDentes.service.FrascoService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -198,6 +201,24 @@ public class FrascoFormController {
             frascos = frascoService.getPainelFrasco();
         }
         model.addAttribute("frascos", frascos);
+    }
+
+    @GetMapping("/graficos")
+    public String exibirGraficos(Model model) {
+
+        List<Map<String, Object>> dados = frascoService.buscarDadosGrafico();
+        List<Frasco> frascos = frascoService.getPainelFrasco();
+
+        try {
+            String json = new ObjectMapper().writeValueAsString(dados);
+            model.addAttribute("jsonGrafico", json);
+        } catch (Exception e) {
+            model.addAttribute("jsonGrafico", "[]");
+        }
+
+        model.addAttribute("frascos", frascos);
+
+        return "painelFrascos/graficos";
     }
 }
 

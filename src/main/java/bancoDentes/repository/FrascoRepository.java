@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FrascoRepository extends JpaRepository<Frasco, Long> {
     @Query("""
@@ -22,6 +23,17 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
             @Param("status") EstadoDente estado,
             @Param("max") Maxilar maxilar
     );
+
+    @Query("""
+    SELECT new map(
+        f.nomDente as nome,
+        COUNT(f) as quantidade
+    )
+    FROM Frasco f
+    GROUP BY f.nomDente
+""")
+    List<Map<String, Object>> contarPorTipoDente();
+
 }
 
 

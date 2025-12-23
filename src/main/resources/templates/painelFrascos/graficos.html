@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(
+          ~{::title},
+          ~{::#conteudoGrafico},
+          ~{}, ~{} )}">
+
+<head>
+    <title>Estatísticas do Banco de Dentes</title>
+</head>
+
+<body>
+<div id="conteudoGrafico" class="py-5">
+
+    <div class="row g-4">
+
+        <div class="col-md-7 col-lg-8">
+            <div class="card shadow h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <strong>Painel de Frascos</strong>
+                    <span id="contadorRegistros" class="badge bg-secondary rounded-pill">0 registros</span>
+                </div>
+
+                <div class="card-body overflow-hidden">
+                    <div id="cardsContainer" class="row g-4">
+                        <div th:replace="~{painelFrascos/blocos-frascos :: blocos(${frascos}, false)}"></div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white py-3" id="paginacao-container">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-3">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-pie-chart-fill me-2"></i>
+                        Distribuição
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoPizza" style="max-height: 280px;"></canvas>
+                </div>
+                <div class="card-footer text-center text-muted small">
+                    Clique no gráfico para filtrar
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <input type="hidden" id="dadosGraficoInput" th:value="${jsonGrafico}" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // --- 1. LÓGICA DE PAGINAÇÃO (Baseada no seu script original) ---
+            const containerCards = document.getElementById('cardsContainer');
+            const containerPaginacao = document.getElementById('paginacao-container');
+            const contadorRegistros = document.getElementById('contadorRegistros');
+
+            // "Cache" original com TODOS os elementos carregados pelo Thymeleaf
+            const todosOsCards = Array.from(containerCards.querySelectorAll('.frasco-card'));
+
+            // Lista que está sendo exibida atualmente (pode ser filtrada ou total)
+            let listaAtual = [...todosOsCards];
+
+            const ITENS_POR_PAGINA = 15;
+
+            // Função igual à do seu script: exibe a página cortando o array
+            const displayPageBlocos = (currentPage = 1) => {
+                containerCards.innerHTML = ''; // Limpa a tela
+
+                if (!listaAtual.length) {
+                    containerCards.innerHTML = '<div class="col-12 text-center text-muted mt-5">Nenhum item encontrado.</div>';
+                    containerPaginacao.innerHTML = '';
+                    return;
+                }
+
+                // Lógica de "Slice" (Fatiar)
+                const start = (currentPage - 1) * ITENS_POR_PAGINA;
+                const end = start + ITENS_POR_PAGINA;
+
+                // Adiciona apenas os elementos da página atual ao DOM
+                listaAtual.slice(start, end).forEach(item => containerCards.appendChild(item));
+
+                montarPaginacao(currentPage);
+            };
+
+            const montarPaginacao = (currentPage) => {
+                const pageCount = Math.ceil(listaAtual.length / ITENS_POR_PAGINA);
+
+                if (pageCount <= 1) {
+                    containerPaginacao.innerHTML = '';
+                    return;
+                }
+
+                const ul = document.createElement('ul');
+                ul.className = 'pagination justify-content-center mb-0';
+
+                // Botão Anterior
+                ul.innerHTML += `
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+                    </li>
+                `;
+
+                // Números (Simplificado para mostrar todos, igual seu script)
+                for (let i = 1; i <= pageCount; i++) {
+                    ul.innerHTML += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `;
+                }
+
+                // Botão Próximo
+                ul.innerHTML += `
+                    <li class="page-item ${currentPage === pageCount ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+                    </li>
+                `;
+
+                containerPaginacao.innerHTML = '';
+                containerPaginacao.appendChild(ul);
+            };
+
+            // Evento de clique na paginação
+            containerPaginacao.onclick = e => {
+                const link = e.target.closest('.page-link');
+                const li = link ? link.closest('.page-item') : null;
+
+                if (link && li && !li.classList.contains('disabled') && !li.classList.contains('active')) {
+                    e.preventDefault();
+                    displayPageBlocos(parseInt(link.dataset.page, 10));
+                }
+            };
+
+
+            // --- 2. LÓGICA DO GRÁFICO E FILTRAGEM ---
+
+            let filtroAtivo = null;
+
+            function aplicarFiltro(tipoSelecionado) {
+                // Toggle do filtro
+                const tipoNormalizado = normalizarTexto(tipoSelecionado);
+
+                if (filtroAtivo === tipoNormalizado) {
+                    filtroAtivo = null; // Remove filtro
+                    listaAtual = [...todosOsCards]; // Volta a lista completa
+                } else {
+                    filtroAtivo = tipoNormalizado;
+                    // Filtra o array original criando uma nova listaAtual
+                    listaAtual = todosOsCards.filter(card => {
+                        const titulo = card.querySelector('.card-header h5');
+                        return titulo && normalizarTexto(titulo.textContent) === filtroAtivo;
+                    });
+                }
+
+                // Atualiza contador
+                contadorRegistros.textContent = `${listaAtual.length} registro(s)`;
+
+                // Reinicia para página 1 com a nova lista
+                displayPageBlocos(1);
+            }
+
+            function inicializarGrafico() {
+                const inputVal = document.getElementById('dadosGraficoInput').value;
+                const dados = inputVal ? JSON.parse(inputVal) : [];
+
+                if (dados.length === 0) return;
+
+                const labels = dados.map(item => item.nome.replace(/_/g, ' '));
+                const valores = dados.map(item => item.quantidade);
+                const cores = labels.map((_, i) => `hsl(${(i * 360) / labels.length}, 70%, 55%)`);
+
+                const ctx = document.getElementById('graficoPizza').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: valores,
+                            backgroundColor: cores,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } },
+                        onClick: function (evt, elements) {
+                            if (!elements.length) return;
+                            const index = elements[0].index;
+                            const nomeOriginal = dados[index].nome;
+                            aplicarFiltro(nomeOriginal);
+                        }
+                    }
+                });
+            }
+
+            function normalizarTexto(texto) {
+                if (!texto) return "";
+                return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                            .replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+            }
+
+            // Inicialização
+            inicializarGrafico();
+            contadorRegistros.textContent = `${todosOsCards.length} registro(s)`;
+            displayPageBlocos(1); // Exibe primeira página ao carregar
+        });
+    </script>
+
+</div>
+</body>
+</html>

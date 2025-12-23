@@ -160,6 +160,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Seleção dos elementos (igual ao seu)
             const elements = {
                 datCad: document.getElementById('datCad'),
                 datManutencao: document.getElementById('datManutencao'),
@@ -173,6 +174,8 @@
             };
 
             const calcularDataManutencao = () => {
+                if (!elements.datCad.value) return;
+
                 const dataCadastro = new Date(elements.datCad.value);
                 if (isNaN(dataCadastro)) {
                     elements.datManutencao.value = '';
@@ -182,7 +185,8 @@
                 elements.datManutencao.value = dataCadastro.toISOString().slice(0, 16);
             };
 
-            const atualizarCampos = () => {
+            // ADICIONEI UM PARÂMETRO 'limpar' AQUI
+            const atualizarCampos = (limpar = false) => {
                 const valor = elements.nomeDente.value.trim();
                 const isEndo = valor === 'ENDO';
                 const isMolar = valor === 'MOLAR';
@@ -195,30 +199,41 @@
                 elements.posicaoContainer.style.display = isMolar || isPreMolar ? 'block' : 'none';
                 elements.molarCheckboxes.style.display = isMolar ? 'block' : 'none';
                 elements.preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
-                elements.checkboxes.forEach(cb => cb.checked = false);
+
+                // AGORA SÓ LIMPA SE O PARÂMETRO FOR TRUE (QUANDO O USUÁRIO MUDA O SELECT)
+                if (limpar) {
+                    elements.checkboxes.forEach(cb => cb.checked = false);
+                }
             };
 
-            elements.datCad.addEventListener('change', calcularDataManutencao);
-            elements.nomeDente.addEventListener('change', atualizarCampos);
-            calcularDataManutencao();
-            atualizarCampos();
+            // Listeners
+            if(elements.datCad) {
+                elements.datCad.addEventListener('change', calcularDataManutencao);
+            }
+
+            if(elements.nomeDente){
+                // AQUI ESTÁ O TRUQUE: Passamos true para limpar quando o usuário muda
+                elements.nomeDente.addEventListener('change', () => atualizarCampos(true));
+
+                // Na inicialização (load), passamos false (ou nada) para manter os dados do banco
+                atualizarCampos(false);
+            }
+
+            if(elements.datCad && elements.datCad.value) {
+                 calcularDataManutencao();
+            }
+
+            // Script do Alerta (Mantive o seu aqui junto para organizar)
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
         });
-
-  document.addEventListener("DOMContentLoaded", function() {
-      var alerts = document.querySelectorAll('.alert');
-
-      alerts.forEach(function(alert) {
-          setTimeout(function() {
-
-              var bsAlert = new bootstrap.Alert(alert);
-              bsAlert.close();
-
-          }, 5000); // <--- Ajuste o tempo aqui (3000 = 3s, 5000 = 5s)
-      });
-  });
-
-
     </script>
+
 
 
 </div>
