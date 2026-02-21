@@ -46,8 +46,9 @@ public class FrascoService {
         frascoDoBanco.setPosicao(frasco.getPosicao());
         frascoDoBanco.setDatManutencao(frasco.getDatManutencao());
         frascoDoBanco.setDatCad(frasco.getDatCad());
-
-        return frascoRepository.save(frascoDoBanco);
+        frasco = frascoRepository.save(frasco);
+        frasco.gerarIdentificacao();
+        return frascoRepository.save(frasco);
     }
 
     /**

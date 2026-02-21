@@ -12,17 +12,27 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
 
     <th:block th:replace="${cssExtra} ?: ~{}"></th:block>
+
+    <style>
+        .custom-header { background-color: #212529; }
+        .custom-header .btn { color: white; border: none; }
+    </style>
+
 </head>
 
 <body>
 <header>
+    <div th:replace="~{layout/navBar :: menu}"></div>
 </header>
 
 <main class="container mt-4">
     <div th:replace="${conteudo}"></div>
 </main>
 
-<footer>
+<footer class="footer mt-auto py-3 bg-light border-top">
+    <div class="container text-center">
+        <span class="text-muted">© 2026 Banco de Dentes - Laboratório de Odontologia - Orientador: Kleyton H.</span>
+    </div>
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

@@ -54,7 +54,7 @@ public class FrascoFormController {
      * @param model objeto utilizado para envio de dados à view
      * @return nome do template Thymeleaf do formulário de frasco
      */
-    @GetMapping("/editar/{codFrasco}")
+    @GetMapping("/edit/{codFrasco}")
     public String editar(@PathVariable("codFrasco") Long codFrasco, Model model) {
         Frasco frasco = frascoService.buscarPorId(codFrasco);
 

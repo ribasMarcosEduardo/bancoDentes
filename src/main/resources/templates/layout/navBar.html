@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<nav th:fragment="menu" class="navbar navbar-expand-lg custom-header">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown"
+            aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <button class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false">Cadastros</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" th:href="@{/frasco}">Frasco</a></li>
+            <li><a class="dropdown-item" th:href="@{/frasco/painel}">Armários</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <button class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false">Gerenciamento</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" th:href="@{/frasco/painel}">Painel de frascos</a></li>
+            <li><a class="dropdown-item" th:href="@{/frasco/graficos}">Gráfico</a></li>
+          </ul>
+        </li>
+      </ul>
+      <form method="post" class="ms-auto">
+        <button type="submit" class="btn btn-outline-light">Sair</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+
+</body>
+</html>

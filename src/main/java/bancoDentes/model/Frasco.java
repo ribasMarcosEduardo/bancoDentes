@@ -57,10 +57,12 @@ public class Frasco {
         if (codFrasco == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-        if (nomDente == null) {
-            throw new FrascoException("Impossível gerar etiqueta: Tipo de dente não informado.");
-        }
+        String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
 
-        this.identificacao = String.format("%s-%s", nomDente.getSigla(), codFrasco);
+        this.identificacao = String.format("%s%s%s-%s",
+                nomDente.getSigla(),
+                siglaMaxilar,
+                estado.getSigla(),
+                codFrasco);
     }
 }

@@ -30,7 +30,7 @@
         <td th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy HH:mm')}"></td>
         <td>
           <div class="d-flex justify-content-center gap-2">
-            <a th:href="@{/frasco/editar/{id}(id=${frasco.codFrasco})}"
+            <a th:href="@{/frasco/edit/{id}(id=${frasco.codFrasco})}"
                class="btn btn-sm btn-outline-primary"
                title="Editar Frasco">
               <i class="bi bi-pencil"></i>
