@@ -7,14 +7,14 @@
     <div th:if="${!#lists.isEmpty(frascos)}" id="cardsContainer" class="row g-4">
         <div th:each="frasco : ${frascos}"
              class="col-md-6 col-lg-4 frasco-card"
-             th:data-id="${frasco.codFrasco}"
+             th:data-id="${frasco.codigo}"
              th:data-dat-cad="${#temporals.format(frasco.datCad, 'yyyy-MM-dd')}">
 
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0" th:text="${frasco.nomDente}">Nome do Dente</h5>
                     <h5 class="card-title mb-0" th:text="${frasco.identificacao}">Identificação</h5>
-                    <span class="badge bg-secondary rounded-pill" th:text="'ID: ' + ${frasco.codFrasco}">ID</span>
+                    <span class="badge bg-secondary rounded-pill" th:text="'ID: ' + ${frasco.codigo}">ID</span>
                 </div>
 
                 <div class="card-body">
@@ -42,14 +42,14 @@
                 </div>
 
                 <div class="card-footer d-flex justify-content-end gap-2" th:if="${exibirAcoes}">
-                    <a th:href="@{/frasco/edit/{id}(id=${frasco.codFrasco})}"
+                    <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}"
                        class="btn btn-sm btn-outline-primary"
                        title="Editar Frasco">
                         <i class="bi bi-pencil"></i>
                     </a>
 
                     <form method="post"
-                          th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codFrasco})}"
+                          th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}"
                           onsubmit="return confirm('Tem certeza que deseja excluir este frasco?');">
 
                         <button type="submit"

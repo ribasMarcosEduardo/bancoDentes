@@ -5,7 +5,6 @@ import bancoDentes.model.Frasco;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
 import bancoDentes.model.enumModels.NomeDente;
-import bancoDentes.repository.FrascoRepository;
 import bancoDentes.service.FrascoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("frasco")
@@ -50,13 +47,13 @@ public class FrascoFormController {
      * converte a entidade para {@link FrascoDTO} e envia
      * os dados para preenchimento do formulário.
      *
-     * @param codFrasco identificador único do frasco
+     * @param codigo identificador único do frasco
      * @param model objeto utilizado para envio de dados à view
      * @return nome do template Thymeleaf do formulário de frasco
      */
-    @GetMapping("/edit/{codFrasco}")
-    public String editar(@PathVariable("codFrasco") Long codFrasco, Model model) {
-        Frasco frasco = frascoService.buscarPorId(codFrasco);
+    @GetMapping("/edit/{codigo}")
+    public String editar(@PathVariable("codigo") Long codigo, Model model) {
+        Frasco frasco = frascoService.buscarPorId(codigo);
 
         FrascoDTO dto = FrascoDTO.recuperaFrasco(frasco);
         model.addAttribute("frascoDTO", dto);
@@ -64,51 +61,31 @@ public class FrascoFormController {
         return "form/frascoForm";
     }
 
-    /**
-     * Processa o envio do formulário de cadastro ou edição de frasco.
-     *
-     * Realiza o binding dos dados do formulário para um {@link FrascoDTO},
-     * converte para entidade {@link Frasco} e persiste os dados.
-     *
-     * Em caso de sucesso, redireciona para a tela inicial de cadastro
-     * exibindo uma mensagem de confirmação.
-     *
-     * @param frascoDTO objeto contendo os dados do formulário
-     * @param result resultado da validação dos campos
-     * @param redirectAttributes atributos utilizados para mensagens pós-redirect
-     * @return redirecionamento para a rota de cadastro de frasco
-     */
-
-    @PostMapping
-    public String frasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
+    @PostMapping("/save")
+    public String saveFrasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
                          BindingResult result,
                          RedirectAttributes redirectAttributes) {
-
         try {
-                Frasco frasco = frascoDTO.mapearFrasco();
-            if (frasco.getCodFrasco() != null) {
-                frascoService.atualizarFrasco(frasco);
-                redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco atualizado com sucesso!");
-                return "redirect:/frasco/painel";
-            } else {
-                frascoService.save(frasco);
-                redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco cadastrado com sucesso!");
-            }
+            Frasco frasco = frascoDTO.mapearFrasco();
+            boolean ehAtualizacao = (frasco.getCodigo() != null); // Gambiarra temporária
+            frascoService.save(frasco);
+            String mensagem = ehAtualizacao ? "Frasco atualizado com sucesso!" : "Frasco cadastrado com sucesso!";
+            redirectAttributes.addFlashAttribute("mensagemSucesso", mensagem);
+
+            return "redirect:/frasco/painel";
 
         } catch (Exception e) {
-            System.err.println("Erro ao salvar o Frasco: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao salvar: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar: " + e.getMessage());
+            return "redirect:/frasco";
         }
-
-        return "redirect:/frasco";
     }
 
-    @PostMapping("/excluirFrasco/{codFrasco}") // Leia a observação abaixo sobre @DeleteMapping vs @PostMapping
-    public String excluirFrasco(@PathVariable("codFrasco") Long codFrasco,
+    @PostMapping("/excluirFrasco/{codigo}")
+    public String excluirFrasco(@PathVariable("codigo") Long codigo,
                                 RedirectAttributes redirectAttributes) {
 
         try {
-            frascoService.excluirFrasco(codFrasco);
+            frascoService.excluirFrasco(codigo);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco excluído com sucesso!");
 
         } catch (Exception e) {

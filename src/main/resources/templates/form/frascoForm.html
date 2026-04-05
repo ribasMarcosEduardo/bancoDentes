@@ -34,14 +34,14 @@
                 <div class="card-header bg-primary text-white d-flex align-items-center">
                     <i class="bi bi-beaker fs-4 me-3"></i>
                     <h1 class="h4 mb-0"
-                        th:text="${frascoDTO.codFrasco != null} ? 'Cadastro do Frasco #' + ${frascoDTO.identificacao} : 'Cadastro de Frasco'">
+                        th:text="${frascoDTO.codigo != null} ? 'Cadastro do Frasco #' + ${frascoDTO.identificacao} : 'Cadastro de Frasco'">
                         Cadastro de Frasco
                     </h1>
                 </div>
                 <div class="card-body p-4">
 
-                    <form th:action="@{/frasco}" th:object="${frascoDTO}" method="post" class="mt-4">
-                        <input type="hidden" th:field="*{codFrasco}"/>
+                    <form th:action="@{/frasco/save}" th:object="${frascoDTO}" method="post" class="mt-4">
+                        <input type="hidden" th:field="*{codigo}"/>
 
                         <h5 class="mb-3 text-primary">Dados do Frasco</h5>
                         <div class="row">

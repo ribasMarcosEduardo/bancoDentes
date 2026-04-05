@@ -5,25 +5,22 @@ import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
 import bancoDentes.model.enumModels.NomeDente;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "FRASCO")
 public class Frasco {
 
-    // Tabela e colunas
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODFRASCO")
-    private Long codFrasco;
+    private Long codigo;
 
     @Column(name = "DATCAD", nullable = false)
     private LocalDateTime datCad = LocalDateTime.now();
@@ -54,7 +51,7 @@ public class Frasco {
 
     // Método que gera a identificação do frasco
     public void gerarIdentificacao() {
-        if (codFrasco == null) {
+        if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
         String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
@@ -63,6 +60,6 @@ public class Frasco {
                 nomDente.getSigla(),
                 siglaMaxilar,
                 estado.getSigla(),
-                codFrasco);
+                codigo);
     }
 }

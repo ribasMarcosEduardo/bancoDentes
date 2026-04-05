@@ -20,7 +20,7 @@
       </thead>
       <tbody>
       <tr class="text-center" th:each="frasco : ${frascos}">
-        <td th:text="${frasco.codFrasco}"></td>
+        <td th:text="${frasco.codigo}"></td>
         <td th:text="${frasco.nomDente}"></td>
         <td th:text="${frasco.identificacao}"></td>
         <td th:text="${frasco.maxilar ?: '-'}"></td>
@@ -30,14 +30,14 @@
         <td th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy HH:mm')}"></td>
         <td>
           <div class="d-flex justify-content-center gap-2">
-            <a th:href="@{/frasco/edit/{id}(id=${frasco.codFrasco})}"
+            <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}"
                class="btn btn-sm btn-outline-primary"
                title="Editar Frasco">
               <i class="bi bi-pencil"></i>
             </a>
 
             <form method="post"
-                  th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codFrasco})}"
+                  th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}"
                   onsubmit="return confirm('Tem certeza que deseja excluir este frasco?');">
 
               <button type="submit"

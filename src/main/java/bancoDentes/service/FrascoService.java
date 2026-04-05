@@ -6,7 +6,9 @@ import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
 import bancoDentes.model.enumModels.NomeDente;
 import bancoDentes.repository.FrascoRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,37 +17,17 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class FrascoService {
+
     private final FrascoRepository frascoRepository;
 
-    /**
-     * Persiste um novo frasco e gera sua identificação.
-     *
-     * @param frasco entidade a ser salva
-     * @return frasco persistido com identificação gerada
-     */
-    public Frasco save(Frasco frasco){
-        frasco = frascoRepository.save(frasco);
-        frasco.gerarIdentificacao();
-        return frascoRepository.save(frasco);
-    }
+    @Transactional
+    public Frasco save(Frasco frasco) {
+        if (frasco.getCodigo() != null) {
+            Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
+            BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao");
+            frasco = frascoDoBanco;
+        }
 
-    /**
-     * Atualiza os dados de um frasco já existente.
-     *
-     * @param frasco entidade contendo os novos dados
-     * @return frasco atualizado
-     * @throws FrascoException caso o frasco não exista
-     */
-    public Frasco atualizarFrasco(Frasco frasco) {
-        Frasco frascoDoBanco = buscarPorId(frasco.getCodFrasco());
-
-        frascoDoBanco.setNomDente(frasco.getNomDente());
-        frascoDoBanco.setEstado(frasco.getEstado());
-        frascoDoBanco.setQuantidade(frasco.getQuantidade());
-        frascoDoBanco.setMaxilar(frasco.getMaxilar());
-        frascoDoBanco.setPosicao(frasco.getPosicao());
-        frascoDoBanco.setDatManutencao(frasco.getDatManutencao());
-        frascoDoBanco.setDatCad(frasco.getDatCad());
         frasco = frascoRepository.save(frasco);
         frasco.gerarIdentificacao();
         return frascoRepository.save(frasco);
@@ -57,7 +39,7 @@ public class FrascoService {
      * @return lista de frascos
      */
     public List<Frasco> getPainelFrasco() {
-        return frascoRepository.findAll();
+        return frascoRepository.findAllDisponiveis();
     }
 
     /**
@@ -70,7 +52,7 @@ public class FrascoService {
      */
     public List<Frasco> getFrascosFiltrados(NomeDente nomeDente, EstadoDente estadoDente, Maxilar maxilar) {
         if (nomeDente == null && estadoDente == null && maxilar == null) {
-            return frascoRepository.findAll();
+            return frascoRepository.findAllDisponiveis();
         }
 
         return frascoRepository.getFrascosFiltrados(nomeDente, estadoDente, maxilar);
