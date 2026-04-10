@@ -33,7 +33,7 @@ public class SolicitacaoFormController {
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto,
+    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto,
                        RedirectAttributes redirectAttributes) {
         try {
             solicitacaoService.save(dto);

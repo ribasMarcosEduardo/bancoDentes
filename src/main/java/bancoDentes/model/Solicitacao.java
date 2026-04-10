@@ -1,5 +1,8 @@
 package bancoDentes.model;
 
+import bancoDentes.model.enumModels.EstadoDente;
+import bancoDentes.model.enumModels.Maxilar;
+import bancoDentes.model.enumModels.NomeDente;
 import bancoDentes.model.enumModels.StatusSolicitacao;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,9 +24,6 @@ public class Solicitacao {
     @Column(name = "CODSOLICITACAO")
     private Long codigo;
 
-    @OneToMany(mappedBy = "solicitacao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemSolicitacao> itens = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "CODESTUDANTE")
     private Estudante estudante;
@@ -37,6 +37,24 @@ public class Solicitacao {
 
     @Column(name = "DATFINALIZACAO")
     private LocalDateTime dataFinalizacao;
+
+    @Column(name = "QUANTIDADE")
+    private Long quantidade;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ESTADO", nullable = false)
+    private EstadoDente estado;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MAXILAR")
+    private Maxilar maxilar;
+
+    @Column(name = "POSICAO")
+    private Long posicao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "NOMDENTE", nullable = false)
+    private NomeDente nomDente;
 
     @PrePersist
     protected void onCreate() {

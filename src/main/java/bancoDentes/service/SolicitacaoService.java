@@ -1,21 +1,16 @@
 package bancoDentes.service;
 
-import bancoDentes.dto.ItemSolicitacaoDTO;
 import bancoDentes.dto.SolicitacaoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Estudante;
-import bancoDentes.model.Frasco;
-import bancoDentes.model.ItemSolicitacao;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.repository.EstudanteRepository;
-import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.SolicitacaoRepository;
+import bancoDentes.service.validator.SolicitacaoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,32 +18,25 @@ public class SolicitacaoService {
 
     private final SolicitacaoRepository solicitacaoRepository;
     private final EstudanteRepository estudanteRepository; // Apenas teste
-    private final FrascoRepository frascoRepository;
+    private final SolicitacaoValidator solicitacaoValidator;
 
     @Transactional
     public Solicitacao save(SolicitacaoDTO solicitacaoDTO) {
-        Long codEstudante = (solicitacaoDTO.codEstudante() != null) ? solicitacaoDTO.codEstudante() : 1L;
-
+        Long codEstudante = (solicitacaoDTO.estudante().getCodEstudante() != null) ? solicitacaoDTO.estudante().getCodEstudante() : 1L;
         Estudante estudante = estudanteRepository.findById(codEstudante)
                 .orElseThrow(() -> new RuntimeException("Estudante ID " + codEstudante + " não encontrado!"));
 
+        solicitacaoValidator.validarParaSalvar(solicitacaoDTO,estudante);
         Solicitacao solicitacao = solicitacaoDTO.mapearSolicitacao(estudante);
-        if (solicitacaoDTO.itens() != null) {
-            solicitacao.getItens().clear();
 
-            for (ItemSolicitacaoDTO itemDto : solicitacaoDTO.itens()) {
-                Frasco frasco = frascoRepository.findById(itemDto.codFrasco())
-                        .orElseThrow(() -> new RuntimeException("Frasco não encontrado: " + itemDto.codFrasco()));
-
-                ItemSolicitacao item = itemDto.mapearItem(frasco);
-                item.setSolicitacao(solicitacao);
-                solicitacao.getItens().add(item);
-            }
+        if (solicitacao.getCodigo() != null){
+            Solicitacao solBanco = buscarPorId(solicitacao.getCodigo());
+            BeanUtils.copyProperties(solicitacao, solBanco, "codigo");
+            solicitacao = solBanco;
         }
 
         return solicitacaoRepository.save(solicitacao);
     }
-
 
     public Solicitacao buscarPorId(Long codSolicitacao) {
         return solicitacaoRepository.findById(codSolicitacao)

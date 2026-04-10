@@ -1,161 +1,315 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Solicitação de Dentes</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste - Nova Solicitação</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+    }
+
+    .card-header {
+      border-radius: 12px 12px 0 0 !important;
+    }
+
+    .input-group-text {
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+    }
+
+    .form-control, .form-select {
+      border-color: #dee2e6;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+
+    .credito-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .credito-ok {
+      background-color: #d1e7dd;
+      color: #0a3622;
+    }
+
+    .credito-erro {
+      background-color: #f8d7da;
+      color: #58151c;
+    }
+
+    .section-divider {
+      color: #0d6efd;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-estudante {
+      font-size: 11px;
+      background-color: #e7f1ff;
+      color: #0c5460;
+      border: 1px solid #b8daff;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body class="py-5">
 
-<div class="container py-5">
-  <div class="card shadow">
-    <div class="card-header bg-primary text-white">
-      <h3 class="mb-0">Solicitação de Dentes</h3>
+<div class="container">
+  <div class="row justify-content-center mb-3">
+    <div class="col-md-10 col-lg-8">
+
+      <div id="alertSucesso" class="alert alert-success alert-dismissible fade show shadow-sm d-none" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span>Solicitação enviada com sucesso!</span>
+        <button type="button" class="btn-close" onclick="fecharAlerta('alertSucesso')"></button>
+      </div>
+
+      <div id="alertErro" class="alert alert-danger alert-dismissible fade show shadow-sm d-none" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="msgErro">Erro ao solicitar.</span>
+        <button type="button" class="btn-close" onclick="fecharAlerta('alertErro')"></button>
+      </div>
+
     </div>
-    <div class="card-body">
+  </div>
 
-      <div th:if="${mensagemSucesso}" class="alert alert-success" th:text="${mensagemSucesso}"></div>
-      <div th:if="${mensagemErro}" class="alert alert-danger" th:text="${mensagemErro}"></div>
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card shadow-sm">
 
-      <form th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
-
-        <div class="mb-4">
-          <label class="form-label fw-bold">ID do Estudante (Padrão: 1)</label>
-          <input type="number" th:field="*{codEstudante}" class="form-control" style="width: 120px;">
+        <div class="card-header bg-primary text-white d-flex align-items-center gap-2 py-3">
+          <i class="bi bi-clipboard2-pulse fs-4"></i>
+          <h1 class="h5 mb-0">Nova Solicitação — Teste de Validação</h1>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-          <h5 class="mb-0">Dentes Solicitados</h5>
-          <button type="button" class="btn btn-sm btn-success" onclick="adicionarLinha()">
-            <i class="bi bi-plus-lg"></i> Adicionar Dente
-          </button>
-        </div>
+        <div class="card-body p-4">
 
-        <table class="table" id="tabelaItens">
-          <thead class="table-light">
-          <tr>
-            <th style="width: 50%;">Frasco (Dente)</th>
-            <th style="width: 20%;">Disponível</th>
-            <th style="width: 20%;">Quantidade</th>
-            <th style="width: 50px;"></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td>
-              <select name="itens[0].codFrasco" class="form-select select-frasco" required onchange="atualizarMaximo(this)">
-                <option value="" data-max="0">-- Selecione --</option>
-                <option th:each="f : ${frascos}"
-                        th:value="${f.codigo}"
-                        th:data-max="${f.quantidade}"
-                        th:text="${f.identificacao} + ' - ' + ${f.nomDente}"></option>
-              </select>
-            </td>
-            <td>
-              <span class="badge bg-info text-dark span-max">0</span> unidades
-            </td>
-            <td>
-              <input type="number" name="itens[0].quantidade" class="form-control input-qtd"
-                     value="1" min="1" max="0" required oninput="validarQtd(this)">
-            </td>
-            <td></td>
-          </tr>
-          </tbody>
-        </table>
+          <!-- Painel de simulação -->
+          <div class="alert alert-info py-2 px-3 mb-4" style="font-size: 13px;">
+            <i class="bi bi-info-circle me-1"></i>
+            <strong>Modo teste:</strong> Troque o código do estudante para simular diferentes cenários.
+            IDs disponíveis: <strong>1</strong> (10 créditos), <strong>2</strong> (3 créditos), <strong>3</strong> (0 créditos), <strong>4</strong> (50 créditos).
+          </div>
 
-        <div class="d-flex justify-content-end mt-4 gap-2">
-          <a th:href="@{/frasco/painel}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary px-5">Finalizar Solicitação</button>
+          <!-- Estudante -->
+          <p class="section-divider mb-3"><i class="bi bi-person-badge me-1"></i> Dados do estudante</p>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Código do estudante</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                <input type="number" id="codEstudante" class="form-control" value="1" min="1" onchange="buscarEstudante()" />
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Créditos disponíveis <span class="badge-estudante ms-1">simulado do banco</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-coin"></i></span>
+                <input type="number" id="creditoEstudante" class="form-control" value="10" min="0" oninput="atualizarFeedback()" />
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-3" />
+
+          <!-- Dente -->
+          <p class="section-divider mb-3"><i class="bi bi-grid-1x2 me-1"></i> Características do dente</p>
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label fw-semibold">Nome do dente</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-type"></i></span>
+                <select id="nomeDente" class="form-select" onchange="atualizarCampos(true)">
+                  <option value="">-- Selecione o nome do dente --</option>
+                  <option value="ENDO">ENDO</option>
+                  <option value="MOLAR">MOLAR</option>
+                  <option value="PRE_MOLAR">PRÉ-MOLAR</option>
+                  <option value="INCISIVO">INCISIVO</option>
+                  <option value="CANINO">CANINO</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3" id="maxilarContainer">
+              <label class="form-label fw-semibold">Maxilar</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-grip-horizontal"></i></span>
+                <select id="maxilar" class="form-select">
+                  <option value="">-- Selecione o maxilar --</option>
+                  <option value="SUPERIOR">SUPERIOR</option>
+                  <option value="INFERIOR">INFERIOR</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Estado do dente</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-heart-pulse-fill"></i></span>
+                <select id="estadoDente" class="form-select">
+                  <option value="">-- Selecione o estado --</option>
+                  <option value="INTEGRO">ÍNTEGRO</option>
+                  <option value="FRAGMENTADO">FRAGMENTADO</option>
+                  <option value="CARIADO">CARIADO</option>
+                  <option value="TRATADO">TRATADO</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-3" />
+
+          <!-- Quantidade -->
+          <p class="section-divider mb-3"><i class="bi bi-123 me-1"></i> Quantidade</p>
+          <div class="row align-items-end">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Quantidade solicitada</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                <input type="number" id="quantidade" class="form-control" value="1" min="1" oninput="atualizarFeedback()" />
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                            <span id="creditoFeedback" class="credito-badge credito-ok">
+                                <i class="bi bi-check-circle-fill me-1"></i> Créditos suficientes (disp: 10)
+                            </span>
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary" onclick="resetar()">
+              <i class="bi bi-x-lg me-1"></i> Cancelar
+            </button>
+            <button class="btn btn-primary" onclick="simularSave()">
+              <i class="bi bi-save me-1"></i> Salvar solicitação
+            </button>
+          </div>
+
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
 
-<script th:inline="javascript">
-  let contadorItens = 1;
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const creditosSimulados = { 1: 10, 2: 3, 3: 0, 4: 50 };
 
-  function atualizarMaximo(selectElement) {
-      const linha = selectElement.closest('tr');
-      const valorSelecionado = selectElement.value;
-
-      // --- NOVA LÓGICA DE VALIDAÇÃO DE DUPLICIDADE ---
-      if (valorSelecionado !== "") {
-          const todosSelects = document.querySelectorAll('.select-frasco');
-          let duplicado = false;
-
-          todosSelects.forEach(s => {
-              // Verifica se outro select (não o atual) tem o mesmo valor
-              if (s !== selectElement && s.value === valorSelecionado) {
-                  duplicado = true;
-              }
-          });
-
-          if (duplicado) {
-              alert("Este frasco já foi selecionado em outra linha. Escolha um frasco diferente ou ajuste a quantidade da linha existente.");
-              selectElement.value = ""; // Reseta o select
-              linha.querySelector('.span-max').innerText = "0";
-              linha.querySelector('.input-qtd').max = "0";
-              return; // Interrompe a execução
-          }
-      }
-      // -----------------------------------------------
-
-      const optionSelecionada = selectElement.options[selectElement.selectedIndex];
-      const maximo = optionSelecionada.getAttribute('data-max') || 0;
-
-      const spanMax = linha.querySelector('.span-max');
-      const inputQtd = linha.querySelector('.input-qtd');
-
-      spanMax.innerText = maximo;
-      inputQtd.max = maximo;
-
-      if (parseInt(inputQtd.value) > parseInt(maximo)) {
-          inputQtd.value = maximo;
-      }
+  function buscarEstudante() {
+    const cod = parseInt(document.getElementById('codEstudante').value);
+    const credito = creditosSimulados[cod];
+    if (credito !== undefined) {
+      document.getElementById('creditoEstudante').value = credito;
+    }
+    atualizarFeedback();
   }
 
-  function validarQtd(input) {
-      const max = parseInt(input.max);
-      if (parseInt(input.value) > max) {
-          alert("Quantidade indisponível em estoque! Limite: " + max);
-          input.value = max;
-      }
+  function atualizarFeedback() {
+    const credito = parseInt(document.getElementById('creditoEstudante').value) || 0;
+    const qtd = parseInt(document.getElementById('quantidade').value) || 0;
+    const badge = document.getElementById('creditoFeedback');
+
+    if (qtd > credito) {
+      badge.className = 'credito-badge credito-erro';
+      badge.innerHTML = `<i class="bi bi-x-circle-fill me-1"></i> Créditos insuficientes (disp: ${credito})`;
+    } else {
+      badge.className = 'credito-badge credito-ok';
+      badge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Créditos suficientes (disp: ${credito})`;
+    }
   }
 
-  function adicionarLinha() {
-      const tabela = document.getElementById('tabelaItens').getElementsByTagName('tbody')[0];
-      const novaLinha = tabela.insertRow();
+  function atualizarCampos(limpar = false) {
+    const valor = document.getElementById('nomeDente').value;
+    const isEndo = valor === 'ENDO';
+    const maxilarContainer = document.getElementById('maxilarContainer');
+    const maxilar = document.getElementById('maxilar');
 
-      // Buscamos o HTML original do primeiro select (que contém todos os dentes do banco)
-      const optionsHtml = document.querySelector('.select-frasco').innerHTML;
-
-      novaLinha.innerHTML = `
-          <td>
-              <select name="itens[${contadorItens}].codFrasco" class="form-select select-frasco" required onchange="atualizarMaximo(this)">
-                  ${optionsHtml}
-              </select>
-          </td>
-          <td>
-              <span class="badge bg-info text-dark span-max">0</span> unidades
-          </td>
-          <td>
-              <input type="number" name="itens[${contadorItens}].quantidade" class="form-control input-qtd"
-                     value="1" min="1" max="0" required oninput="validarQtd(this)">
-          </td>
-          <td>
-              <button type="button" class="btn btn-outline-danger btn-sm" onclick="removerLinha(this)">
-                  <i class="bi bi-trash"></i>
-              </button>
-          </td>
-      `;
-      contadorItens++;
+    maxilarContainer.style.display = isEndo ? 'none' : 'block';
+    maxilar.required = !isEndo;
+    if (isEndo && limpar) maxilar.value = '';
   }
 
-  function removerLinha(botao) {
-      botao.closest('tr').remove();
+  function simularSave() {
+    esconderAlertas();
+
+    const codEstudante = parseInt(document.getElementById('codEstudante').value);
+    const credito = parseInt(document.getElementById('creditoEstudante').value);
+    const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
+    const nomeDente = document.getElementById('nomeDente').value;
+    const estadoDente = document.getElementById('estadoDente').value;
+    const maxilar = document.getElementById('maxilar').value;
+    const isEndo = nomeDente === 'ENDO';
+
+    // Validações — mesma ordem do SolicitacaoValidator
+    if (!codEstudante) return mostrarErro('Código do estudante é obrigatório');
+    if (!nomeDente) return mostrarErro('Nome do dente é obrigatório');
+    if (!isEndo && !maxilar) return mostrarErro('Maxilar é obrigatório para esse tipo de dente');
+    if (!estadoDente) return mostrarErro('Estado do dente é obrigatório');
+    if (!quantidade || quantidade < 1) return mostrarErro('Quantidade deve ser maior que zero');
+
+    // validaCreditos()
+    if (credito == null || isNaN(credito)) return mostrarErro('Crédito do estudante não informado');
+    if (credito < quantidade) return mostrarErro(`Créditos insuficientes para solicitação (disponível: ${credito}, solicitado: ${quantidade})`);
+
+    mostrarSucesso();
   }
+
+  function mostrarErro(msg) {
+    document.getElementById('msgErro').textContent = msg;
+    const el = document.getElementById('alertErro');
+    el.classList.remove('d-none');
+    setTimeout(() => el.classList.add('d-none'), 5000);
+  }
+
+  function mostrarSucesso() {
+    const el = document.getElementById('alertSucesso');
+    el.classList.remove('d-none');
+    setTimeout(() => el.classList.add('d-none'), 4000);
+  }
+
+  function fecharAlerta(id) {
+    document.getElementById(id).classList.add('d-none');
+  }
+
+  function esconderAlertas() {
+    document.getElementById('alertSucesso').classList.add('d-none');
+    document.getElementById('alertErro').classList.add('d-none');
+  }
+
+  function resetar() {
+    document.getElementById('codEstudante').value = 1;
+    document.getElementById('creditoEstudante').value = 10;
+    document.getElementById('nomeDente').value = '';
+    document.getElementById('maxilar').value = '';
+    document.getElementById('estadoDente').value = '';
+    document.getElementById('quantidade').value = 1;
+    atualizarCampos(false);
+    esconderAlertas();
+    atualizarFeedback();
+  }
+
+  atualizarFeedback();
+  atualizarCampos(false);
 </script>
 
 </body>

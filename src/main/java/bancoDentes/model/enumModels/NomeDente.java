@@ -3,7 +3,6 @@ package bancoDentes.model.enumModels;
 public enum NomeDente {
 
     CANINO("Canino", "C"),
-    ENDO("Endo", "E"),
     INCISIVO("Incisivo", "I"),
     MOLAR("Molar", "M"),
     PRE_MOLAR("Pré-Molar", "PM");

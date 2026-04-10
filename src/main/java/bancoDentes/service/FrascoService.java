@@ -1,5 +1,6 @@
 package bancoDentes.service;
 
+import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.enumModels.EstadoDente;
@@ -21,7 +22,9 @@ public class FrascoService {
     private final FrascoRepository frascoRepository;
 
     @Transactional
-    public Frasco save(Frasco frasco) {
+    public Frasco save(FrascoDTO frascoDTO) {
+        Frasco frasco = frascoDTO.mapearFrasco();
+
         if (frasco.getCodigo() != null) {
             Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
             BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao");
@@ -45,12 +48,13 @@ public class FrascoService {
     /**
      * Retorna frascos de acordo com os filtros informados.
      *
-     * @param nomeDente filtro opcional por tipo de dente
+     * @param nomeDente   filtro opcional por tipo de dente
      * @param estadoDente filtro opcional por estado
-     * @param maxilar filtro opcional por maxilar
+     * @param maxilar     filtro opcional por maxilar
+     * @param misto
      * @return lista de frascos filtrados
      */
-    public List<Frasco> getFrascosFiltrados(NomeDente nomeDente, EstadoDente estadoDente, Maxilar maxilar) {
+    public List<Frasco> getFrascosFiltrados(NomeDente nomeDente, EstadoDente estadoDente, Maxilar maxilar, String misto) {
         if (nomeDente == null && estadoDente == null && maxilar == null) {
             return frascoRepository.findAllDisponiveis();
         }

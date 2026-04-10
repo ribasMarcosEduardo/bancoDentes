@@ -19,11 +19,12 @@ public record FrascoDTO(
         NomeDente nomeDente,
         Long posicao,
         Maxilar maxilar,
-        String identificacao
+        String identificacao,
+        String misto
 ) {
 
     public static FrascoDTO empty() {
-        return new FrascoDTO(null, null, null, null, null, null, null, null,null    );
+        return new FrascoDTO(null, null, null, null, null, null, null, null,null,null);
     }
 
     public Frasco mapearFrasco(){
@@ -41,6 +42,7 @@ public record FrascoDTO(
         frasco.setNomDente(this.nomeDente);
         frasco.setPosicao(this.posicao);
         frasco.setMaxilar(this.maxilar);
+        frasco.setMisto(this.misto != null ? this.misto : "N");
 
         return frasco;
     }
@@ -55,7 +57,8 @@ public record FrascoDTO(
                 frasco.getNomDente(),
                 frasco.getPosicao(),
                 frasco.getMaxilar(),
-                frasco.getIdentificacao()
+                frasco.getIdentificacao(),
+                frasco.getMisto()
         );
     }
 }

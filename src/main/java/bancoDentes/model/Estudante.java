@@ -24,7 +24,7 @@ public class Estudante {
     private String nome;
 
     @Column(name = "CREDITO")
-    private Long Cretito;
+    private Long Credito;
 
 
 }
