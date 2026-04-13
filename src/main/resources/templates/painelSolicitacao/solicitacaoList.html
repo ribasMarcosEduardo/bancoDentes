@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::#solicitacaoConteudo}, ~{}, ~{::#meusScripts})}">
+<head>
+  <title>Minhas Solicitações</title>
+</head>
+<body class="py-5">
+
+<div id="solicitacaoConteudo" class="container">
+
+  <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    <span th:text="${mensagemSucesso}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <span th:text="${mensagemErro}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-card-list fs-4"></i>
+        <h1 class="h5 mb-0">Minhas Solicitações</h1>
+      </div>
+
+      <a th:href="@{/solicitacao}" class="btn btn-sm btn-light text-primary fw-bold shadow-sm">
+        <i class="bi bi-plus-lg"></i> Nova Solicitação
+      </a>
+    </div>
+
+    <div class="card-body p-4">
+
+      <div th:if="${!#lists.isEmpty(solicitacoes)}" class="table-responsive">
+        <table id="tabela-solicitacoes" class="table table-striped table-hover align-middle" style="width:100%">
+          <thead>
+          <tr>
+            <th class="text-center">ID</th>
+            <th class="text-center">Data</th>
+            <th class="text-center">Tipo</th>
+            <th class="text-center">Dentição</th>
+            <th class="text-center">Maxilar</th>
+            <th class="text-center">Posição</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Qtd.</th>
+            <th class="text-center">Status</th>
+            <th class="text-center" data-orderable="false">Ações</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr class="text-center" th:each="solicitacao : ${solicitacoes}">
+            <td th:text="${solicitacao.codigo}"></td>
+            <td th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="${solicitacao.tipoDente}"></td>
+            <td th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '-'}"></td>
+            <td th:text="${solicitacao.maxilar ?: '-'}"></td>
+            <td th:text="${solicitacao.posicao ?: '-'}"></td>
+            <td th:text="${solicitacao.estado ?: '-'}"></td>
+            <td class="fw-bold" th:text="${solicitacao.quantidade}"></td>
+            <td>
+              <span class="badge bg-secondary" th:text="${solicitacao.statusSolicitacao}"></span>
+            </td>
+            <td>
+              <div class="d-flex justify-content-center gap-2">
+                <a th:href="@{/solicitacao/view/{id}(id=${solicitacao.codigo})}"
+                   class="btn btn-sm btn-outline-info" title="Ver Detalhes">
+                  <i class="bi bi-eye"></i>
+                </a>
+
+                <form method="post" th:action="@{/solicitacao/cancelar/{id}(id=${solicitacao.codigo})}" onsubmit="return confirm('Tem certeza que deseja cancelar esta solicitação? Os créditos serão devolvidos.');">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar Solicitação">
+                    <i class="bi bi-x-circle"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div th:if="${#lists.isEmpty(solicitacoes)}" class="alert alert-info shadow-sm mb-0" role="alert">
+        <i class="bi bi-info-circle me-2"></i> Você ainda não possui nenhuma solicitação registrada.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<th:block id="meusScripts">
+  <script th:inline="none">
+    $(document).ready(function() {
+      $('#tabela-solicitacoes').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/pt-BR.json' },
+        order: [[1, 'desc']],
+        columnDefs: [ { orderable: false, targets: -1 } ],
+        searching: false
+      });
+    });
+  </script>
+</th:block>
+
+</body>
+</html>

@@ -1,9 +1,10 @@
 package bancoDentes.model;
 
 import bancoDentes.exception.FrascoException;
+import bancoDentes.model.enumModels.Denticao;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.NomeDente;
+import bancoDentes.model.enumModels.TipoDente;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,14 +24,14 @@ public class Frasco {
     private Long codigo;
 
     @Column(name = "DATCAD", nullable = false)
-    private LocalDateTime datCad = LocalDateTime.now();
+    private LocalDateTime datCad;
 
     @Column(name = "DATMANUTENCAO")
     private LocalDateTime datManutencao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "NOMDENTE", nullable = false)
-    private NomeDente nomDente;
+    @Column(name = "TIPDENTE", nullable = true)
+    private TipoDente tipoDente;
 
     @Column(name = "POSICAO")
     private Long posicao;
@@ -40,8 +41,12 @@ public class Frasco {
     private Maxilar maxilar;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ESTADO", nullable = false)
+    @Column(name = "ESTADO", nullable = true)
     private EstadoDente estado;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "DENTICAO", nullable = true)
+    private Denticao denticao;
 
     @Column(name = "QUANTIDADE", nullable = false)
     private Long quantidade;
@@ -54,12 +59,16 @@ public class Frasco {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-        String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
+            String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
+            String siglaTipo = (tipoDente != null) ? tipoDente.getSigla() : "";
+            String siglaEstado = (estado != null) ? estado.getSigla() : "";
+            String siglaDenticao = (denticao != null) ? denticao.getSigla() : "";
 
-        this.identificacao = String.format("%s%s%s-%s",
-                nomDente.getSigla(),
-                siglaMaxilar,
-                estado.getSigla(),
-                codigo);
+            this.identificacao = String.format("%s%s%s%s-%s",
+                    siglaTipo,
+                    siglaMaxilar,
+                    siglaEstado,
+                    siglaDenticao,
+                    codigo);
     }
 }

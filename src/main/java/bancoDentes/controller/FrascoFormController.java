@@ -4,7 +4,7 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.NomeDente;
+import bancoDentes.model.enumModels.TipoDente;
 import bancoDentes.service.FrascoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -66,14 +66,9 @@ public class FrascoFormController {
                          BindingResult result,
                          RedirectAttributes redirectAttributes) {
         try {
-            Frasco frasco = frascoDTO.mapearFrasco();
-            boolean ehAtualizacao = (frasco.getCodigo() != null); // Gambiarra temporária
-            frascoService.save(frasco);
-            String mensagem = ehAtualizacao ? "Frasco atualizado com sucesso!" : "Frasco cadastrado com sucesso!";
-            redirectAttributes.addFlashAttribute("mensagemSucesso", mensagem);
-
+            frascoService.save(frascoDTO);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco salvo com sucesso!");
             return "redirect:/frasco/painel";
-
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar: " + e.getMessage());
             return "redirect:/frasco";
@@ -83,11 +78,9 @@ public class FrascoFormController {
     @PostMapping("/excluirFrasco/{codigo}")
     public String excluirFrasco(@PathVariable("codigo") Long codigo,
                                 RedirectAttributes redirectAttributes) {
-
         try {
             frascoService.excluirFrasco(codigo);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco excluído com sucesso!");
-
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao excluir: " + e.getMessage());
         }
@@ -103,7 +96,7 @@ public class FrascoFormController {
      * Caso nenhum filtro seja informado, todos os frascos
      * disponíveis são carregados.
      *
-     * @param nomeDente filtro opcional pelo tipo de dente
+     * @param tipoDente filtro opcional pelo tipo de dente
      * @param estadoDente filtro opcional pelo estado do dente
      * @param maxilar filtro opcional pelo maxilar
      * @param model objeto utilizado para envio de dados à view
@@ -111,14 +104,14 @@ public class FrascoFormController {
      */
     @GetMapping("/painel")
     public String exibePainelFrascos(
-            @RequestParam(required = false) NomeDente nomeDente,
+            @RequestParam(required = false) TipoDente tipoDente,
             @RequestParam(required = false) EstadoDente estadoDente,
             @RequestParam(required = false) Maxilar maxilar,
             Model model) {
 
-        carregarDadosFiltrados(nomeDente, estadoDente, maxilar, model);
+        carregarDadosFiltrados(tipoDente, estadoDente, maxilar, model);
 
-        model.addAttribute("filtroNomeDente", nomeDente);
+        model.addAttribute("filtroNomeDente", tipoDente);
         model.addAttribute("filtroEstadoDente", estadoDente);
         model.addAttribute("filtroMaxilar", maxilar);
 
@@ -133,7 +126,7 @@ public class FrascoFormController {
      * a página inteira.
      *
      * @param view tipo de visualização desejada (blocos ou lista)
-     * @param nomeDente filtro opcional pelo tipo de dente
+     * @param tipoDente filtro opcional pelo tipo de dente
      * @param estadoDente filtro opcional pelo estado do dente
      * @param maxilar filtro opcional pelo maxilar
      * @param model objeto utilizado para envio de dados à view
@@ -141,13 +134,13 @@ public class FrascoFormController {
      */
     @GetMapping("/visualizacao")
     public String getVisualizacao(@RequestParam(defaultValue = "blocos") String view,
-                                  @RequestParam(required = false) NomeDente nomeDente,
+                                  @RequestParam(required = false) TipoDente tipoDente,
                                   @RequestParam(required = false) EstadoDente estadoDente,
                                   @RequestParam(required = false) Maxilar maxilar,
                                   Model model) {
 
 
-        carregarDadosFiltrados(nomeDente, estadoDente, maxilar, model);
+        carregarDadosFiltrados(tipoDente, estadoDente, maxilar, model);
 
         if ("lista".equals(view)) {
             return "painelFrascos/lista-frascos :: lista";
@@ -162,18 +155,18 @@ public class FrascoFormController {
      * Caso ao menos um filtro esteja presente, realiza a busca filtrada;
      * caso contrário, retorna todos os frascos cadastrados.
      *
-     * @param nomeDente filtro opcional pelo tipo de dente
+     * @param tipoDente filtro opcional pelo tipo de dente
      * @param estadoDente filtro opcional pelo estado do dente
      * @param maxilar filtro opcional pelo maxilar
      * @param model objeto utilizado para envio da lista de frascos à view
      */
-    private void carregarDadosFiltrados(NomeDente nomeDente, EstadoDente estadoDente, Maxilar maxilar, Model model) {
+    private void carregarDadosFiltrados(TipoDente tipoDente, EstadoDente estadoDente, Maxilar maxilar, Model model) {
         List<Frasco> frascos;
-        boolean possuiFiltros = nomeDente != null || estadoDente != null || maxilar != null;
+        boolean possuiFiltros = tipoDente != null || estadoDente != null || maxilar != null;
 
         if (possuiFiltros) {
-            Maxilar maxilarFiltro = (nomeDente == NomeDente.ENDO) ? null : maxilar;
-            frascos = frascoService.getFrascosFiltrados(nomeDente, estadoDente, maxilarFiltro);
+            Maxilar maxilarFiltro = (tipoDente == TipoDente.MISTO) ? null : maxilar;
+            frascos = frascoService.getFrascosFiltrados(tipoDente, estadoDente, maxilarFiltro);
         } else {
             frascos = frascoService.getPainelFrasco();
         }

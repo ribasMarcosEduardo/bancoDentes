@@ -4,15 +4,14 @@ public enum EstadoDente {
 
     CARIADO("Cariado", "C"),
     HIGIDO("Hígido", "H"),
-    MISTO("Misto", "M"),
     RESTAURADO("Restaurado", "R");
 
     private final String nome;
     private final String sigla;
 
     EstadoDente(String nome, String sigla) {
-        this.sigla = sigla;
         this.nome = nome;
+        this.sigla = sigla;
     }
 
     @Override
