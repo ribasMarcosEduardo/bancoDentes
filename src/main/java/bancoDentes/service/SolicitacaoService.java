@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SolicitacaoService {
@@ -22,17 +24,19 @@ public class SolicitacaoService {
 
     @Transactional
     public Solicitacao save(SolicitacaoDTO solicitacaoDTO) {
-        Long codEstudante = (solicitacaoDTO.estudante().getCodEstudante() != null) ? solicitacaoDTO.estudante().getCodEstudante() : 1L;
-        Estudante estudante = estudanteRepository.findById(codEstudante)
-                .orElseThrow(() -> new RuntimeException("Estudante ID " + codEstudante + " não encontrado!"));
+        Estudante estudante = estudanteRepository.findById(2L)
+                .orElseThrow(() -> new RuntimeException("Estudante não encontrado"));
 
-        solicitacaoValidator.validarParaSalvar(solicitacaoDTO,estudante);
+        solicitacaoValidator.saveValidator(solicitacaoDTO,estudante);
         Solicitacao solicitacao = solicitacaoDTO.mapearSolicitacao(estudante);
 
         if (solicitacao.getCodigo() != null){
             Solicitacao solBanco = buscarPorId(solicitacao.getCodigo());
+            manipulaCredito(estudante, solBanco.getQuantidade(), solicitacao.getQuantidade());
             BeanUtils.copyProperties(solicitacao, solBanco, "codigo");
             solicitacao = solBanco;
+        }else{
+            manipulaCredito(estudante, 0L, solicitacao.getQuantidade());
         }
 
         return solicitacaoRepository.save(solicitacao);
@@ -43,6 +47,18 @@ public class SolicitacaoService {
                 .orElseThrow(() -> new FrascoException("Solicitação não encontrado com o ID: " + codSolicitacao));
     }
 
+    public void excluirSolicitacao(Long codigoSol){
+        Solicitacao solicitacao = buscarPorId(codigoSol);
+        manipulaCredito(solicitacao.getEstudante(), solicitacao.getQuantidade(), 0L);
+        solicitacaoRepository.deleteById(codigoSol);
+    }
 
+    private void manipulaCredito(Estudante estudante, Long quantidadeAntiga, Long quantidadeNova){
+        Long diferenca = quantidadeNova - quantidadeAntiga;
+        estudante.setCredito(estudante.getCredito() - diferenca);
+    }
 
+    public List<Solicitacao> buscarPorEstudante(Long codEstudante) {
+        return solicitacaoRepository.findByEstudante_CodEstudante(codEstudante);
+    }
 }

@@ -39,10 +39,10 @@
     </div>
     <form id="filtroForm" th:action="@{/frasco/painel}" method="get" class="row g-3 align-items-end">
       <div class="col-md-3">
-        <label for="nomeDente" class="form-label fw-bold">Grupo do Dente</label>
-        <select id="nomeDente" name="nomeDente" class="form-select">
+        <label for="tipoDente" class="form-label fw-bold">Grupo do Dente</label>
+        <select id="tipoDente" name="tipoDente" class="form-select">
           <option value="">Todos</option>
-          <option th:each="nome : ${T(bancoDentes.model.enumModels.NomeDente).values()}"
+          <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
                   th:value="${nome.name()}" th:text="${nome}"
                   th:selected="${nome == filtroNomeDente}"></option>
         </select>

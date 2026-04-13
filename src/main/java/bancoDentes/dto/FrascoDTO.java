@@ -1,9 +1,10 @@
 package bancoDentes.dto;
 
 import bancoDentes.model.Frasco;
+import bancoDentes.model.enumModels.Denticao;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.NomeDente;
+import bancoDentes.model.enumModels.TipoDente;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -16,15 +17,15 @@ public record FrascoDTO(
         LocalDateTime datManutencao,
         EstadoDente estadoDente,
         Long quantidade,
-        NomeDente nomeDente,
+        TipoDente tipoDente,
         Long posicao,
         Maxilar maxilar,
-        String identificacao,
-        String misto
+        Denticao denticao,
+        String identificacao
 ) {
 
     public static FrascoDTO empty() {
-        return new FrascoDTO(null, null, null, null, null, null, null, null,null,null);
+        return new FrascoDTO(null,null, null, null, null, null, null, null,null,null);
     }
 
     public Frasco mapearFrasco(){
@@ -39,11 +40,10 @@ public record FrascoDTO(
         frasco.setDatManutencao(this.datManutencao);
         frasco.setEstado(this.estadoDente);
         frasco.setQuantidade(this.quantidade);
-        frasco.setNomDente(this.nomeDente);
+        frasco.setTipoDente(this.tipoDente);
         frasco.setPosicao(this.posicao);
         frasco.setMaxilar(this.maxilar);
-        frasco.setMisto(this.misto != null ? this.misto : "N");
-
+        frasco.setDenticao(this.denticao);
         return frasco;
     }
 
@@ -54,11 +54,11 @@ public record FrascoDTO(
                 frasco.getDatManutencao(),
                 frasco.getEstado(),
                 frasco.getQuantidade(),
-                frasco.getNomDente(),
+                frasco.getTipoDente(),
                 frasco.getPosicao(),
                 frasco.getMaxilar(),
-                frasco.getIdentificacao(),
-                frasco.getMisto()
+                frasco.getDenticao(),
+                frasco.getIdentificacao()
         );
     }
 }

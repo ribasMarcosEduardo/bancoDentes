@@ -1,15 +1,10 @@
 package bancoDentes.model;
 
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.NomeDente;
-import bancoDentes.model.enumModels.StatusSolicitacao;
+import bancoDentes.model.enumModels.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -29,7 +24,7 @@ public class Solicitacao {
     private Estudante estudante;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STASOLICITACAO")
+    @Column(name = "STASOLICITACAO", nullable = true)
     private StatusSolicitacao statusSolicitacao;
 
     @Column(name = "DATSOLICITACAO")
@@ -42,19 +37,23 @@ public class Solicitacao {
     private Long quantidade;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ESTADO", nullable = false)
+    @Column(name = "ESTADO", nullable = true)
     private EstadoDente estado;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "MAXILAR")
+    @Column(name = "MAXILAR",nullable = true)
     private Maxilar maxilar;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "DENTICAO", nullable = true)
+    private Denticao denticao;
 
     @Column(name = "POSICAO")
     private Long posicao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "NOMDENTE", nullable = false)
-    private NomeDente nomDente;
+    @Column(name = "TIPDENTE", nullable = false)
+    private TipoDente tipoDente;
 
     @PrePersist
     protected void onCreate() {

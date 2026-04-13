@@ -9,10 +9,11 @@
       <thead>
       <tr>
         <th class="text-center">ID</th>
-        <th class="text-center">Grupo</th>
+        <th class="text-center">Tipo</th>
         <th class="text-center">Identificação</th>
         <th class="text-center">Posição</th>
         <th class="text-center">Estado</th>
+        <th class="text-center">Dentição</th>
         <th class="text-center">Qtd.</th>
         <th class="text-center">Data Cadastro</th>
         <th class="text-center">Data de Manutenção</th>
@@ -21,10 +22,11 @@
       <tbody>
       <tr class="text-center" th:each="frasco : ${frascos}">
         <td th:text="${frasco.codigo}"></td>
-        <td th:text="${frasco.nomDente}"></td>
+        <td th:text="${frasco.tipoDente}"></td>
         <td th:text="${frasco.identificacao}"></td>
         <td th:text="${frasco.maxilar ?: '-'}"></td>
-        <td th:text="${frasco.estado}"></td>
+        <td th:text="${frasco.estado ?: '-'}"></td>
+        <td th:text="${frasco.denticao ?: '-'}"></td>
         <td th:text="${frasco.quantidade}"></td>
         <td th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy HH:mm')}"></td>
         <td th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy HH:mm')}"></td>
@@ -61,3 +63,4 @@
 
 </body>
 </html>
+

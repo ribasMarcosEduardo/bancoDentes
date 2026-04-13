@@ -12,20 +12,33 @@
 
             <div class="card h-100 shadow-sm">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0" th:text="${frasco.nomDente}">Nome do Dente</h5>
+                    <h5 class="card-title mb-0" th:text="${frasco.tipoDente}">Tipo do Dente</h5>
                     <h5 class="card-title mb-0" th:text="${frasco.identificacao}">Identificação</h5>
                     <span class="badge bg-secondary rounded-pill" th:text="'ID: ' + ${frasco.codigo}">ID</span>
                 </div>
 
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                        <li th:if="${frasco.maxilar != null}" class="list-group-item"><strong>Maxilar:</strong> <span
-                                th:text="${frasco.maxilar}"></span></li>
-                        <li th:if="${frasco.posicao != null}" class="list-group-item"><strong>Posição:</strong> <span
-                                th:text="${frasco.posicao}"></span></li>
-                        <li class="list-group-item"><strong>Estado:</strong> <span th:text="${frasco.estado}"></span></li>
-                        <li class="list-group-item"><strong>Quantidade:</strong> <span
-                                th:text="${frasco.quantidade}"></span></li>
+                        <li th:if="${frasco.maxilar != null}" class="list-group-item">
+                            <strong>Maxilar:</strong> <span th:text="${frasco.maxilar}"></span>
+                        </li>
+
+                        <li th:if="${frasco.posicao != null}" class="list-group-item">
+                            <strong>Posição:</strong> <span th:text="${frasco.posicao}"></span>
+                        </li>
+
+                        <li th:if="${frasco.estado != null}" class="list-group-item">
+                            <strong>Estado:</strong> <span th:text="${frasco.estado}"></span>
+                        </li>
+
+                        <li th:if="${frasco.denticao != null}" class="list-group-item">
+                            <strong>Dentição:</strong> <span th:text="${frasco.denticao.nome}"></span>
+                        </li>
+
+                        <li class="list-group-item">
+                            <strong>Quantidade:</strong> <span th:text="${frasco.quantidade}"></span>
+                        </li>
+
                         <li class="list-group-item text-muted">
                             <div class="d-flex flex-column mb-2">
                                 <small style="font-size: 0.75rem;">Cadastrado em:</small>
@@ -37,7 +50,6 @@
                                 <strong style="font-size: 0.85rem;" th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yyyy HH:mm')}"></strong>
                             </div>
                         </li>
-
                     </ul>
                 </div>
 

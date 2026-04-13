@@ -69,14 +69,28 @@
 
                         <h5 class="mb-3 mt-4 text-primary">Características do Dente</h5>
                         <div class="row">
-                            <div class="col-md-12 mb-4">
-                                <label for="nomeDente" class="form-label fw-bold">Nome do Dente:</label>
+                            <div class="col-md-6 mb-4">
+                                <label for="tipoDente" class="form-label fw-bold">Tipo do Dente:</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-type"></i></span>
-                                    <select th:field="*{nomeDente}" id="nomeDente" class="form-select" required>
-                                        <option value="">-- Selecione o Nome do Dente --</option>
-                                        <option th:each="nome : ${T(bancoDentes.model.enumModels.NomeDente).values()}"
+                                    <select th:field="*{tipoDente}" id="tipoDente" class="form-select" required>
+                                        <option value="">-- Selecione o Tipo do Dente --</option>
+                                        <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
                                                 th:value="${nome.name()}" th:text="${nome}"></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4" id="denticaoContainer">
+                                <label for="denticao" class="form-label fw-bold">Dentição:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                    <select th:field="*{denticao}" id="denticao" class="form-select" required>
+                                        <option value="">-- Selecione a Dentição --</option>
+
+                                        <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
+                                                th:value="${d.name()}" th:text="${d.nome}"></option>
+
                                     </select>
                                 </div>
                             </div>
@@ -124,7 +138,7 @@
                         <hr class="my-2"/>
                         <h5 class="mb-3 mt-4 text-primary">Estado e Quantidade</h5>
                         <div class="row">
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-6 mb-4" id="estadoDenteContainer">
                                 <label for="estadoDente" class="form-label fw-bold">Estado do Dente:</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-heart-pulse-fill"></i></span>
@@ -160,16 +174,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Seleção dos elementos (igual ao seu)
+            // Mapeamento de todos os elementos
             const elements = {
                 datCad: document.getElementById('datCad'),
                 datManutencao: document.getElementById('datManutencao'),
-                nomeDente: document.getElementById('nomeDente'),
+                tipoDente: document.getElementById('tipoDente'),
+                denticaoContainer: document.getElementById('denticaoContainer'), // Adicionado
+                denticao: document.getElementById('denticao'),                   // Adicionado
                 maxilarContainer: document.getElementById('maxilarContainer'),
                 maxilar: document.getElementById('maxilar'),
                 posicaoContainer: document.getElementById('posicaoContainer'),
                 molarCheckboxes: document.getElementById('molarCheckboxes'),
                 preMolarCheckboxes: document.getElementById('preMolarCheckboxes'),
+                estadoDenteContainer: document.getElementById('estadoDenteContainer'),
+                estadoDente: document.getElementById('estadoDente'),
                 checkboxes: document.querySelectorAll('#posicaoContainer input[type="checkbox"]')
             };
 
@@ -185,23 +203,48 @@
                 elements.datManutencao.value = dataCadastro.toISOString().slice(0, 16);
             };
 
-            // ADICIONEI UM PARÂMETRO 'limpar' AQUI
             const atualizarCampos = (limpar = false) => {
-                const valor = elements.nomeDente.value.trim();
-                const isEndo = valor === 'ENDO';
+                const valor = elements.tipoDente.value.trim().toUpperCase();
+
                 const isMolar = valor === 'MOLAR';
                 const isPreMolar = valor === 'PRE_MOLAR';
+                const isMisto = valor === 'MISTO';
 
-                elements.maxilarContainer.style.display = isEndo ? 'none' : 'block';
-                elements.maxilar.required = !isEndo;
-                if (isEndo) elements.maxilar.value = '';
+                if (isMisto) {
+                    // Se for MISTO, oculta Dentição, Maxilar, Posição e Estado do Dente
+                    elements.denticaoContainer.style.display = 'none';
+                    elements.denticao.required = false;
 
-                elements.posicaoContainer.style.display = isMolar || isPreMolar ? 'block' : 'none';
-                elements.molarCheckboxes.style.display = isMolar ? 'block' : 'none';
-                elements.preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
+                    elements.maxilarContainer.style.display = 'none';
+                    elements.maxilar.required = false;
 
-                // AGORA SÓ LIMPA SE O PARÂMETRO FOR TRUE (QUANDO O USUÁRIO MUDA O SELECT)
+                    elements.posicaoContainer.style.display = 'none';
+
+                    elements.estadoDenteContainer.style.display = 'none';
+                    elements.estadoDente.required = false;
+                } else {
+                    // Lógica para os outros tipos
+                    elements.denticaoContainer.style.display = 'block';
+                    elements.denticao.required = true;
+
+                    elements.maxilarContainer.style.display = 'block';
+                    elements.maxilar.required = true;
+
+                    elements.posicaoContainer.style.display = (isMolar || isPreMolar) ? 'block' : 'none';
+                    elements.molarCheckboxes.style.display = isMolar ? 'block' : 'none';
+                    elements.preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
+
+                    elements.estadoDenteContainer.style.display = 'block';
+                    elements.estadoDente.required = true;
+                }
+
+                // Limpeza de campos ao trocar de opção para não salvar lixo no banco
                 if (limpar) {
+                    if (isMisto) {
+                        elements.denticao.value = '';
+                        elements.maxilar.value = '';
+                        elements.estadoDente.value = '';
+                    }
                     elements.checkboxes.forEach(cb => cb.checked = false);
                 }
             };
@@ -211,11 +254,8 @@
                 elements.datCad.addEventListener('change', calcularDataManutencao);
             }
 
-            if(elements.nomeDente){
-                // AQUI ESTÁ O TRUQUE: Passamos true para limpar quando o usuário muda
-                elements.nomeDente.addEventListener('change', () => atualizarCampos(true));
-
-                // Na inicialização (load), passamos false (ou nada) para manter os dados do banco
+            if(elements.tipoDente){
+                elements.tipoDente.addEventListener('change', () => atualizarCampos(true));
                 atualizarCampos(false);
             }
 
@@ -223,7 +263,7 @@
                  calcularDataManutencao();
             }
 
-            // Script do Alerta (Mantive o seu aqui junto para organizar)
+            // Fechar alertas automaticamente
             var alerts = document.querySelectorAll('.alert');
             alerts.forEach(function(alert) {
                 setTimeout(function() {
@@ -233,9 +273,6 @@
             });
         });
     </script>
-
-
-
 </div>
 </body>
 </html>

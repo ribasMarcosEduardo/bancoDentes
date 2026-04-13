@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SolicitacaoValidator {
 
-    public void validarParaSalvar(SolicitacaoDTO dto, Estudante estudante) {
+    public void saveValidator(SolicitacaoDTO dto, Estudante estudante) {
         validaCreditos(estudante.getCredito(),dto.quantidade());
     }
 
