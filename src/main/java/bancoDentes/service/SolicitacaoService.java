@@ -61,4 +61,8 @@ public class SolicitacaoService {
     public List<Solicitacao> buscarPorEstudante(Long codEstudante) {
         return solicitacaoRepository.findByEstudante_CodEstudante(codEstudante);
     }
+
+    public List<Solicitacao> listarSolicitacoes() {
+        return solicitacaoRepository.findAll();
+    }
 }

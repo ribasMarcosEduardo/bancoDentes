@@ -36,6 +36,7 @@ public class FrascoFormController {
      */
     @GetMapping
     public String cadastrarFrasco(Model model) {
+
         model.addAttribute("frascoDTO", FrascoDTO.empty());
         return "form/frascoForm";
     }
@@ -65,6 +66,7 @@ public class FrascoFormController {
     public String saveFrasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
                          BindingResult result,
                          RedirectAttributes redirectAttributes) {
+
         try {
             frascoService.save(frascoDTO);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco salvo com sucesso!");
@@ -139,7 +141,6 @@ public class FrascoFormController {
                                   @RequestParam(required = false) Maxilar maxilar,
                                   Model model) {
 
-
         carregarDadosFiltrados(tipoDente, estadoDente, maxilar, model);
 
         if ("lista".equals(view)) {
@@ -161,6 +162,7 @@ public class FrascoFormController {
      * @param model objeto utilizado para envio da lista de frascos à view
      */
     private void carregarDadosFiltrados(TipoDente tipoDente, EstadoDente estadoDente, Maxilar maxilar, Model model) {
+
         List<Frasco> frascos;
         boolean possuiFiltros = tipoDente != null || estadoDente != null || maxilar != null;
 

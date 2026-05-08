@@ -17,16 +17,13 @@ public class ItemSolicitacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODITEM")
-    private Long codItem;
+    private Long codigo;
 
     @ManyToOne
-    @JoinColumn(name = "CODSOLICITACAO")
-    private Solicitacao solicitacao;
-
-    @ManyToOne
-    @JoinColumn(name = "CODFRASCO")
+    @JoinColumn(name = "CODFRASCO", nullable = false)
     private Frasco frasco;
 
-    @Column(name = "QUANTIDADE")
-    private Long quantidade;
+    @ManyToOne
+    @JoinColumn(name = "CODSOLICITACAO", nullable = false)
+    private Solicitacao solicitacao;
 }
