@@ -16,11 +16,12 @@ public record SolicitacaoDTO(
         Maxilar maxilar,
         TipoDente tipoDente,
         EstadoDente estadoDente,
-        Denticao denticao
+        Denticao denticao,
+        String justificativa
 ) {
 
         public static Object empty() {
-                return new SolicitacaoDTO(null,null,null,null,null,null,null,null,null,null);
+                return new SolicitacaoDTO(null,null,null,null,null,null,null,null,null,null, null);
         }
 
         public Solicitacao mapearSolicitacao(Estudante estudante) {
@@ -35,6 +36,7 @@ public record SolicitacaoDTO(
                 sol.setTipoDente(this.tipoDente);
                 sol.setEstado(this.estadoDente);
                 sol.setDenticao(this.denticao);
+                sol.setJustificativa(this.justificativa);
                 return sol;
         }
 

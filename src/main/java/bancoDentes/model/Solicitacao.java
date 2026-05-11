@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -22,10 +23,6 @@ public class Solicitacao {
     @ManyToOne
     @JoinColumn(name = "CODESTUDANTE")
     private Estudante estudante;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STASOLICITACAO", nullable = true)
-    private StatusSolicitacao statusSolicitacao;
 
     @Column(name = "DATSOLICITACAO")
     private LocalDateTime datSolicitacao;
@@ -55,12 +52,12 @@ public class Solicitacao {
     @Column(name = "TIPDENTE", nullable = false)
     private TipoDente tipoDente;
 
+    @Column(name = "JUSTIFICATIVA", nullable = false)
+    private String justificativa;
+
     @PrePersist
     protected void onCreate() {
         this.datSolicitacao = LocalDateTime.now();
-        if (this.statusSolicitacao == null) {
-            this.statusSolicitacao = StatusSolicitacao.PENDENTE;
-        }
     }
 
 

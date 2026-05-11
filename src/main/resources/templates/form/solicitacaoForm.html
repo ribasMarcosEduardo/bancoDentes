@@ -141,19 +141,27 @@
 
             <hr class="my-3" />
 
-            <p class="section-divider mb-3"><i class="bi bi-123 me-1"></i> Quantidade</p>
-            <div class="row align-items-end">
-              <div class="col-md-6 mb-3">
+            <p class="section-divider mb-3"><i class="bi bi-123 me-1"></i> Detalhes da Solicitação</p>
+            <div class="row">
+              <div class="col-md-6 mb-3 align-self-start">
                 <label class="form-label fw-semibold">Quantidade solicitada</label>
                 <div class="input-group">
                   <span class="input-group-text"><i class="bi bi-layers"></i></span>
                   <input type="number" th:field="*{quantidade}" id="quantidade" class="form-control" min="1" value="1" oninput="atualizarFeedback()" required />
                 </div>
+                <div id="creditoFeedback" class="credito-badge credito-ok mt-2 p-2">
+                  <i class="bi bi-check-circle-fill me-1"></i> Verificando créditos...
+                </div>
               </div>
+
+              <!-- Campo de Justificativa Adicionado Aqui -->
               <div class="col-md-6 mb-3">
-                <span id="creditoFeedback" class="credito-badge credito-ok">
-                    <i class="bi bi-check-circle-fill me-1"></i> Verificando créditos...
-                </span>
+                <label class="form-label fw-semibold">Justificativa / Observação</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-pencil-square"></i></span>
+                  <textarea th:field="*{justificativa}" id="justificativa" class="form-control" rows="3"
+                            placeholder="Ex: Trabalho de Endodontia I, pesquisa científica..." required></textarea>
+                </div>
               </div>
             </div>
 
@@ -175,7 +183,6 @@
   </div>
 
   <script>
-    // Validação de Créditos em tempo real
     function atualizarFeedback() {
       const credito = parseInt(document.getElementById('creditoEstudante').value) || 0;
       const qtd = parseInt(document.getElementById('quantidade').value) || 0;
@@ -190,83 +197,72 @@
       }
     }
 
-    // Regra do MISTO + POSIÇÃO
     function atualizarCampos(limpar = false) {
       const valor = document.getElementById('tipoDente').value.trim().toUpperCase();
-
       const isMisto = valor === 'MISTO';
       const isMolar = valor === 'MOLAR';
       const isPreMolar = valor === 'PRE_MOLAR';
 
       const denticaoContainer = document.getElementById('denticaoContainer');
       const denticao = document.getElementById('denticao');
-
       const maxilarContainer = document.getElementById('maxilarContainer');
       const maxilar = document.getElementById('maxilar');
-
       const estadoContainer = document.getElementById('estadoDenteContainer');
       const estado = document.getElementById('estadoDente');
-
       const posicaoContainer = document.getElementById('posicaoContainer');
       const molarCheckboxes = document.getElementById('molarCheckboxes');
       const preMolarCheckboxes = document.getElementById('preMolarCheckboxes');
       const checkboxes = document.querySelectorAll('#posicaoContainer input[type="checkbox"]');
 
       if (isMisto) {
-          // Oculta tudo que não faz sentido no MISTO
-          denticaoContainer.style.display = 'none';
-          denticao.required = false;
-
-          maxilarContainer.style.display = 'none';
-          maxilar.required = false;
-
-          posicaoContainer.style.display = 'none';
-
-          estadoContainer.style.display = 'none';
-          estado.required = false;
+        denticaoContainer.style.display = 'none';
+        denticao.required = false;
+        maxilarContainer.style.display = 'none';
+        maxilar.required = false;
+        posicaoContainer.style.display = 'none';
+        estadoContainer.style.display = 'none';
+        estado.required = false;
       } else {
-          // Mostra os campos padrão
-          denticaoContainer.style.display = 'block';
-          denticao.required = true;
-
-          maxilarContainer.style.display = 'block';
-          maxilar.required = true;
-
-          estadoContainer.style.display = 'block';
-          estado.required = true;
-
-          // Lógica específica para Posição aparecer apenas em Molars
-          posicaoContainer.style.display = (isMolar || isPreMolar) ? 'block' : 'none';
-          molarCheckboxes.style.display = isMolar ? 'block' : 'none';
-          preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
+        denticaoContainer.style.display = 'block';
+        denticao.required = true;
+        maxilarContainer.style.display = 'block';
+        maxilar.required = true;
+        estadoContainer.style.display = 'block';
+        estado.required = true;
+        posicaoContainer.style.display = (isMolar || isPreMolar) ? 'block' : 'none';
+        molarCheckboxes.style.display = isMolar ? 'block' : 'none';
+        preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
       }
 
-      // Limpa os dados se trocar de opção para não salvar "lixo" escondido no banco
       if (limpar) {
-          if (isMisto) {
-              denticao.value = '';
-              maxilar.value = '';
-              estado.value = '';
-          }
-          checkboxes.forEach(cb => cb.checked = false);
+        if (isMisto) {
+          denticao.value = '';
+          maxilar.value = '';
+          estado.value = '';
+        }
+        checkboxes.forEach(cb => cb.checked = false);
       }
     }
 
-    // Validação final antes de salvar
     function validarESubmeter() {
       esconderAlertas();
 
       const credito = parseInt(document.getElementById('creditoEstudante').value) || 0;
       const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
       const tipoDente = document.getElementById('tipoDente').value;
+      const justificativa = document.getElementById('justificativa').value.trim();
 
       if (!tipoDente) return mostrarErro('Selecione o tipo do dente.');
 
       if (credito < quantidade) {
-          return mostrarErro(`Seus créditos são insuficientes para solicitar ${quantidade} dente(s).`);
+        return mostrarErro(`Seus créditos são insuficientes para solicitar ${quantidade} dente(s).`);
       }
 
-      // Envia o formulário
+      // Validação da Justificativa
+      if (justificativa.length < 5) {
+        return mostrarErro('Por favor, informe uma justificativa válida (mínimo 5 caracteres).');
+      }
+
       document.getElementById('formSolicitacao').submit();
     }
 
@@ -274,7 +270,8 @@
       document.getElementById('msgErro').textContent = msg;
       const el = document.getElementById('alertErro');
       el.classList.remove('d-none');
-      setTimeout(() => el.classList.add('d-none'), 5000);
+      // Scroll para o topo para ver o erro
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function esconderAlertas() {
@@ -286,10 +283,9 @@
       document.getElementById(id).classList.add('d-none');
     }
 
-    // Inicializa as regras ao carregar a página
     document.addEventListener('DOMContentLoaded', () => {
-        atualizarFeedback();
-        atualizarCampos(false);
+      atualizarFeedback();
+      atualizarCampos(false);
     });
   </script>
 

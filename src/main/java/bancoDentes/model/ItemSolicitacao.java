@@ -26,4 +26,7 @@ public class ItemSolicitacao {
     @ManyToOne
     @JoinColumn(name = "CODSOLICITACAO", nullable = false)
     private Solicitacao solicitacao;
+
+    @Column(name = "QUANTIDADE", nullable = false)
+    private Long quantidade;
 }
