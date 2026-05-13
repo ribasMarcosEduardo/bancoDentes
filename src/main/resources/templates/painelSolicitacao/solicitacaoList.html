@@ -45,8 +45,8 @@
             <th class="text-center">Dentição</th>
             <th class="text-center">Maxilar</th>
             <th class="text-center">Qtd.</th>
-            <th class="text-center">Just.</th> <!-- Nova Coluna -->
-            <th class="text-center">Status</th>
+            <th class="text-center">Just.</th>
+
             <th class="text-center" data-orderable="false">Ações</th>
           </tr>
           </thead>
@@ -70,9 +70,7 @@
               </button>
             </td>
 
-            <td>
-              <span class="badge bg-secondary" th:text="${solicitacao.statusSolicitacao}"></span>
-            </td>
+
             <td>
               <div class="d-flex justify-content-center gap-2">
                 <a th:href="@{/solicitacao/view/{id}(id=${solicitacao.codigo})}"

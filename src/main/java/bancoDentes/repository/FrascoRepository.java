@@ -40,7 +40,7 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
         WHERE f.codigo NOT IN (
             SELECT i.frasco.codigo 
             FROM ItemSolicitacao i 
-            WHERE i.solicitacao.statusSolicitacao = bancoDentes.model.enumModels.StatusSolicitacao.PENDENTE
+         
         )
     """)
     List<Frasco> findAllDisponiveis();

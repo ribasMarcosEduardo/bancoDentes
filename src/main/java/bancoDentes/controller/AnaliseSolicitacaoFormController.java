@@ -22,21 +22,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnaliseSolicitacaoFormController {
 
-    private AnaliseSolicitacaoService analiseSolicitacaoService;
-    private SolicitacaoService solicitacaoService;
+    private final AnaliseSolicitacaoService analiseSolicitacaoService;
+    private final SolicitacaoService solicitacaoService;
 
     @GetMapping
-    public String analiseSolicitacao(Model model){
+    public String analiseSolicitacao(@RequestParam(value = "codSolicitacao", required = false) Long id, Model model){
         model.addAttribute("itemSolicitacaoDTO", ItemSolicitacaoDTO.empty());
         return "form/analiseSolicitacaoForm";
     }
 
     @GetMapping("/painel")
     public String exibePainelSolicitacoes(Model model) {
-
         List<Solicitacao> listaSolicitacoes = solicitacaoService.listarSolicitacoes();
         model.addAttribute("solicitacoes", listaSolicitacoes);
-        return "analista/painelAvaliacao";
+        return "painelAnalise/analiseList";
     }
 
 }
