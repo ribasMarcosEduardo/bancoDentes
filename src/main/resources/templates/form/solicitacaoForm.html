@@ -41,6 +41,7 @@
           <form id="formSolicitacao" th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
 
             <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}" />
+            <input type="hidden" th:field="*{version}"/>
 
             <p class="section-divider mb-3"><i class="bi bi-person-badge me-1"></i> Seus Dados</p>
             <div class="row">

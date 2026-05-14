@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::#conteudoFormAnalise}, ~{}, ~{::#scriptsFormAnalise})}">
+<head>
+    <title>Análise de Solicitação</title>
+    <style>
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+        .step-indicator .nav-link { pointer-events: none; color: #6c757d; }
+        .step-indicator .nav-link.active { color: #0d6efd; font-weight: bold; border-bottom: 3px solid #0d6efd; }
+    </style>
+</head>
+<body>
+
+<div id="conteudoFormAnalise" class="container py-4">
+
+    <ul class="nav nav-tabs justify-content-center mb-4 step-indicator" id="wizardSteps">
+        <li class="nav-item"><a class="nav-link active" id="tab-1" href="#">1. Revisão do Pedido</a></li>
+        <li class="nav-item"><a class="nav-link" id="tab-2" href="#">2. Separação de Dentes</a></li>
+        <li class="nav-item"><a class="nav-link" id="tab-3" href="#">3. Resumo e Finalização</a></li>
+    </ul>
+
+    <form th:action="@{/analiseSolicitacao/salvar}" th:object="${itemSolicitacaoDTO}" method="post" id="formWizard">
+
+        <input type="hidden" name="codigoSolicitacao" th:value="${solicitacao.codigo}" id="codigoSolicitacao" />
+        <input type="hidden" id="qtdSolicitada" th:value="${solicitacao.quantidade}" />
+        <input type="hidden" th:field="*{version}"/>
+
+        <div class="card shadow-sm step-panel active" id="step1">
+            <div class="card-header bg-dark text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-person me-2"></i> Detalhes da Solicitação</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Estudante Solicitante:</label>
+                        <p class="form-control-plaintext bg-light ps-2 rounded" th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : 'Não informado'}"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Data do Pedido:</label>
+                        <p class="form-control-plaintext bg-light ps-2 rounded" th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy HH:mm')}"></p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Tipo de Dente:</label>
+                        <p class="form-control-plaintext bg-light ps-2 rounded" th:text="${solicitacao.tipoDente}"></p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Quantidade Solicitada:</label>
+                        <p class="form-control-plaintext bg-light ps-2 rounded fw-bold text-primary" th:text="${solicitacao.quantidade}"></p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Maxilar / Dentição:</label>
+                        <p class="form-control-plaintext bg-light ps-2 rounded" th:text="${(solicitacao.maxilar ?: '-') + ' / ' + (solicitacao.denticao != null ? solicitacao.denticao.nome : '-')}"></p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Justificativa do Estudante:</label>
+                        <div class="p-3 bg-light rounded" th:text="${solicitacao.justificativa}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between py-3">
+                <a th:href="@{/analiseSolicitacao/painel}" class="btn btn-outline-danger"><i class="bi bi-x-circle"></i> Negar / Voltar</a>
+                <button type="button" class="btn btn-primary btn-next">Prosseguir <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm step-panel" id="step2">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i> Vinculação de Frascos</h5>
+                <button type="button" class="btn btn-sm btn-light text-dark fw-bold" id="btnAdicionarFrasco">
+                    <i class="bi bi-plus-lg"></i> Adicionar Frasco
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Limite máximo para separação: <strong th:text="${solicitacao.quantidade}"></strong> dentes.
+                    <span class="badge bg-warning text-dark ms-2" id="badgeTotalSeparado">Total Separado: 0</span>
+                </div>
+
+                <div id="containerFrascos" class="d-flex flex-column gap-3">
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between py-3">
+                <button type="button" class="btn btn-secondary btn-prev"><i class="bi bi-arrow-left"></i> Voltar</button>
+                <button type="button" class="btn btn-primary btn-next" id="btnAvancarEtapa2">Prosseguir <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm step-panel" id="step3">
+            <div class="card-header bg-dark text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-check2-all me-2"></i> Resumo da Avaliação</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h6 class="text-muted fw-bold mb-3">SOLICITADO</h6>
+                        <p><strong>Tipo:</strong> <span th:text="${solicitacao.tipoDente}"></span></p>
+                        <p><strong>Quantidade Pedida:</strong> <span th:text="${solicitacao.quantidade}"></span></p>
+                    </div>
+                    <div class="col-md-6 ps-4">
+                        <h6 class="text-success fw-bold mb-3">SEPARADO PARA ENVIO</h6>
+                        <div id="resumoSeparacao text-dark">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between py-3">
+                <button type="button" class="btn btn-secondary btn-prev"><i class="bi bi-arrow-left"></i> Voltar</button>
+                <button type="submit" class="btn btn-success fw-bold"><i class="bi bi-bookmark-check-fill"></i> Finalizar Pedido</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<th:block id="scriptsFormAnalise">
+    <script th:inline="javascript">
+        let currentStep = 1;
+        const maxQtd = parseInt(document.getElementById('qtdSolicitada').value);
+        let frascoCount = 0;
+
+        // Dados que vieram do Enum/Banco para popular os selects dinâmicos se necessário,
+        // ou você pode fazer uma busca AJAX. Para o exemplo, usaremos IDs manuais de Frascos.
+
+        $(document).ready(function() {
+            // Navegação Avançar
+            $('.btn-next').click(function() {
+                if (currentStep === 2 && !validarQuantidade()) {
+                    return; // Bloqueia avanço se passar do limite
+                }
+                if (currentStep < 3) {
+                    mudarPasso(currentStep + 1);
+                }
+            });
+
+            // Navegação Voltar
+            $('.btn-prev').click(function() {
+                if (currentStep > 1) {
+                    mudarPasso(currentStep - 1);
+                }
+            });
+
+            // Adicionar Linha de Frasco (Etapa 2)
+            $('#btnAdicionarFrasco').click(function() {
+                adicionarLinhaFrasco();
+            });
+
+            // Atualizar soma total quando mudar a quantidade de dentes de qualquer frasco
+            $(document).on('input', '.qtd-dentes-frasco', function() {
+                calcularTotalSeparado();
+            });
+
+            // Remove linha de frasco
+            $(document).on('click', '.btn-remover-frasco', function() {
+                $(this).closest('.linha-frasco').remove();
+                calcularTotalSeparado();
+            });
+
+            // Adiciona a primeira linha automaticamente ao abrir a etapa 2 se estiver vazia
+            adicionarLinhaFrasco();
+        });
+
+        function mudarPasso(step) {
+            $(`#step${currentStep}`).removeClass('active');
+            $(`#tab-${currentStep}`).removeClass('active');
+
+            currentStep = step;
+
+            $(`#step${currentStep}`).addClass('active');
+            $(`#tab-${currentStep}`).addClass('active');
+
+            if(currentStep === 3) {
+                gerarResumoFinal();
+            }
+        }
+
+        function adicionarLinhaFrasco() {
+            frascoCount++;
+            const html = `
+                <div class="row g-2 align-items-end linha-frasco border p-2 rounded bg-light shadow-sm">
+                    <div class="col-md-7">
+                        <label class="form-label small fw-bold">Selecionar Frasco (Filtrado por ${/*[[${solicitacao.tipoDente}]]*/ ''}):</label>
+                        <select name="frascosIds" class="form-select select-frasco" required>
+                            <option value="">-- Selecione um Frasco Disponível --</option>
+                            <option value="10">Frasco #012 - Prateleira A (Contém 5 dentes)</option>
+                            <option value="11">Frasco #054 - Prateleira B (Contém 12 dentes)</option>
+                            <option value="12">Frasco #099 - Prateleira C (Contém 3 dentes)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Qtd Retirada:</label>
+                        <input type="number" name="quantidadesRetiradas" class="form-control qtd-dentes-frasco" min="1" value="1" required />
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <button type="button" class="btn btn-outline-danger btn-remover-frasco w-100"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            `;
+            $('#containerFrascos').append(html);
+            calcularTotalSeparado();
+        }
+
+        function calcularTotalSeparado() {
+            let total = 0;
+            $('.qtd-dentes-frasco').each(function() {
+                let valor = parseInt($(this).val()) || 0;
+                total += valor;
+            });
+
+            $('#badgeTotalSeparado').text('Total Separado: ' + total);
+
+            if (total > maxQtd) {
+                $('#badgeTotalSeparado').removeClass('bg-warning text-dark bg-success').addClass('bg-danger text-white');
+                return false;
+            } else if (total === maxQtd) {
+                $('#badgeTotalSeparado').removeClass('bg-warning text-dark bg-danger').addClass('bg-success text-white');
+            } else {
+                $('#badgeTotalSeparado').removeClass('bg-danger bg-success text-white').addClass('bg-warning text-dark');
+            }
+            return total;
+        }
+
+        function validarQuantidade() {
+            const total = calcularTotalSeparado();
+            if (total > maxQtd) {
+                alert(`Erro: A quantidade total separada (${total}) não pode ser maior que a solicitada (${maxQtd}).`);
+                return false;
+            }
+            if (total === 0) {
+                alert('Erro: Você precisa separar pelo menos 1 dente de algum frasco.');
+                return false;
+            }
+            return true;
+        }
+
+        function gerarResumoFinal() {
+            let htmlResumo = '<ul class="list-group shadow-sm">';
+            $('.linha-frasco').each(function() {
+                const frascoTexto = $(this).find('.select-frasco option:selected').text();
+                const qtd = $(this).find('.qtd-dentes-frasco').val();
+                if(frascoTexto && qtd > 0 && $(this).find('.select-frasco').val() !== "") {
+                    htmlResumo += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                        ${frascoTexto}
+                        <span class="badge bg-primary rounded-pill">${qtd} retirados</span>
+                    </li>`;
+                }
+            });
+            htmlResumo += '</ul>';
+            $('#resumoSeparacao').html(htmlResumo);
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

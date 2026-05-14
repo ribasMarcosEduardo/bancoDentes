@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
 @Table(name = "SOL_ETAPA")
 public class SolicitacaoEtapa {
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODETAPA")
@@ -35,8 +39,13 @@ public class SolicitacaoEtapa {
     @Column(name = "OBSERVACAO", length = 500)
     private String observacao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CODUSUARIO")
+    private Estudante analista;
+
     @PrePersist
-    protected void onCreate() {
+    @PreUpdate
+    protected void onPersistOrUpdate() {
         this.dataAlteracao = LocalDateTime.now();
     }
 }

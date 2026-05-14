@@ -15,6 +15,10 @@ import java.util.StringJoiner;
 @Table(name = "SOLICITACAO")
 public class Solicitacao {
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODSOLICITACAO")

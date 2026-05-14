@@ -14,6 +14,10 @@ import lombok.Setter;
 @Table(name = "ITEM_SOLICITACAO")
 public class ItemSolicitacao {
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODITEM")
