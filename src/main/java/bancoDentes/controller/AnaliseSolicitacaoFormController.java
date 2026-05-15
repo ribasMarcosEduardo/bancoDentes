@@ -1,20 +1,12 @@
 package bancoDentes.controller;
 
-import bancoDentes.dto.ItemSolicitacaoDTO;
-import bancoDentes.dto.SolicitacaoDTO;
 import bancoDentes.model.Solicitacao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.TipoDente;
-import bancoDentes.service.AnaliseSolicitacaoService;
+import bancoDentes.service.AnaliseEtapasService;
 import bancoDentes.service.SolicitacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -24,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AnaliseSolicitacaoFormController {
 
-    private final AnaliseSolicitacaoService analiseSolicitacaoService;
+    private final AnaliseEtapasService analiseEtapasService;
     private final SolicitacaoService solicitacaoService;
 
     @GetMapping("/painel")
@@ -34,10 +26,11 @@ public class AnaliseSolicitacaoFormController {
         return "painelAnalise/analiseList";
     }
 
-    @GetMapping("/etapa1")
-    public String exibeEtapa1(@RequestParam("codigo") Long codigo, Model model) {
+    @GetMapping("/visualizaSolicitacao/{codigo}")
+    public String exibePrimeiraEtapa(@PathVariable("codigo") Long codigo, Model model) {
         model.addAttribute("solicitacao", solicitacaoService.buscarPorId(codigo));
-        return "form/analiseSolicitacaoEtapa1";
+        model.addAttribute("etapas", analiseEtapaService.buscarPorSolicitacao(codigo));
+        return "analiseEtapas/visualizaSolicitacao";
     }
 
     @PostMapping("/etapa1/prosseguir")
@@ -113,7 +106,7 @@ public class AnaliseSolicitacaoFormController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            analiseSolicitacaoService.confirmarAnalise(codSolicitacao);
+            //analiseSolicitacaoService.confirmarAnalise(codSolicitacao);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Análise confirmada com sucesso!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
@@ -124,4 +117,4 @@ public class AnaliseSolicitacaoFormController {
     }
 }
 
-}
+

@@ -1,5 +1,6 @@
 package bancoDentes.model;
 
+import bancoDentes.model.enumModels.StatusEtapa;
 import bancoDentes.model.enumModels.StatusSolicitacao; // Certifique-se de que o caminho do seu Enum está correto
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,8 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "SOL_ETAPA")
-public class SolicitacaoEtapa {
+@Table(name = "ANALISE_ETAPA")
+public class AnaliseEtapas {
 
     @Version
     @Column(name = "VERSION", nullable = false)
@@ -29,15 +30,15 @@ public class SolicitacaoEtapa {
     @JoinColumn(name = "CODSOLICITACAO", nullable = false)
     private Solicitacao solicitacao;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STASOLICITACAO", nullable = true)
-    private StatusSolicitacao statusSolicitacao;
-
     @Column(name = "DATALTERACAO", nullable = false)
     private LocalDateTime dataAlteracao;
 
-    @Column(name = "OBSERVACAO", length = 500)
-    private String observacao;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STAETAPA", nullable = false)
+    private StatusEtapa statusEtapa;
+
+    @Column(name = "JUSTIFICATIVA", length = 500)
+    private String justificativa;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CODUSUARIO")
@@ -47,5 +48,7 @@ public class SolicitacaoEtapa {
     @PreUpdate
     protected void onPersistOrUpdate() {
         this.dataAlteracao = LocalDateTime.now();
+        this.statusEtapa = statusEtapa.EM_ANDAMENTO;
     }
+
 }

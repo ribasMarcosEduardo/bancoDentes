@@ -45,6 +45,7 @@
             <th class="text-center">Dentição</th>
             <th class="text-center">Maxilar</th>
             <th class="text-center">Qtd.</th>
+            <th class="text-center">Status</th>
             <th class="text-center">Just.</th>
 
             <th class="text-center" data-orderable="false">Ações</th>
@@ -58,8 +59,7 @@
             <td th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '-'}"></td>
             <td th:text="${solicitacao.maxilar ?: '-'}"></td>
             <td class="fw-bold" th:text="${solicitacao.quantidade}"></td>
-
-            <!-- Coluna da Justificativa com Popover -->
+            <td th:text="${solicitacao.statusSolicitacao.name()}"></td>
             <td>
               <button type="button" class="btn btn-sm btn-link p-0"
                       data-bs-toggle="popover"

@@ -56,12 +56,17 @@ public class Solicitacao {
     @Column(name = "TIPDENTE", nullable = false)
     private TipoDente tipoDente;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STASOLICITACAO", nullable = false)
+    private StatusSolicitacao statusSolicitacao;
+
     @Column(name = "JUSTIFICATIVA", nullable = false)
     private String justificativa;
 
     @PrePersist
     protected void onCreate() {
         this.datSolicitacao = LocalDateTime.now();
+        this.statusSolicitacao = StatusSolicitacao.PENDENTE;
     }
 
 

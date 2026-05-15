@@ -41,6 +41,7 @@
                         <th class="text-center">Dentição</th>
                         <th class="text-center">Maxilar</th>
                         <th class="text-center">Qtd.</th>
+                        <th class="text-center">Status</th>
                         <th class="text-center">Just.</th>
                         <th class="text-center" data-orderable="false">Ações</th>
                     </tr>
@@ -52,6 +53,7 @@
                         <td th:text="${solicitacao.denticao}">Dentição</td>
                         <td th:text="${solicitacao.maxilar}">Maxilar</td>
                         <td th:text="${solicitacao.quantidade}">Qtd.</td>
+                        <td th:text="${solicitacao.statusSolicitacao.name()}"></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-secondary"
                                     data-bs-toggle="popover" title="Justificativa"
@@ -61,11 +63,8 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a th:href="@{/painel/aprovar/{id}(id=${solicitacao.codigo})}" class="btn btn-sm btn-success">
-                                    <i class="bi bi-check-lg"></i>
-                                </a>
-                                <a th:href="@{/painel/reprovar/{id}(id=${solicitacao.codigo})}" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-x-lg"></i>
+                                <a th:href="@{/analiseSolicitacao/visualizaSolicitacao/{cod}(cod=${solicitacao.codigo})}" class="btn btn-sm btn-success">
+                                    Iniciar análise
                                 </a>
                             </div>
                         </td>

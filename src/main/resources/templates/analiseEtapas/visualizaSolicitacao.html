@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(
+          ~{::title},
+          ~{::#etapa1Conteudo},
+          ~{},
+          ~{::#etapa1Scripts})}">
+
+<head>
+    <title>Análise de Solicitação — Etapa 1</title>
+</head>
+
+<body>
+<div id="etapa1Conteudo" class="py-5">
+
+    <div class="container">
+
+        <!-- Alertas de Feedback -->
+        <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${mensagemSucesso}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${mensagemErro}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Barra de Progresso (Etapas) -->
+        <div class="d-flex mb-4">
+            <div class="flex-fill text-center py-2 px-3 fw-semibold border"
+                 style="background:#E6F1FB;color:#185FA5;border-color:#378ADD!important;border-radius:8px 0 0 8px;font-size:14px">
+                <i class="bi bi-eye me-1"></i> 1 · Revisão
+            </div>
+            <div class="flex-fill text-center py-2 px-3 border text-secondary"
+                 style="background:#f8f9fa;border-left:0;font-size:14px">
+                <i class="bi bi-eyedropper me-1"></i> 2 · Separação
+            </div>
+            <div class="flex-fill text-center py-2 px-3 border text-secondary"
+                 style="background:#f8f9fa;border-left:0;border-radius:0 8px 8px 0;font-size:14px">
+                <i class="bi bi-clipboard-check me-1"></i> 3 · Resumo
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex align-items-center gap-2 py-3">
+                <i class="bi bi-file-earmark-text fs-5"></i>
+                <div>
+                    <span class="fw-semibold">Revisão do pedido</span>
+                    <span class="ms-2 text-secondary" style="font-size:13px">
+                        Solicitação #<span th:text="${solicitacao.codigo}"></span>
+                    </span>
+                </div>
+                <span class="badge bg-warning text-dark ms-auto">Pendente de Análise</span>
+            </div>
+
+            <div class="card-body p-4">
+
+                <!-- Informações do Aluno -->
+                <h6 class="text-uppercase text-secondary fw-semibold mb-2" style="font-size:11px; letter-spacing:.05em">
+                    Estudante Solicitante
+                </h6>
+                <p class="fs-5 fw-semibold mb-4" th:text="${solicitacao.estudante.nome}">Nome do Aluno</p>
+
+                <hr class="my-4 opacity-10"/>
+
+                <!-- Detalhes Técnicos -->
+                <h6 class="text-uppercase text-secondary fw-semibold mb-3" style="font-size:11px; letter-spacing:.05em">
+                    Especificações dos Dentes
+                </h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded border bg-light">
+                            <div class="text-muted mb-1" style="font-size:11px">Tipo</div>
+                            <div class="fw-bold text-dark" th:text="${solicitacao.tipoDente}">—</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded border bg-light">
+                            <div class="text-muted mb-1" style="font-size:11px">Dentição</div>
+                            <div class="fw-bold text-dark" th:text="${solicitacao.denticao}">—</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded border bg-light">
+                            <div class="text-muted mb-1" style="font-size:11px">Maxilar</div>
+                            <div class="fw-bold text-dark" th:text="${solicitacao.maxilar}">—</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 rounded border" style="background:#E6F1FB; border-color:#B8D9F7!important">
+                            <div class="text-primary mb-1" style="font-size:11px; font-weight: 600">Quantidade</div>
+                            <div class="fw-bold fs-5 text-primary" th:text="${solicitacao.quantidade} + ' unid.'">0 unid.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Justificativa do Aluno -->
+                <div class="p-3 rounded mb-4" style="background:#fff9e6; border: 1px solid #ffeeba">
+                    <div class="text-warning-emphasis fw-semibold mb-1" style="font-size:11px">JUSTIFICATIVA DO ALUNO</div>
+                    <div class="text-dark" th:text="${solicitacao.justificativa}" style="line-height:1.5">...</div>
+                </div>
+
+                <hr class="my-4 opacity-10"/>
+
+                <!-- FORMULÁRIO PRINCIPAL: PROSSEGUIR -->
+                <form th:action="@{/analiseSolicitacao/etapa1/prosseguir}" method="post">
+                    <input type="hidden" name="codSolicitacao" th:value="${solicitacao.codigo}"/>
+
+                    <div class="d-flex justify-content-between align-items-center border-top pt-4">
+                        <!-- Botão para abrir o Modal de Negação -->
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-toggle="modal" data-bs-target="#modalNegar">
+                            <i class="bi bi-x-circle me-2"></i> Negar Pedido
+                        </button>
+
+                        <!-- Botão de Prosseguir (Submit do formulário principal) -->
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold">
+                            Prosseguir para Separação <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE NEGAÇÃO (FORA DO FORM PRINCIPAL) -->
+    <div class="modal fade" id="modalNegar" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalNegarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalNegarLabel fw-bold">Confirmar Rejeição</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- FORMULÁRIO DE NEGAÇÃO -->
+                <form th:action="@{/analiseSolicitacao/etapa1/negar}" method="post">
+                    <div class="modal-body p-4">
+                        <p class="mb-3">Você está prestes a negar a solicitação de <strong><span th:text="${solicitacao.estudante.nome}"></span></strong>.</p>
+
+                        <input type="hidden" name="codSolicitacao" th:value="${solicitacao.codigo}"/>
+
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold text-secondary" style="font-size:13px">Motivo da Rejeição (Obrigatório)</label>
+                            <textarea name="justificativa" class="form-control" rows="4"
+                                      placeholder="Explique o motivo para o aluno..." required></textarea>
+                            <div class="form-text mt-2 text-danger">
+                                <i class="bi bi-info-circle me-1"></i> Esta mensagem será enviada por e-mail ao aluno.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0">
+                        <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger px-4">Confirmar e Negar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block id="etapa1Scripts">
+    <script th:inline="none">
+        // Auto-fechar alertas após 5 segundos
+        setTimeout(() => {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+</th:block>
+
+</body>
+</html>
