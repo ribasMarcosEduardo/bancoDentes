@@ -1,7 +1,9 @@
 package bancoDentes.controller;
 
-import bancoDentes.model.Solicitacao;
-import bancoDentes.service.AnaliseEtapasService;
+import bancoDentes.dto.AnaliseSolicitacaoDTO;
+import bancoDentes.model.AnaliseSolicitacao;
+import bancoDentes.service.AnaliseSolicitacaoService;
+import bancoDentes.service.FrascoService;
 import bancoDentes.service.SolicitacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -9,112 +11,71 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
 @Controller
 @RequestMapping("analiseSolicitacao")
 @RequiredArgsConstructor
 public class AnaliseSolicitacaoFormController {
 
-    private final AnaliseEtapasService analiseEtapasService;
+    private final AnaliseSolicitacaoService analiseSolicitacaoService;
     private final SolicitacaoService solicitacaoService;
+    private final FrascoService frascoService;
 
     @GetMapping("/painel")
     public String exibePainelSolicitacoes(Model model) {
-        List<Solicitacao> listaSolicitacoes = solicitacaoService.listarSolicitacoes();
-        model.addAttribute("solicitacoes", listaSolicitacoes);
+        model.addAttribute("solicitacoes", solicitacaoService.getSolicitacoesAptas());
         return "painelAnalise/analiseList";
     }
 
-    @GetMapping("/visualizaSolicitacao/{codigo}")
-    public String exibePrimeiraEtapa(@PathVariable("codigo") Long codigo, Model model) {
-        model.addAttribute("solicitacao", solicitacaoService.buscarPorId(codigo));
-        model.addAttribute("etapas", analiseEtapaService.buscarPorSolicitacao(codigo));
+    @PostMapping("/analisar/{codSolicitacao}")
+    public String analisar(@PathVariable("codSolicitacao") Long codSolicitacao, RedirectAttributes redirectAttributes) {
+        try {
+            analiseSolicitacaoService.save(codSolicitacao);
+            return "redirect:/analiseSolicitacao/visualizaSolicitacao/" + codSolicitacao;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar a análise do pedido!");
+            return "redirect:/analiseSolicitacao/painel";
+        }
+    }
+
+    @GetMapping("/visualizaSolicitacao/{codSolicitacao}")
+    public String exibePrimeiraEtapa(@PathVariable("codSolicitacao") Long codSolicitacao, Model model) {
+        model.addAttribute("solicitacao", solicitacaoService.buscarPorCodigo(codSolicitacao));
+        model.addAttribute("analise", analiseSolicitacaoService.buscarPorCodSolicitacao(codSolicitacao));
         return "analiseEtapas/visualizaSolicitacao";
     }
 
-    @PostMapping("/etapa1/prosseguir")
-    public String prosseguirEtapa1(
-            @RequestParam("codSolicitacao") Long codSolicitacao,
-            @RequestParam(value = "observacao", required = false) String observacao,
-            RedirectAttributes redirectAttributes) {
-
+    @PostMapping("/rejeitar")
+    public String rejeitar(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, RedirectAttributes redirectAttributes) {
         try {
-          //  analiseSolicitacaoService.prosseguirRevisao(codSolicitacao, observacao);
-            return "redirect:/analiseSolicitacao/etapa2?codigo=" + codSolicitacao;
+            analiseSolicitacaoService.rejeitarSolicitacao(dto);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Análise finalizada!");
+            return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
-            return "redirect:/analiseSolicitacao/etapa1?codigo=" + codSolicitacao;
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar a análise do pedido!");
+            return "redirect:/analiseSolicitacao/painel";
         }
     }
 
-    @PostMapping("/etapa1/negar")
-    public String negarSolicitacao(
-            @RequestParam("codSolicitacao") Long codSolicitacao,
-            @RequestParam("justificativa") String justificativa,
-            RedirectAttributes redirectAttributes) {
-
+    @PostMapping("/reabrir")
+    public String reabrir(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, RedirectAttributes redirectAttributes) {
         try {
-           // analiseSolicitacaoService.negarSolicitacao(codSolicitacao, justificativa);
-            redirectAttributes.addFlashAttribute("mensagemSucesso", "Solicitação negada com sucesso.");
+            analiseSolicitacaoService.reabrirSolicitacao(dto);
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Análise reaberta!");
+            return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
-        }
-
-        return "redirect:/analiseSolicitacao/painel";
-    }
-
-    // ─── ETAPA 2: SEPARAÇÃO ────────────────────────────────────────────────────
-
-    @GetMapping("/etapa2")
-    public String exibeEtapa2(@RequestParam("codigo") Long id, Model model) {
-        model.addAttribute("solicitacao", solicitacaoService.buscarPorId(id));
-      //  model.addAttribute("frascos", analiseSolicitacaoService.buscarFrascosDiposniveis(id));
-        return "form/analiseSolicitacaoEtapa2";
-    }
-
-    @PostMapping("/etapa2/salvar")
-    public String salvarEtapa2(
-            @RequestParam("codSolicitacao") Long codSolicitacao,
-            @RequestParam("codFrasco") List<Long> codFrasco,
-            @RequestParam("quantidadesRetiradas") List<Integer> quantidadesRetiradas,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            //List<ItemSolicitacaoDTO> itens = analiseSolicitacaoService
-            //        .montarItens(codFrasco, quantidadesRetiradas); // ← monta o DTO corretamente
-          //  analiseSolicitacaoService.salvarSeparacao(codSolicitacao, itens);
-            return "redirect:/analiseSolicitacao/etapa3?codigo=" + codSolicitacao;
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
-            return "redirect:/analiseSolicitacao/etapa2?codigo=" + codSolicitacao;
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar a análise do pedido!");
+            return "redirect:/analiseSolicitacao/painel";
         }
     }
 
-    // ─── ETAPA 3: RESUMO / CONFIRMAÇÃO FINAL ──────────────────────────────────
-
-    @GetMapping("/etapa3")
-    public String exibeEtapa3(@RequestParam("codigo") Long id, Model model) {
-        model.addAttribute("solicitacao", solicitacaoService.buscarPorId(id));
-        //model.addAttribute("resumo", analiseSolicitacaoService.gerarResumo(id));
-        return "form/analiseSolicitacaoEtapa3";
+    @GetMapping("/separacao/{codAnalise}")
+    public String separacaoDentes(@PathVariable("codAnalise") Long codAnalise, Model model) {
+        AnaliseSolicitacao analise = analiseSolicitacaoService.buscarPorCodAnalise(codAnalise);
+        model.addAttribute("analise", analise);
+        model.addAttribute("frascos", frascoService.getFrascosFiltrados(analise.getSolicitacao()));
+        return "analiseEtapas/separacaoSolicitacao";
     }
 
-    @PostMapping("/etapa3/confirmar")
-    public String confirmarAnalise(
-            @RequestParam("codSolicitacao") Long codSolicitacao,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            //analiseSolicitacaoService.confirmarAnalise(codSolicitacao);
-            redirectAttributes.addFlashAttribute("mensagemSucesso", "Análise confirmada com sucesso!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", e.getMessage());
-            return "redirect:/analiseSolicitacao/etapa3?codigo=" + codSolicitacao;
-        }
-
-        return "redirect:/analiseSolicitacao/painel";
-    }
 }
 
 

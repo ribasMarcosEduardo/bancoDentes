@@ -69,6 +69,22 @@ public class Solicitacao {
         this.statusSolicitacao = StatusSolicitacao.PENDENTE;
     }
 
+    public void iniciarAnalise(){
+        this.statusSolicitacao = StatusSolicitacao.EM_ANALISE;
+    }
+
+    public void rejeitar() {
+        this.statusSolicitacao = StatusSolicitacao.RECUSADO;
+    }
+
+    public boolean isApto() {
+        return this.statusSolicitacao != StatusSolicitacao.CANCELADO;
+
+        //LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4))
+                //&&
+    }
+
+
 
 
 }

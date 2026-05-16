@@ -64,10 +64,8 @@ public class SolicitacaoFormController {
 
     @GetMapping("/painel")
     public String exibePainelSolicitacoes(Model model) {
-
         Long usuarioLogado = 2L;
-        List<Solicitacao> listaSolicitacoes = solicitacaoService.buscarPorEstudante(usuarioLogado);
-        model.addAttribute("solicitacoes", listaSolicitacoes);
+        model.addAttribute("solicitacoes",  solicitacaoService.buscarPorEstudante(usuarioLogado));
 
         return "painelSolicitacao/solicitacaoList";
     }

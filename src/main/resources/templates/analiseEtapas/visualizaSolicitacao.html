@@ -15,7 +15,6 @@
 
     <div class="container">
 
-        <!-- Alertas de Feedback -->
         <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i>
             <span th:text="${mensagemSucesso}"></span>
@@ -27,7 +26,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Barra de Progresso (Etapas) -->
         <div class="d-flex mb-4">
             <div class="flex-fill text-center py-2 px-3 fw-semibold border"
                  style="background:#E6F1FB;color:#185FA5;border-color:#378ADD!important;border-radius:8px 0 0 8px;font-size:14px">
@@ -57,7 +55,6 @@
 
             <div class="card-body p-4">
 
-                <!-- Informações do Aluno -->
                 <h6 class="text-uppercase text-secondary fw-semibold mb-2" style="font-size:11px; letter-spacing:.05em">
                     Estudante Solicitante
                 </h6>
@@ -65,7 +62,6 @@
 
                 <hr class="my-4 opacity-10"/>
 
-                <!-- Detalhes Técnicos -->
                 <h6 class="text-uppercase text-secondary fw-semibold mb-3" style="font-size:11px; letter-spacing:.05em">
                     Especificações dos Dentes
                 </h6>
@@ -96,7 +92,6 @@
                     </div>
                 </div>
 
-                <!-- Justificativa do Aluno -->
                 <div class="p-3 rounded mb-4" style="background:#fff9e6; border: 1px solid #ffeeba">
                     <div class="text-warning-emphasis fw-semibold mb-1" style="font-size:11px">JUSTIFICATIVA DO ALUNO</div>
                     <div class="text-dark" th:text="${solicitacao.justificativa}" style="line-height:1.5">...</div>
@@ -104,28 +99,23 @@
 
                 <hr class="my-4 opacity-10"/>
 
-                <!-- FORMULÁRIO PRINCIPAL: PROSSEGUIR -->
-                <form th:action="@{/analiseSolicitacao/etapa1/prosseguir}" method="post">
                     <input type="hidden" name="codSolicitacao" th:value="${solicitacao.codigo}"/>
 
                     <div class="d-flex justify-content-between align-items-center border-top pt-4">
-                        <!-- Botão para abrir o Modal de Negação -->
                         <button type="button" class="btn btn-outline-danger px-4" data-bs-toggle="modal" data-bs-target="#modalNegar">
                             <i class="bi bi-x-circle me-2"></i> Negar Pedido
                         </button>
 
-                        <!-- Botão de Prosseguir (Submit do formulário principal) -->
-                        <button type="submit" class="btn btn-primary px-5 py-2 fw-semibold">
+                        <a th:href="@{/analiseSolicitacao/separacao/{codAnalise}(codAnalise=${analise.codigo})}"
+                           class="btn btn-primary px-5 py-2 fw-semibold">
                             Prosseguir para Separação <i class="bi bi-arrow-right ms-2"></i>
-                        </button>
+                        </a>
                     </div>
-                </form>
 
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE NEGAÇÃO (FORA DO FORM PRINCIPAL) -->
     <div class="modal fade" id="modalNegar" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalNegarLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
@@ -133,12 +123,12 @@
                     <h5 class="modal-title" id="modalNegarLabel fw-bold">Confirmar Rejeição</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- FORMULÁRIO DE NEGAÇÃO -->
-                <form th:action="@{/analiseSolicitacao/etapa1/negar}" method="post">
+                <form th:action="@{/analiseSolicitacao/rejeitar}" method="post">
+                    <input type="hidden" name="codigo" th:value="${analise.codigo}"/>
                     <div class="modal-body p-4">
                         <p class="mb-3">Você está prestes a negar a solicitação de <strong><span th:text="${solicitacao.estudante.nome}"></span></strong>.</p>
-
-                        <input type="hidden" name="codSolicitacao" th:value="${solicitacao.codigo}"/>
+                        <input type="hidden" name="codigo" th:value="${analise.codigo}"/>
+                        <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}"/>
 
                         <div class="mb-0">
                             <label class="form-label fw-semibold text-secondary" style="font-size:13px">Motivo da Rejeição (Obrigatório)</label>

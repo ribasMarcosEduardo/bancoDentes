@@ -3,6 +3,7 @@ package bancoDentes.service;
 import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
+import bancoDentes.model.Solicitacao;
 import bancoDentes.model.enumModels.EstadoDente;
 import bancoDentes.model.enumModels.Maxilar;
 import bancoDentes.model.enumModels.TipoDente;
@@ -80,6 +81,16 @@ public class FrascoService {
 
     public List<Map<String, Object>> buscarDadosGrafico() {
         return frascoRepository.contarPorTipoDente();
+    }
+
+
+    public List<Frasco> getFrascosFiltrados(Solicitacao solicitacao) {
+        return frascoRepository.getFrascosFiltrados(
+                solicitacao.getTipoDente(),
+                solicitacao.getDenticao(),
+                solicitacao.getMaxilar(),
+                solicitacao.getEstado()
+        );
     }
 
 }

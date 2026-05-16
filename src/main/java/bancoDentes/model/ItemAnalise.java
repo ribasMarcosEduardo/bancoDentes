@@ -11,8 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ITEM_SOLICITACAO")
-public class ItemSolicitacao {
+@Table(name = "ITEM_ANALISE")
+public class ItemAnalise {
 
     @Version
     @Column(name = "VERSION", nullable = false)
@@ -28,8 +28,8 @@ public class ItemSolicitacao {
     private Frasco frasco;
 
     @ManyToOne
-    @JoinColumn(name = "CODSOLICITACAO", nullable = false)
-    private Solicitacao solicitacao;
+    @JoinColumn(name = "CODANALISE", nullable = false)
+    private AnaliseSolicitacao analiseSolicitacao;
 
     @Column(name = "QUANTIDADE", nullable = false)
     private Long quantidade;

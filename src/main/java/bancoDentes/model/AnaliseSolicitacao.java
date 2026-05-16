@@ -1,7 +1,5 @@
 package bancoDentes.model;
 
-import bancoDentes.model.enumModels.StatusEtapa;
-import bancoDentes.model.enumModels.StatusSolicitacao; // Certifique-se de que o caminho do seu Enum está correto
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ANALISE_ETAPA")
-public class AnaliseEtapas {
+@Table(name = "ANALISE_SOLICITACAO")
+public class AnaliseSolicitacao {
 
     @Version
     @Column(name = "VERSION", nullable = false)
@@ -23,19 +21,15 @@ public class AnaliseEtapas {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CODETAPA")
+    @Column(name = "CODANALISE")
     private Long codigo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CODSOLICITACAO", nullable = false)
     private Solicitacao solicitacao;
 
     @Column(name = "DATALTERACAO", nullable = false)
     private LocalDateTime dataAlteracao;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STAETAPA", nullable = false)
-    private StatusEtapa statusEtapa;
 
     @Column(name = "JUSTIFICATIVA", length = 500)
     private String justificativa;
@@ -48,7 +42,16 @@ public class AnaliseEtapas {
     @PreUpdate
     protected void onPersistOrUpdate() {
         this.dataAlteracao = LocalDateTime.now();
-        this.statusEtapa = statusEtapa.EM_ANDAMENTO;
+    }
+
+    public void rejeitar(String justificativa) {
+        this.justificativa = justificativa;
+        this.solicitacao.rejeitar();
+    }
+
+    public void reabrir() {
+        this.justificativa = null;
+        this.solicitacao.iniciarAnalise();
     }
 
 }

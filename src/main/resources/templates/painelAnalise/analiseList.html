@@ -46,27 +46,48 @@
                         <th class="text-center" data-orderable="false">Ações</th>
                     </tr>
                     </thead>
-                    <tbody> <tr class="text-center" th:each="solicitacao : ${solicitacoes}">
+                    <tbody>
+                    <tr class="text-center" th:each="solicitacao : ${solicitacoes}">
                         <td th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : 'Não informado'}">Aluno</td>
+
                         <td th:text="${solicitacao.tipoDente}">Tipo</td>
                         <td th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy HH:mm')}">Data</td>
-                        <td th:text="${solicitacao.denticao}">Dentição</td>
-                        <td th:text="${solicitacao.maxilar}">Maxilar</td>
+                        <td th:text="${solicitacao.denticao != null ? solicitacao.denticao : '-'}">Dentição</td>
+                        <td th:text="${solicitacao.maxilar ?: '-'}">Maxilar</td>
                         <td th:text="${solicitacao.quantidade}">Qtd.</td>
-                        <td th:text="${solicitacao.statusSolicitacao.name()}"></td>
+
+                        <td th:text="${solicitacao.statusSolicitacao != null ? solicitacao.statusSolicitacao : '-'}">Status</td>
+
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-secondary"
                                     data-bs-toggle="popover" title="Justificativa"
-                                    th:data-bs-content="${solicitacao.justificativa}">
+                                    th:data-bs-content="${solicitacao.justificativa ?: 'Nenhuma informada.'}">
                                 Ver Just.
                             </button>
                         </td>
                         <td>
-                            <div class="btn-group" role="group">
-                                <a th:href="@{/analiseSolicitacao/visualizaSolicitacao/{cod}(cod=${solicitacao.codigo})}" class="btn btn-sm btn-success">
-                                    Iniciar análise
-                                </a>
-                            </div>
+                            <form th:if="${solicitacao.statusSolicitacao.name() == 'PENDENTE'}"
+                                  th:action="@{/analiseSolicitacao/analisar/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}" method="post">
+                                <button type="submit" class="btn btn-sm btn-success fw-bold shadow-sm">
+                                    <i class="bi bi-play-fill"></i> Iniciar análise
+                                </button>
+                            </form>
+
+                            <a th:if="${solicitacao.statusSolicitacao.name() == 'EM_ANALISE'}"
+                               th:href="@{/analiseSolicitacao/visualizaSolicitacao/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}"
+                               class="btn btn-sm btn-primary fw-bold shadow-sm">
+                                <i class="bi bi-arrow-right-short"></i> Continuar análise
+                            </a>
+
+                            <form th:if="${solicitacao.statusSolicitacao.name() != 'PENDENTE' && solicitacao.statusSolicitacao.name() != 'EM_ANALISE'}"
+                                  th:action="@{/analiseSolicitacao/reabrir}" method="post">
+
+                                <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
+
+                                <button type="submit" class="btn btn-sm btn-warning fw-bold shadow-sm text-dark">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reabrir
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>
