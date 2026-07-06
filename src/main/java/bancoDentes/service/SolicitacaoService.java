@@ -31,7 +31,7 @@ public class SolicitacaoService {
         Solicitacao solicitacao = solicitacaoDTO.mapearSolicitacao(estudante);
 
         if (solicitacao.getCodigo() != null){
-            Solicitacao solBanco = buscarPorId(solicitacao.getCodigo());
+            Solicitacao solBanco = buscarPorCodigo(solicitacao.getCodigo());
             manipulaCredito(estudante, solBanco.getQuantidade(), solicitacao.getQuantidade());
             BeanUtils.copyProperties(solicitacao, solBanco, "codigo");
             solicitacao = solBanco;
@@ -42,13 +42,13 @@ public class SolicitacaoService {
         return solicitacaoRepository.save(solicitacao);
     }
 
-    public Solicitacao buscarPorId(Long codSolicitacao) {
+    public Solicitacao buscarPorCodigo(Long codSolicitacao) {
         return solicitacaoRepository.findById(codSolicitacao)
                 .orElseThrow(() -> new FrascoException("Solicitação não encontrado com o ID: " + codSolicitacao));
     }
 
     public void excluirSolicitacao(Long codigoSol){
-        Solicitacao solicitacao = buscarPorId(codigoSol);
+        Solicitacao solicitacao = buscarPorCodigo(codigoSol);
         manipulaCredito(solicitacao.getEstudante(), solicitacao.getQuantidade(), 0L);
         solicitacaoRepository.deleteById(codigoSol);
     }
@@ -61,4 +61,17 @@ public class SolicitacaoService {
     public List<Solicitacao> buscarPorEstudante(Long codEstudante) {
         return solicitacaoRepository.findByEstudante_CodEstudante(codEstudante);
     }
+
+    public List<Solicitacao> listarSolicitacoes() {
+        return solicitacaoRepository.findAll();
+    }
+
+    public List<Solicitacao> getSolicitacoesAptas() {
+        List<Solicitacao> listaAptas = this.listarSolicitacoes().stream()
+                .filter(Solicitacao::isApto)
+                .toList();
+
+        return listaAptas;
+    }
+
 }

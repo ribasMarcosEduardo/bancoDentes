@@ -18,6 +18,10 @@ import java.time.LocalDateTime;
 @Table(name = "FRASCO")
 public class Frasco {
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODFRASCO")

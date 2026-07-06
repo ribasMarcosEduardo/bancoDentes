@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 
 public record FrascoDTO(
         Long codigo,
+        Long version,
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate datCad,
         LocalDateTime datManutencao,
@@ -25,12 +26,13 @@ public record FrascoDTO(
 ) {
 
     public static FrascoDTO empty() {
-        return new FrascoDTO(null,null, null, null, null, null, null, null,null,null);
+        return new FrascoDTO(null,null,null, null, null, null, null, null, null,null,null);
     }
 
     public Frasco mapearFrasco(){
         Frasco frasco = new Frasco();
         frasco.setCodigo(this.codigo);
+        frasco.setVersion(this.version);
 
         if (this.datCad != null) {
             frasco.setDatCad(this.datCad.atStartOfDay());
@@ -50,6 +52,7 @@ public record FrascoDTO(
     public static FrascoDTO recuperaFrasco(Frasco frasco) {
         return new FrascoDTO(
                 frasco.getCodigo(),
+                frasco.getVersion(),
                 frasco.getDatCad() != null ? frasco.getDatCad().toLocalDate() : null,
                 frasco.getDatManutencao(),
                 frasco.getEstado(),

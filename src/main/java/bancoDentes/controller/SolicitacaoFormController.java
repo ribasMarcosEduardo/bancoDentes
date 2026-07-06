@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SolicitacaoFormController {
     private final SolicitacaoService solicitacaoService;
-    private final FrascoService frascoService;
     private final EstudanteService estudanteService;
 
     @GetMapping
@@ -64,18 +63,9 @@ public class SolicitacaoFormController {
     }
 
     @GetMapping("/painel")
-    public String exibePainelSolicitacoes(@RequestParam(required = false) TipoDente tipoDente,
-                                          @RequestParam(required = false) EstadoDente estadoDente,
-                                          @RequestParam(required = false) Maxilar maxilar,
-                                          Model model) {
-
+    public String exibePainelSolicitacoes(Model model) {
         Long usuarioLogado = 2L;
-        List<Solicitacao> listaSolicitacoes = solicitacaoService.buscarPorEstudante(usuarioLogado);
-
-        model.addAttribute("solicitacoes", listaSolicitacoes);
-        model.addAttribute("filtroNomeDente", tipoDente);
-        model.addAttribute("filtroEstadoDente", estadoDente);
-        model.addAttribute("filtroMaxilar", maxilar);
+        model.addAttribute("solicitacoes",  solicitacaoService.buscarPorEstudante(usuarioLogado));
 
         return "painelSolicitacao/solicitacaoList";
     }

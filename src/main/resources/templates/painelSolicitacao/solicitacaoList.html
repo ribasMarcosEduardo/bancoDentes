@@ -8,6 +8,7 @@
 
 <div id="solicitacaoConteudo" class="container">
 
+  <!-- Alertas de Mensagem -->
   <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
     <i class="bi bi-check-circle-fill me-2"></i>
     <span th:text="${mensagemSucesso}"></span>
@@ -43,10 +44,10 @@
             <th class="text-center">Tipo</th>
             <th class="text-center">Dentição</th>
             <th class="text-center">Maxilar</th>
-            <th class="text-center">Posição</th>
-            <th class="text-center">Estado</th>
             <th class="text-center">Qtd.</th>
             <th class="text-center">Status</th>
+            <th class="text-center">Just.</th>
+
             <th class="text-center" data-orderable="false">Ações</th>
           </tr>
           </thead>
@@ -57,12 +58,19 @@
             <td th:text="${solicitacao.tipoDente}"></td>
             <td th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '-'}"></td>
             <td th:text="${solicitacao.maxilar ?: '-'}"></td>
-            <td th:text="${solicitacao.posicao ?: '-'}"></td>
-            <td th:text="${solicitacao.estado ?: '-'}"></td>
             <td class="fw-bold" th:text="${solicitacao.quantidade}"></td>
+            <td th:text="${solicitacao.statusSolicitacao.name()}"></td>
             <td>
-              <span class="badge bg-secondary" th:text="${solicitacao.statusSolicitacao}"></span>
+              <button type="button" class="btn btn-sm btn-link p-0"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      title="Justificativa da Solicitação"
+                      th:data-bs-content="${solicitacao.justificativa ?: 'Nenhuma justificativa informada.'}">
+                <i class="bi bi-chat-right-text-fill fs-5 text-primary"></i>
+              </button>
             </td>
+
+
             <td>
               <div class="d-flex justify-content-center gap-2">
                 <a th:href="@{/solicitacao/view/{id}(id=${solicitacao.codigo})}"
@@ -70,7 +78,8 @@
                   <i class="bi bi-eye"></i>
                 </a>
 
-                <form method="post" th:action="@{/solicitacao/cancelar/{id}(id=${solicitacao.codigo})}" onsubmit="return confirm('Tem certeza que deseja cancelar esta solicitação? Os créditos serão devolvidos.');">
+                <form method="post" th:action="@{/solicitacao/cancelar/{id}(id=${solicitacao.codigo})}"
+                      onsubmit="return confirm('Tem certeza que deseja cancelar esta solicitação?');">
                   <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar Solicitação">
                     <i class="bi bi-x-circle"></i>
                   </button>
@@ -91,16 +100,7 @@
 </div>
 
 <th:block id="meusScripts">
-  <script th:inline="none">
-    $(document).ready(function() {
-      $('#tabela-solicitacoes').DataTable({
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/pt-BR.json' },
-        order: [[1, 'desc']],
-        columnDefs: [ { orderable: false, targets: -1 } ],
-        searching: false
-      });
-    });
-  </script>
+
 </th:block>
 
 </body>

@@ -4,7 +4,7 @@ spring:
   application:
     name: bancoDentes
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/BANCO_DENTES?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/BANCO_DENTES?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver

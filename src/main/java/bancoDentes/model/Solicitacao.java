@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -14,6 +15,10 @@ import java.time.LocalDateTime;
 @Table(name = "SOLICITACAO")
 public class Solicitacao {
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODSOLICITACAO")
@@ -22,10 +27,6 @@ public class Solicitacao {
     @ManyToOne
     @JoinColumn(name = "CODESTUDANTE")
     private Estudante estudante;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STASOLICITACAO", nullable = true)
-    private StatusSolicitacao statusSolicitacao;
 
     @Column(name = "DATSOLICITACAO")
     private LocalDateTime datSolicitacao;
@@ -55,13 +56,34 @@ public class Solicitacao {
     @Column(name = "TIPDENTE", nullable = false)
     private TipoDente tipoDente;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STASOLICITACAO", nullable = false)
+    private StatusSolicitacao statusSolicitacao;
+
+    @Column(name = "JUSTIFICATIVA", nullable = false)
+    private String justificativa;
+
     @PrePersist
     protected void onCreate() {
         this.datSolicitacao = LocalDateTime.now();
-        if (this.statusSolicitacao == null) {
-            this.statusSolicitacao = StatusSolicitacao.PENDENTE;
-        }
+        this.statusSolicitacao = StatusSolicitacao.PENDENTE;
     }
+
+    public void iniciarAnalise(){
+        this.statusSolicitacao = StatusSolicitacao.EM_ANALISE;
+    }
+
+    public void rejeitar() {
+        this.statusSolicitacao = StatusSolicitacao.RECUSADO;
+    }
+
+    public boolean isApto() {
+        return this.statusSolicitacao != StatusSolicitacao.CANCELADO;
+
+        //LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4))
+                //&&
+    }
+
 
 
 
