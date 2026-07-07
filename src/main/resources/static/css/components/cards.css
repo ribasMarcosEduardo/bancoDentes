@@ -1,0 +1,116 @@
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    min-height: var(--card-min-height);
+    overflow: hidden;
+
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transition: 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+}
+
+.card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--card-gap);
+
+    padding: var(--card-padding);
+
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.card__title {
+    margin: 0;
+
+    color: var(--text);
+
+    font-size: var(--card-title-size);
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.card__meta {
+    margin-top: 0.2rem;
+
+    color: var(--text-muted);
+
+    font-size: var(--card-meta-size);
+}
+
+.card__code {
+    padding:
+        calc(var(--card-padding) * 0.28)
+        calc(var(--card-padding) * 0.56);
+
+    border-radius: 999px;
+
+    background: var(--badge-bg);
+    color: var(--badge-text);
+
+    font-size: calc(var(--card-meta-size) * 0.95);
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.card__body {
+    padding: var(--card-padding);
+}
+
+.card__row {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: calc(var(--card-gap) * 0.7);
+
+    padding: calc(var(--card-gap) * 0.5) 0;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--text-soft);
+    font-size: var(--card-text-size);
+}
+
+.card__row:last-child {
+    border-bottom: none;
+}
+
+.card__label {
+    color: var(--text-muted);
+}
+
+.card__value {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.card__footer {
+    padding: calc(var(--card-padding) * 0.8);
+
+    background: var(--surface-muted);
+    border-top: 1px solid var(--border);
+
+    color: var(--text-muted);
+
+    font-size: var(--card-meta-size);
+}
+
+.card__date {
+    margin: 0.18rem 0;
+}

@@ -1,0 +1,308 @@
+.form-shell {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+}
+
+.form-toolbar__title h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.form-toolbar__title p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+}
+
+.form-toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    padding: 2rem;
+
+    display: grid;
+    gap: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.form-grid-estado {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 1fr);
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    height: var(--input-height);
+
+    padding: 0 1rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--input-bg);
+    color: var(--text);
+
+    font: inherit;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.form-control option {
+    background: var(--surface-elevated);
+    color: var(--text);
+}
+
+.form-control option:checked {
+    background: var(--chip-bg);
+    color: var(--text-inverse);
+}
+
+.form-control:focus {
+    border-color: var(--input-border-focus);
+    background: var(--input-bg-focus);
+    box-shadow:
+        0 0 0 4px var(--input-ring),
+        var(--input-shadow-focus);
+}
+
+
+.form-section {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.form-section + .form-section {
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.form-section--disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.form-group--disabled .form-control,
+.form-group--disabled .number-input__btn {
+    pointer-events: none;
+}
+
+.form-group--disabled .form-control {
+    background: var(--input-bg-disabled);
+    color: var(--text-muted);
+}
+
+.form-group--disabled .number-input__btn {
+    opacity: 0.55;
+}
+
+.form-control[type="date"], [type="number"] {
+    color-scheme: light;
+}
+
+.form-control[type="date"],
+.form-control[type="number"] {
+    color-scheme: light;
+}
+
+:root.dark .form-control[type="date"],
+:root.dark .form-control[type="number"],
+body.dark .form-control[type="date"],
+body.dark .form-control[type="number"] {
+    color-scheme: dark;
+}
+
+.quantidade-inline {
+    display: grid;
+    grid-template-columns: 0.5fr auto;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+.quantidade-inline .number-input {
+    flex: 1;
+}
+
+.checkbox-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+
+    margin-top: 0.15rem;
+
+    white-space: nowrap;
+
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.checkbox-inline input {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    margin: 0;
+
+    border: 1px solid var(--border);
+    border-radius: 0.35rem;
+
+    background: var(--surface-soft);
+
+    display: grid;
+    place-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.checkbox-inline input::before {
+    content: "";
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 0.18rem;
+
+    background: var(--checkbox-check);
+
+    transform: scale(0);
+
+    transition: transform 0.15s ease;
+}
+
+.checkbox-inline input:checked {
+    background: var(--checkbox-bg-active);
+    border-color: var(--checkbox-bg-active);
+}
+
+.checkbox-inline input:checked::before {
+    transform: scale(1);
+}
+
+.number-input {
+    position: relative;
+}
+
+.number-input .form-control {
+    padding-right: 4.5rem;
+}
+
+.number-input__actions {
+    position: absolute;
+    top: 50%;
+    right: 0.45rem;
+    transform: translateY(-50%);
+
+    display: flex;
+    gap: 0.25rem;
+}
+
+.number-input__btn {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+
+    background: var(--surface-input);
+    color: var(--text);
+
+    box-shadow: none;
+}
+
+.number-input__btn .icon {
+    width: 13px;
+    height: 13px;
+}
+
+.number-input__btn:hover {
+    background: var(--surface-soft);
+
+    transform: scale(1.04);
+}
+
+.number-input__btn .icon {
+    width: 14px;
+    height: 14px;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper .form-control {
+    padding-right: 3rem;
+}
+
+.select-icon {
+    position: absolute;
+
+    top: 50%;
+    right: 1rem;
+
+    transform: translateY(-50%);
+
+    width: 18px;
+    height: 18px;
+
+    color: var(--text-muted);
+
+    pointer-events: none;
+}

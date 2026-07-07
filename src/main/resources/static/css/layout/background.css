@@ -1,0 +1,41 @@
+.background {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Base comum */
+
+.blob {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(120px);
+
+    opacity: 0.17;
+}
+
+/* Blob azul */
+
+.blob--blue {
+    width: 900px;
+    height: 900px;
+
+    background: rgb(9, 131, 231);
+
+    right: -200px;
+    bottom: 60px;
+}
+
+/* Blob verde */
+
+.blob--green {
+    width: 900px;
+    height: 950px;
+
+    background: rgb(3, 187, 70);
+
+    left: -210px;
+    bottom: -250px;
+}

@@ -1,0 +1,44 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-main);
+    background: var(--page-bg);
+    color: var(--text);
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+
+    background: var(--page-highlight);
+
+    pointer-events: none;
+    z-index: -1;
+}
+
+select:invalid {
+    color: var(--text-muted);
+}
+
+/* Chrome / Edge / Safari */
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}

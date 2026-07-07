@@ -1,0 +1,44 @@
+.page {
+    flex: 1;
+    width: 100%;
+    padding: var(--page-pad);
+}
+
+.dashboard {
+    width: min(var(--container), 100%);
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.main-panel {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.page-header,
+.filter-sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.page-header,
+.filter-sidebar {
+    padding: 2rem;
+}
+
+.page-header h1, .filter-sidebar h1{
+    margin: 0;
+    font-size: 2rem;
+}
+
+.page-header p,
+.filter-sidebar p{
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+}

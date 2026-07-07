@@ -1,0 +1,21 @@
+.low-opacity {
+    color: var(--text-muted);
+}
+
+.icon {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    stroke-width: 2.2;
+}
+
+.icon--logo {
+    width: 26px;
+    height: 26px;
+}
+
+.orderBy-icon {
+    width: 18px;
+    height: 18px;
+}

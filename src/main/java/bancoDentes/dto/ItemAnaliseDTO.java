@@ -21,7 +21,7 @@ public record ItemAnaliseDTO(
         return new ItemAnaliseDTO(null,null,null,null,null);
     }
 
-    public ItemAnalise mapearItemSolicitacao(AnaliseSolicitacao analiseSolicitacao, Frasco frasco) {
+    public ItemAnalise mapearItemSolicitacao() {
         ItemAnalise itemSol = new ItemAnalise();
         itemSol.setCodigo(this.codigo);
         itemSol.setVersion(this.version);

@@ -1,0 +1,39 @@
+.view-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-switch__btn {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 0.75rem;
+
+    background: var(--toggle-bg);
+    color: var(--text-soft);
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.view-switch__btn:hover {
+    background: var(--toggle-bg-hover);
+
+    transform: translateY(-1px);
+}
+
+.view-switch__btn.active {
+    background: var(--toggle-active-bg);
+    color: var(--toggle-active-text);
+}
+

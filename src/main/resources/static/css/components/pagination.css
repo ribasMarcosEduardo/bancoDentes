@@ -1,0 +1,17 @@
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}

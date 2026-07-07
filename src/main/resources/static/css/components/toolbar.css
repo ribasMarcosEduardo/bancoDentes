@@ -1,0 +1,109 @@
+.toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+    z-index: 1;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    padding: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.toolbar input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    font-family: inherit;
+    max-width: 360px;
+}
+
+.toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.toolbar__info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    gap: 0.2rem;
+}
+
+.toolbar__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    color: var(--text-muted);
+
+    line-height: 1;
+
+    padding-left: 0.5rem;
+}
+
+.toolbar__badge {
+    height: var(--btn-height);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+    min-width: 220px;
+
+    padding: 0 1rem;
+
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+
+    background: var(--input-bg);
+    color: var(--text);
+
+    font-size: 0.88rem;
+    font-weight: 600;
+
+    box-shadow: var(--btn-shadow);
+}
+
+.toolbar__stats {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-stat {
+    min-width: 130px;
+
+    display: grid;
+    gap: 0.25rem;
+
+    padding: 0.65rem 0.85rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--surface-soft);
+}
+
+.toolbar-stat span {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.toolbar-stat strong {
+    color: var(--text);
+    font-size: 0.95rem;
+}

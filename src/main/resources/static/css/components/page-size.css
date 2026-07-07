@@ -1,0 +1,19 @@
+.page-size-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.page-size-control__select {
+    width: 82px;
+}
+
+.page-size-control__select .form-control {
+    height: var(--btn-height);
+    padding-left: 0.75rem;
+    padding-right: 2.25rem;
+}

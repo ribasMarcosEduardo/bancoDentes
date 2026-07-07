@@ -1,0 +1,183 @@
+:root {
+    --font-main: "Google Sans", sans-serif;
+    --btn-height: 42px;
+    --input-height: 42px;
+
+    --card-width: 280px;
+    --card-min-height: 13rem;
+    --card-padding: 1.25rem;
+    --card-gap: 0.75rem;
+    --card-title-size: 1.1rem;
+    --card-text-size: 0.88rem;
+    --card-meta-size: 0.78rem;
+    --card-radius: 1rem;
+    --card-shadow: 0 10px 24px rgba(0,0,0,0.12);
+
+    --radius: 1rem;
+    --container: 1400px;
+    --page-pad: 2rem;
+}
+
+:root.light,
+body.light{
+    --page-bg: #fcfcfc;
+    --surface: #ffffff;
+    --surface-soft: rgba(255,255,255,0.78);
+    --surface-muted: rgba(245,245,245,0.6);
+    --surface-elevated: rgba(255,255,255,0.88);
+
+    --text: #1f2937;
+    --text-muted: #6b7280;
+    --text-soft: rgba(31,41,55,0.72);
+    --text-inverse: #ffffff;
+    
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.18);
+
+    --primary: rgba(44,48,54,0.95);
+    --primary-hover: rgba(44,48,54,1);
+
+    --secondary: rgba(229,231,235,0.95);
+    --secondary-hover: rgba(229,231,235,1);
+
+    --chip-bg: rgba(31,41,55,0.85);
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+
+    --glass-bg-start: rgba(255,255,255,0.48);
+    --glass-bg-end: rgba(255,255,255,0.24);
+
+    --glass-border: rgba(255,255,255,0.35);
+
+    --glass-shadow: 0 10px 30px rgba(0,0,0,0.06);
+
+    --page-highlight:
+        radial-gradient(
+            circle at top,
+            rgba(255,255,255,0.9),
+            transparent 40%
+        );
+
+
+    --input-bg: rgba(255,255,255,0.75);
+    --input-bg-focus: rgba(255,255,255,0.95);
+    --input-border-focus: rgba(31,41,55,0.35);
+    --input-ring: rgba(31,41,55,0.08);
+    --input-shadow-focus: 0 4px 14px rgba(0,0,0,0.06);
+    --icon-muted: rgba(31,41,55,0.45);
+    --icon-active: rgba(31,41,55,0.78);
+
+    --btn-primary-bg: rgba(31,41,55,0.92);
+    --btn-primary-bg-hover: rgba(31,41,55,1);
+    --btn-primary-text: #ffffff;
+
+    --btn-secondary-bg: rgba(229,231,235,0.92);
+    --btn-secondary-bg-hover: rgba(229,231,235,1);
+    --btn-secondary-text: #1f2937;
+
+    --btn-tonal-bg: rgba(31,41,55,0.10);
+    --btn-tonal-bg-hover: rgba(31,41,55,0.16);
+    --btn-tonal-text: rgba(31,41,55,0.92);
+
+    --btn-pagination-bg: rgba(245,245,245,0.72);
+    --btn-pagination-bg-hover: rgba(255,255,255,0.96);
+    --btn-pagination-text: rgba(31,41,55,0.72);
+
+    --btn-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    --toggle-bg: rgba(229,231,235,0.92);
+    --toggle-bg-hover: rgba(229,231,235,1);
+
+    --toggle-active-bg: rgba(31,41,55,0.92);
+    --toggle-active-text: #ffffff;
+
+    --badge-bg: rgba(31,41,55,0.92);
+    --badge-text: #ffffff;
+
+    --checkbox-bg-active: rgba(31,41,55,0.92);
+    --checkbox-check: #ffffff;
+
+    --filter-chip-bg: rgba(31,41,55,0.92);
+    --filter-chip-text: #ffffff;
+
+    --step-line-bg: rgba(31,41,55,0.14);
+    --step-line-active: #1f2937;
+}
+
+:root.dark,
+body.dark {
+    --page-bg: #0f172a;
+    --surface: #111827;
+    --surface-soft: rgba(17,24,39,0.82);
+    --surface-muted: rgba(31,41,55,0.7);
+    --surface-elevated: rgba(17,24,39,0.92);
+
+    --text: #f9fafb;
+    --text-muted: #9ca3af;
+    --text-soft: rgba(249,250,251,0.72);
+    --text-inverse: #111827;
+
+    --page-highlight: none;
+
+    --border: rgba(255,255,255,0.1);
+    --border-strong: rgba(255,255,255,0.22);
+
+    --primary: rgba(249,250,251,0.92);
+    --primary-hover: rgba(249,250,251,1);
+
+    --secondary: rgba(31,41,55,0.95);
+    --secondary-hover: rgba(55,65,81,1);
+
+    --chip-bg: rgba(249,250,251,0.16);
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+    --glass-bg-start: rgba(17,24,39,0.92);
+    --glass-bg-end: rgba(17,24,39,0.62);
+
+    --glass-border: rgba(255,255,255,0.08);
+
+    --glass-shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+    --input-bg: rgba(31,41,55,0.92);
+    --input-bg-focus: rgba(55,65,81,0.96);
+    --input-border-focus: rgba(249,250,251,0.35);
+    --input-ring: rgba(249,250,251,0.08);
+    --input-shadow-focus: 0 4px 14px rgba(0,0,0,0.28);
+    --icon-muted: rgba(249,250,251,0.45);
+    --icon-active: rgba(249,250,251,0.82);
+
+    --btn-primary-bg: rgba(249,250,251,0.92);
+    --btn-primary-bg-hover: rgba(249,250,251,1);
+    --btn-primary-text: #111827;
+
+    --btn-secondary-bg: rgba(31,41,55,0.92);
+    --btn-secondary-bg-hover: rgba(55,65,81,1);
+    --btn-secondary-text: #f9fafb;
+
+    --btn-tonal-bg: rgba(249,250,251,0.10);
+    --btn-tonal-bg-hover: rgba(249,250,251,0.16);
+    --btn-tonal-text: rgba(249,250,251,0.92);
+
+    --btn-pagination-bg: rgba(31,41,55,0.82);
+    --btn-pagination-bg-hover: rgba(55,65,81,1);
+    --btn-pagination-text: rgba(249,250,251,0.82);
+
+    --btn-shadow: 0 4px 14px rgba(0,0,0,0.22);
+
+    --toggle-bg: rgba(31,41,55,0.92);
+    --toggle-bg-hover: rgba(55,65,81,1);
+
+    --toggle-active-bg: rgba(249,250,251,0.92);
+    --toggle-active-text: #111827;
+
+    --badge-bg: rgba(249,250,251,0.16);
+    --badge-text: #ffffff;
+
+    --checkbox-bg-active: rgba(249,250,251,0.92);
+    --checkbox-check: #111827;
+
+    --filter-chip-bg: rgba(249,250,251,0.16);
+    --filter-chip-text: #ffffff;
+
+    --step-line-bg: rgba(255,255,255,0.14);
+    --step-line-active: #22c55e;
+}

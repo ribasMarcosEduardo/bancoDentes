@@ -1,0 +1,86 @@
+<header class="navbar glass">
+    <div class="navbar__inner">
+
+        <a href="index.html" class="navbar__brand">
+            <span class="navbar__logo">
+                <i class="icon icon--logo" data-lucide="home"></i>
+            </span>
+        </a>
+
+        <nav class="navbar__nav glass">
+            <a href="index.html" class="navbar__link">Dashboard</a>
+            <a href="frascos.html" class="navbar__link">Frascos</a>
+            <a href="movimentacoes.html" class="navbar__link">Movimentações</a>
+            <div class="navbar__dropdown">
+                <button class="navbar__link navbar__dropdown-btn">
+                    Solicitações
+                </button>
+
+                <div class="navbar__dropdown-menu">
+                    <a href="solicitacoes.html">Painel de Solicitações</a>
+                    <a href="historico_solicitacoes.html">Histórico de Solicitações</a>
+                </div>
+            </div>
+
+            <div class="navbar__dropdown">
+                <button class="navbar__link navbar__dropdown-btn">
+                    Cadastros
+                </button>
+
+                <div class="navbar__dropdown-menu">
+                    <a href="cadastro_frasco.html">Cadastrar frasco</a>
+                    <a href="cadastro_movimentacao.html">Cadastrar movimentação</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="navbar__actions">
+            <button class="navbar__theme-toggle" id="themeToggle" type="button">
+                <i class="icon" id="themeIcon" data-lucide="moon"></i>
+            </button>
+
+            <button class="navbar__config glass" aria-label="Configurações">
+                <i class="icon icon--md" data-lucide="settings"></i>
+            </button>
+
+            <a href="#" class="navbar__login glass">Login</a>
+        </div>
+
+    </div>
+</header>
+
+<button class="mobile-menu-toggle glass" aria-label="Abrir menu">
+    <i class="icon" data-lucide="menu"></i>
+</button>
+
+<div class="mobile-menu-overlay"></div>
+
+<aside class="mobile-menu glass">
+    <div class="mobile-menu__header">
+        <span class="navbar__logo">Banco de Dentes Humanos</span>
+
+        <button class="mobile-menu__close" aria-label="Fechar menu">
+            <i class="icon" data-lucide="x"></i>
+        </button>
+    </div>
+
+    <nav class="mobile-menu__nav">
+        <a href="frascos.html">Frascos</a>
+        <a href="movimentacoes.html">Movimentações</a>
+        <span class="mobile-menu__section">Solicitações</span>
+            <a href="solicitacoes.html">Painel de Solicitações</a>
+            <a href="historico_solicitacoes.html">Histórico de Solicitações</a>
+
+        <span class="mobile-menu__section">Cadastros</span>
+            <a href="cadastro_frasco.html">Cadastrar frasco</a>
+            <a href="cadastro_movimentacao.html">Cadastrar movimentação</a>
+    </nav>
+
+    <div class="mobile-menu__footer">
+        <a href="#">Login</a>
+        <button>
+            <i class="icon" data-lucide="settings"></i>
+            Configurações
+        </button>
+    </div>
+</aside>

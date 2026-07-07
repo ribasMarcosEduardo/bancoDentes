@@ -15,6 +15,15 @@
 
     <div class="container">
 
+        <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${mensagemSucesso}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${mensagemErro}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <div id="alertaJs" class="alert alert-danger d-none alert-dismissible fade show shadow-sm" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <span id="alertaJsTexto"></span>
@@ -84,16 +93,30 @@
                             </tr>
                             </thead>
                             <tbody id="corpoTabelaSelecionados">
-                            <tr id="linhaVazia">
+
+                            <tr th:each="item : ${itensSalvos}">
+                                <td><span class="badge bg-secondary font-monospace" th:text="'#' + ${item.frasco.identificacao}">#00</span></td>
+                                <td>
+                                    <span class="fw-semibold text-dark" th:text="${item.frasco.tipoDente} + ' · ' + ${item.frasco.denticao}"></span>
+                                </td>
+                                <td class="text-center fw-bold text-primary" th:text="${item.quantidade} + ' unidades'"></td>
+                                <td class="text-end">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                            th:formaction="@{/analiseSolicitacao/removerItem(codItem=${item.codigo}, codAnalise=${analise.codigo})}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${#lists.isEmpty(itensSalvos)}">
                                 <td colspan="4" class="text-center text-muted py-4">
                                     <i class="bi bi-info-circle me-1"></i> Nenhum frasco alocado ainda. Clique em "Selecionar do Estoque".
                                 </td>
                             </tr>
+
                             </tbody>
                         </table>
                     </div>
-
-                    <div id="inputsEscondidos"></div>
 
                     <div class="p-3 rounded mb-4 d-flex justify-content-between align-items-center" style="background:#E6F1FB; border: 1px solid #B8D9F7">
                         <div class="d-flex align-items-center gap-2">
@@ -101,7 +124,7 @@
                             <span class="fw-semibold text-primary" style="font-size:14px">Total da Carga Separada:</span>
                         </div>
                         <span class="fs-5 fw-bold text-primary" id="txtContadorTotal">
-                            0 / <span th:text="${analise.solicitacao.quantidade}">0</span> unidades
+                            <span th:text="${totalJaSeparado}">0</span> / <span th:text="${analise.solicitacao.quantidade}">0</span> unidades
                         </span>
                     </div>
 
@@ -109,7 +132,7 @@
                         <a th:href="@{/analiseSolicitacao/visualizaSolicitacao/{cod}(cod=${analise.solicitacao.codigo})}" class="btn btn-outline-secondary px-4">
                             <i class="bi bi-arrow-left me-1"></i> Voltar para Revisão
                         </a>
-                        <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm" id="btnProsseguir" disabled>
+                        <button type="submit" class="btn btn-success px-5 fw-bold shadow-sm" id="btnProsseguir" th:disabled="${totalJaSeparado == null or totalJaSeparado == 0}">
                             <i class="bi bi-arrow-right me-1"></i> Ir para Resumo
                         </button>
                     </div>
@@ -159,9 +182,7 @@
                                 <td class="text-end">
                                     <button type="button" class="btn btn-sm btn-success fw-bold"
                                             th:data-codigo="${frasco.codigo}"
-                                            th:data-identificacao="${frasco.identificacao}"
-                                            th:data-descricao="${frasco.tipoDente} + ' · ' + ${frasco.denticao}"
-                                            onclick="adicionarFrascoNaLista(this.getAttribute('data-codigo'), this.getAttribute('data-identificacao'), this.getAttribute('data-descricao'))">
+                                            onclick="alocarFrasco(this.getAttribute('data-codigo'))">
                                         <i class="bi bi-plus-lg"></i> Alocar
                                     </button>
                                 </td>
@@ -176,27 +197,31 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary fw-semibold" data-bs-dismiss="modal">Concluir Seleção</button>
+                    <button type="button" class="btn btn-secondary fw-semibold" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
 
-</div> <th:block id="etapa2Scripts">
+    <form id="formAdicionarFrasco" th:action="@{/analiseSolicitacao/selecionaFrasco}" method="post" class="d-none">
+        <input type="hidden" name="analiseSolicitacao.codigo" th:value="${analise.codigo}" />
+        <input type="hidden" id="inputCodFrasco" name="frasco.codigo" />
+        <input type="hidden" id="inputQuantidade" name="quantiade" />
+    </form>
+</div>
+
+<th:block id="etapa2Scripts">
     <script th:inline="javascript">
         /*<![CDATA[*/
 
-        // Resgata o limite máximo estabelecido pelo pedido do aluno
+        // Puxando as variáveis do back-end para o JavaScript poder validar os limites
         const limiteMaximoAlocado = /*[[${analise.solicitacao.quantidade}]]*/ 0;
-        let totalAcumuladoNaAnalise = 0;
+        let totalAcumuladoNaAnalise = /*[[${totalJaSeparado != null ? totalJaSeparado : 0}]]*/ 0;
 
-        // Dicionário na memória para controlar o que já foi adicionado e evitar duplicados
-        const mapaFrascosEscolhidos = {};
-
-        function adicionarFrascoNaLista(codigo, identificacao, descricao) {
-            const inputQtdModal = document.getElementById(`qtd-retirar-${codigo}`);
+        function alocarFrasco(codigoFrasco) {
+            const inputQtdModal = document.getElementById(`qtd-retirar-${codigoFrasco}`);
             const qtdDesejada = parseInt(inputQtdModal.value) || 0;
-            const disponivelNoEstoque = parseInt(document.getElementById(`disponivel-${codigo}`).textContent) || 0;
+            const disponivelNoEstoque = parseInt(document.getElementById(`disponivel-${codigoFrasco}`).textContent) || 0;
 
             // Validação 1: Entrada zerada ou negativa
             if (qtdDesejada <= 0) {
@@ -206,104 +231,29 @@
 
             // Validação 2: Ultrapassou o estoque real do pote
             if (qtdDesejada > disponivelNoEstoque) {
-                mostrarErroJs(`Quantidade indisponível no Frasco #${identificacao}. Limite máximo de estoque: ${disponivelNoEstoque}.`);
+                mostrarErroJs(`Quantidade indisponível no Frasco selecionado. Limite: ${disponivelNoEstoque}.`);
                 return;
             }
 
             // Validação 3: Testar se a nova inserção estoura a cota total do aluno
-            const quantidadeJaAlocadaDesseMesmoFrasco = mapaFrascosEscolhidos[codigo] ? mapaFrascosEscolhidos[codigo].qtd : 0;
-            const saldoSeAdicionar = totalAcumuladoNaAnalise - quantidadeJaAlocadaDesseMesmoFrasco + qtdDesejada;
-
+            const saldoSeAdicionar = totalAcumuladoNaAnalise + qtdDesejada;
             if (saldoSeAdicionar > limiteMaximoAlocado) {
                 mostrarErroJs(`Ação bloqueada! Essa operação elevaria o total para ${saldoSeAdicionar} unidades. O aluno solicitou apenas ${limiteMaximoAlocado}.`);
                 return;
             }
 
-            // Oculta alertas de erros anteriores caso passe nas validações
-            $('#alertaJs').addClass('d-none');
+            // Se passou nas validações, preenche o form oculto e envia
+            document.getElementById('inputCodFrasco').value = codigoFrasco;
+            document.getElementById('inputQuantidade').value = qtdDesejada;
 
-            // Se o lote já estava na tabela, vamos apenas atualizar a sua quantidade
-            if (mapaFrascosEscolhidos[codigo]) {
-                mapaFrascosEscolhidos[codigo].qtd = qtdDesejada;
-            } else {
-                // Caso contrário, registra o novo item no mapa
-                mapaFrascosEscolhidos[codigo] = {
-                    identificacao: identificacao,
-                    descricao: descricao,
-                    qtd: qtdDesejada
-                };
-            }
-
-            reconstruirTabelaESelecao();
-        }
-
-        function removerFrascoDaLista(codigo) {
-            delete mapaFrascosEscolhidos[codigo];
-            reconstruirTabelaESelecao();
-        }
-
-        function reconstruirTabelaESelecao() {
-            const corpoTabela = document.getElementById('corpoTabelaSelecionados');
-            const containerInputs = document.getElementById('inputsEscondidos');
-
-            corpoTabela.innerHTML = '';
-            containerInputs.innerHTML = '';
-            totalAcumuladoNaAnalise = 0;
-
-            const chaves = Object.keys(mapaFrascosEscolhidos);
-
-            if (chaves.length === 0) {
-                corpoTabela.innerHTML = `
-                    <tr id="linhaVazia">
-                        <td colspan="4" class="text-center text-muted py-4">
-                            <i class="bi bi-info-circle me-1"></i> Nenhum frasco alocado ainda. Clique em "Selecionar do Estoque".
-                        </td>
-                    </tr>`;
-            } else {
-                chaves.forEach(codigo => {
-                    const item = mapaFrascosEscolhidos[codigo];
-                    totalAcumuladoNaAnalise += item.qtd;
-
-                    // 1. Atualiza a exibição da tabela visual na tela (Corrigido para removerFrascoDaLista)
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><span class="badge bg-secondary font-monospace">#${item.identificacao}</span></td>
-                        <td><span class="fw-semibold text-dark">${item.descricao}</span></td>
-                        <td class="text-center fw-bold text-primary">${item.qtd} unidades</td>
-                        <td class="text-end">
-                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removerFrascoDaLista(${codigo})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    corpoTabela.appendChild(tr);
-
-                    // 2. Injeta os inputs hidden que o Spring precisa mapear no POST para arrays
-                    containerInputs.innerHTML += `<input type="hidden" name="codFrasco" value="${codigo}" />`;
-                    containerInputs.innerHTML += `<input type="hidden" name="quantidadesRetiradas" value="${item.qtd}" />`;
-                });
-            }
-
-            // Atualiza os contadores globais da interface gráfica
-            document.getElementById('txtContadorTotal').textContent = `${totalAcumuladoNaAnalise} / ${limiteMaximoAlocado} unidades`;
-
-            // Gerencia os estados de bloqueio dos botões
-            const btnProsseguir = document.getElementById('btnProsseguir');
-            if (totalAcumuladoNaAnalise > 0 && totalAcumuladoNaAnalise <= limiteMaximoAlocado) {
-                btnProsseguir.removeAttribute('disabled');
-            } else {
-                btnProsseguir.setAttribute('disabled', 'disabled');
-            }
+            // Dispara o formulário pro Spring!
+            document.getElementById('formAdicionarFrasco').submit();
         }
 
         function mostrarErroJs(mensagem) {
             document.getElementById('alertaJsTexto').textContent = mensagem;
             $('#alertaJs').removeClass('d-none');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        // Garante o escopo global para a função do botão de exclusão
-        window.removerFrascoDaLista = removerFrascoDaLista;
 
         /*]]>*/
     </script>
