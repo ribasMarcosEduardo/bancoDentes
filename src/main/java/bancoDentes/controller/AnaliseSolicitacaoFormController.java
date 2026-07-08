@@ -35,30 +35,30 @@ public class AnaliseSolicitacaoFormController extends BaseController {
     }
 
     @PostMapping("/analisar/{codSolicitacao}")
-    public String analisar(@PathVariable("codSolicitacao") Long codSolicitacao, HttpServletRequest request) {
+    public String analisar(@PathVariable("codSolicitacao") Long codSolicitacao) {
         try {
             analiseSolicitacaoService.save(codSolicitacao);
             return "redirect:/analiseSolicitacao/visualizaSolicitacao/" + codSolicitacao;
         } catch (AnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.analise.processamento"));
+            this.saveError(this.getText("error.analise.processamento"));
             return "redirect:/analiseSolicitacao/painel";
         }
     }
 
     @GetMapping("/visualizaSolicitacao/{codSolicitacao}")
-    public String exibePrimeiraEtapa(@PathVariable("codSolicitacao") Long codSolicitacao, Model model, HttpServletRequest request) {
+    public String exibePrimeiraEtapa(@PathVariable("codSolicitacao") Long codSolicitacao, Model model) {
         try{
             model.addAttribute("solicitacao", solicitacaoService.buscarPorCodigo(codSolicitacao));
             model.addAttribute("analise", analiseSolicitacaoService.buscarPorCodSolicitacao(codSolicitacao));
             return "analiseEtapas/visualizaSolicitacao";
         } catch (AnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.analise.processamento"));
+            this.saveError(this.getText("error.analise.processamento"));
             return "redirect:/analiseSolicitacao/painel";
         }
     }
@@ -67,34 +67,34 @@ public class AnaliseSolicitacaoFormController extends BaseController {
     public String rejeitar(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, HttpServletRequest request) {
         try {
             analiseSolicitacaoService.rejeitarSolicitacao(dto);
-            this.saveMessage(request, this.getText("msg.sucesso.analise.finalizada"));
+            this.saveMessage(this.getText("msg.sucesso.analise.finalizada"));
             return "redirect:/analiseSolicitacao/painel";
         } catch (AnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.analise.processamento"));
+            this.saveError(this.getText("error.analise.processamento"));
             return "redirect:/analiseSolicitacao/painel";
         }
     }
 
     @PostMapping("/reabrir")
-    public String reabrir(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, HttpServletRequest request) {
+    public String reabrir(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto) {
         try {
             analiseSolicitacaoService.reabrirSolicitacao(dto);
-            this.saveMessage(request, this.getText("msg.sucesso.analise.reaberta"));
+            this.saveMessage(this.getText("msg.sucesso.analise.reaberta"));
             return "redirect:/analiseSolicitacao/painel";
         } catch (AnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.analise.processamento"));
+            this.saveError(this.getText("error.analise.processamento"));
             return "redirect:/analiseSolicitacao/painel";
         }
     }
 
     @GetMapping("/separacao/{codAnalise}")
-    public String separacaoDentes(@PathVariable("codAnalise") Long codAnalise, Model model, HttpServletRequest request) {
+    public String separacaoDentes(@PathVariable("codAnalise") Long codAnalise, Model model) {
         try {
             AnaliseSolicitacao analise = analiseSolicitacaoService.buscarPorCodAnalise(codAnalise);
             List<ItemAnalise> itensSalvos = itemAnaliseService.buscarItensPorAnalise(codAnalise);
@@ -109,36 +109,36 @@ public class AnaliseSolicitacaoFormController extends BaseController {
             return "analiseEtapas/separacaoSolicitacao";
 
         } catch (AnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.analise.processamento"));
+            this.saveError(this.getText("error.analise.processamento"));
             return "redirect:/analiseSolicitacao/painel";
         }
     }
 
     @PostMapping("/selecionaFrasco")
-    public String selecionaFrasco(@ModelAttribute ItemAnaliseDTO dto, HttpServletRequest request) {
+    public String selecionaFrasco(@ModelAttribute ItemAnaliseDTO dto) {
         try {
             itemAnaliseService.save(dto);
-            this.saveMessage(request, this.getText("msg.sucesso.frasco.alocado"));
+            this.saveMessage(this.getText("msg.sucesso.frasco.alocado"));
         } catch (AnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.frasco.alocado", e.getMessage()));
+            this.saveError(this.getText("error.frasco.alocado", e.getMessage()));
         }
         return "redirect:/analiseSolicitacao/separacao/" + dto.analiseSolicitacao().getCodigo();
     }
 
     @PostMapping("/removerItem/{codigo}")
-    public String removerItem(@PathVariable("codigo") Long codigo, HttpServletRequest request) {
+    public String removerItem(@PathVariable("codigo") Long codigo) {
         try {
             itemAnaliseService.removerItem(codigo);
-            this.saveMessage(request, this.getText("msg.sucesso.item.removido"));
+            this.saveMessage(this.getText("msg.sucesso.item.removido"));
         } catch (ItemAnaliseException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.item.removido", e.getMessage()));
+            this.saveError(this.getText("error.item.removido", e.getMessage()));
         }
         return "redirect:/frasco/painel";
     }

@@ -31,7 +31,7 @@ public class SolicitacaoFormController extends BaseController{
     private final EstudanteService estudanteService;
 
     @GetMapping
-    public String cadastrarSolicitacao(Model model, HttpServletRequest request) {
+    public String cadastrarSolicitacao(Model model) {
         try {
             Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
             model.addAttribute("solicitacaoDTO", SolicitacaoDTO.empty());
@@ -40,53 +40,60 @@ public class SolicitacaoFormController extends BaseController{
             return "form/solicitacaoForm";
 
         } catch (EstudanteException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.solicitacao.processamento"));
+            this.saveError(this.getText("error.solicitacao.processamento"));
             return "redirect:/solicitacao/painel";
         }
     }
 
     @PostMapping("/save")
-    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto, HttpServletRequest request) {
+    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto) {
         try {
             solicitacaoService.save(dto);
-            this.saveMessage(request, this.getText("msg.sucesso.solicitacao.enviada"));
+            this.saveMessage(this.getText("msg.sucesso.solicitacao.enviada"));
             return "redirect:/solicitacao/painel";
 
         } catch (SolicitacaoException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.solicitacao.salvar", e.getMessage()));
+            this.saveError(this.getText("error.solicitacao.salvar", e.getMessage()));
             return "redirect:/solicitacao/painel";
         }
     }
 
     @PostMapping("/cancelar/{codigo}")
-    public String cancelarSolicitacao(@PathVariable("codigo") Long codigo, HttpServletRequest request) {
+    public String cancelarSolicitacao(@PathVariable("codigo") Long codigo) {
         try {
             solicitacaoService.excluirSolicitacao(codigo);
-            this.saveMessage(request, this.getText("msg.sucesso.solicitacao.excluida"));
+            this.saveMessage(this.getText("msg.sucesso.solicitacao.excluida"));
 
         } catch (SolicitacaoException e) {
-            this.saveError(request, e.getMessage());
+            this.saveError(e.getMessage());
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.solicitacao.excluir", e.getMessage()));
+            this.saveError(this.getText("error.solicitacao.excluir", e.getMessage()));
         }
 
         return "redirect:/solicitacao/painel";
     }
 
     @GetMapping("/painel")
-    public String exibePainelSolicitacoes(Model model, HttpServletRequest request) {
+    public String exibePainelSolicitacoes(Model model) {
         try {
-            Long usuarioLogado = 2L;
-            model.addAttribute("solicitacoes", solicitacaoService.buscarPorEstudante(usuarioLogado));
+            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
+            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorEstudante(usuarioLogado.getCodEstudante());
+
+            model.addAttribute("solicitacoes", solicitacoes);
+            model.addAttribute("pendentes", solicitacaoService.getPendentes(solicitacoes));
+            model.addAttribute("concluidas", solicitacaoService.getConcluidas(solicitacoes));
+            model.addAttribute("usuarioLogado", usuarioLogado);
+
             return "painelSolicitacao/solicitacaoList";
+
         } catch (Exception e) {
-            this.saveError(request, this.getText("error.solicitacao.processamento"));
+            this.saveError(this.getText("error.solicitacao.processamento"));
             return "redirect:/";
         }
     }

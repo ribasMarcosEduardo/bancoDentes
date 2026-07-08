@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.StringJoiner;
 
 @Getter
@@ -83,8 +84,4 @@ public class Solicitacao {
         //LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4))
                 //&&
     }
-
-
-
-
 }

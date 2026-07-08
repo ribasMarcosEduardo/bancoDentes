@@ -7,6 +7,7 @@ import bancoDentes.exception.SolicitacaoException;
 import bancoDentes.exception.SolicitacaoNaoEncontradaException;
 import bancoDentes.model.Estudante;
 import bancoDentes.model.Solicitacao;
+import bancoDentes.model.enumModels.StatusSolicitacao;
 import bancoDentes.repository.EstudanteRepository;
 import bancoDentes.repository.SolicitacaoRepository;
 import bancoDentes.service.validator.SolicitacaoValidator;
@@ -76,6 +77,18 @@ public class SolicitacaoService extends BaseService{
                 .toList();
 
         return listaAptas;
+    }
+
+    public long getPendentes(List<Solicitacao> solicitacoes) {
+        return solicitacoes.stream()
+                .filter(s -> s.getStatusSolicitacao() == StatusSolicitacao.PENDENTE)
+                .count();
+    }
+
+    public long getConcluidas(List<Solicitacao> solicitacoes) {
+        return solicitacoes.stream()
+                .filter(s -> s.getStatusSolicitacao() == StatusSolicitacao.FINALIZADO)
+                .count();
     }
 
 }
