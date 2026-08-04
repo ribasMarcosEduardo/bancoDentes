@@ -1,0 +1,43 @@
+@media (max-width: 1000px) {
+
+    .navbar {
+        display: none;
+    }
+}
+
+.toolbar__filter-toggle {
+    display: none;
+}
+
+@media (max-width: 1110px) {
+
+    /* Sem espaço pra sidebar fixa, o botão de filtro na toolbar abre
+       ela como painel deslizante (ver .filters-sidebar-desktop em
+       css/components/filters.css) */
+    .toolbar__filter-toggle {
+        display: flex;
+    }
+
+    :root {
+        --page-pad: 1rem;
+    }
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .page-header {
+        padding: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+}

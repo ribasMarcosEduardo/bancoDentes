@@ -37,3 +37,205 @@
     color: var(--toggle-active-text);
 }
 
+/*
+    Filtro de setor (Todos / BDH / Biobanco) ao lado da paginação.
+    Mesmo glass bem transparente aplicado nas setas de paginação
+    (ver .pagination__actions .btn-pagination em pagination.css).
+*/
+
+.sector-switch {
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    padding: 0.3rem;
+    border-radius: 0.85rem;
+
+    /*
+        background-image (não background-color) — mesmo gradiente de 2
+        paradas usado no estado "grudado" abaixo, só que com a mesma
+        cor nas duas paradas. São o mesmo tipo de valor, então a
+        transição interpola direitinho em vez de trocar seco.
+    */
+    background-image: linear-gradient(to bottom right, var(--glass-thin-bg), var(--glass-thin-bg));
+
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    border: 1px solid var(--glass-border);
+
+    user-select: none;
+
+    /*
+        backdrop-filter NÃO entra na transição — ver o mesmo comentário
+        em .pagination__actions .btn-pagination (components/pagination.css):
+        é caro de recalcular a cada frame, e animá-lo dessincroniza o
+        sector-switch das setas de paginação ao lado durante o scroll
+        (um deles atualiza um frame antes do outro, ficando com o fundo
+        raso/reto por um instante enquanto o vizinho já gruda).
+    */
+    transition:
+        background-image 0.4s ease,
+        border-color 0.4s ease,
+        box-shadow 0.4s ease;
+}
+
+.sector-switch::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+
+    /*
+        O ruído mistura com um gradiente PRÓPRIO deste pseudo-elemento
+        (via background-blend-mode, entre as duas camadas do próprio
+        background-image), não com o conteúdo por baixo do sector-switch.
+        Com mix-blend-mode: overlay direto no ::before, o ruído misturava
+        com o resultado do backdrop-filter — que muda a cada frame
+        conforme a lista rola por baixo — deixando o granulado
+        deslocado/desconexo do tom do próprio vidro (mais visível no
+        modo escuro).
+    */
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        linear-gradient(to bottom right, var(--glass-frost-bg-start), var(--glass-frost-bg-end));
+    background-size: 120px 120px, cover;
+    background-blend-mode: overlay, normal;
+
+    opacity: 0;
+
+    transition: opacity 0.4s ease;
+}
+
+/*
+    Estado "grudado" — ver .pagination.is-stuck em pagination.css
+    (alternado via JS em setupStickyPagination no includes.js).
+*/
+.pagination.is-stuck .sector-switch {
+    background-image: linear-gradient(to bottom right, var(--glass-frost-bg-start), var(--glass-frost-bg-end));
+    border-color: var(--glass-frost-border);
+
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+
+    box-shadow: var(--glass-frost-shadow);
+}
+
+.pagination.is-stuck .sector-switch::before {
+    opacity: var(--glass-frost-noise-opacity, 0.05);
+}
+
+.sector-switch__indicator {
+    position: absolute;
+    top: 0.3rem;
+    left: 0;
+
+    height: 32px;
+    width: 0;
+
+    border-radius: 0.6rem;
+    background: var(--btn-tonal-bg-hover);
+
+    pointer-events: none;
+    z-index: 0;
+
+    transition:
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sector-switch__btn {
+    position: relative;
+    z-index: 1;
+
+    height: 32px;
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0 0.85rem;
+
+    border: none;
+    border-radius: 0.6rem;
+
+    background: transparent;
+    color: var(--text-soft);
+
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.sector-switch__btn:hover {
+    color: var(--text);
+    transform: translateY(-1px);
+}
+
+.sector-switch__btn.active {
+    color: var(--btn-tonal-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sector-switch__indicator {
+        transition: none;
+    }
+}
+
+@media (max-width: 450px) {
+
+    .sector-switch {
+        gap: 0.2rem;
+    }
+
+    .sector-switch__indicator,
+    .sector-switch__btn {
+        height: 26px;
+    }
+
+    .sector-switch__btn {
+        padding: 0 0.5rem;
+        font-size: 0.7rem;
+    }
+}
+
+/*
+    Transição entre as visualizações de grade (cards) e lista (tabela)
+    em #resultsView. Como a troca acontece via display:none/block
+    (results.css), a animação é reiniciada sozinha sempre que o
+    elemento volta a ser renderizado — não precisa de JS.
+*/
+
+@keyframes results-view-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.results--grid .results-grid,
+.results--list .result-table {
+    animation: results-view-fade-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .results--grid .results-grid,
+    .results--list .result-table {
+        animation: none;
+    }
+}
+

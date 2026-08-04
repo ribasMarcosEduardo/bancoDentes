@@ -8,10 +8,236 @@
 
     gap: 1rem;
     flex-wrap: wrap;
+
+    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+
+    /*
+        Acompanha a .toolbar (também sticky) quando ela gruda no topo,
+        em vez de rolar pra fora da tela. --pagination-sticky-top é
+        calculado via JS (setupStickyPagination em includes.js), que
+        mede a altura real da toolbar — ela varia demais entre
+        páginas/larguras pra usar um valor fixo aqui.
+
+        O sticky precisa estar aqui, não em .pagination__actions: a
+        containing block de um sticky é o pai DIRETO, e .pagination é
+        filho de .list-panel (ver layout/page.css), que é alto o
+        bastante (pagination + results juntos) pra isso funcionar
+        durante toda a rolagem da lista — .pagination__actions sozinho,
+        dentro de um .pagination baixo, não teria essa folga.
+    */
+    position: sticky;
+    top: var(--pagination-sticky-top, 5rem);
+    z-index: 1;
+}
+
+/*
+    Só as setas/sector-switch devem "ficar" visíveis quando gruda — o
+    texto de resultados (.low-opacity) some nessa hora (ver a classe
+    is-stuck, alternada via JS em setupStickyPagination). Mantém o
+    espaço reservado (sem collapse de largura) pra não deslocar o
+    resto quando funde/aparece.
+*/
+.pagination .low-opacity {
+    transition: opacity 0.2s ease, visibility 0s linear 0s;
+}
+
+.pagination.is-stuck .low-opacity {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
 .pagination__actions {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+.pagination__actions .sector-switch {
+    margin-right: 0.75rem;
+}
+
+.pagination__range {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+
+    user-select: none;
+}
+
+/* Mesmo glass bem transparente do .sector-switch, pra formar um único grupo visual */
+
+.pagination__actions .btn-pagination {
+    position: relative;
+
+    /*
+        background-image (não background-color) nos dois estados —
+        são o mesmo tipo de valor (linear-gradient com 2 paradas), o
+        que dá pra interpolar suavemente na transição. Uma cor sólida
+        de um lado e um gradiente do outro não anima, só troca seco.
+    */
+    background-image: linear-gradient(to bottom right, var(--glass-thin-bg), var(--glass-thin-bg));
+    border: 1px solid var(--glass-border);
+
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    /*
+        backdrop-filter NÃO entra na transição: é caro de recalcular a
+        cada frame, e animá-lo faz o navegador atualizar as duas setas
+        em momentos levemente diferentes durante o scroll — uma delas
+        fica visivelmente "atrasada" (fundo raso/reto, sem o blur)
+        por alguns frames enquanto a outra já terminou. Trocando na
+        hora (sem transição), as duas mudam de estado no mesmo frame.
+    */
+    transition:
+        background-image 0.4s ease,
+        border-color 0.4s ease;
+}
+
+/* Ruído do glass-frost (mesmo SVG de components/glass.css) — some por
+   padrão, só aparece quando .pagination gruda (ver abaixo) */
+.pagination__actions .btn-pagination::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    /*
+        border-radius própria (em vez de overflow:hidden no botão) pra
+        recortar o ruído nas pontas arredondadas sem cortar junto a
+        box-shadow do botão, que precisa vazar pra fora da caixa —
+        background já respeita border-radius sozinho, sem precisar de
+        overflow:hidden.
+    */
+    border-radius: inherit;
+
+    /*
+        Zera border/transform/z-index: as setas têm data-tooltip (ver
+        base/utilities.css), e [data-tooltip]::before é a setinha do
+        balão — mesmo pseudo-elemento que usamos aqui pro ruído, então
+        as duas regras se acumulam no MESMO ::before (não são coisas
+        separadas). Sem isso, sobrava o border:5px solid transparent
+        (com border-top-color escura) e o transform:translate(-50%,4px)
+        do balão, deslocando e emoldurando o ruído pra fora do botão.
+    */
+    border: none;
+    transform: none;
+    z-index: 0;
+
+    /*
+        O ruído mistura com um gradiente PRÓPRIO deste pseudo-elemento
+        (via background-blend-mode, entre as duas camadas do próprio
+        background-image), não com o conteúdo por baixo do botão. Com
+        mix-blend-mode: overlay direto no ::before, o ruído misturava
+        com o resultado do backdrop-filter do botão — que muda a cada
+        frame conforme a lista rola por baixo — deixando o granulado
+        deslocado/manchado em vez de uniforme sobre o vidro.
+    */
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        linear-gradient(to bottom right, var(--glass-frost-bg-start), var(--glass-frost-bg-end));
+    background-size: 120px 120px, cover;
+    background-blend-mode: overlay, normal;
+
+    opacity: 0;
+
+    transition: opacity 0.4s ease;
+}
+
+/*
+    Quando a paginação gruda no topo (.pagination.is-stuck, alternada
+    via JS em setupStickyPagination), as setas e o sector-switch
+    trocam pro visual mais opaco do glass-frost — fundo mais visível
+    em cima de card/lista rolando por baixo. Volta ao glass fino
+    quando desgruda, pela mesma transição.
+*/
+.pagination.is-stuck .pagination__actions .btn-pagination {
+    background-image: linear-gradient(to bottom right, var(--glass-frost-bg-start), var(--glass-frost-bg-end));
+    border-color: var(--glass-frost-border);
+
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+
+.pagination.is-stuck .pagination__actions .btn-pagination::before {
+    opacity: var(--glass-frost-noise-opacity, 0.05);
+}
+
+@media (max-width: 600px) {
+
+    /*
+        Linha 1: sector-switch (esquerda) ... intervalo + setas (direita).
+        Linha 2: texto de resultados, embaixo, alinhado à esquerda.
+        O padding lateral do .pagination continua o mesmo, então tudo
+        segue levemente recuado em relação à lista/cards, como já era.
+    */
+    .pagination {
+        flex-direction: column;
+        align-items: stretch;
+
+        /* setas (.pagination__actions, order:1) ficam visualmente acima
+           do texto de resultados (.low-opacity, order:2) — 1.5rem entre
+           os dois em qualquer página que empilhe assim */
+        gap: 1.5rem;
+
+        /* item do grid .main-panel: sem isso a rolagem abaixo vaza pra
+           página inteira em vez de ficar contida aqui */
+        min-width: 0;
+    }
+
+    .pagination__actions {
+        order: 1;
+        width: 100%;
+        gap: 0.4rem;
+
+        /* Em telas bem estreitas (~320px) o conjunto pode não caber
+           inteiro; melhor rolar horizontalmente do que quebrar uma só
+           seta pra outra linha */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+
+        /*
+            Barra escondida — o scroll por toque/arraste continua
+            funcionando, só a trilha/thumb do scrollbar.css global não
+            aparecem aqui. Uma barrinha horizontal bem curta colada
+            embaixo do sector-switch + setas destoava do resto (nenhum
+            outro scroll da página mostra a barra tão perto do conteúdo).
+        */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .pagination__actions::-webkit-scrollbar {
+        display: none;
+    }
+
+    /*
+        overflow-x:auto acima força overflow-y a virar "auto" também
+        (mesmo eixo computado nos dois quando só um é "visible" — regra
+        do spec de overflow), então o balão do tooltip (data-tooltip,
+        ver base/utilities.css), que aparece ACIMA do botão, ficava
+        cortado pela borda do container ao tocar/focar a seta no mobile
+        — não só a sombra, o balão inteiro (não há altura sobrando
+        nessa faixa curta pra ele aparecer sem ser cortado, em cima ou
+        embaixo). Desliga o balão aqui; no touch ele não seria lido a
+        tempo mesmo (sem hover persistente).
+    */
+    .pagination__actions [data-tooltip]::after,
+    .pagination__actions [data-tooltip]::before {
+        display: none;
+    }
+
+    .low-opacity {
+        order: 2;
+    }
+
+    .pagination__actions .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination__range {
+        margin-left: auto;
+    }
 }

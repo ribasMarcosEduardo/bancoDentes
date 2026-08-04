@@ -1,0 +1,94 @@
+/*
+    Criado via JS (setupScrollToTopButton em includes.js) — precisa
+    medir a borda esquerda de .results pra se alinhar com ela, então
+    não faz sentido já vir pronto no HTML de cada página. "top" (não
+    "bottom") também é setado via JS a cada scroll/resize, pra travar
+    o botão sem ultrapassar o fim de .results em listas curtas.
+*/
+.scroll-to-top {
+    position: fixed;
+    z-index: 60;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+
+    background: var(--glass-thin-bg);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    color: var(--text);
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease,
+        background 0.2s ease,
+        visibility 0s linear 0.25s;
+}
+
+.scroll-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease,
+        background 0.2s ease,
+        visibility 0s linear 0s;
+}
+
+.scroll-to-top:hover {
+    background: var(--surface-elevated);
+    transform: translateY(-2px);
+}
+
+.scroll-to-top .icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+/*
+    No mobile o .mobile-menu-toggle (hambúrguer) vira um FAB fixo no
+    canto inferior direito (ver layout/mobile-menu.css) — aqui, em vez
+    de acompanhar .results (ver updatePosition em includes.js, que
+    limpa left/top nessa faixa pra não brigar com o right/bottom
+    daqui), o botão gruda do lado esquerdo dele: "right" base + a
+    largura do hambúrguer (56px) + 1rem de gap.
+
+    bottom não é o mesmo 1.25rem do hambúrguer — os dois têm alturas
+    diferentes (56px vs 48px aqui), então bottom igual deixava as bases
+    alinhadas mas os centros descasados. +4px (metade da diferença de
+    altura, (56-48)/2) centraliza os dois de verdade.
+*/
+@media (max-width: 1000px) {
+    .scroll-to-top {
+        right: calc(1.25rem + 56px + 1rem);
+        bottom: calc(1.25rem + 4px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scroll-to-top {
+        transition: opacity 0.15s linear, visibility 0s linear 0.15s;
+    }
+
+    .scroll-to-top.is-visible {
+        transition: opacity 0.15s linear, visibility 0s linear 0s;
+    }
+}

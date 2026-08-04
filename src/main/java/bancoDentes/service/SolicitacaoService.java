@@ -36,8 +36,10 @@ public class SolicitacaoService extends BaseService{
 
         if (solicitacao.getCodigo() != null){
             Solicitacao solBanco = buscarPorCodigo(solicitacao.getCodigo());
-            manipulaCredito(estudante, solBanco.getQuantidade(), solicitacao.getQuantidade());
-            BeanUtils.copyProperties(solicitacao, solBanco, "codigo");
+            if (!solBanco.getQuantidade().equals(solicitacao.getQuantidade())) {
+                manipulaCredito(estudante, solBanco.getQuantidade(), solicitacao.getQuantidade());
+            }
+            BeanUtils.copyProperties(solicitacao, solBanco, "codigo", "statusSolicitacao", "datSolicitacao");
             solicitacao = solBanco;
         } else {
             manipulaCredito(estudante, 0L, solicitacao.getQuantidade());
@@ -54,11 +56,12 @@ public class SolicitacaoService extends BaseService{
     @Transactional
     public void excluirSolicitacao(Long codigoSol) throws SolicitacaoException {
         Solicitacao solicitacao = buscarPorCodigo(codigoSol);
+        solicitacaoValidator.exclusaoValidator(solicitacao);
         manipulaCredito(solicitacao.getEstudante(), solicitacao.getQuantidade(), 0L);
         solicitacaoRepository.delete(solicitacao);
     }
 
-    private void manipulaCredito(Estudante estudante, Long quantidadeAntiga, Long quantidadeNova){
+    public void manipulaCredito(Estudante estudante, Long quantidadeAntiga, Long quantidadeNova){
         Long diferenca = quantidadeNova - quantidadeAntiga;
         estudante.setCredito(estudante.getCredito() - diferenca);
     }
@@ -87,7 +90,7 @@ public class SolicitacaoService extends BaseService{
 
     public long getConcluidas(List<Solicitacao> solicitacoes) {
         return solicitacoes.stream()
-                .filter(s -> s.getStatusSolicitacao() == StatusSolicitacao.FINALIZADO)
+                .filter(s -> s.getStatusSolicitacao() == StatusSolicitacao.CONCLUIDO)
                 .count();
     }
 

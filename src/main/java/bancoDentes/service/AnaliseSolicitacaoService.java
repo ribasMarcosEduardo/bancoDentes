@@ -5,8 +5,10 @@ import bancoDentes.exception.AnaliseException;
 import bancoDentes.exception.AnaliseNaoEncontradaException;
 import bancoDentes.exception.SolicitacaoException;
 import bancoDentes.model.AnaliseSolicitacao;
+import bancoDentes.model.Estudante;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.repository.AnaliseSolicitacaoRepository;
+import bancoDentes.service.validator.SolicitacaoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class AnaliseSolicitacaoService extends BaseService {
 
     private final SolicitacaoService solicitacaoService;
     private final AnaliseSolicitacaoRepository analiseSolicitacaoRepository;
+    private final SolicitacaoValidator solicitacaoValidator;
 
     public AnaliseSolicitacao save(final Long codSolicitacao) throws AnaliseException, SolicitacaoException {
         Optional<AnaliseSolicitacao> analise = analiseSolicitacaoRepository.findBySolicitacaoCodigo(codSolicitacao);
@@ -42,21 +45,28 @@ public class AnaliseSolicitacaoService extends BaseService {
     }
 
     @Transactional
-    public AnaliseSolicitacao rejeitarSolicitacao(final AnaliseSolicitacaoDTO analiseSolicitacaoDTO) throws AnaliseException {
-        AnaliseSolicitacao analise = analiseSolicitacaoRepository
-                .findById(analiseSolicitacaoDTO.codigo())
-                .orElseThrow(() -> new AnaliseNaoEncontradaException(this.getText("error.analise.nao.encontrada")));
+    public AnaliseSolicitacao negarSolicitacao(final AnaliseSolicitacaoDTO analiseSolicitacaoDTO) throws AnaliseException, SolicitacaoException {
+        Long codSolicitacao = analiseSolicitacaoDTO.solicitacao().getCodigo();
+        AnaliseSolicitacao analise = this.save(codSolicitacao);
 
-        analise.rejeitar(analiseSolicitacaoDTO.justificativa());
+        solicitacaoService.manipulaCredito(analise.getSolicitacao().getEstudante(),
+                analise.getSolicitacao().getQuantidade(), 0L);
 
+        analise.negar(analiseSolicitacaoDTO.justificativa());
         return analiseSolicitacaoRepository.save(analise);
     }
 
     @Transactional
-    public AnaliseSolicitacao reabrirSolicitacao(final AnaliseSolicitacaoDTO analiseSolicitacaoDTO) throws AnaliseException {
+    public AnaliseSolicitacao reabrirSolicitacao(final AnaliseSolicitacaoDTO analiseSolicitacaoDTO) throws AnaliseException, SolicitacaoException {
         AnaliseSolicitacao analise = analiseSolicitacaoRepository
                 .findBySolicitacaoCodigo(analiseSolicitacaoDTO.solicitacao().getCodigo())
                 .orElseThrow(() -> new AnaliseNaoEncontradaException(this.getText("error.analise.nao.encontrada")));
+
+        Solicitacao sol = analise.getSolicitacao();
+        Estudante est = sol.getEstudante();
+
+        solicitacaoValidator.validaCreditos(est.getCredito(), sol.getQuantidade());
+        solicitacaoService.manipulaCredito(est, 0L, sol.getQuantidade());
 
         analise.reabrir();
 

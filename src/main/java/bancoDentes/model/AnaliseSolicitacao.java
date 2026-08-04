@@ -44,9 +44,9 @@ public class AnaliseSolicitacao {
         this.dataAlteracao = LocalDateTime.now();
     }
 
-    public void rejeitar(String justificativa) {
+    public void negar(String justificativa) {
         this.justificativa = justificativa;
-        this.solicitacao.rejeitar();
+        this.solicitacao.negar();
     }
 
     public void reabrir() {

@@ -13,17 +13,23 @@
 
 .result-table--frascos {
     --list-first-col: 1.15fr;
-    --list-extra-cols: 8;
 }
 
 .result-table--movimentacoes {
     --list-first-col: 0.4fr;
-    --list-extra-cols: 5;
 }
 
 .result-table--solicitacoes {
     --list-first-col: 1.1fr;
     --list-extra-cols: 6;
+}
+
+.result-table--frascos .result-table__head,
+.result-table--frascos .result-list {
+    grid-template-columns:
+        var(--list-first-col)
+        repeat(6, 1fr)
+        80px;
 }
 
 .result-table--solicitacoes .result-table__head,
@@ -42,6 +48,26 @@
         40px;
 }
 
+/*
+    Cada coluna flexível tem um piso próprio via minmax() — sem isso, a
+    pill de Tipo (width fixa, 86px) "ganha" da coluna de Frasco na
+    disputa por espaço em telas estreitas (o algoritmo de grid dá
+    prioridade ao tamanho explícito da pill sobre o min-content de um
+    texto que só encolhe via white-space:nowrap) e a coluna de Frasco
+    zera, sobrepondo o texto nas colunas vizinhas.
+*/
+.result-table--movimentacoes .result-table__head,
+.result-table--movimentacoes .result-list {
+    grid-template-columns:
+        minmax(84px, var(--list-first-col))
+        minmax(90px, 1fr)
+        minmax(90px, 1fr)
+        minmax(86px, 1fr)
+        minmax(50px, 1fr)
+        minmax(80px, 1fr)
+        40px;
+}
+
 .result-table__head,
 .result-list {
     display: grid;
@@ -53,6 +79,8 @@
     column-gap: 1rem;
 
     padding: 0.95rem 1.25rem;
+
+    user-select: none;
 }
 
 .result-table__head span,
@@ -103,12 +131,65 @@
     white-space: nowrap;
 }
 
+.result-list__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+
+    justify-self: center;
+}
+
+.result-list__action {
+    width: 32px;
+    height: 32px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.result-list__action .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+
+    color: var(--icon-muted);
+}
+
+.result-list__action:hover {
+    transform: translateY(-1px);
+}
+
+.result-list__action--blue {
+    border-color: rgba(59, 130, 246, 0.55);
+}
+
+.result-list__action--red {
+    border-color: rgba(239, 68, 68, 0.55);
+}
+
 .request-row {
     border-top: 1px solid var(--border);
 }
 
 .request-row .result-list {
     border-top: none;
+    cursor: pointer;
 }
 
 .request-toggle {
@@ -149,6 +230,27 @@
     transform: rotate(180deg);
 }
 
+/* Variante "muda": sem o fundo circular, igual à seta de dropdown da navbar */
+.request-toggle--plain {
+    width: 32px;
+    height: 32px;
+
+    background: none;
+    color: var(--icon-muted);
+}
+
+.request-toggle--plain .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.request-toggle--plain:hover {
+    background: none;
+    color: var(--icon-active);
+}
+
 .request-details {
     position: relative;
 
@@ -185,6 +287,9 @@
     bottom: 0;
 
     width: 4px;
+
+    /* Barra neutra, sem cor de status (usada em listas como a de frascos) */
+    background: var(--border-strong);
 }
 
 .request-row--pendente .request-details::before {
@@ -192,6 +297,10 @@
 }
 
 .request-row--separacao .request-details::before {
+    background: #3b82f6;
+}
+
+.request-row--em_analise  .request-details::before {
     background: #3b82f6;
 }
 
@@ -204,6 +313,15 @@
 }
 
 .request-row--negado .request-details::before {
+    background: #ef4444;
+}
+
+/* Mesmas cores dos chips da coluna "Tipo" em movimentacoes.html */
+.request-row--entrada .request-details::before {
+    background: #22c55e;
+}
+
+.request-row--saida .request-details::before {
     background: #ef4444;
 }
 
@@ -242,15 +360,35 @@
     font-weight: 700;
 }
 
+.request-panel__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
 .request-details__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem 1.25rem;
 }
 
+.request-details__grid--single {
+    grid-template-columns: 1fr;
+}
+
 .request-detail {
     display: grid;
     gap: 0.25rem;
+}
+
+/*
+    Data duplicada na visão expandida só faz sentido quando ela some da
+    linha da lista (historico_solicitacoes.css reexibe isso em telas
+    estreitas) — nas demais larguras a coluna Data já está visível na
+    própria linha.
+*/
+.request-detail--data {
+    display: none;
 }
 
 .request-details__label {
@@ -334,6 +472,11 @@
     color: #3b82f6;
 }
 
+.status-pill--em_analise {
+    background: rgba(59,130,246,0.16);
+    color: #3b82f6;
+}
+
 .status-pill--retirada {
     background: rgba(168,85,247,0.16);
     color: #a855f7;
@@ -352,4 +495,41 @@
 .status-pill--edicao {
     background: rgba(20,184,166,0.16);
     color: #14b8a6;
+}
+
+@media (max-width: 860px) {
+
+    /*
+        As colunas (Identificador, Grupo, Estado...) não têm como se
+        empilhar sem perder o alinhamento entre cabeçalho e linhas, então
+        em telas estreitas a tabela vira uma faixa com scroll horizontal
+        em vez de espremer/sobrepor o texto das colunas.
+    */
+    /* `.results` é item do grid `.main-panel`; sem isso ele não encolhe
+       abaixo do conteúdo e a página inteira alarga em vez do scroll
+       ficar contido dentro da tabela */
+    .results {
+        min-width: 0;
+    }
+
+    .result-table {
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .result-table__head,
+    .result-list {
+        min-width: 720px;
+    }
+
+    .request-details__layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .request-details__grid {
+        grid-template-columns: 1fr;
+    }
 }

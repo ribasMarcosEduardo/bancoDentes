@@ -48,6 +48,7 @@
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    align-items: start;
     gap: 1.5rem;
 }
 
@@ -62,9 +63,62 @@
     gap: 0.45rem;
 }
 
+.form-group[hidden] {
+    display: none;
+}
+
 .form-group label {
     font-weight: 600;
     font-size: 0.95rem;
+}
+
+.field-hint {
+    margin: 0;
+
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.required-mark {
+    color: #ef4444;
+}
+
+.optional-mark {
+    color: var(--text-muted);
+}
+
+.form-legend {
+    margin-top: 1rem;
+    margin-bottom: -1rem;
+
+    text-align: right;
+    opacity: 0.65;
+
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.form-legend .required-mark,
+.form-legend .optional-mark {
+    margin-right: 0.15rem;
+}
+
+.form-legend__label {
+    margin-right: 0.3rem;
+}
+
+@media (max-width: 500px) {
+    .form-legend {
+        display: grid;
+        margin-bottom: -0.25rem;
+        grid-template-columns: auto auto auto;
+        justify-content: start;
+        row-gap: 0.5rem;
+    }
+
+    .form-legend__value {
+        text-align: left;
+    }
 }
 
 .form-control {
@@ -94,13 +148,13 @@
 }
 
 .form-control option {
-    background: var(--surface-elevated);
+    background: var(--surface);
     color: var(--text);
 }
 
 .form-control option:checked {
-    background: var(--chip-bg);
-    color: var(--text-inverse);
+    background: var(--surface-soft);
+    color: var(--text);
 }
 
 .form-control:focus {
@@ -146,15 +200,92 @@
 }
 
 .form-control[type="date"],
-.form-control[type="number"] {
+.form-control[type="number"],
+select.form-control {
     color-scheme: light;
 }
 
 :root.dark .form-control[type="date"],
 :root.dark .form-control[type="number"],
+:root.dark select.form-control,
 body.dark .form-control[type="date"],
-body.dark .form-control[type="number"] {
+body.dark .form-control[type="number"],
+body.dark select.form-control {
     color-scheme: dark;
+}
+
+/* O Chromium simplesmente não pinta o ::-webkit-calendar-picker-indicator
+   nativo quando o input está disabled (nenhuma opacity/filter consegue
+   trazer ele de volta) — por isso ele fica invisível e só serve como área
+   de clique; o ícone visível é o .date-icon por cima, sempre desenhado. */
+.date-wrapper {
+    position: relative;
+}
+
+.date-wrapper .form-control {
+    padding-right: 3rem;
+}
+
+/* Área de clique restrita ao ícone (não o campo inteiro), pra manter o
+   comportamento nativo: clicar no texto edita a data digitando, só
+   clicar no ícone abre/fecha o calendário — sem isso, qualquer clique no
+   campo reabria o calendário até ao tentar fechar clicando no ícone. */
+.date-wrapper .form-control::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    width: 2.5rem;
+    height: 100%;
+    margin: 0;
+
+    opacity: 0;
+}
+
+/*
+    Botão real (não o <svg> direto) recebendo o hover/click e o
+    [data-tooltip] (ver base/utilities.css) — precisou virar um <button>
+    porque ::before/::after em cima de um <svg> não pinta de forma
+    confiável no Chromium (o balão existia no computed style mas nunca
+    aparecia). Também tampa o ::-webkit-calendar-picker-indicator nativo
+    por baixo, então o tooltip NATIVO do Chromium não aparece duplicado.
+*/
+.date-icon-trigger {
+    position: absolute;
+
+    top: 50%;
+    right: 1rem;
+
+    transform: translateY(-50%);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border: none;
+    background: none;
+
+    cursor: pointer;
+}
+
+.date-icon-trigger:disabled {
+    cursor: not-allowed;
+}
+
+.date-icon {
+    width: 18px;
+    height: 18px;
+    min-width: 15px;
+    min-height: 15px;
+
+    color: var(--text-muted);
+
+    pointer-events: none;
+}
+
+.form-control:disabled + .date-icon {
+    cursor: not-allowed;
 }
 
 .quantidade-inline {
@@ -168,67 +299,8 @@ body.dark .form-control[type="number"] {
     flex: 1;
 }
 
-.checkbox-inline {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-
-    margin-top: 0.15rem;
-
-    white-space: nowrap;
-
-    color: var(--text-soft);
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.checkbox-inline input {
-    appearance: none;
-    -webkit-appearance: none;
-
-    width: 18px;
-    height: 18px;
-
-    margin: 0;
-
-    border: 1px solid var(--border);
-    border-radius: 0.35rem;
-
-    background: var(--surface-soft);
-
-    display: grid;
-    place-content: center;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.checkbox-inline input::before {
-    content: "";
-
-    width: 10px;
-    height: 10px;
-
-    border-radius: 0.18rem;
-
-    background: var(--checkbox-check);
-
-    transform: scale(0);
-
-    transition: transform 0.15s ease;
-}
-
-.checkbox-inline input:checked {
-    background: var(--checkbox-bg-active);
-    border-color: var(--checkbox-bg-active);
-}
-
-.checkbox-inline input:checked::before {
-    transform: scale(1);
+.number-input--compact {
+    max-width: 37%;
 }
 
 .number-input {
@@ -305,4 +377,20 @@ body.dark .form-control[type="number"] {
     color: var(--text-muted);
 
     pointer-events: none;
+}
+
+.form-control:disabled + .select-icon {
+    display: none;
+}
+
+/* Mesmo padrão de rotação usada em .page-size-control__select (ver
+   page-size.css/page-size.js), aplicado aos selects do formulário —
+   estado controlado via JS (forms.js) pelo mesmo motivo: :focus sozinho
+   continua ativo após escolher uma opção, o que prende a seta girada. */
+.form-card .select-icon {
+    transition: transform 0.2s ease;
+}
+
+.form-card .select-wrapper.is-open .select-icon {
+    transform: translateY(-50%) rotate(180deg);
 }

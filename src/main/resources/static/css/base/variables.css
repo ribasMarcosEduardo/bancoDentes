@@ -50,6 +50,23 @@ body.light{
 
     --glass-shadow: 0 10px 30px rgba(0,0,0,0.06);
 
+    /* Glass bem fino (sector-switch + setas de paginação) */
+    --glass-thin-bg: rgba(255,255,255,0.55);
+
+    /* Vidro fosco granulado (light) para o .glass-frost */
+    --glass-frost-bg-start: rgba(255,255,255,0.76);
+    --glass-frost-bg-end: rgba(255,255,255,0.52);
+    --glass-frost-border: rgba(255,255,255,0.55);
+    --glass-frost-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    --glass-frost-noise-opacity: 0.11;
+
+    /* Glass-frost-strong (light): mais opaco e mais granulado, pra sidebar de filtros */
+    --glass-frost-strong-bg-start: rgba(255,255,255,0.92);
+    --glass-frost-strong-bg-end: rgba(255,255,255,0.35);
+    --glass-frost-strong-border: rgba(255,255,255,0.68);
+    --glass-frost-strong-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    --glass-frost-strong-noise-opacity: 0.2;
+
     --page-highlight:
         radial-gradient(
             circle at top,
@@ -105,79 +122,101 @@ body.light{
 
 :root.dark,
 body.dark {
-    --page-bg: #0f172a;
-    --surface: #111827;
-    --surface-soft: rgba(17,24,39,0.82);
-    --surface-muted: rgba(31,41,55,0.7);
-    --surface-elevated: rgba(17,24,39,0.92);
+    --page-bg: #202020;
+    --surface: #1c1c1c;
+    --surface-soft: rgba(28,28,28,0.85);
+    --surface-muted: rgba(255,255,255,0.05);
+    --surface-elevated: rgba(255,255,255,0.10);
 
-    --text: #f9fafb;
-    --text-muted: #9ca3af;
-    --text-soft: rgba(249,250,251,0.72);
-    --text-inverse: #111827;
+    --text: rgba(255,255,255,0.92);
+    --text-muted: rgba(255,255,255,0.58);
+    --text-soft: rgba(255,255,255,0.76);
+    --text-inverse: #1b1b1b;
 
-    --page-highlight: none;
+    --page-highlight:
+        radial-gradient(
+            circle at top,
+            rgba(255,255,255,0.05),
+            transparent 60%
+        );
 
-    --border: rgba(255,255,255,0.1);
-    --border-strong: rgba(255,255,255,0.22);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.16);
 
-    --primary: rgba(249,250,251,0.92);
-    --primary-hover: rgba(249,250,251,1);
+    --primary: rgba(255,255,255,0.92);
+    --primary-hover: #ffffff;
 
-    --secondary: rgba(31,41,55,0.95);
-    --secondary-hover: rgba(55,65,81,1);
+    --secondary: rgba(255,255,255,0.08);
+    --secondary-hover: rgba(255,255,255,0.14);
 
-    --chip-bg: rgba(249,250,251,0.16);
-    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    --chip-bg: rgba(255,255,255,0.12);
+    --shadow: 0 10px 30px rgba(0,0,0,0.45);
 
-    --glass-bg-start: rgba(17,24,39,0.92);
-    --glass-bg-end: rgba(17,24,39,0.62);
+    --glass-bg-start: rgba(32,32,32,0.82);
+    --glass-bg-end: rgba(20,20,20,0.60);
 
-    --glass-border: rgba(255,255,255,0.08);
+    --glass-border: rgba(255,255,255,0.09);
 
-    --glass-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    --glass-shadow: 0 10px 30px rgba(0,0,0,0.45);
 
-    --input-bg: rgba(31,41,55,0.92);
-    --input-bg-focus: rgba(55,65,81,0.96);
-    --input-border-focus: rgba(249,250,251,0.35);
-    --input-ring: rgba(249,250,251,0.08);
-    --input-shadow-focus: 0 4px 14px rgba(0,0,0,0.28);
-    --icon-muted: rgba(249,250,251,0.45);
-    --icon-active: rgba(249,250,251,0.82);
+    /* Glass bem fino (sector-switch + setas de paginação) */
+    --glass-thin-bg: rgba(255,255,255,0.05);
 
-    --btn-primary-bg: rgba(249,250,251,0.92);
-    --btn-primary-bg-hover: rgba(249,250,251,1);
-    --btn-primary-text: #111827;
+    /* Vidro fosco granulado (dark) para o .glass-frost */
+    --glass-frost-bg-start: rgba(32,32,32,0.88);
+    --glass-frost-bg-end: rgba(20,20,20,0.72);
+    --glass-frost-border: rgba(255,255,255,0.09);
+    --glass-frost-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    --glass-frost-noise-opacity: 0.16;
 
-    --btn-secondary-bg: rgba(31,41,55,0.92);
-    --btn-secondary-bg-hover: rgba(55,65,81,1);
-    --btn-secondary-text: #f9fafb;
+    /* Glass-frost-strong (dark): idêntico ao glass-frost normal */
+    --glass-frost-strong-bg-start: var(--glass-frost-bg-start);
+    --glass-frost-strong-bg-end: var(--glass-frost-bg-end);
+    --glass-frost-strong-border: var(--glass-frost-border);
+    --glass-frost-strong-shadow: var(--glass-frost-shadow);
+    --glass-frost-strong-noise-opacity: var(--glass-frost-noise-opacity);
 
-    --btn-tonal-bg: rgba(249,250,251,0.10);
-    --btn-tonal-bg-hover: rgba(249,250,251,0.16);
-    --btn-tonal-text: rgba(249,250,251,0.92);
+    --input-bg: rgba(255,255,255,0.06);
+    --input-bg-focus: rgba(255,255,255,0.10);
+    --input-border-focus: rgba(255,255,255,0.35);
+    --input-ring: rgba(255,255,255,0.08);
+    --input-shadow-focus: 0 4px 14px rgba(0,0,0,0.35);
+    --icon-muted: rgba(255,255,255,0.45);
+    --icon-active: rgba(255,255,255,0.85);
 
-    --btn-pagination-bg: rgba(31,41,55,0.82);
-    --btn-pagination-bg-hover: rgba(55,65,81,1);
-    --btn-pagination-text: rgba(249,250,251,0.82);
+    --btn-primary-bg: rgba(255,255,255,0.92);
+    --btn-primary-bg-hover: #ffffff;
+    --btn-primary-text: #1b1b1b;
 
-    --btn-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    --btn-secondary-bg: rgba(255,255,255,0.08);
+    --btn-secondary-bg-hover: rgba(255,255,255,0.14);
+    --btn-secondary-text: rgba(255,255,255,0.92);
 
-    --toggle-bg: rgba(31,41,55,0.92);
-    --toggle-bg-hover: rgba(55,65,81,1);
+    --btn-tonal-bg: rgba(255,255,255,0.08);
+    --btn-tonal-bg-hover: rgba(255,255,255,0.14);
+    --btn-tonal-text: rgba(255,255,255,0.90);
 
-    --toggle-active-bg: rgba(249,250,251,0.92);
-    --toggle-active-text: #111827;
+    --btn-pagination-bg: rgba(255,255,255,0.06);
+    --btn-pagination-bg-hover: rgba(255,255,255,0.12);
+    --btn-pagination-text: rgba(255,255,255,0.75);
 
-    --badge-bg: rgba(249,250,251,0.16);
+    --btn-shadow: 0 4px 14px rgba(0,0,0,0.35);
+
+    --toggle-bg: rgba(255,255,255,0.08);
+    --toggle-bg-hover: rgba(255,255,255,0.14);
+
+    --toggle-active-bg: rgba(255,255,255,0.92);
+    --toggle-active-text: #1b1b1b;
+
+    --badge-bg: rgba(255,255,255,0.14);
     --badge-text: #ffffff;
 
-    --checkbox-bg-active: rgba(249,250,251,0.92);
-    --checkbox-check: #111827;
+    --checkbox-bg-active: rgba(255,255,255,0.92);
+    --checkbox-check: #1b1b1b;
 
-    --filter-chip-bg: rgba(249,250,251,0.16);
+    --filter-chip-bg: rgba(255,255,255,0.14);
     --filter-chip-text: #ffffff;
 
-    --step-line-bg: rgba(255,255,255,0.14);
+    --step-line-bg: rgba(255,255,255,0.12);
     --step-line-active: #22c55e;
 }

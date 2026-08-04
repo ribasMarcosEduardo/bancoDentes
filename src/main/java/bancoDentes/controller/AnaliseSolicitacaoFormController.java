@@ -63,10 +63,10 @@ public class AnaliseSolicitacaoFormController extends BaseController {
         }
     }
 
-    @PostMapping("/rejeitar")
-    public String rejeitar(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, HttpServletRequest request) {
+    @PostMapping("/negarSolicitacao")
+    public String negarSolicitacao(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, HttpServletRequest request) {
         try {
-            analiseSolicitacaoService.rejeitarSolicitacao(dto);
+            analiseSolicitacaoService.negarSolicitacao(dto);
             this.saveMessage(this.getText("msg.sucesso.analise.finalizada"));
             return "redirect:/analiseSolicitacao/painel";
         } catch (AnaliseException e) {

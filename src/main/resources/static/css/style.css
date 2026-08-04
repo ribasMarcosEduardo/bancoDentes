@@ -2,6 +2,7 @@
 @import url("./base/reset.css");
 @import url("./base/globals.css");
 @import url("./base/utilities.css");
+@import url("./base/scrollbar.css");
 
 @import url("./layout/background.css");
 @import url("./layout/mobile-menu.css");
@@ -20,6 +21,7 @@
 @import url("./components/filters.css");
 @import url("./components/stepper.css");
 @import url("./components/pagination.css");
+@import url("./components/scroll-to-top.css");
 @import url("./components/view-switch.css");
 @import url("./components/page-size.css");
 @import url("./components/analysis.css");

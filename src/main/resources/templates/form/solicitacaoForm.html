@@ -26,11 +26,11 @@
     <section class="form-shell">
 
       <header class="page-header">
-        <h1>Nova Solicitação</h1>
+        <h1>Solicitação de Dentes</h1>
         <p>Preencha os dados da solicitação de acordo com o necessário para sua atividade prática.</p>
       </header>
 
-      <div class="toolbar glass-soft">
+      <div class="toolbar glass-frost">
         <div class="toolbar__info">
           <span class="toolbar__label">Saldo Disponível:</span>
           <div class="toolbar__badge" th:text="${usuarioLogado.credito}">0</div>
@@ -50,13 +50,14 @@
       <form id="formSolicitacao" class="form-card" th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
         <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}" />
         <input type="hidden" th:field="*{version}"/>
+        <input type="hidden" th:field="*{codigo}"/>
 
         <section class="form-section">
           <div class="form-group">
-            <label>Tipo do dente (Grupo dentário)</label>
+            <label>Grupo dentário</label>
             <div class="select-wrapper">
               <select class="form-control" th:field="*{tipoDente}" id="tipoDente" onchange="atualizarCampos(true)" required>
-                <option value="">- Selecione o Tipo -</option>
+                <option value="">- Selecione o grupo -</option>
                 <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
                         th:value="${nome.name()}" th:text="${nome}"></option>
               </select>

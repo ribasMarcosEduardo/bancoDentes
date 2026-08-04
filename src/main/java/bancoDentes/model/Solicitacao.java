@@ -64,6 +64,9 @@ public class Solicitacao {
     @Column(name = "JUSTIFICATIVA", nullable = false)
     private String justificativa;
 
+    @OneToOne(mappedBy = "solicitacao")
+    private AnaliseSolicitacao analiseSolicitacao;
+
     @PrePersist
     protected void onCreate() {
         this.datSolicitacao = LocalDateTime.now();
@@ -74,14 +77,15 @@ public class Solicitacao {
         this.statusSolicitacao = StatusSolicitacao.EM_ANALISE;
     }
 
-    public void rejeitar() {
-        this.statusSolicitacao = StatusSolicitacao.RECUSADO;
+    public void negar() {
+        this.statusSolicitacao = StatusSolicitacao.NEGADO;
     }
 
     public boolean isApto() {
-        return this.statusSolicitacao != StatusSolicitacao.CANCELADO;
+        return LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4));
+    }
 
-        //LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4))
-                //&&
+    public boolean isEditavel() {
+        return !this.isApto() && StatusSolicitacao.PENDENTE.equals(this.statusSolicitacao);
     }
 }

@@ -48,6 +48,25 @@ public class SolicitacaoFormController extends BaseController{
         }
     }
 
+    @GetMapping("/edit/{codSolicitacao}")
+    public String editSolicitacao(@PathVariable Long codSolicitacao, Model model) {
+        try {
+            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
+            Solicitacao solicitacao = this.solicitacaoService.buscarPorCodigo(codSolicitacao);
+
+            SolicitacaoDTO dto = SolicitacaoDTO.recuperaSolicitacao(solicitacao);
+
+            model.addAttribute("solicitacaoDTO", dto);
+            model.addAttribute("usuarioLogado", usuarioLogado);
+
+            return "form/solicitacaoForm";
+
+        } catch (Exception e) {
+            this.saveError(this.getText("error.solicitacao.processamento"));
+            return "redirect:/solicitacao/painel";
+        }
+    }
+
     @PostMapping("/save")
     public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto) {
         try {
@@ -64,8 +83,8 @@ public class SolicitacaoFormController extends BaseController{
         }
     }
 
-    @PostMapping("/cancelar/{codigo}")
-    public String cancelarSolicitacao(@PathVariable("codigo") Long codigo) {
+    @PostMapping("/excluir/{codigo}")
+    public String excluirSolicitacao(@PathVariable("codigo") Long codigo) {
         try {
             solicitacaoService.excluirSolicitacao(codigo);
             this.saveMessage(this.getText("msg.sucesso.solicitacao.excluida"));

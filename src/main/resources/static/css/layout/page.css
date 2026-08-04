@@ -2,6 +2,15 @@
     flex: 1;
     width: 100%;
     padding: var(--page-pad);
+
+    /*
+        101vh (não 100%) força a página a sempre passar um pouco da
+        altura da tela, mesmo com pouco conteúdo (ex.: listas de 3-5
+        itens) — garante uma barra de rolagem visível na maioria dos
+        monitores, em vez de só aparecer quando o conteúdo já é alto o
+        bastante por conta própria.
+    */
+    min-height: 101vh;
 }
 
 .dashboard {
@@ -16,6 +25,20 @@
 
 .main-panel {
     display: grid;
+    gap: 1.5rem;
+}
+
+/*
+    Agrupa .pagination + .results num único item do grid do
+    .main-panel. Precisa existir pra dar ao .pagination__actions (que
+    fica sticky, ver components/pagination.css) uma containing block
+    alta o bastante — sticky é limitado à altura do próprio pai, e
+    .pagination sozinho é baixo demais (só uma linha) pra continuar
+    grudado enquanto a lista inteira rola por baixo.
+*/
+.list-panel {
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
 }
 

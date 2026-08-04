@@ -2,10 +2,9 @@ package bancoDentes.model.enumModels;
 
 public enum StatusSolicitacao {
     PENDENTE("Pendente"),
-    EM_ANALISE("Em analise"),
-    FINALIZADO("Finalizado"),
-    RECUSADO("Recusado"),
-    CANCELADO("Cancelado");
+    EM_ANALISE("Em análise"),
+    CONCLUIDO("Concluído"),
+    NEGADO("Negado");
 
     private final String nome;
 

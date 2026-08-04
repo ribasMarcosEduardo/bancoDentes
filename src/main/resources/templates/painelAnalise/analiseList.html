@@ -1,128 +1,429 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::#painelAnalistaConteudo}, ~{}, ~{::#meusScripts})}">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Painel de Avaliação</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        (function () {
+            var theme = localStorage.getItem("theme") || "light";
+            document.documentElement.classList.add(theme);
+        })();
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/solicitacoes.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/frascos.css(v=${#dates.createNow().getTime()})}">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Painel de Solicitações</title>
 </head>
-<body class="py-5">
 
-<div id="painelAnalistaConteudo" class="container">
+<body>
 
-    <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <span th:text="${mensagemSucesso}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <span th:text="${mensagemErro}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-shield-check fs-4"></i>
-                <h1 class="h5 mb-0">Painel de Avaliação de Solicitações</h1>
-            </div>
-            <span class="badge bg-secondary">Modo Analista</span>
-        </div>
-
-        <div class="card-body p-4">
-
-            <div th:if="${!#lists.isEmpty(solicitacoes)}" class="table-responsive">
-                <table id="tabela-analise" class="table table-striped table-hover align-middle" style="width:100%">
-                    <thead>
-                    <tr>
-                        <th class="text-center">Aluno</th>
-                        <th class="text-center">Tipo</th>
-                        <th class="text-center">Data</th>
-                        <th class="text-center">Dentição</th>
-                        <th class="text-center">Maxilar</th>
-                        <th class="text-center">Qtd.</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Just.</th>
-                        <th class="text-center" data-orderable="false">Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="text-center" th:each="solicitacao : ${solicitacoes}">
-                        <td th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : 'Não informado'}">Aluno</td>
-
-                        <td th:text="${solicitacao.tipoDente}">Tipo</td>
-                        <td th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy HH:mm')}">Data</td>
-                        <td th:text="${solicitacao.denticao != null ? solicitacao.denticao : '-'}">Dentição</td>
-                        <td th:text="${solicitacao.maxilar ?: '-'}">Maxilar</td>
-                        <td th:text="${solicitacao.quantidade}">Qtd.</td>
-
-                        <td th:text="${solicitacao.statusSolicitacao != null ? solicitacao.statusSolicitacao : '-'}">Status</td>
-
-                        <td>
-                            <button type="button" class="btn btn-sm btn-outline-secondary"
-                                    data-bs-toggle="popover" title="Justificativa"
-                                    th:data-bs-content="${solicitacao.justificativa ?: 'Nenhuma informada.'}">
-                                Ver Just.
-                            </button>
-                        </td>
-                        <td>
-                            <form th:if="${solicitacao.statusSolicitacao.name() == 'PENDENTE'}"
-                                  th:action="@{/analiseSolicitacao/analisar/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}" method="post">
-                                <button type="submit" class="btn btn-sm btn-success fw-bold shadow-sm">
-                                    <i class="bi bi-play-fill"></i> Iniciar análise
-                                </button>
-                            </form>
-
-                            <a th:if="${solicitacao.statusSolicitacao.name() == 'EM_ANALISE'}"
-                               th:href="@{/analiseSolicitacao/visualizaSolicitacao/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}"
-                               class="btn btn-sm btn-primary fw-bold shadow-sm">
-                                <i class="bi bi-arrow-right-short"></i> Continuar análise
-                            </a>
-
-                            <form th:if="${solicitacao.statusSolicitacao.name() != 'PENDENTE' && solicitacao.statusSolicitacao.name() != 'EM_ANALISE'}"
-                                  th:action="@{/analiseSolicitacao/reabrir}" method="post">
-
-                                <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
-
-                                <button type="submit" class="btn btn-sm btn-warning fw-bold shadow-sm text-dark">
-                                    <i class="bi bi-arrow-counterclockwise"></i> Reabrir
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div th:if="${#lists.isEmpty(solicitacoes)}" class="alert alert-info shadow-sm mb-0" role="alert">
-                <i class="bi bi-info-circle me-2"></i> Não há nenhuma solicitação pendente de análise no momento.
-            </div>
-
-        </div>
-    </div>
+<div class="background">
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--green"></div>
 </div>
 
-<th:block id="meusScripts">
-    <script th:inline="none">
-        $(document).ready(function() {
-          // Inicializa o DataTable
-          $('#tabela-analise').DataTable({
-            language: { url: '//cdn.datatables.net/plug-ins/1.13.8/i18n/pt-BR.json' },
-            order: [[2, 'desc']], // Ordena por data mais recente
-            columnDefs: [
-              { orderable: false, targets: [-1, -2] } // Desativa ordenação em Ações e Justificativa
-            ],
-            searching: true // Mantido true para o analista conseguir buscar por ID ou Tipo facilmente
-          });
+<div th:replace="~{partials/navbar :: navbar}"></div>
 
-          // Inicializa os Popovers do Bootstrap
-          var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-          var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl)
-          });
+<main class="page">
+    <section class="dashboard">
+
+        <div class="filters-sidebar-desktop">
+            <aside class="filter-sidebar glass-frost-strong">
+                <div class="filters-header">
+                    <i class="icon" data-lucide="filter"></i>
+                    <h2>Filtros</h2>
+
+                    <button type="button" class="filters-mobile-close" aria-label="Fechar filtros">
+                        <i class="icon" data-lucide="x"></i>
+                    </button>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Status <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter"><input type="checkbox" value="Pendente" data-filter-group="Status"><span>Pendente</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Em separação" data-filter-group="Status"><span>Em separação</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Em analise" data-filter-group="Status"><span>Em análise</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Aguardando retirada" data-filter-group="Status"><span>Aguardando retirada</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Concluído" data-filter-group="Status"><span>Concluído</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Negado" data-filter-group="Status"><span>Negado</span></label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Grupo dentário <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter"><input type="checkbox" value="Molar" data-filter-group="Grupo dentário"><span>Molar</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário"><span>Pré-Molar</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Canino" data-filter-group="Grupo dentário"><span>Canino</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário"><span>Incisivo</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Endo" data-filter-group="Grupo dentário"><span>Endo</span></label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Estado do dente <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter"><input type="checkbox" value="Cariado" data-filter-group="Estado"><span>Cariado</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Hígido" data-filter-group="Estado"><span>Hígido</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Restaurado" data-filter-group="Estado"><span>Restaurado</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Misto" data-filter-group="Estado"><span>Misto</span></label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Arcada <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter"><input type="checkbox" value="Superior" data-filter-group="Arcada"><span>Superior</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Inferior" data-filter-group="Arcada"><span>Inferior</span></label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Dentição <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter"><input type="checkbox" value="Permanente" data-filter-group="Dentição"><span>Permanente</span></label>
+                        <label class="checkbox-filter"><input type="checkbox" value="Decídua" data-filter-group="Dentição"><span>Decídua</span></label>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="main-panel">
+
+            <header class="page-header">
+                <h1>Painel de Avaliação</h1>
+                <p>Analise, acompanhe e gerencie as solicitações acadêmicas.</p>
+            </header>
+
+            <div class="toolbar glass-frost">
+                <div class="search-wrapper">
+                    <input type="search" id="searchInput" placeholder="Buscar solicitação ou aluno...">
+                    <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
+                    <i class="search-icon" data-lucide="search"></i>
+                </div>
+
+                <div class="toolbar__actions">
+                    <div class="toolbar__row toolbar__row--controls">
+                        <div class="page-size-control">
+                            <label for="pageSize">Exibir</label>
+                            <div class="select-wrapper page-size-control__select">
+                                <select class="form-control" id="pageSize">
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                </select>
+                                <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar__row toolbar__row--buttons">
+                        <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
+                            <i class="icon" data-lucide="filter"></i>
+                        </button>
+
+                        <button class="btn btn-secondary" id="btnSortOrder">
+                            <span class="btn__label">Ordenar</span>
+                            <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="active-filters-bar glass-frost" id="activeFiltersBar">
+                <div class="active-filters-bar__inner">
+                    <div class="active-filters-bar__header">
+                        <span class="active-filters-bar__label">Filtros ativos:</span>
+                        <button class="filters-clear" type="button">
+                            <i class="icon" data-lucide="rotate-ccw"></i> Resetar Filtros
+                        </button>
+                    </div>
+                    <div class="active-filters" id="activeFilters"></div>
+                </div>
+            </div>
+
+            <div class="list-panel">
+                <div class="pagination">
+                    <div class="low-opacity">
+                        <strong id="paginationInfo" th:text="${#lists.size(solicitacoes)} + ' Solicitações Encontradas'">0 Solicitações Encontradas</strong>
+                    </div>
+
+                    <div class="pagination__actions">
+                        <div class="sector-switch" id="sectorSwitch">
+                            <span class="sector-switch__indicator"></span>
+                            <button class="sector-switch__btn active" data-setor="todos">Todos</button>
+                            <button class="sector-switch__btn" data-setor="bdh">BDH</button>
+                            <button class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
+                        </div>
+
+                        <div class="pagination__nav">
+                            <span class="pagination__range">1-10</span>
+
+                            <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                                <i data-lucide="chevron-left"></i>
+                            </button>
+                            <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="results results--list" id="resultsView">
+
+                    <div th:if="${#lists.isEmpty(solicitacoes)}" class="alert alert-info shadow-sm mt-4" role="alert">
+                        <i class="bi bi-info-circle me-2"></i> Não há nenhuma solicitação para avaliação no momento.
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(solicitacoes)}" class="result-table result-table--solicitacoes">
+                        <div class="result-table__head">
+                            <span>Solicitação</span>
+                            <span>Grupo</span>
+                            <span>Solicitante</span>
+                            <span>Qtd.</span>
+                            <span>Status</span>
+                            <span>Data</span>
+                            <span></span>
+                        </div>
+
+                        <article th:each="solicitacao : ${solicitacoes}"
+                                 th:classappend="'request-row--' + ${#strings.toLowerCase(solicitacao.statusSolicitacao.name())}"
+                                 class="request-row"
+                                 th:data-codigo="${solicitacao.codigo}"
+                                 th:data-status="${solicitacao.statusSolicitacao.nome}"
+                                 th:data-grupo="${solicitacao.tipoDente}"
+                                 th:data-estado="${solicitacao.estado != null ? solicitacao.estado.nome : ''}"
+                                 th:data-arcada="${solicitacao.maxilar != null ? solicitacao.maxilar.nome : ''}"
+                                 th:data-denticao="${solicitacao.denticao != null ? solicitacao.denticao.nome : ''}"
+                                 th:data-estudante="${solicitacao.estudante != null ? solicitacao.estudante.nome : ''}">
+
+                            <div class="result-list">
+                                <span class="result-list__code" th:text="'SOL-' + ${#numbers.formatInteger(solicitacao.codigo, 3)}">SOL-000</span>
+                                <span th:text="${solicitacao.tipoDente}">Grupo</span>
+                                <span th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : 'Não informado'}">Aluno</span>
+                                <span th:text="${solicitacao.quantidade}">Qtd</span>
+
+                                <span class="status-pill"
+                                      th:classappend="'status-pill--' + ${#strings.toLowerCase(solicitacao.statusSolicitacao.name())}"
+                                      th:text="${solicitacao.statusSolicitacao.nome ?: solicitacao.statusSolicitacao.name()}">Status</span>
+
+                                <span th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yy')}">Data</span>
+
+                                <button class="request-toggle request-toggle--plain" type="button" aria-label="Expandir solicitação">
+                                    <i class="icon" data-lucide="chevron-down"></i>
+                                </button>
+                            </div>
+
+                            <div class="request-details">
+                                <div class="request-details__content">
+                                    <div class="request-details__layout">
+                                        <section class="request-panel">
+                                            <h4 class="request-panel__title">Detalhes da Solicitação</h4>
+
+                                            <div class="request-details__grid">
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Estado</span>
+                                                    <span th:text="${solicitacao.estado != null ? solicitacao.estado.nome : '-'}">Hígido</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Arcada</span>
+                                                    <span th:text="${solicitacao.maxilar != null ? solicitacao.maxilar.nome : '-'}">Inferior</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Dentição</span>
+                                                    <span th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '-'}">Permanente</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Posição</span>
+                                                    <span th:text="${solicitacao.posicao != null ? solicitacao.posicao : '-'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Quantidade Solicitada</span>
+                                                    <span th:text="${solicitacao.quantidade}">10</span>
+                                                </div>
+
+                                                <div class="request-detail" th:if="${solicitacao.dataFinalizacao != null}">
+                                                    <span class="request-details__label">Finalizado em</span>
+                                                    <span th:text="${#temporals.format(solicitacao.dataFinalizacao, 'dd/MM/yyyy HH:mm')}"></span>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section class="request-panel">
+                                            <h4 class="request-panel__title">Observações do Aluno</h4>
+
+                                            <div class="request-notes"
+                                                 th:classappend="${#strings.isEmpty(solicitacao.justificativa)} ? 'request-notes--empty' : ''"
+                                                 th:text="${not #strings.isEmpty(solicitacao.justificativa) ? solicitacao.justificativa : 'Sem observações.'}">
+                                            </div>
+                                        </section>
+
+                                        <section class="request-panel" th:if="${solicitacao.statusSolicitacao.name() == 'NEGADO'}">
+                                            <h4 class="request-panel__title" style="color: #dc3545; display: flex; align-items: center; gap: 6px;">
+                                                <i class="icon" data-lucide="message-square-x" style="width: 16px; height: 16px;"></i>
+                                                Justificativa do Avaliador
+                                            </h4>
+                                            <div class="request-notes" style="background-color: #fff5f5; border-left: 4px solid #dc3545; color: #b02a37;">
+                                                <span th:text="${solicitacao.analiseSolicitacao != null ? solicitacao.analiseSolicitacao.justificativa : 'O avaliador não deixou nenhuma justificativa.'}"></span>
+                                            </div>
+                                        </section>
+
+                                    </div>
+
+                                    <div class="request-details__actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+
+                                        <form th:if="${solicitacao.statusSolicitacao.name() == 'PENDENTE' or solicitacao.statusSolicitacao.name() == 'EM_ANALISE'}"
+                                              th:id="|formNegar-${solicitacao.codigo}|" th:action="@{/analiseSolicitacao/negarSolicitacao}" method="post" style="margin: 0;">
+                                            <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
+                                            <input type="hidden" th:id="|justificativa-${solicitacao.codigo}|" name="justificativa" />
+                                            <button type="button" class="btn btn-outline btn-outline-danger" th:onclick="abrirModalNegar([[${solicitacao.codigo}]])">
+                                                Negar
+                                            </button>
+                                        </form>
+
+                                        <form th:if="${solicitacao.statusSolicitacao.name() == 'PENDENTE'}"
+                                              th:action="@{/analiseSolicitacao/analisar/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}" method="post" style="margin: 0;">
+                                            <button type="submit" class="btn btn-outline btn-outline-success">
+                                                Iniciar Análise
+                                            </button>
+                                        </form>
+
+                                        <a th:if="${solicitacao.statusSolicitacao.name() == 'EM_ANALISE'}"
+                                           th:href="@{/analiseSolicitacao/visualizaSolicitacao/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}"
+                                           class="btn btn-outline btn-outline-info">
+                                            Continuar Análise
+                                        </a>
+
+                                        <form th:if="${solicitacao.statusSolicitacao.name() != 'PENDENTE' and solicitacao.statusSolicitacao.name() != 'EM_ANALISE'}"
+                                              th:action="@{/analiseSolicitacao/reabrir}" method="post" style="margin: 0;">
+                                            <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
+                                            <button type="submit" class="btn btn-outline btn-outline-warning">
+                                                Reabrir
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            </div>
+
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/filters.js}"></script>
+<script th:src="@{/js/results.js}"></script>
+<script th:src="@{/js/requests.js}"></script>
+<script th:src="@{/js/search.js}"></script>
+<script th:src="@{/js/page-size.js}"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+
+        var msgSucesso = [[${mensagemSucesso != null ? mensagemSucesso : session.mensagemSucesso != null ? session.mensagemSucesso : ''}]];
+        var msgErro = [[${mensagemErro != null ? mensagemErro : session.mensagemErro != null ? session.mensagemErro : ''}]];
+
+        var isReloadOrBack = false;
+        var perfEntries = performance.getEntriesByType("navigation");
+        if (perfEntries.length > 0) {
+            var p = perfEntries[0].type;
+            if (p === 'reload' || p === 'back_forward') {
+                isReloadOrBack = true;
+            }
+        } else if (window.performance && window.performance.navigation) {
+            var t = window.performance.navigation.type;
+            if (t === 1 || t === 2) {
+                isReloadOrBack = true;
+            }
+        }
+
+        if (!isReloadOrBack) {
+            if (msgSucesso && msgSucesso.trim() !== "") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: msgSucesso,
+                    showConfirmButton: false,
+                    timer: 5000
+                });
+            }
+
+            if (msgErro && msgErro.trim() !== "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ops...',
+                    text: msgErro,
+                    showConfirmButton: true,
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
+    });
+
+    function abrirModalNegar(codigo) {
+        Swal.fire({
+            title: 'Negar Solicitação',
+            text: 'Por favor, informe a justificativa para negar esta solicitação:',
+            input: 'textarea',
+            inputPlaceholder: 'Digite a justificativa...',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Confirmar Negação',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'A justificativa é obrigatória!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var inputJustificativa = document.getElementById('justificativa-' + codigo);
+                var form = document.getElementById('formNegar-' + codigo);
+
+                if (inputJustificativa && form) {
+                    inputJustificativa.value = result.value;
+                    form.submit();
+                } else {
+                    Swal.fire(
+                        'Erro no Sistema',
+                        'Não consegui encontrar o formulário.',
+                        'error'
+                    );
+                }
+            }
         });
-    </script>
-</th:block>
+    }
+</script>
 
 </body>
 </html>

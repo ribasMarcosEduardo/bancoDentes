@@ -1,3 +1,45 @@
+const NUMERACAO_POR_GRUPO_E_DENTICAO = {
+    premolar: {
+        permanente: [
+            { value: "14", label: "1º Pré-molar Superior Direito" },
+            { value: "15", label: "2º Pré-molar Superior Direito" },
+            { value: "24", label: "1º Pré-molar Superior Esquerdo" },
+            { value: "25", label: "2º Pré-molar Superior Esquerdo" },
+            { value: "34", label: "1º Pré-molar Inferior Esquerdo" },
+            { value: "35", label: "2º Pré-molar Inferior Esquerdo" },
+            { value: "44", label: "1º Pré-molar Inferior Direito" },
+            { value: "45", label: "2º Pré-molar Inferior Direito" },
+        ],
+        decidua: [],
+    },
+    molar: {
+        permanente: [
+            { value: "16", label: "1º Molar Superior Direito" },
+            { value: "17", label: "2º Molar Superior Direito" },
+            { value: "18", label: "3º Molar / Siso Superior Direito" },
+            { value: "26", label: "1º Molar Superior Esquerdo" },
+            { value: "27", label: "2º Molar Superior Esquerdo" },
+            { value: "28", label: "3º Molar / Siso Superior Esquerdo" },
+            { value: "36", label: "1º Molar Inferior Esquerdo" },
+            { value: "37", label: "2º Molar Inferior Esquerdo" },
+            { value: "38", label: "3º Molar / Siso Inferior Esquerdo" },
+            { value: "46", label: "1º Molar Inferior Direito" },
+            { value: "47", label: "2º Molar Inferior Direito" },
+            { value: "48", label: "3º Molar / Siso Inferior Direito" },
+        ],
+        decidua: [
+            { value: "54", label: "1º Molar Decíduo Superior Direito" },
+            { value: "55", label: "2º Molar Decíduo Superior Direito" },
+            { value: "64", label: "1º Molar Decíduo Superior Esquerdo" },
+            { value: "65", label: "2º Molar Decíduo Superior Esquerdo" },
+            { value: "74", label: "1º Molar Decíduo Inferior Esquerdo" },
+            { value: "75", label: "2º Molar Decíduo Inferior Esquerdo" },
+            { value: "84", label: "1º Molar Decíduo Inferior Direito" },
+            { value: "85", label: "2º Molar Decíduo Inferior Direito" },
+        ],
+    },
+};
+
 function setupCadastroFrasco() {
     const grupoDentario = document.querySelector("#grupoDentario");
     const estadoFrascoSection = document.querySelector("#estadoFrascoSection");
@@ -6,13 +48,25 @@ function setupCadastroFrasco() {
     const quantidadeInput = document.querySelector("#quantidade");
     const quantidadeControls = document.querySelectorAll(".quantidade-control");
     const atributosFrascoSection = document.querySelector("#atributosFrascoSection");
+    const denticaoGroup = document.querySelector("#denticaoGroup");
+    const denticaoSelect = document.querySelector("#denticaoSelect");
+    const arcadaGroup = document.querySelector("#arcadaGroup");
+    const numeracaoGroup = document.querySelector("#numeracaoGroup");
+    const numeracaoSelect = document.querySelector("#numeracaoSelect");
+    const numeracaoHint = document.querySelector("#numeracaoHint");
 
     if (
         !grupoDentario ||
         !estadoFrascoSection ||
         !estadoDente ||
         !quantidadeInput ||
-        !atributosFrascoSection
+        !atributosFrascoSection ||
+        !denticaoGroup ||
+        !denticaoSelect ||
+        !arcadaGroup ||
+        !numeracaoGroup ||
+        !numeracaoSelect ||
+        !numeracaoHint
     ) {
         return;
     }
@@ -33,28 +87,73 @@ function setupCadastroFrasco() {
         });
     }
 
-    grupoDentario.addEventListener("change", () => {
-        const hasGrupo = grupoDentario.value !== "";
+    function usaNumeracao() {
+        return grupoDentario.value === "molar" || grupoDentario.value === "premolar";
+    }
 
-        if (hasGrupo) {
-            enableSection(estadoFrascoSection);
-            estadoDente.disabled = false;
-        } else {
-            disableSection(estadoFrascoSection);
-            estadoDente.disabled = true;
+    function isEndo() {
+        return grupoDentario.value === "endo";
+    }
+
+    function atualizarVisibilidadeCamposAtributos() {
+        const endo = isEndo();
+        const mostrarNumeracao = usaNumeracao();
+
+        denticaoGroup.hidden = endo;
+        arcadaGroup.hidden = endo || mostrarNumeracao;
+        numeracaoGroup.hidden = endo || !mostrarNumeracao;
+    }
+
+    function popularOpcoesNumeracao() {
+        const denticao = denticaoSelect.value;
+        const opcoes = (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoDentario.value] || {})[denticao] || [];
+
+        numeracaoSelect.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.selected = true;
+
+        if (!denticao) {
+            placeholder.textContent = "- Selecione a Dentição -";
+            numeracaoSelect.appendChild(placeholder);
+            return;
         }
 
-        estadoDente.value = "";
+        if (opcoes.length === 0) {
+            placeholder.textContent = "Não disponível";
+            numeracaoSelect.appendChild(placeholder);
+            return;
+        }
 
-        quantidadeGroup.classList.add("form-group--disabled");
-        quantidadeInput.disabled = true;
-        setDisabled(quantidadeControls, true);
+        placeholder.disabled = true;
+        placeholder.textContent = "- Selecione a Numeração -";
+        numeracaoSelect.appendChild(placeholder);
 
-        disableSection(atributosFrascoSection);
-        setDisabled(atributosControls, true);
-    });
+        opcoes.forEach(({ value, label }) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            option.dataset.label = label;
+            numeracaoSelect.appendChild(option);
+        });
+    }
 
-    estadoDente.addEventListener("change", () => {
+    function sincronizarDisabledNumeracao() {
+        const atributosLiberados = !atributosFrascoSection.classList.contains("form-section--disabled");
+        const temDenticao = denticaoSelect.value !== "";
+        const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
+
+        numeracaoSelect.disabled = !(atributosLiberados && temDenticao && temOpcoes);
+    }
+
+    function atualizarDicaNumeracao() {
+        const opcaoSelecionada = numeracaoSelect.selectedOptions[0];
+        const label = opcaoSelecionada ? opcaoSelecionada.dataset.label : undefined;
+        numeracaoHint.textContent = label ? `(${label})` : "";
+    }
+
+    function aplicarEstadoSelecionado() {
         const hasEstado = estadoDente.value !== "";
 
         if (hasEstado) {
@@ -70,7 +169,51 @@ function setupCadastroFrasco() {
             disableSection(atributosFrascoSection);
             setDisabled(atributosControls, true);
         }
+
+        sincronizarDisabledNumeracao();
+    }
+
+    grupoDentario.addEventListener("change", () => {
+        const hasGrupo = grupoDentario.value !== "";
+        const endo = isEndo();
+
+        if (hasGrupo) {
+            enableSection(estadoFrascoSection);
+        } else {
+            disableSection(estadoFrascoSection);
+        }
+
+        if (endo) {
+            estadoDente.disabled = true;
+            estadoDente.value = "misto";
+        } else {
+            estadoDente.disabled = !hasGrupo;
+            estadoDente.value = "";
+        }
+
+        denticaoSelect.value = "";
+
+        atualizarVisibilidadeCamposAtributos();
+        popularOpcoesNumeracao();
+        atualizarDicaNumeracao();
+
+        aplicarEstadoSelecionado();
     });
+
+    estadoDente.addEventListener("change", aplicarEstadoSelecionado);
+
+    denticaoSelect.addEventListener("change", () => {
+        popularOpcoesNumeracao();
+        sincronizarDisabledNumeracao();
+        atualizarDicaNumeracao();
+    });
+
+    numeracaoSelect.addEventListener("change", () => {
+        atualizarDicaNumeracao();
+    });
+
+    atualizarVisibilidadeCamposAtributos();
+    popularOpcoesNumeracao();
 }
 
 setupCadastroFrasco();
@@ -148,4 +291,65 @@ function setupNumberInputs() {
 }
 
 setupNumberInputs();
+
+// seta dos selects do formulário gira ao abrir/fechar (mesmo padrão do
+// page-size-control, ver page-size.js)
+
+function setupFormSelectAnimations() {
+    const wrappers = document.querySelectorAll(".form-card .select-wrapper");
+
+    wrappers.forEach((wrapper) => {
+        const select = wrapper.querySelector(".form-control");
+
+        if (!select) {
+            return;
+        }
+
+        let isOpen = false;
+
+        function close() {
+            isOpen = false;
+            wrapper.classList.remove("is-open");
+        }
+
+        select.addEventListener("mousedown", () => {
+            const wasFocused = document.activeElement === select;
+
+            isOpen = wasFocused ? !isOpen : true;
+            wrapper.classList.toggle("is-open", isOpen);
+        });
+
+        select.addEventListener("blur", close);
+        select.addEventListener("change", close);
+    });
+}
+
+setupFormSelectAnimations();
+
+// clique no botão do ícone de calendário abre o seletor nativo — o botão
+// tampa o ::-webkit-calendar-picker-indicator (ver forms.css), então ele
+// precisa disparar a abertura sozinho. Enter/Espaço já funcionam de
+// graça por ser um <button> de verdade.
+
+function setupDateIcons() {
+    const triggers = document.querySelectorAll(".form-card .date-icon-trigger");
+
+    triggers.forEach((trigger) => {
+        const input = trigger.closest(".date-wrapper")?.querySelector(".form-control");
+
+        if (!input || !input.showPicker) {
+            return;
+        }
+
+        trigger.addEventListener("click", () => {
+            if (input.disabled) {
+                return;
+            }
+
+            input.showPicker();
+        });
+    });
+}
+
+setupDateIcons();
 

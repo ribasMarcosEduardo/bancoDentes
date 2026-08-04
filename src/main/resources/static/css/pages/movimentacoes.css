@@ -1,0 +1,455 @@
+/*
+    O código do frasco (ex.: PMbd-a0001) tem hífen — um ponto de quebra
+    de linha válido pro navegador — e sem um white-space:nowrap próprio
+    (como o .result-list__code já tem) ele quebrava em 2 linhas em
+    colunas estreitas, sobrepondo a pill de Tipo ao lado.
+*/
+.result-table--movimentacoes .result-table__head span:nth-child(2),
+.result-table--movimentacoes .result-list > span:nth-child(2) {
+    white-space: nowrap;
+}
+
+@media (max-width: 607px) {
+
+    /*
+        O filtro sai da 1ª linha (onde ficava à esquerda de Ordenar) e
+        vai pra 2ª linha, ao lado de "Exibir", alinhado à direita da
+        toolbar.
+
+        components/toolbar.css empilha .toolbar__row--buttons (Filtro +
+        Ordenar + Nova Movimentação) em cima e .toolbar__row--controls
+        (Exibir) embaixo — mas como caixas inteiras, não dá pra tirar só
+        o filtro de uma delas via order (order só reordena entre irmãos
+        do MESMO container). display:contents em .toolbar__row--buttons
+        resolve isso: ela some como caixa mas continua existindo no DOM
+        (seletores como ".toolbar__row > .btn" em toolbar.css continuam
+        batendo igual) — Filtro, Ordenar e Nova Movimentação passam a
+        ser itens soltos do grid, enquanto .toolbar__row--controls
+        continua como uma caixa real (não precisa dissolver: só ela
+        precisava "receber" o filtro, e isso é feito posicionando o
+        filtro por cima da mesma célula, não movendo pra dentro dela).
+
+        Um flex-wrap comum NÃO funcionaria aqui: a quebra de linha só
+        aconteceria se os 4 juntos não coubessem numa linha só, mas em
+        boa parte da faixa 351-607px eles cabem perfeitamente lado a
+        lado (sem quebrar em 2 linhas de verdade). Por isso um grid
+        explícito, com Ordenar/Nova sempre na linha 1 e Exibir/Filtro
+        sempre na linha 2 (grid-row fixo, independente da largura
+        disponível) — do mesmo jeito que o layout original (2 caixas
+        reais empilhadas em coluna) já garantia 2 linhas sempre, sem
+        depender de quebra automática.
+    */
+    .toolbar__actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .toolbar__row--buttons {
+        display: contents;
+    }
+
+    /*
+        Ordenar e Nova Movimentação preenchem a linha 1, um em cada
+        coluna.
+    */
+    .toolbar__row--buttons .btn {
+        grid-row: 1;
+    }
+
+    /*
+        .toolbar__row--controls (Exibir) ocupa a linha 2 inteira (as
+        duas colunas) — sem isso, ficaria preso a só 1 coluna (metade
+        da largura) e "Exibir" cortaria/estouraria em telas estreitas,
+        já que ele não precisa dividir a linha de verdade com o filtro:
+        o filtro só fica visualmente por cima dessa mesma célula, na
+        ponta esquerda. justify-self:end tira o stretch padrão do grid
+        (que ocuparia a célula inteira) — assim "Exibir" só ocupa o
+        próprio tamanho e fica colado na ponta direita da toolbar.
+
+        width:fit-content desfaz o width:100% de ".toolbar__row" (regra
+        genérica, em components/toolbar.css, pensada pro layout antigo
+        sem grid) — com width:100% a caixa já ocupava a célula inteira
+        sozinha, sem sobrar espaço nenhum pro justify-self:end empurrar
+        pra direita (e o filtro, colado em "start" na mesma célula,
+        ficava por cima do começo de "Exibir").
+    */
+    .toolbar__row--controls {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        width: fit-content;
+        justify-self: end;
+    }
+
+    /*
+        O filtro ocupa a MESMA célula de .toolbar__row--controls (linha
+        2, as duas colunas), colado na ponta esquerda — sem colidir com
+        "Exibir" (que fica à direita).
+    */
+    .toolbar__filter-toggle {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
+@media (max-width: 440px) {
+
+    /*
+        Abaixo de ~440px, "Ordenar" (botão secundário) e "Nova"
+        movimentação (botão primário) não cabem mais lado a lado com o
+        botão de filtro na mesma linha — some o texto de Ordenar
+        (fica só o ícone) e o prefixo "Nova" de "Nova Movimentação"
+        (fica só "Movimentação"). O limite real de overflow ficava por
+        volta de 400-435px (não exatamente 400px) — 440px cobre com
+        folga.
+    */
+    .btn__label {
+        display: none;
+    }
+
+    .btn-label--prefix {
+        display: none;
+    }
+}
+
+@media (max-width: 1115px) {
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        justify-content: right;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+}
+
+/*
+    Entre 607px e 1271px a busca fica sozinha na primeira linha da
+    toolbar; embaixo, Exibir grudado na esquerda e filtro + Ordenar +
+    Nova movimentação na direita, na mesma linha. Vem depois do bloco
+    de 1115px acima de propósito: pra faixa em que os dois se
+    sobrepõem (607–1115px), o justify-content:space-between daqui
+    precisa vencer o justify-content:right de lá.
+
+    O limite é 607px (e não 608px) de propósito, pra grudar exatamente
+    no @media (max-width:607px) de components/toolbar.css — ver o
+    comentário equivalente em pages/frascos.css pro detalhe de por que
+    um gap de 1px aqui causa um intervalo sem nenhum dos dois layouts
+    em larguras fracionárias (zoom/escala de tela fora de 100%).
+*/
+@media (min-width: 607px) and (max-width: 1271px) {
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}
+
+/*
+    Base do agrupamento intervalo + setas — precisa existir em qualquer
+    largura (não só dentro do media query de 350px), senão vira uma div
+    sem estilo (display:block) e os elementos empilham/quebram em vez
+    de ficar lado a lado.
+*/
+.pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+@media (max-width: 600px) {
+
+    /*
+        .pagination__range tinha margin-left:auto (regra global, em
+        pagination.css) pra empurrar ela e as setas — suas irmãs diretas
+        — até a direita. Desde que elas viraram um grupo próprio
+        (.pagination__nav), o auto-margin precisa estar no grupo, senão
+        ele empurra só dentro de uma caixa que já está do tamanho do
+        conteúdo, sem efeito nenhum.
+    */
+    .pagination:has(.sector-switch) .pagination__nav {
+        margin-left: auto;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 766px) {
+
+    /*
+        Nessa faixa a paginação inteira (sector-switch + intervalo +
+        setas) não cabe ao lado do texto de resultados e ficava tudo
+        amontoado à esquerda. Vira 2 linhas: sector-switch à esquerda e
+        setas à direita em cima, texto de resultados embaixo.
+    */
+    .pagination:has(.sector-switch) {
+        flex-direction: column;
+        align-items: stretch;
+
+        /* setas (.pagination__actions, order:1) ficam visualmente acima
+           do texto de resultados (.low-opacity, order:2) — 1.5rem entre
+           os dois em qualquer página que empilhe assim */
+        gap: 1.5rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .low-opacity {
+        order: 2;
+    }
+}
+
+@media (max-width: 450px) {
+
+    /*
+        Setas de paginação menores — mesmo ajuste de frascos.css/
+        solicitacoes.css, com :has(.sector-switch) escopando só as
+        páginas que têm o switch.
+    */
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination {
+        width: 38px;
+        height: 28px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+@media (max-width: 350px) {
+
+    /*
+        Linha 1: sector-switch maior (igual já era). Linha 2: setas +
+        intervalo alinhados com a largura do switch — seta esquerda na
+        borda esquerda do switch, intervalo (ex.: "1-5") centralizado
+        com o switch, seta direita na borda direita do switch.
+
+        A técnica: .pagination__actions vira width:fit-content (encolhe
+        pro tamanho do filho mais largo, que é o sector-switch) com
+        align-items:stretch — isso estica o .pagination__nav (mais
+        estreito) pra essa mesma largura, sem alterar o próprio
+        sector-switch (esticar algo pro tamanho que ele já tem não muda
+        nada nele). Precisa vir DEPOIS do bloco de max-width:450px
+        acima (mesma especificidade nos seletores de .btn-pagination —
+        quem vence é quem vem por último no arquivo) pra desfazer o
+        encolhimento das setas nessa faixa.
+    */
+    .pagination:has(.sector-switch) .pagination__actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: fit-content;
+        margin: 0 auto;
+        gap: 0.65rem;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn,
+    .pagination:has(.sector-switch) .sector-switch__indicator {
+        height: 38px;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn {
+        padding: 0 1rem;
+        font-size: 0.85rem;
+    }
+
+    /*
+        Volta as setas ao tamanho padrão de .btn-pagination (48x32,
+        ícone 24px) — o encolhimento de max-width:450px é só pra faixa
+        média (351-450px), sem o switch maior ao lado pra alinhar.
+
+        margin-left:0 desfaz o margin-left:auto herdado do bloco de
+        max-width:600px (pensado pro layout lado a lado, não empilhado)
+        — uma margem auto no eixo cruzado (aqui, a largura, já que o
+        pai virou coluna) faz o navegador ignorar o align-items:stretch
+        do pai nesse item e ele volta a ocupar só o tamanho do próprio
+        conteúdo, empurrado pra direita pela margem.
+    */
+    .pagination:has(.sector-switch) .pagination__nav {
+        justify-content: space-between;
+        margin-left: 0;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination {
+        width: 48px;
+        height: 32px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    /*
+        Ordem no HTML é intervalo, seta anterior, seta próxima — reordena
+        só visualmente (setas nas pontas, intervalo no meio) sem mudar o
+        DOM. Como as duas setas têm a mesma largura, o justify-content:
+        space-between acima já centraliza o intervalo sozinho — só
+        precisa desfazer o margin-left:auto genérico (regra global, sem
+        :has(.sector-switch), em components/pagination.css a partir de
+        600px) que empurrava o intervalo pra direita quando ele e as
+        setas ficavam soltos direto em .pagination__actions; aqui ele
+        absorvia sozinho todo o espaço livre ANTES do intervalo,
+        quebrando a centralização.
+    */
+    .pagination:has(.sector-switch) .pagination__range {
+        order: 2;
+        margin-left: 0;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination:nth-child(2) {
+        order: 1;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination:nth-child(3) {
+        order: 3;
+    }
+}
+
+@media (max-width: 800px) {
+
+    /*
+        A partir de 800px, Grupo já dá pra ver na área expandida da
+        linha (seção "Detalhes do Frasco") — sobra Movimentação,
+        Frasco, Tipo, Qtd. e Data na lista.
+        Ordem dos filhos: 1 Movimentação, 2 Frasco, 3 Grupo, 4 Tipo,
+        5 Qtd., 6 Data, 7 seta.
+    */
+    .result-table--movimentacoes .result-table__head,
+    .result-table--movimentacoes .result-list {
+        grid-template-columns:
+            minmax(84px, var(--list-first-col))
+            minmax(90px, 1fr)
+            minmax(86px, 1fr)
+            minmax(50px, 1fr)
+            minmax(80px, 1fr)
+            40px;
+    }
+
+    .result-table--movimentacoes .result-table__head span:nth-child(3),
+    .result-table--movimentacoes .result-list > span:nth-child(3) {
+        display: none;
+    }
+}
+
+/*
+    Entre 601px e 767px a coluna Grupo já está escondida (regra de
+    max-width:800px acima), mas o min-width:720px genérico de list.css
+    (@media max-width:860px) continua valendo mesmo assim — sem espaço
+    sobrando pra isso, o grid inteiro (.dashboard/.main-panel) estoura
+    e toolbar, paginação e footer ficam mais largos que a viewport.
+    Mesmo padrão usado em frascos.css/solicitacoes.css/
+    historico_solicitacoes.css pra essa faixa: zera o min-width
+    herdado.
+*/
+@media (min-width: 601px) and (max-width: 767px) {
+
+    .result-table--movimentacoes .result-table__head,
+    .result-table--movimentacoes .result-list {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /*
+        No celular só sobra espaço pro essencial — o resto dá pra ver na
+        área expandida da linha.
+        Ordem dos filhos: 1 Movimentação, 2 Frasco, 3 Grupo, 4 Tipo,
+        5 Qtd., 6 Data, 7 seta.
+    */
+    .result-table--movimentacoes .result-table__head,
+    .result-table--movimentacoes .result-list {
+        min-width: 0;
+        grid-template-columns:
+            minmax(84px, var(--list-first-col))
+            minmax(90px, 1fr)
+            minmax(86px, 1fr)
+            minmax(50px, 1fr)
+            40px;
+    }
+
+    .result-table--movimentacoes .result-table__head span:nth-child(6),
+    .result-table--movimentacoes .result-list > span:nth-child(6) {
+        display: none;
+    }
+}
+
+@media (max-width: 500px) {
+
+    /*
+        Sobra só Movimentação, Frasco, Tipo e seta — Qtd. também dá pra
+        ver expandindo a linha (já sempre visível em "Detalhes da
+        Movimentação", independente da largura).
+    */
+    .result-table--movimentacoes .result-table__head,
+    .result-table--movimentacoes .result-list {
+        grid-template-columns:
+            minmax(84px, var(--list-first-col))
+            minmax(90px, 1fr)
+            minmax(86px, 1fr)
+            40px;
+    }
+
+    .result-table--movimentacoes .result-table__head span:nth-child(5),
+    .result-table--movimentacoes .result-list > span:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 450px) {
+
+    /*
+        Sobra só Movimentação, Frasco e seta — Tipo também dá pra ver
+        expandindo a linha (já sempre visível em "Detalhes da
+        Movimentação", independente da largura).
+    */
+    .result-table--movimentacoes .result-table__head,
+    .result-table--movimentacoes .result-list {
+        grid-template-columns:
+            minmax(84px, var(--list-first-col))
+            minmax(90px, 1fr)
+            40px;
+    }
+
+    .result-table--movimentacoes .result-table__head span:nth-child(4),
+    .result-table--movimentacoes .result-list > span:nth-child(4) {
+        display: none;
+    }
+}

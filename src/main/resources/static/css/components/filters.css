@@ -9,19 +9,115 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 1rem;
+
+    animation: fade-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    user-select: none;
 }
 
 .filters-header h2 {
     margin: 0;
 }
 
+.filters-mobile-close {
+    display: none;
+}
+
+@media (max-width: 1110px) {
+
+    /*
+        Sem espaço pra ficar fixa ao lado da lista, a sidebar de filtros
+        vira um painel deslizante — mesma posição/estilo do menu de
+        navegação (ver .mobile-menu em css/layout/mobile-menu.css).
+    */
+    .filters-sidebar-desktop {
+        display: flex;
+        flex-direction: column;
+
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 90;
+
+        width: min(320px, 85vw);
+        height: 100vh;
+
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+    }
+
+    .filters-sidebar-desktop.is-open {
+        transform: translateX(0);
+    }
+
+    .filters-sidebar-desktop .filter-sidebar {
+        flex: 1;
+        min-height: 0;
+
+        /* Permite rolar quando o conteúdo dos filtros não cabe na tela */
+        overflow-y: auto;
+    }
+
+    .filters-mobile-close {
+        flex-shrink: 0;
+
+        width: 40px;
+        height: 40px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-left: auto;
+
+        border: none;
+        border-radius: 999px;
+
+        background: transparent;
+        color: var(--text);
+
+        cursor: pointer;
+    }
+
+    .filters-mobile-close .icon {
+        width: 20px;
+        height: 20px;
+
+        min-width: 20px;
+        min-height: 20px;
+
+        stroke-width: 2.2;
+    }
+}
+
 .filters-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
     border: none;
     background: transparent;
-    color: rgba(31,41,55,0.55);
+    padding: 0;
+
+    color: var(--text-muted);
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+
     cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.filters-clear:hover {
+    color: var(--text);
+}
+
+.filters-clear .icon {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
 }
 
 .active-filters {
@@ -36,15 +132,28 @@
     align-items: center;
     gap: 0.35rem;
 
-    padding: 0.6rem 0.65rem;
-    padding-left: 1rem;
-    border-radius: 999px;
+    padding: 0.5rem 0.6rem;
+    padding-left: 0.75rem;
+    border-radius: 0.6rem;
 
     background: var(--filter-chip-bg);
     color: var(--filter-chip-text);
 
     font-size: 0.78rem;
     font-weight: 500;
+
+    opacity: 1;
+    transform: scale(1);
+    user-select: none;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.filter-chip--hidden {
+    opacity: 0;
+    transform: scale(0.85) translateY(-4px);
+    pointer-events: none;
 }
 
 .filter-chip button {
@@ -62,12 +171,78 @@
     color: inherit;
     width: 14px;
     height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+}
+
+/*
+    Barra de filtros ativos fora da sidebar (entre a toolbar e a
+    paginação). Só aparece quando há pelo menos um filtro selecionado.
+*/
+
+.active-filters-bar {
+    display: grid;
+    grid-template-rows: 0fr;
+
+    opacity: 0;
+    margin-block: -0.75rem;
+
+    transition:
+        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        margin 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease;
+}
+
+.active-filters-bar.has-active {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-block: 0;
+}
+
+.active-filters-bar__inner {
+    overflow: hidden;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+
+    padding: 1.1rem 1.25rem;
+}
+
+.active-filters-bar .active-filters {
+    margin-bottom: 0;
+    padding-inline: 0.4rem;
+}
+
+.active-filters-bar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.active-filters-bar__label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+
+    user-select: none;
 }
 
 .filter-section {
-    border-top: 1px solid rgba(0,0,0,0.08);
+    border-top: 1px solid var(--border);
     padding: 0.85rem 0;
+
+    animation: fade-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+.filter-sidebar .filter-section:nth-child(2) { animation-delay: 0.05s; }
+.filter-sidebar .filter-section:nth-child(3) { animation-delay: 0.1s; }
+.filter-sidebar .filter-section:nth-child(4) { animation-delay: 0.15s; }
+.filter-sidebar .filter-section:nth-child(5) { animation-delay: 0.2s; }
 
 .filter-section__toggle {
     width: 100%;
@@ -86,12 +261,14 @@
     font-size: 0.92rem;
 
     cursor: pointer;
+
+    user-select: none;
 }
 
 .filter-section__toggle .icon {
     width: 17px;
     height: 17px;
-    transition: 0.2s ease;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .filter-section.is-closed .filter-section__toggle .icon {
@@ -102,10 +279,21 @@
     display: grid;
     gap: 0.65rem;
     margin-top: 0.9rem;
+
+    overflow: hidden;
+    max-height: 220px;
+    opacity: 1;
+
+    transition:
+        max-height 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+        margin-top 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.15s ease;
 }
 
 .filter-section.is-closed .filter-section__content {
-    display: none;
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
 }
 
 .checkbox-filter {
@@ -116,6 +304,8 @@
     color: var(--text-soft);
     font-size: 0.9rem;
     cursor: pointer;
+
+    user-select: none;
 }
 
 .checkbox-filter input {
@@ -176,4 +366,13 @@
 
 .checkbox-filter:hover {
     color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .active-filters-bar,
+    .filter-chip,
+    .filter-section__content,
+    .filter-section__toggle .icon {
+        transition: none;
+    }
 }

@@ -27,6 +27,7 @@ button {
     -webkit-appearance: none;
 
     cursor: pointer;
+    user-select: none;
 
     transition:
         background 0.2s ease,
@@ -123,8 +124,6 @@ button {
 
     font-size: 1rem;
     font-weight: 600;
-
-    box-shadow: var(--btn-shadow);
 }
 
 .btn-pagination:hover {
