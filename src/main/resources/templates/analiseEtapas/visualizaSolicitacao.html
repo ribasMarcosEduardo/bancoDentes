@@ -1,163 +1,229 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(
-          ~{::title},
-          ~{::#etapa1Conteudo},
-          ~{},
-          ~{::#etapa1Scripts})}">
-
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Análise de Solicitação — Etapa 1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        // Aplica o tema salvo ANTES do primeiro paint, direto no <html> —
+        // sem isso, a página sempre nasce clara e só troca pra escura
+        // quando includes.js roda lá no fim do <body>, causando um flash
+        // visível do tema errado a cada navegação com o modo escuro ativo.
+        (function () {
+            var theme = localStorage.getItem("theme") || "light";
+            document.documentElement.classList.add(theme);
+        })();
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/cadastro_frasco.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/analise_solicitacao.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Análise de Solicitação</title>
 </head>
 
 <body>
-<div id="etapa1Conteudo" class="py-5">
 
-    <div class="container">
-
-        <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span th:text="${mensagemSucesso}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${mensagemErro}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-
-        <div class="d-flex mb-4">
-            <div class="flex-fill text-center py-2 px-3 fw-semibold border"
-                 style="background:#E6F1FB;color:#185FA5;border-color:#378ADD!important;border-radius:8px 0 0 8px;font-size:14px">
-                <i class="bi bi-eye me-1"></i> 1 · Revisão
-            </div>
-            <div class="flex-fill text-center py-2 px-3 border text-secondary"
-                 style="background:#f8f9fa;border-left:0;font-size:14px">
-                <i class="bi bi-eyedropper me-1"></i> 2 · Separação
-            </div>
-            <div class="flex-fill text-center py-2 px-3 border text-secondary"
-                 style="background:#f8f9fa;border-left:0;border-radius:0 8px 8px 0;font-size:14px">
-                <i class="bi bi-clipboard-check me-1"></i> 3 · Resumo
-            </div>
-        </div>
-
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white d-flex align-items-center gap-2 py-3">
-                <i class="bi bi-file-earmark-text fs-5"></i>
-                <div>
-                    <span class="fw-semibold">Revisão do pedido</span>
-                    <span class="ms-2 text-secondary" style="font-size:13px">
-                        Solicitação #<span th:text="${solicitacao.codigo}"></span>
-                    </span>
-                </div>
-                <span class="badge bg-warning text-dark ms-auto">Pendente de Análise</span>
-            </div>
-
-            <div class="card-body p-4">
-
-                <h6 class="text-uppercase text-secondary fw-semibold mb-2" style="font-size:11px; letter-spacing:.05em">
-                    Estudante Solicitante
-                </h6>
-                <p class="fs-5 fw-semibold mb-4" th:text="${solicitacao.estudante.nome}">Nome do Aluno</p>
-
-                <hr class="my-4 opacity-10"/>
-
-                <h6 class="text-uppercase text-secondary fw-semibold mb-3" style="font-size:11px; letter-spacing:.05em">
-                    Especificações dos Dentes
-                </h6>
-                <div class="row g-3 mb-4">
-                    <div class="col-6 col-md-3">
-                        <div class="p-3 rounded border bg-light">
-                            <div class="text-muted mb-1" style="font-size:11px">Tipo</div>
-                            <div class="fw-bold text-dark" th:text="${solicitacao.tipoDente}">—</div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="p-3 rounded border bg-light">
-                            <div class="text-muted mb-1" style="font-size:11px">Dentição</div>
-                            <div class="fw-bold text-dark" th:text="${solicitacao.denticao}">—</div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="p-3 rounded border bg-light">
-                            <div class="text-muted mb-1" style="font-size:11px">Maxilar</div>
-                            <div class="fw-bold text-dark" th:text="${solicitacao.maxilar}">—</div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="p-3 rounded border" style="background:#E6F1FB; border-color:#B8D9F7!important">
-                            <div class="text-primary mb-1" style="font-size:11px; font-weight: 600">Quantidade</div>
-                            <div class="fw-bold fs-5 text-primary" th:text="${solicitacao.quantidade} + ' unid.'">0 unid.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-3 rounded mb-4" style="background:#fff9e6; border: 1px solid #ffeeba">
-                    <div class="text-warning-emphasis fw-semibold mb-1" style="font-size:11px">JUSTIFICATIVA DO ALUNO</div>
-                    <div class="text-dark" th:text="${solicitacao.justificativa}" style="line-height:1.5">...</div>
-                </div>
-
-                <hr class="my-4 opacity-10"/>
-
-                    <input type="hidden" name="codSolicitacao" th:value="${solicitacao.codigo}"/>
-
-                    <div class="d-flex justify-content-between align-items-center border-top pt-4">
-                        <button type="button" class="btn btn-outline-danger px-4" data-bs-toggle="modal" data-bs-target="#modalNegar">
-                            <i class="bi bi-x-circle me-2"></i> Negar Pedido
-                        </button>
-
-                        <a th:href="@{/analiseSolicitacao/separacao/{codAnalise}(codAnalise=${analise.codigo})}"
-                           class="btn btn-primary px-5 py-2 fw-semibold">
-                            Prosseguir para Separação <i class="bi bi-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalNegar" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalNegarLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="modalNegarLabel fw-bold">Confirmar Rejeição</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form th:action="@{/analiseSolicitacao/rejeitar}" method="post">
-                    <input type="hidden" name="codigo" th:value="${analise.codigo}"/>
-                    <div class="modal-body p-4">
-                        <p class="mb-3">Você está prestes a negar a solicitação de <strong><span th:text="${solicitacao.estudante.nome}"></span></strong>.</p>
-                        <input type="hidden" name="codigo" th:value="${analise.codigo}"/>
-                        <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}"/>
-
-                        <div class="mb-0">
-                            <label class="form-label fw-semibold text-secondary" style="font-size:13px">Motivo da Rejeição (Obrigatório)</label>
-                            <textarea name="justificativa" class="form-control" rows="4"
-                                      placeholder="Explique o motivo para o aluno..." required></textarea>
-                            <div class="form-text mt-2 text-danger">
-                                <i class="bi bi-info-circle me-1"></i> Esta mensagem será enviada por e-mail ao aluno.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light border-0">
-                        <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger px-4">Confirmar e Negar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
+<div class="background">
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--green"></div>
 </div>
 
-<th:block id="etapa1Scripts">
-    <script th:inline="none">
-        // Auto-fechar alertas após 5 segundos
-        setTimeout(() => {
-            $('.alert').fadeOut('slow');
-        }, 5000);
-    </script>
-</th:block>
+<div th:replace="~{partials/navbar :: navbar}"></div>
+
+<main class="page">
+    <section class="analysis-shell">
+
+        <header class="page-header">
+            <h1>Análise de Solicitação</h1>
+
+            <p>
+                Acompanhe as etapas de separação, retirada e conclusão da solicitação acadêmica.
+            </p>
+        </header>
+
+        <div class="toolbar glass-frost">
+            <div class="toolbar__info">
+                <span class="toolbar__label">Código da Solicitação:</span>
+                <div class="toolbar__badge">SOL-002</div>
+            </div>
+
+            <div class="toolbar__actions">
+                <a href="solicitacoes.html" class="btn btn-secondary">
+                    Voltar ao Painel
+                </a>
+
+                <button class="btn btn-outline btn-outline-danger" id="cancelRequestBtn">
+                    Cancelar pedido
+                </button>
+
+                <button class="btn btn-primary" id="nextStepBtn">
+                    Confirmar Separação
+                </button>
+            </div>
+        </div>
+
+        <div class="stepper">
+            <div class="step" data-step="separacao">
+                <div class="step__circle">
+                    <i class="icon" data-lucide="package"></i>
+                </div>
+                <span>Separação</span>
+            </div>
+
+            <div class="stepper__line"></div>
+
+            <div class="step" data-step="retirada">
+                <div class="step__circle">
+                    <i class="icon" data-lucide="package-check"></i>
+                </div>
+                <span>Retirada</span>
+            </div>
+
+            <div class="stepper__line"></div>
+
+            <div class="step" data-step="concluido">
+                <div class="step__circle">
+                    <i class="icon" data-lucide="check-check"></i>
+                </div>
+                <span>Concluído</span>
+            </div>
+        </div>
+
+        <section class="analysis-step" data-step-panel="separacao">
+            <section class="analysis-grid">
+
+                <section class="analysis-card">
+                    <header class="analysis-card__header">
+                        <h2>Detalhes da Solicitação</h2>
+                        <span class="status-pill status-pill--separacao">Em Separação</span>
+                    </header>
+
+                    <div class="analysis-details">
+                        <div class="analysis-detail">
+                            <span>Grupo dentário</span>
+                            <strong>Pré-Molar</strong>
+                        </div>
+
+                        <div class="analysis-detail">
+                            <span>Estado</span>
+                            <strong>Hígido</strong>
+                        </div>
+
+                        <div class="analysis-detail">
+                            <span>Arcada</span>
+                            <strong>Inferior</strong>
+                        </div>
+
+                        <div class="analysis-detail">
+                            <span>Dentição</span>
+                            <strong>Permanente</strong>
+                        </div>
+
+                        <div class="analysis-detail">
+                            <span>Quantidade solicitada</span>
+                            <strong>34 dentes</strong>
+                        </div>
+
+                        <div class="analysis-detail">
+                            <span>Solicitante</span>
+                            <strong>Maria Souza</strong>
+                        </div>
+                    </div>
+
+                    <div class="analysis-notes">
+                        <h3>Observações</h3>
+                        <p>Solicitação destinada à atividade prática de anatomia dental.</p>
+                    </div>
+                </section>
+
+                <section class="analysis-card">
+                    <header class="analysis-card__header">
+                        <h2>Separação de Frascos</h2>
+
+                        <button class="btn btn-tonal">
+                            <i class="icon" data-lucide="plus"></i>
+                            Adicionar frasco
+                        </button>
+                    </header>
+
+                    <div class="analysis-progress">
+                        <div class="analysis-progress__text">
+                            <strong>12 / 34 dentes selecionados</strong>
+                            <span>Faltam 22 dentes para completar a solicitação.</span>
+                        </div>
+
+                        <div class="analysis-progress__bar">
+                            <div class="analysis-progress__fill" style="width: 35%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="selected-flasks">
+                        <div class="selected-flasks__head">
+                            <span>Frasco</span>
+                            <span>Quantidade retirada</span>
+                        </div>
+
+                        <article class="selected-flask">
+                            <span class="result-list__code">PM_HPI-21</span>
+                            <span>6</span>
+                        </article>
+
+                        <article class="selected-flask">
+                            <span class="result-list__code">PM_HPI-22</span>
+                            <span>6</span>
+                        </article>
+                    </div>
+                </section>
+
+            </section>
+        </section>
+
+        <section class="analysis-step" data-step-panel="retirada">
+            <section class="analysis-card">
+                <header class="analysis-card__header">
+                    <h2>Solicitação pronta para retirada</h2>
+                    <span class="status-pill status-pill--retirada">Aguardando Retirada</span>
+                </header>
+
+                <div class="analysis-message analysis-message--success">
+                    <i class="icon" data-lucide="check-circle"></i>
+                    Os dentes foram separados e estão disponíveis para retirada pelo acadêmico.
+                </div>
+            </section>
+        </section>
+
+        <section class="analysis-step" data-step-panel="concluido">
+            <section class="analysis-card">
+                <header class="analysis-card__header">
+                    <h2>Solicitação concluída</h2>
+                    <span class="status-pill status-pill--concluido">Concluído</span>
+                </header>
+
+                <div class="analysis-details">
+                    <div class="analysis-detail">
+                        <span>Data de conclusão</span>
+                        <strong>03/06/2026</strong>
+                    </div>
+
+                    <div class="analysis-detail">
+                        <span>Responsável pela entrega</span>
+                        <strong>Estagiário BDH</strong>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/forms.js}"></script>
+<script th:src="@{/js/analysis.js}"></script>
 
 </body>
 </html>

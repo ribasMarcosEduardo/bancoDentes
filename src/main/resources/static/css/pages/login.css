@@ -1,0 +1,251 @@
+/* Página de login: sempre no tema escuro (ver class="dark" fixa no
+   <html>/<body> de login.html) — o fundo aurora foi desenhado pra
+   contraste contra escuro, então não faz sentido herdar o toggle
+   claro/escuro do resto do dashboard aqui. */
+
+body.login-page {
+    min-height: 100vh;
+    background: transparent;
+}
+
+.login-shell {
+    position: relative;
+    z-index: 20;
+
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 2rem;
+}
+
+.login-brand {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+}
+
+.login-brand__logo {
+    display: block;
+    height: 26px;
+    width: auto;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 470px;
+
+    padding: 3rem 2.75rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    animation: fade-slide-in 0.5s ease both;
+
+    /* Escala local: reaproveita as mesmas variáveis que .form-control e
+       .btn já usam (ver base/variables.css), só que maiores — sem
+       precisar duplicar altura/padding em cada elemento aqui. */
+    --input-height: 48px;
+    --btn-height: 48px;
+}
+
+.login-back {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 0.4rem;
+
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.7rem;
+
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.login-back:hover {
+    color: var(--text);
+}
+
+.login-back .icon {
+    width: 13px;
+    height: 13px;
+}
+
+.login-card__logo {
+    display: block;
+    margin: 0 auto;
+    width: 120px;
+    height: auto;
+}
+
+.login-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.login-field {
+    position: relative;
+}
+
+.login-field .form-control {
+    padding-left: 3.9rem;
+}
+
+.login-field__icon {
+    position: absolute;
+    top: 50%;
+    left: 1.1rem;
+    transform: translateY(-50%);
+
+    width: 20px;
+    height: 20px;
+
+    color: var(--icon-muted);
+    pointer-events: none;
+}
+
+/* Barrinha que separa o ícone do texto digitado — não encosta nas
+   bordas do input (top/bottom com folga), só marca a divisão. */
+.login-field__divider {
+    position: absolute;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    left: 3rem;
+
+    width: 1px;
+
+    background: var(--border-strong);
+    pointer-events: none;
+}
+
+/* Só aparece quando o campo tem algo digitado (ver login.js, toggle da
+   classe "is-visible" no evento "input") — escondido com scale(0.5) +
+   opacity 0 e uma easing "back out" (passa de 1 e volta) pra dar a
+   sensação de pop-up ao entrar; a mesma curva também serve pra saída,
+   só encolhendo de volta. visibility com delay tira o botão da ordem
+   de tab e de clique enquanto invisível, sem precisar de display:none
+   (que impediria a transição de rodar). */
+.login-field__toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.6rem;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.5rem;
+    border: none;
+    background: none;
+
+    color: var(--icon-muted);
+    cursor: pointer;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) scale(0.4);
+    pointer-events: none;
+
+    transition:
+        opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0s linear 0.25s;
+}
+
+.login-field__toggle.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) scale(1);
+    pointer-events: auto;
+
+    transition:
+        opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.login-field__toggle:hover {
+    color: var(--icon-active);
+}
+
+.login-field__toggle .icon {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.login-options {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+
+    /* Puxa pra mais perto do campo de senha acima (o gap de 1.25rem do
+       .login-form é grande demais só pra esse par). */
+    margin-top: -0.65rem;
+
+    /* Mesmo valor do border-radius do .form-control: alinha o texto com
+       a parte reta da borda inferior do input, não com a curva do canto. */
+    padding-left: 0.85rem;
+
+    font-size: 0.78rem;
+}
+
+.login-options a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    color: var(--text-muted);
+    text-decoration: none;
+    opacity: 0.6;
+}
+
+.login-options a:hover {
+    color: var(--text);
+    opacity: 1;
+}
+
+.login-options .icon {
+    width: 14px;
+    height: 14px;
+}
+
+.login-submit {
+    width: 100%;
+    margin-top: 0.75rem;
+}
+
+.login-card__footer {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.login-card__footer a {
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-card__footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .login-brand {
+        top: 1.25rem;
+        left: 1.25rem;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+    }
+}

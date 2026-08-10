@@ -1,0 +1,134 @@
+@media (max-width: 607px) {
+
+    /*
+        O filtro sai da 1ª linha (onde ficava à esquerda de Ordenar) e
+        vai pra 2ª linha, ao lado de "Exibir", alinhado à direita da
+        toolbar.
+
+        components/toolbar.css empilha .toolbar__row--buttons (Filtro +
+        Ordenar + Novo Usuário) em cima e .toolbar__row--controls
+        (Exibir) embaixo — mas como caixas inteiras, não dá pra tirar só
+        o filtro de uma delas via order (order só reordena entre irmãos
+        do MESMO container). display:contents em .toolbar__row--buttons
+        resolve isso: ela some como caixa mas continua existindo no DOM
+        (seletores como ".toolbar__row > .btn" em toolbar.css continuam
+        batendo igual) — Filtro, Ordenar e Novo Usuário passam a ser
+        itens soltos do grid, enquanto .toolbar__row--controls continua
+        como uma caixa real (não precisa dissolver: só ela precisava
+        "receber" o filtro, e isso é feito posicionando o filtro por
+        cima da mesma célula, não movendo pra dentro dela).
+
+        Mesmo padrão de movimentacoes.css/frascos.css pra essa faixa.
+    */
+    .toolbar__actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .toolbar__row--buttons {
+        display: contents;
+    }
+
+    /* Ordenar e Novo Usuário preenchem a linha 1, um em cada coluna. */
+    .toolbar__row--buttons .btn {
+        grid-row: 1;
+    }
+
+    /*
+        .toolbar__row--controls (Exibir) ocupa a linha 2 inteira (as
+        duas colunas) — justify-self:end + width:fit-content colam ele
+        na ponta direita, sobrando espaço à esquerda pro filtro (mesma
+        célula, "start") sem colidir.
+    */
+    .toolbar__row--controls {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        width: fit-content;
+        justify-self: end;
+    }
+
+    .toolbar__filter-toggle {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
+@media (max-width: 440px) {
+
+    /*
+        Abaixo de ~440px, "Ordenar" e "Novo Usuário" não cabem mais lado
+        a lado com o botão de filtro na mesma linha — some o texto de
+        Ordenar (fica só o ícone) e o prefixo "Novo" de "Novo Usuário"
+        (fica só "Usuário").
+    */
+    .btn__label {
+        display: none;
+    }
+
+    .btn-label--prefix {
+        display: none;
+    }
+}
+
+@media (max-width: 1115px) {
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        justify-content: right;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+}
+
+/*
+    Entre 607px e 1271px a busca fica sozinha na primeira linha da
+    toolbar; embaixo, Exibir grudado na esquerda e filtro + Ordenar +
+    Novo Usuário na direita, na mesma linha. Vem depois do bloco de
+    1115px acima de propósito: pra faixa em que os dois se sobrepõem
+    (607–1115px), o justify-content:space-between daqui precisa vencer
+    o justify-content:right de lá.
+*/
+@media (min-width: 607px) and (max-width: 1271px) {
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}
+
+/*
+    Sem sector-switch nesse painel (só paginação + texto de resultados),
+    então em telas estreitas o fallback genérico de list.css
+    (@media max-width:860px, scroll horizontal com min-width:720px) já
+    resolve sozinho — nenhuma coluna precisa ser escondida aqui, o que
+    evitaria o único jeito de recuperar essa informação (não há linha
+    expansível nesse painel, diferente de frascos/solicitações).
+*/
