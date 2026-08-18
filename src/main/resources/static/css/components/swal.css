@@ -1,0 +1,64 @@
+:root.light, body.light,
+:root.dark, body.dark {
+    --swal2-width: 30rem;
+    --swal2-border-radius: var(--radius);
+    --swal2-padding: 0 0 1.5rem;
+    --swal2-title-padding: 1.5rem 1.5rem 0;
+    --swal2-html-container-padding: 0.6rem 1.5rem 0;
+    --swal2-actions-margin: 1.5rem 1.5rem 0;
+    --swal2-actions-width: calc(100% - 3rem);
+    --swal2-actions-justify-content: flex-end;
+}
+
+:root.light, body.light {
+    --swal2-background: var(--surface);
+    --swal2-color: var(--text);
+    --swal2-backdrop: rgba(0,0,0,0.45);
+
+    --swal2-input-background: var(--input-bg);
+    --swal2-input-border: 1px solid var(--border);
+    --swal2-input-focus-border: 1px solid var(--input-border-focus);
+    --swal2-input-focus-box-shadow: 0 0 0 3px var(--input-ring);
+
+    --swal2-validation-message-background: var(--secondary);
+    --swal2-validation-message-color: var(--text);
+}
+
+:root.dark, body.dark {
+    --swal2-background: var(--surface);
+    --swal2-color: var(--text);
+    --swal2-backdrop: rgba(0,0,0,0.6);
+
+    --swal2-input-background: var(--input-bg);
+    --swal2-input-border: 1px solid var(--border);
+    --swal2-input-focus-border: 1px solid var(--input-border-focus);
+    --swal2-input-focus-box-shadow: 0 0 0 3px var(--input-ring);
+
+    --swal2-validation-message-background: var(--secondary);
+    --swal2-validation-message-color: var(--text);
+}
+
+.swal2-popup {
+    font-family: var(--font-main);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.swal2-title {
+    font-size: 1.15rem;
+}
+
+.swal2-html-container {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.swal2-textarea {
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+}
+
+.swal2-actions {
+    gap: 0.75rem;
+}

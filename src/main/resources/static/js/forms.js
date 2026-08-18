@@ -218,6 +218,130 @@ function setupCadastroFrasco() {
 
 setupCadastroFrasco();
 
+// "Salvar e Continuar"/"Salvar e Sair" ficam na toolbar, fora do <form>
+// (ver form="cadastroFrascoForm" em cadastro_frasco.html) — só assim os
+// dois type="submit" conseguem disparar o submit do form de verdade.
+// Preenchimento incompleto usa a validação nativa do HTML (os campos
+// obrigatórios já têm o atributo required; disabled é ignorado sozinho
+// pela constraint validation, sem precisar reescrever essa lógica aqui)
+// só que com SWAL no lugar do balãozinho padrão do navegador.
+function setupCadastroFrascoSubmit() {
+    const form = document.querySelector("#cadastroFrascoForm");
+    const grupoDentario = document.querySelector("#grupoDentario");
+
+    if (!form || typeof Swal === "undefined") {
+        return;
+    }
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+            form.querySelector(":invalid")?.focus();
+
+            Swal.fire({
+                icon: "warning",
+                title: "Preenchimento incompleto",
+                text: "Preencha todos os campos obrigatórios antes de salvar.",
+                confirmButtonText: "Entendi",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                },
+            });
+            return;
+        }
+
+        // event.submitter é o botão que de fato disparou o submit — como
+        // os dois (Continuar/Sair) são type="submit" pro mesmo form, é
+        // assim que sabe qual dos dois fluxos seguir depois do SWAL.
+        const continuar = event.submitter?.id === "salvarContinuarBtn";
+
+        Swal.fire({
+            icon: "success",
+            title: "Frasco cadastrado!",
+            text: continuar
+                ? "Cadastro realizado com sucesso. O formulário foi limpo para um novo cadastro."
+                : "Cadastro realizado com sucesso.",
+            confirmButtonText: "Ok",
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: "btn btn-primary",
+            },
+        }).then(() => {
+            // No projeto final (Thymeleaf): entra aqui o POST de verdade pro
+            // backend — o SWAL de sucesso só dispararia depois da resposta OK.
+            if (continuar) {
+                // form.reset() não desfaz o que o JS mudou via .disabled
+                // (só volta value/selected ao estado inicial do HTML) — o
+                // "change" reaproveita a mesma cascata de setupCadastroFrasco()
+                // (grupoDentario -> estadoFrascoSection -> atributosFrascoSection)
+                // pra recolher/desabilitar tudo de novo, sem duplicar a lógica.
+                form.reset();
+                grupoDentario?.dispatchEvent(new Event("change"));
+            } else {
+                window.location.href = "frascos.html";
+            }
+        });
+    });
+}
+
+setupCadastroFrascoSubmit();
+
+// cadastro_movimentacao.html: Local -> Tipo (+ "Escolher Frascos") -> Observações,
+// cada etapa só libera depois que a anterior está preenchida. A liberação de
+// Observações a partir da seleção de frascos entra junto com o modal de busca
+// (ainda não implementado), então por enquanto ela fica travada.
+
+function setupCadastroMovimentacao() {
+    const localSelect = document.querySelector("#localMovimentacao");
+    const tipoSection = document.querySelector("#tipoMovimentacaoSection");
+    const tipoGroup = document.querySelector("#tipoMovimentacaoGroup");
+    const tipoSelect = document.querySelector("#tipoMovimentacao");
+    const tipoHint = document.querySelector("#tipoMovimentacaoHint");
+    const escolherFrascosBtn = document.querySelector("#escolherFrascosBtn");
+
+    if (!localSelect || !tipoSection || !tipoGroup || !tipoSelect || !escolherFrascosBtn) {
+        return;
+    }
+
+    // Independe de tipoSelect.disabled: o Biobanco trava o select (disabled)
+    // já com "saida" preenchido, e o botão precisa liberar mesmo assim —
+    // só o valor importa aqui.
+    function aplicarTipoSelecionado() {
+        escolherFrascosBtn.disabled = tipoSelect.value === "";
+    }
+
+    function aplicarLocalSelecionado() {
+        const local = localSelect.value;
+        const hasLocal = local !== "";
+        const isBiobanco = local === "biobanco";
+
+        tipoSection.classList.toggle("form-section--disabled", !hasLocal);
+
+        // Zera antes de reaplicar — troca de Local sempre parte de um Tipo
+        // em branco, tanto pra sair do Biobanco (que trava em "Saída") quanto
+        // pra evitar um valor antigo sobrando ao alternar entre locais.
+        tipoSelect.value = "";
+        tipoSelect.disabled = !hasLocal;
+
+        if (isBiobanco) {
+            tipoSelect.value = "saida";
+            tipoSelect.disabled = true;
+        }
+
+        tipoGroup.classList.toggle("form-group--disabled", isBiobanco);
+        if (tipoHint) tipoHint.hidden = !isBiobanco;
+
+        aplicarTipoSelecionado();
+    }
+
+    localSelect.addEventListener("change", aplicarLocalSelecionado);
+    tipoSelect.addEventListener("change", aplicarTipoSelecionado);
+}
+
+setupCadastroMovimentacao();
+
 // botoes +/- quantidade
 
 function setupNumberInputs() {
