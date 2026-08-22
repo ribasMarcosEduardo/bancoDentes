@@ -126,6 +126,12 @@ button {
     font-weight: 600;
 }
 
+.btn-pagination:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .btn-pagination:hover {
     background: var(--btn-pagination-bg-hover);
 

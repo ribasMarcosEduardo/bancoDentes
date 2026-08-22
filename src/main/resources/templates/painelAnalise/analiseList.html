@@ -6,7 +6,8 @@
 
     <script>
         (function () {
-            var theme = localStorage.getItem("theme") || "light";
+            var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
             document.documentElement.classList.add(theme);
         })();
     </script>
@@ -378,7 +379,7 @@
                                     </div>
 
                                     <div class="request-details__actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                        <form th:if="${solicitacao.statusSolicitacao.name() == 'PENDENTE' or solicitacao.statusSolicitacao.name() == 'EM_ANALISE'}"
+                                        <form th:if="${solicitacao.isNegar()}"
                                               th:id="|formNegar-${solicitacao.codigo}|" th:action="@{/analiseSolicitacao/negarSolicitacao}" method="post" style="margin: 0;">
                                             <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
                                             <input type="hidden" th:id="|justificativa-${solicitacao.codigo}|" name="justificativa" />
@@ -387,21 +388,21 @@
                                             </button>
                                         </form>
 
-                                        <form th:if="${solicitacao.statusSolicitacao.name() == 'PENDENTE'}"
+                                        <form th:if="${solicitacao.isPendente()}"
                                               th:action="@{/analiseSolicitacao/analisar/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}" method="post" style="margin: 0;">
                                             <button type="submit" class="btn btn-outline btn-outline-success">
                                                 Iniciar Análise
                                             </button>
                                         </form>
 
-                                        <a th:if="${solicitacao.statusSolicitacao.name() == 'EM_ANALISE'}"
+                                        <a th:if="${solicitacao.isContinuar()}"
                                            th:href="@{/analiseSolicitacao/visualizaSolicitacao/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}"
                                            class="btn btn-outline btn-outline-info">
                                             Continuar Análise
                                         </a>
 
-                                        <form th:if="${solicitacao.statusSolicitacao.name() != 'PENDENTE' and solicitacao.statusSolicitacao.name() != 'EM_ANALISE'}"
-                                              th:action="@{/analiseSolicitacao/reabrir}" method="post" style="margin: 0;">
+                                        <form th:if="${solicitacao.isReabrir()}"
+                                              th:action="@{/analiseSolicitacao/reabrirSolicitacao}" method="post" style="margin: 0;">
                                             <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
                                             <button type="submit" class="btn btn-outline btn-outline-warning">
                                                 Reabrir

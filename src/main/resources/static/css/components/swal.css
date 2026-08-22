@@ -62,3 +62,102 @@
 .swal2-actions {
     gap: 0.75rem;
 }
+
+/* Resumo do cadastro no modal "Confirmar cadastro?" (ver montarResumoCadastro
+   em forms.js) — .swal2-html-container centraliza texto por padrão, então
+   o wrapper reforça text-align:left pras linhas label/valor não ficarem
+   bagunçadas. */
+.swal-resumo {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.5rem 0 0.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 0.25rem);
+    background: var(--secondary);
+    text-align: left;
+}
+
+.swal-resumo__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.88rem;
+}
+
+.swal-resumo__row span {
+    color: var(--text-muted);
+}
+
+.swal-resumo__row strong {
+    color: var(--text);
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Observações no resumo do "Confirmar movimentação?" (ver
+   montarResumoMovimentacao em forms.js) — texto livre, não cabe no
+   formato label/valor de .swal-resumo__row, por isso ganha um bloco
+   próprio, separado por uma linha das linhas normais acima. */
+.swal-resumo__obs {
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.swal-resumo__obs span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-bottom: 0.2rem;
+}
+
+.swal-resumo__obs p {
+    color: var(--text);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+}
+
+/* Toast de sucesso (ver showToast em includes.js) — swal2 dá padding/borda/
+   sombra próprios ao ".swal2-toast", mas não border-radius; sem isso ele
+   nasce com cantos retos, destoando do resto dos popups (--swal2-border-radius). */
+.swal2-popup.swal2-toast {
+    border-radius: var(--swal2-border-radius);
+}
+
+/* body.swal2-toast-shown .swal2-container (vendor) nasce com width:360px
+   fixo e overflow-x:hidden — sem alargar o container junto, um toast mais
+   largo que 360px ficava cortado nas laterais, e a sombra projetada dele
+   também, por não sobrar espaço horizontal dentro do container pra ela
+   "vazar" antes do corte. padding-inline reserva esse respiro pra sombra;
+   width/max-width seguem o mesmo teto do toast lá embaixo. */
+body:has(.swal2-toast.glass-success) .swal2-container {
+    width: min(94vw, 34rem);
+    padding-inline: 2rem;
+}
+
+/* .glass-success (glass.css) some por cima do fundo sólido padrão do
+   toast — aqui só entra o que é específico dele: mais largo no desktop
+   (o texto do resumo pede mais espaço que um toast comum) e o ícone de
+   sucesso na cor do vidro esverdeado, não o verde default do swal2. */
+.swal2-toast.glass-success {
+    min-width: 20rem;
+    max-width: min(90vw, 26rem);
+}
+
+@media (min-width: 768px) {
+    .swal2-toast.glass-success {
+        min-width: 24rem;
+    }
+}
+
+.swal2-toast.glass-success .swal2-success-ring {
+    border-color: var(--glass-success-icon);
+}
+
+.swal2-toast.glass-success .swal2-success-line-tip,
+.swal2-toast.glass-success .swal2-success-line-long {
+    background-color: var(--glass-success-icon);
+}

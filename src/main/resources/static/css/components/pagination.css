@@ -66,6 +66,19 @@
     user-select: none;
 }
 
+/* Base do agrupamento intervalo + setas — existia duplicada (idêntica)
+   em frascos.css/movimentacoes.css/solicitacoes.css, cada uma dentro do
+   próprio contexto de página; movida pra cá porque sem ela .pagination__nav
+   é só uma div sem estilo (display:block) e os elementos empilham em vez
+   de ficar lado a lado — faltava justamente pra quem usa .pagination__nav
+   fora dessas 3 páginas (ex.: rodapé de modal). As regras duplicadas nas
+   páginas continuam funcionando normalmente por cima desta (mesmos valores). */
+.pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
 /* Mesmo glass bem transparente do .sector-switch, pra formar um único grupo visual */
 
 .pagination__actions .btn-pagination {

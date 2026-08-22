@@ -5,23 +5,21 @@ import bancoDentes.exception.EstudanteException;
 import bancoDentes.exception.SolicitacaoException;
 import bancoDentes.model.Estudante;
 import bancoDentes.model.Solicitacao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.TipoDente;
-import bancoDentes.repository.EstudanteRepository;
 import bancoDentes.service.EstudanteService;
-import bancoDentes.service.FrascoService;
 import bancoDentes.service.SolicitacaoService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * Controlador responsável pelo gerenciamento das requisições web
+ * referentes às Solicitações de dentes feitas pelos estudantes.
+ *
+ * @author Marcos Eduardo Ribas
+ */
 @Controller
 @RequestMapping("solicitacao")
 @RequiredArgsConstructor
@@ -30,6 +28,11 @@ public class SolicitacaoFormController extends BaseController{
     private final SolicitacaoService solicitacaoService;
     private final EstudanteService estudanteService;
 
+    /**
+     * Renderiza o formulário em branco para a criação de uma nova solicitação de dentes.
+     *
+     * @param model
+     */
     @GetMapping
     public String cadastrarSolicitacao(Model model) {
         try {
@@ -48,25 +51,11 @@ public class SolicitacaoFormController extends BaseController{
         }
     }
 
-    @GetMapping("/edit/{codSolicitacao}")
-    public String editSolicitacao(@PathVariable Long codSolicitacao, Model model) {
-        try {
-            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
-            Solicitacao solicitacao = this.solicitacaoService.buscarPorCodigo(codSolicitacao);
-
-            SolicitacaoDTO dto = SolicitacaoDTO.recuperaSolicitacao(solicitacao);
-
-            model.addAttribute("solicitacaoDTO", dto);
-            model.addAttribute("usuarioLogado", usuarioLogado);
-
-            return "form/solicitacaoForm";
-
-        } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.processamento"));
-            return "redirect:/solicitacao/painel";
-        }
-    }
-
+    /**
+     * Processa a submissão do formulário para salvar (criar ou atualizar) uma solicitação.
+     *
+     * @param dto
+     */
     @PostMapping("/save")
     public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto) {
         try {
@@ -83,6 +72,11 @@ public class SolicitacaoFormController extends BaseController{
         }
     }
 
+    /**
+     * Processa a requisição para excluir logicamente ou fisicamente uma solicitação existente.
+     *
+     * @param codigo
+     */
     @PostMapping("/excluir/{codigo}")
     public String excluirSolicitacao(@PathVariable("codigo") Long codigo) {
         try {
@@ -98,6 +92,11 @@ public class SolicitacaoFormController extends BaseController{
         return "redirect:/solicitacao/painel";
     }
 
+    /**
+     * Exibe o painel do estudante listando todas as suas solicitações.
+     *
+     * @param model
+     */
     @GetMapping("/painel")
     public String exibePainelSolicitacoes(Model model) {
         try {

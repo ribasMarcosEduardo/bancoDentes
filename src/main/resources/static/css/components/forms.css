@@ -87,6 +87,14 @@
     color: var(--text-muted);
 }
 
+/* Mantém o botão ao lado de um select alinhado com o campo (não com o
+   label) — mesmo texto do label real, só invisível, ocupando a mesma
+   altura (ver .form-group__label--invisible acima do "Escolher Frascos"
+   em cadastro_movimentacao.html). */
+.form-group__label--invisible {
+    visibility: hidden;
+}
+
 .form-legend {
     margin-top: 1rem;
     margin-bottom: -1rem;
@@ -165,6 +173,34 @@
         var(--input-shadow-focus);
 }
 
+.form-control:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* .form-control fixa height: var(--input-height) (pensado pra <input>/
+   <select> de uma linha só) — a textarea de Observações precisa de
+   várias linhas, então troca por min-height e devolve o padding vertical
+   que o form-control zera. */
+.textarea-control {
+    height: auto;
+    min-height: calc(var(--input-height) * 2);
+
+    /* <textarea> nasce display:inline-block e herda aquele espacinho
+       fantasma de descendente de linha (baseline) que sobra embaixo de
+       inline-block dentro de um bloco — dava pra medir: a
+       .textarea-veil-wrapper ficava ~5px mais alta que o próprio campo.
+       Nessa folga, o overflow:hidden dela (ver .textarea-veil-wrapper)
+       não coincidia mais com o canto arredondado do campo, deixando
+       margem pra scrollbar mobile vazar visualmente ali. */
+    display: block;
+
+    padding: 0.75rem 1rem;
+
+    resize: vertical;
+    line-height: 1.5;
+}
+
 /* O navegador (autofill do Chrome/Google) ignora "background" normal e
    pinta o campo com um amarelo/branco sólido próprio — o "box-shadow
    inset" gigante é o único jeito confiável de sobrescrever isso. Usa
@@ -189,6 +225,18 @@
     gap: 1.5rem;
 }
 
+/* display:grid acima tem a mesma especificidade do [hidden] nativo do
+   navegador ([hidden] { display: none } no UA stylesheet) — sem essa
+   regra, uma .form-section com o atributo hidden setado via JS (ver
+   grupoDentario "change" em setupCadastroSolicitacao, js/forms.js,
+   escondendo #avancadosSection inteira quando o grupo é Endo) continuava
+   ocupando o layout normalmente, porque a regra do autor (esta classe)
+   vem depois do UA stylesheet no cascade e "ganha" em empate de
+   especificidade. Mesmo ajuste já existia pra .form-group[hidden] acima. */
+.form-section[hidden] {
+    display: none;
+}
+
 .form-section + .form-section {
     padding-top: 2rem;
     border-top: 1px solid var(--border);
@@ -211,6 +259,142 @@
 
 .form-group--disabled .number-input__btn {
     opacity: 0.55;
+}
+
+/* .form-group--disabled acima esmaece o <input>/botões individualmente —
+   a variante --fraction (ver mais abaixo) desenha a própria borda no
+   wrapper, não no <input>, então ficava de fora desse esmaecimento e
+   continuava com aparência "ativa" mesmo travada (ver Quantidade em
+   cadastro_solicitacao.html, antes do Grupo dentário ser escolhido). */
+.form-group--disabled .number-input--fraction {
+    opacity: 0.55;
+}
+
+/* Campo de Observações em cadastro_movimentacao.html enquanto nenhum
+   frasco foi selecionado (ver sincronizarObservacoes em
+   frasco-search-movimentacao.js) — só o textarea borra, não o resto da
+   seção (label incluso), pra o aviso por cima ficar nítido em vez de
+   esmaecido junto como o .form-section--disabled genérico faria. */
+.textarea-veil-wrapper {
+    position: relative;
+
+    /* Corta qualquer scrollbar nativa que vaze pra fora do canto
+       arredondado — comum em navegador mobile, cuja scrollbar "flutuante"
+       nem sempre respeita o border-radius do próprio elemento rolável. A
+       wrapper tem exatamente o tamanho do textarea (só existe pra
+       empilhar veil/contador por cima dele), então recortar aqui com o
+       mesmo raio reproduz o recorte que faltava, sem afetar a rolagem em
+       si (o overflow:auto continua no textarea, ver abaixo). */
+    overflow: hidden;
+    border-radius: 0.85rem; /* mesmo valor de .form-control */
+}
+
+.textarea-veil-wrapper--locked .textarea-control {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Reserva uma faixa embaixo só pro contador (ver .textarea-counter
+   abaixo) — sem isso, texto rolando até o fim ficava por baixo do
+   "0/500", ilegível. padding não é área de digitação (o textarea nunca
+   desenha texto por cima dele), então a última linha sempre para antes
+   dessa faixa, mesmo com o campo cheio/rolado até o fim.
+
+   resize:none tira a alcinha nativa de redimensionar (os "3 risquinhos"
+   no canto inferior direito) — ela nasce bem em cima do contador, no
+   mesmo canto, e o navegador desenha um triângulo ali (a "dobra de
+   folha") que brigava visualmente com o "0/500". Puxar a altura também
+   não reduz o padding-bottom junto, então o espaço reservado ficava
+   desproporcional num campo mais baixo. Com 500 caracteres de limite,
+   as 4 linhas fixas (rows) já bastam — não perde muito abrir mão do
+   redimensionamento livre. */
+.textarea-veil-wrapper .textarea-control {
+    padding-bottom: 1.75rem;
+    resize: none;
+}
+
+/* Barra de rolagem própria do campo, mais contrastada que a global (ver
+   base/scrollbar.css): var(--border-strong) sozinha (18%/16% de alfa)
+   quase some sobre o fundo já translúcido do textarea (--input-bg). Os
+   dois "dialetos" de novo (ver comentário em base/scrollbar.css) —
+   scrollbar-color aqui é redundante com o herdado de <html>, mas escrito
+   explícito pra não depender de herança em engines/mobile que se
+   comportem diferente. */
+.textarea-control {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-muted) transparent;
+}
+
+.textarea-control::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+}
+
+.textarea-control::-webkit-scrollbar-thumb:hover {
+    background: var(--text);
+}
+
+.textarea-veil {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+
+    pointer-events: none;
+}
+
+.textarea-veil .icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Contador "0/500" (ver setupObservacoesCounter em forms.js) — canto
+   inferior direito do textarea, pequeno e discreto de propósito, só
+   pra acompanhar o limite sem competir com o texto digitado.
+
+   O padding-bottom reservado ali em cima (.textarea-veil-wrapper
+   .textarea-control) é só a primeira linha de defesa — com scroll (texto
+   maior que o campo) o fim da rolagem nem sempre respeita esse padding
+   igual entre navegadores, então o texto pode acabar passando por baixo
+   do contador. Por isso o fundo sólido (var(--surface), opaco de
+   verdade, diferente do --input-bg translúcido do próprio campo) em vez
+   de opacity no elemento inteiro — opacity deixaria o fundo tão vazado
+   quanto o texto de antes, voltando a ficar ilegível. Continua discreto
+   pela cor (--text-muted) e pela borda fina, não por transparência. */
+.textarea-counter {
+    position: absolute;
+    /* 0.5rem ficava colado na faixa da scrollbar (8px, ver
+       ::-webkit-scrollbar em base/scrollbar.css) — mais respiro lateral
+       pra não sobrepor a barra quando o texto rola. */
+    right: 0.7rem;
+    bottom: 0.4rem;
+
+    padding: 0.05rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+
+    font-size: 0.72rem;
+    color: var(--text-muted);
+
+    pointer-events: none;
+}
+
+/* Some junto com o resto do campo enquanto ele está travado — não faz
+   sentido acompanhar limite de um campo que ainda nem pode ser digitado. */
+.textarea-veil-wrapper--locked .textarea-counter {
+    display: none;
+}
+
+.textarea-veil-wrapper--locked .textarea-veil {
+    display: flex;
 }
 
 .form-control[type="date"], [type="number"] {
@@ -306,17 +490,6 @@ body.dark select.form-control {
     cursor: not-allowed;
 }
 
-.quantidade-inline {
-    display: grid;
-    grid-template-columns: 0.5fr auto;
-    gap: 2.5rem;
-    align-items: center;
-}
-
-.quantidade-inline .number-input {
-    flex: 1;
-}
-
 .number-input--compact {
     max-width: 37%;
 }
@@ -368,9 +541,117 @@ body.dark select.form-control {
     transform: scale(1.04);
 }
 
+.number-input__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .number-input__btn .icon {
     width: 14px;
     height: 14px;
+}
+
+/* Variante "fração" — mostra atual/máximo lado a lado (ex.: "1/14") em
+   vez de só o número digitável sozinho. O <input> vira só o numerador
+   (bem estreito, sem moldura própria); .number-input__max é o "/14"
+   fixo ao lado; quem desenha a borda do campo inteiro agora é este
+   wrapper, não mais o <input>. */
+.number-input--fraction {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+
+    height: var(--input-height);
+    padding: 0 0.6rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--input-bg);
+
+    /* Trava contra qualquer filho que ainda assim tente crescer além da
+       caixa (ex.: um valor digitado bem maior que o max permitido, por
+       uma fração de segundo antes do JS clampar) — sem isso, esse
+       excesso empurrava os botões +/- visualmente pra fora da borda. */
+    overflow: hidden;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.number-input--fraction:focus-within {
+    border-color: var(--input-border-focus);
+    background: var(--input-bg-focus);
+    box-shadow: 0 0 0 4px var(--input-ring), var(--input-shadow-focus);
+}
+
+.number-input--fraction .form-control {
+    /* flex-basis em ch (não rem) — acompanha a largura real dos
+       algarismos da fonte. 2.4ch cobre até 2 dígitos (ex.: 99, pior
+       caso realista pra dentes num único frasco) com uma pequena
+       folga; flex:0 0 <basis> (não cresce nem encolhe) + min-width:0 é
+       o que faz esse tamanho valer de verdade — um <input> dentro de
+       flex, por padrão, recusa encolher abaixo do próprio conteúdo
+       (min-width:auto implícito), e foi isso que antes ignorava o
+       "width" e deixava os botões vazarem quando o número tinha
+       2+ dígitos. */
+    flex: 0 0 2.4ch;
+    min-width: 0;
+
+    padding: 0;
+
+    border: none;
+    background: none;
+    box-shadow: none;
+
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* O wrapper (:focus-within acima) já mostra o estado de foco do campo
+   inteiro — sem isso, o <input> aplicava TAMBÉM o próprio destaque
+   padrão (.form-control:focus, em fundo/box-shadow), duplicando o
+   efeito visual num elemento que nem tem borda própria pra mostrar. */
+.number-input--fraction .form-control:focus {
+    background: none;
+    box-shadow: none;
+}
+
+.number-input__max {
+    /* flex-shrink:0 — sem isso, o flex espremia este texto (não tem
+       largura própria fixa, só o conteúdo "/14") pra abrir espaço
+       quando o numerador ao lado crescia, em vez de deixar a caixa
+       inteira (ver .modal-result .number-input--fraction) absorver
+       essa largura extra. Resultado prático: com 2 dígitos, "/14"
+       ficava espremido bem perto dos botões, e o espaçamento "mudava"
+       conforme o número de dígitos — exatamente o bug relatado. */
+    flex-shrink: 0;
+
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Some junto com o numerador — sem isso "/14" ficava normal (bem
+   visível) do lado de um "1" apagado enquanto o frasco não é
+   adicionado, uma combinação estranha de opacidades diferentes. */
+.number-input--fraction:has(.form-control:disabled) .number-input__max {
+    opacity: 0.55;
+}
+
+/* .number-input__actions (setas +/-) some do posicionamento absoluto
+   padrão (pensado pra ficar por cima do <input>, ver regra acima) e
+   vira só mais um item deste flex, empurrado pro fim com margin-left:
+   auto — o "/14" está entre o numerador e as setas, não dá pra
+   sobrepor como antes. */
+.number-input--fraction .number-input__actions {
+    position: static;
+    transform: none;
+
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 0.4rem;
 }
 
 .select-wrapper {

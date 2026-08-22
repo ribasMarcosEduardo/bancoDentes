@@ -105,7 +105,7 @@ function setupFrascoSearchModal() {
     const selectedFlasksList = document.querySelector(".selected-flasks");
     const selectedFlasksHead = document.querySelector("#selectedFlasksHead");
     const selectedFlasksEmpty = document.querySelector("#selectedFlasksEmpty");
-    const observacoesSection = document.querySelector("#observacoesSection");
+    const observacoesWrapper = document.querySelector("#observacoesWrapper");
     const observacoesField = document.querySelector("#observacoesMovimentacao");
 
     // Estado compartilhado entre o modal e a lista "Frascos selecionados"
@@ -330,13 +330,16 @@ function setupFrascoSearchModal() {
 
     // Observações só faz sentido preencher depois que existe pelo menos
     // um frasco selecionado (ver cadastro_movimentacao.html) — reflete
-    // esse gate a cada mudança na seleção.
+    // esse gate a cada mudança na seleção. .textarea-veil-wrapper--locked
+    // (ver forms.css) borra só o textarea e mostra o aviso por cima, em
+    // vez do .form-section--disabled genérico (que esmaeceria a seção
+    // toda, aviso incluso).
     function sincronizarObservacoes() {
-        if (!observacoesSection || !observacoesField) return;
+        if (!observacoesField) return;
 
         const liberado = selecionados.size > 0;
 
-        observacoesSection.classList.toggle("form-section--disabled", !liberado);
+        observacoesWrapper?.classList.toggle("textarea-veil-wrapper--locked", !liberado);
         observacoesField.disabled = !liberado;
     }
 

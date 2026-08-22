@@ -4,7 +4,9 @@ public enum StatusSolicitacao {
     PENDENTE("Pendente"),
     EM_ANALISE("Em análise"),
     CONCLUIDO("Concluído"),
-    NEGADO("Negado");
+    NEGADO("Negado"),
+    EM_SEPARACAO("Em separação"),
+    AGUARDANDO_RETIRADA("Aguardando retirada");
 
     private final String nome;
 

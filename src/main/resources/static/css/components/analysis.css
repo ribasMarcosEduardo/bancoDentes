@@ -30,6 +30,13 @@
 
     padding: 1.25rem 1.5rem;
 
+    /* Garante a mesma altura em qualquer header do grid, tenha ele um
+       .btn (--btn-height, mais alto) ou só um .status-pill (mais baixo)
+       — sem isso "Detalhes da Solicitação" (só status-pill) ficava mais
+       baixo que "Separação de Frascos" (tem o botão "Adicionar frasco"
+       ao lado), desalinhando as duas colunas lado a lado. */
+    min-height: calc(var(--btn-height) + 2.5rem);
+
     background: var(--surface-muted);
     border-bottom: 1px solid var(--border);
 }
@@ -140,8 +147,15 @@
 .selected-flasks__head,
 .selected-flask {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* 3ª coluna com largura FIXA (não "auto") — cada linha é um grid
+       independente (não uma tabela de verdade), então se essa coluna
+       variasse com o conteúdo (cabeçalho "Ações" vs. os botões do corpo),
+       a coluna do meio (1fr) ficaria com larguras diferentes entre
+       cabeçalho e linhas, e o número de "Quantidade retirada" pareceria
+       desalinhado do texto acima mesmo os dois estando centralizados. */
+    grid-template-columns: 1fr 1fr 5.5rem;
     align-items: center;
+    gap: 0.5rem;
 
     padding: 0.95rem 1.5rem;
 }
@@ -159,16 +173,68 @@
     color: var(--text-soft);
     font-size: 0.9rem;
 
-    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
 }
 
-.selected-flask:last-child {
-    border-bottom: none;
+/* Cada frasco selecionado é um .request-row (mesmo padrão de
+   expandir/recolher já usado em frascos.html — ver .request-details em
+   list.css) envolvendo essa barra; a borda entre um frasco e outro fica
+   no .request-row, não mais aqui. */
+.selected-flasks .request-row {
+    border-top: 1px solid var(--border);
 }
 
-.selected-flask span:last-child,
-.selected-flasks__head span:last-child {
+/* :first-of-type, não :first-child — o irmão anterior de verdade é
+   .selected-flasks__head (o cabeçalho), então .request-row nunca seria
+   o primeiro filho e essa regra nunca bateria com :first-child. */
+.selected-flasks .request-row:first-of-type {
+    border-top: none;
+}
+
+/* Coluna "Quantidade retirada" (2ª de 3 — a 3ª é a coluna de ações) */
+.selected-flask span:nth-child(2),
+.selected-flasks__head span:nth-child(2) {
     justify-self: center;
+}
+
+.selected-flasks__head span:nth-child(3) {
+    justify-self: center;
+}
+
+/* .selected-flasks__head e .selected-flasks__empty (abaixo) definem seu
+   próprio "display" — sem isso, o atributo hidden (que só assume
+   "display: none" na folha de estilo do próprio navegador, de
+   prioridade menor que qualquer regra daqui) nunca conseguiria esconder
+   nenhum dos dois de verdade. Foi por isso que o aviso "Nenhum frasco
+   selecionado ainda." continuava aparecendo mesmo com frascos já
+   adicionados — faltava essa regra pro próprio aviso, só o cabeçalho
+   tinha sido corrigido. */
+.selected-flasks__head[hidden],
+.selected-flasks__empty[hidden] {
+    display: none;
+}
+
+.selected-flasks__empty {
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+
+    padding: 2.75rem 1.5rem;
+
+    color: var(--text-muted);
+}
+
+.selected-flasks__empty .icon {
+    width: 28px;
+    height: 28px;
+
+    opacity: 0.6;
+}
+
+.selected-flasks__empty p {
+    margin: 0;
+    font-size: 0.9rem;
 }
 
 .analysis-message {

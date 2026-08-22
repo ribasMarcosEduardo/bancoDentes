@@ -32,6 +32,7 @@
 .result-table--usuarios .result-table__head,
 .result-table--usuarios .result-list {
     grid-template-columns:
+        minmax(90px, 0.6fr)
         var(--list-first-col)
         1.7fr
         0.9fr

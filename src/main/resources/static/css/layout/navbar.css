@@ -349,6 +349,7 @@
 
 .notif-card__body {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 0.15rem;
 
@@ -473,6 +474,23 @@
     z-index: 1;
 }
 
+/* Ponte invisível cobrindo o espaço entre o botão e o menu/painel,
+   evitando que o hover "pisque" ou feche ao descer o mouse. Fica
+   ancorada no próprio menu/painel (não no botão, que é bem menor),
+   herdando a largura e o alinhamento reais dele — assim nunca "vaza"
+   por cima de outros itens da navbar. Não altera o espaçamento
+   visual, só mantém o hover contínuo. */
+.navbar__dropdown-menu::before,
+.notif-panel::before {
+    content: "";
+    position: absolute;
+    top: -0.75rem;
+    left: 0;
+    right: 0;
+
+    height: 0.75rem;
+}
+
 .navbar__dropdown-menu {
     position: absolute;
     top: calc(100% + 0.75rem);
@@ -521,6 +539,44 @@
 .navbar__dropdown-menu a:hover {
     background: var(--surface-muted);
     color: var(--text);
+}
+
+/* Entre ~1150px e 1000px (onde mobile-menu.css assume com o menu
+   hambúrguer), o conjunto logo + links + ações não cabe mais em uma
+   linha só. Sem isso, o conteúdo simplesmente transborda e é cortado
+   pelo overflow-x:hidden do body (ver base/globals.css) — o botão de
+   Login some aos poucos ao invés da navbar encolher de forma
+   controlada. Aperta espaçamento/fonte progressivamente pra manter
+   tudo visível até o hand-off pro menu mobile. */
+@media (max-width: 1150px) {
+
+    .navbar__inner {
+        gap: 0.85rem;
+    }
+
+    .navbar__logo {
+        padding: 0.7rem;
+    }
+
+    .navbar__nav {
+        gap: 0.2rem;
+        padding: 0.45rem 0.6rem;
+    }
+
+    .navbar__link,
+    .navbar__dropdown-btn {
+        padding: 0 0.6rem;
+        font-size: 0.82rem;
+    }
+
+    .navbar__actions {
+        gap: 0.5rem;
+    }
+
+    .navbar__login {
+        padding: 0 0.75rem;
+        font-size: 0.85rem;
+    }
 }
 
 .navbar__theme-toggle {

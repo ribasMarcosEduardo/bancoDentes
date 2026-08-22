@@ -25,5 +25,9 @@
 @import url("./components/view-switch.css");
 @import url("./components/page-size.css");
 @import url("./components/analysis.css");
+@import url("./components/modal.css");
+@import url("./components/swal.css");
 
 @import url("./pages/dashboard.css");
+@import url("./pages/login.css");
+@import url("./pages/confirmacao_email.css");

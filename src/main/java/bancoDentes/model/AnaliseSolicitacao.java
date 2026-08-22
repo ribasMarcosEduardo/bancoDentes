@@ -54,4 +54,16 @@ public class AnaliseSolicitacao {
         this.solicitacao.iniciarAnalise();
     }
 
+    public void emSeparacao() {
+        this.solicitacao.emSeparacao();
+    }
+
+    public void aguardandoRetirada() {
+        this.solicitacao.aguardandoRetirada();
+    }
+
+    public void concluir() {
+        this.solicitacao.concluir();
+    }
+
 }

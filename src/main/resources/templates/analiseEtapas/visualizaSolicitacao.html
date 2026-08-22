@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script>
-        // Aplica o tema salvo ANTES do primeiro paint, direto no <html> —
-        // sem isso, a página sempre nasce clara e só troca pra escura
-        // quando includes.js roda lá no fim do <body>, causando um flash
-        // visível do tema errado a cada navegação com o modo escuro ativo.
         (function () {
-            var theme = localStorage.getItem("theme") || "light";
+            var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
             document.documentElement.classList.add(theme);
         })();
     </script>
 
+    <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/pages/cadastro_frasco.css}">
     <link rel="stylesheet" th:href="@{/css/pages/analise_solicitacao.css}">
@@ -38,53 +36,67 @@
 
         <header class="page-header">
             <h1>Análise de Solicitação</h1>
-
-            <p>
-                Acompanhe as etapas de separação, retirada e conclusão da solicitação acadêmica.
-            </p>
+            <p>Acompanhe as etapas de separação, retirada e conclusão da solicitação acadêmica.</p>
         </header>
 
         <div class="toolbar glass-frost">
             <div class="toolbar__info">
                 <span class="toolbar__label">Código da Solicitação:</span>
-                <div class="toolbar__badge">SOL-002</div>
+                <div class="toolbar__badge" th:text="'SOL-' + ${#numbers.formatInteger(analise.solicitacao.codigo, 3)}">SOL-000</div>
             </div>
 
-            <div class="toolbar__actions">
-                <a href="solicitacoes.html" class="btn btn-secondary">
-                    Voltar ao Painel
+            <div class="toolbar__actions-group">
+                <a th:href="@{/analiseSolicitacao/painel}" class="btn btn-secondary" id="backToPanelBtn">
+                    <span class="btn-label--full">Voltar ao Painel</span>
+                    <span class="btn-label--short">Voltar</span>
                 </a>
 
-                <button class="btn btn-outline btn-outline-danger" id="cancelRequestBtn">
-                    Cancelar pedido
-                </button>
+                <div class="toolbar__actions">
+                    <form th:action="@{/analiseSolicitacao/negarSolicitacao}" method="post" style="margin: 0;" id="formNegarAnalise">
+                        <input type="hidden" name="solicitacao.codigo" th:value="${analise.solicitacao.codigo}">
+                        <input type="hidden" name="justificativa" id="justificativaNegacao">
+                        <button type="button" class="btn btn-outline btn-outline-danger" id="cancelRequestBtn">
+                            Cancelar pedido
+                        </button>
+                    </form>
 
-                <button class="btn btn-primary" id="nextStepBtn">
-                    Confirmar Separação
-                </button>
+                    <form th:action="@{/analiseSolicitacao/aguardandoRetirada}" method="post" style="margin: 0;" id="formAguardandoRetirada" th:if="${analise.solicitacao.statusSolicitacao.name() == 'EM_ANALISE' or analise.solicitacao.statusSolicitacao.name() == 'EM_SEPARACAO'}" onsubmit="return confirmarSeparacao(event)">
+                        <input type="hidden" name="codSolicitacao" th:value="${analise.solicitacao.codigo}">
+                        <button type="submit" class="btn btn-primary" id="nextStepBtn">
+                            Confirmar Separação
+                        </button>
+                    </form>
+
+                    <form th:action="@{/analiseSolicitacao/concluirSolicitacao}" method="post" style="margin: 0;" id="formConcluirSolicitacao" th:if="${analise.solicitacao.statusSolicitacao.name() == 'AGUARDANDO_RETIRADA'}" onsubmit="return confirmarRetirada(event)">
+                        <input type="hidden" name="codSolicitacao" th:value="${analise.solicitacao.codigo}">
+                        <button type="submit" class="btn btn-primary" id="confirmRetiradaBtn">
+                            Confirmar Retirada
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <div class="stepper">
-            <div class="step" data-step="separacao">
+        <div class="stepper" th:with="status=${analise.solicitacao.statusSolicitacao.name()}">
+            <div class="step" data-step="separacao" th:classappend="${status == 'EM_ANALISE' or status == 'EM_SEPARACAO' ? 'active' : 'completed'}">
                 <div class="step__circle">
                     <i class="icon" data-lucide="package"></i>
                 </div>
                 <span>Separação</span>
             </div>
 
-            <div class="stepper__line"></div>
+            <div class="stepper__line" th:classappend="${status != 'EM_ANALISE' and status != 'EM_SEPARACAO' ? 'completed' : ''}"></div>
 
-            <div class="step" data-step="retirada">
+            <div class="step" data-step="retirada" th:classappend="${status == 'AGUARDANDO_RETIRADA' ? 'active' : (status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'completed' : '')}">
                 <div class="step__circle">
                     <i class="icon" data-lucide="package-check"></i>
                 </div>
                 <span>Retirada</span>
             </div>
 
-            <div class="stepper__line"></div>
+            <div class="stepper__line" th:classappend="${status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'completed' : ''}"></div>
 
-            <div class="step" data-step="concluido">
+            <div class="step" data-step="concluido" th:classappend="${status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'active' : ''}">
                 <div class="step__circle">
                     <i class="icon" data-lucide="check-check"></i>
                 </div>
@@ -92,50 +104,53 @@
             </div>
         </div>
 
-        <section class="analysis-step" data-step-panel="separacao">
+        <section class="analysis-step" data-step-panel="separacao" th:if="${analise.solicitacao.statusSolicitacao.name() == 'EM_ANALISE' or analise.solicitacao.statusSolicitacao.name() == 'EM_SEPARACAO'}">
             <section class="analysis-grid">
 
                 <section class="analysis-card">
                     <header class="analysis-card__header">
                         <h2>Detalhes da Solicitação</h2>
-                        <span class="status-pill status-pill--separacao">Em Separação</span>
+                        <span class="status-pill"
+                              th:classappend="'status-pill--' + ${#strings.toLowerCase(analise.solicitacao.statusSolicitacao.name())}"
+                              th:text="${analise.solicitacao.statusSolicitacao.nome ?: analise.solicitacao.statusSolicitacao.name()}">
+                            </span>
                     </header>
 
                     <div class="analysis-details">
                         <div class="analysis-detail">
                             <span>Grupo dentário</span>
-                            <strong>Pré-Molar</strong>
+                            <strong th:text="${analise.solicitacao.tipoDente}">-</strong>
                         </div>
 
                         <div class="analysis-detail">
                             <span>Estado</span>
-                            <strong>Hígido</strong>
+                            <strong th:text="${analise.solicitacao.estado != null ? analise.solicitacao.estado : 'Não informado'}">-</strong>
                         </div>
 
                         <div class="analysis-detail">
                             <span>Arcada</span>
-                            <strong>Inferior</strong>
+                            <strong th:text="${analise.solicitacao.maxilar != null ? analise.solicitacao.maxilar : 'Não informado'}">-</strong>
                         </div>
 
                         <div class="analysis-detail">
                             <span>Dentição</span>
-                            <strong>Permanente</strong>
+                            <strong th:text="${analise.solicitacao.denticao != null ? analise.solicitacao.denticao.nome : 'Não informado'}">-</strong>
                         </div>
 
                         <div class="analysis-detail">
                             <span>Quantidade solicitada</span>
-                            <strong>34 dentes</strong>
+                            <strong th:text="${analise.solicitacao.quantidade} + ' dentes'">-</strong>
                         </div>
 
                         <div class="analysis-detail">
                             <span>Solicitante</span>
-                            <strong>Maria Souza</strong>
+                            <strong th:text="${analise.solicitacao.estudante.nome}">-</strong>
                         </div>
                     </div>
 
                     <div class="analysis-notes">
                         <h3>Observações</h3>
-                        <p>Solicitação destinada à atividade prática de anatomia dental.</p>
+                        <p th:text="${not #strings.isEmpty(analise.solicitacao.justificativa) ? analise.solicitacao.justificativa : 'Nenhuma observação informada.'}"></p>
                     </div>
                 </section>
 
@@ -143,37 +158,44 @@
                     <header class="analysis-card__header">
                         <h2>Separação de Frascos</h2>
 
-                        <button class="btn btn-tonal">
+                        <button type="button" class="btn btn-tonal" id="adicionarFrascoBtn" th:if="${analise.solicitacao.statusSolicitacao.name() == 'EM_ANALISE' or analise.solicitacao.statusSolicitacao.name() == 'EM_SEPARACAO'}">
                             <i class="icon" data-lucide="plus"></i>
                             Adicionar frasco
                         </button>
                     </header>
 
-                    <div class="analysis-progress">
+                    <div class="analysis-progress" th:with="totSep=${totalJaSeparado != null ? totalJaSeparado : 0}">
                         <div class="analysis-progress__text">
-                            <strong>12 / 34 dentes selecionados</strong>
-                            <span>Faltam 22 dentes para completar a solicitação.</span>
+                            <strong th:text="${totSep} + ' / ' + ${analise.solicitacao.quantidade} + ' dentes selecionados'"></strong>
+                            <span th:text="'Faltam ' + (${analise.solicitacao.quantidade - totSep > 0 ? analise.solicitacao.quantidade - totSep : 0}) + ' dentes para completar a solicitação.'"></span>
                         </div>
 
                         <div class="analysis-progress__bar">
-                            <div class="analysis-progress__fill" style="width: 35%;"></div>
+                            <div class="analysis-progress__fill" th:style="'width: ' + (${totSep} * 100.0 / ${analise.solicitacao.quantidade}) + '%;'"></div>
                         </div>
                     </div>
 
                     <div class="selected-flasks">
-                        <div class="selected-flasks__head">
+                        <div class="selected-flasks__head" id="selectedFlasksHead" th:if="${!#lists.isEmpty(itensSalvos)}">
                             <span>Frasco</span>
                             <span>Quantidade retirada</span>
+                            <span>Ações</span>
                         </div>
 
-                        <article class="selected-flask">
-                            <span class="result-list__code">PM_HPI-21</span>
-                            <span>6</span>
-                        </article>
+                        <div class="selected-flasks__empty" id="selectedFlasksEmpty" th:if="${#lists.isEmpty(itensSalvos)}">
+                            <i class="icon" data-lucide="package-search"></i>
+                            <p>Nenhum frasco selecionado ainda.</p>
+                        </div>
 
-                        <article class="selected-flask">
-                            <span class="result-list__code">PM_HPI-22</span>
-                            <span>6</span>
+                        <article class="selected-flask" th:each="item : ${itensSalvos}">
+                            <span class="result-list__code" th:text="${item.frasco.identificacao != null ? item.frasco.identificacao : 'FR-' + item.frasco.codigo}">-</span>
+                            <span th:text="${item.quantidade}">0</span>
+                            <form th:action="@{/analiseSolicitacao/removerItem/{codigo}(codigo=${item.codigo})}" method="post" style="margin: 0; display: flex; align-items: center;">
+                                <input type="hidden" name="codSolicitacao" th:value="${analise.solicitacao.codigo}">
+                                <button type="submit" style="background: transparent; border: none; color: #dc3545; cursor: pointer; padding: 4px;" aria-label="Remover frasco">
+                                    <i class="icon" data-lucide="trash-2"></i>
+                                </button>
+                            </form>
                         </article>
                     </div>
                 </section>
@@ -181,7 +203,7 @@
             </section>
         </section>
 
-        <section class="analysis-step" data-step-panel="retirada">
+        <section class="analysis-step" data-step-panel="retirada" th:if="${analise.solicitacao.statusSolicitacao.name() == 'AGUARDANDO_RETIRADA'}">
             <section class="analysis-card">
                 <header class="analysis-card__header">
                     <h2>Solicitação pronta para retirada</h2>
@@ -195,7 +217,7 @@
             </section>
         </section>
 
-        <section class="analysis-step" data-step-panel="concluido">
+        <section class="analysis-step" data-step-panel="concluido" th:if="${analise.solicitacao.statusSolicitacao.name() == 'CONCLUIDO' or analise.solicitacao.statusSolicitacao.name() == 'CONCLUIDA'}">
             <section class="analysis-card">
                 <header class="analysis-card__header">
                     <h2>Solicitação concluída</h2>
@@ -205,12 +227,12 @@
                 <div class="analysis-details">
                     <div class="analysis-detail">
                         <span>Data de conclusão</span>
-                        <strong>03/06/2026</strong>
+                        <strong th:text="${analise.solicitacao.dataAtualizacao != null ? #temporals.format(analise.solicitacao.dataAtualizacao, 'dd/MM/yyyy') : '---'}">---</strong>
                     </div>
 
                     <div class="analysis-detail">
                         <span>Responsável pela entrega</span>
-                        <strong>Estagiário BDH</strong>
+                        <strong>Responsável BDH</strong>
                     </div>
                 </div>
             </section>
@@ -218,12 +240,224 @@
     </section>
 </main>
 
-<div th:replace="~{partials/footer :: footer}"></div>
+<div class="modal-overlay" id="modalBuscaFrasco">
+    <div class="modal glass-frost" role="dialog" aria-modal="true" aria-labelledby="modalBuscaFrascoTitle">
 
+        <header class="modal__header" th:with="totSep=${totalJaSeparado != null ? totalJaSeparado : 0}">
+            <h2 id="modalBuscaFrascoTitle">
+                <i class="icon" data-lucide="search"></i>
+                Buscar Frasco
+            </h2>
+
+            <span class="modal-header-count" id="modalBuscaFrascoProgressCount" th:text="${totSep} + '/' + ${analise.solicitacao.quantidade}">0/34</span>
+
+            <button type="button" class="modal__close" id="modalBuscaFrascoClose" aria-label="Fechar">
+                <i class="icon" data-lucide="x"></i>
+            </button>
+
+            <div class="modal-header-progress">
+                <div class="modal-header-progress__fill" id="modalBuscaFrascoProgressFill" th:style="'width: ' + (${totSep} * 100.0 / ${analise.solicitacao.quantidade}) + '%;'"></div>
+            </div>
+        </header>
+
+        <div class="modal__body">
+
+            <div class="modal__body-fixed">
+                <div class="search-wrapper modal-search">
+                    <input type="search" id="modalBuscaFrascoInput" placeholder="Buscar por identificador...">
+
+                    <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
+                    <i class="search-icon" data-lucide="search"></i>
+                </div>
+
+                <div class="modal-filters">
+                    <div class="select-wrapper">
+                        <select class="form-control" id="modalFiltroStatus">
+                            <option value="todos" selected>Todos</option>
+                            <option value="adicionados">Já Adicionados</option>
+                        </select>
+                        <i class="select-icon icon" data-lucide="chevron-down"></i>
+                    </div>
+
+                    <div class="select-wrapper">
+                        <select class="form-control" id="modalOrdenar">
+                            <option value="">Ordenar por</option>
+                            <option value="disponivel-asc">Disponível (menor p/ maior)</option>
+                            <option value="disponivel-desc">Disponível (maior p/ menor)</option>
+                            <option value="manutencao-asc">Manutenção (mais próxima)</option>
+                            <option value="manutencao-desc">Manutenção (mais antiga)</option>
+                        </select>
+                        <i class="select-icon icon" data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-results-scroll">
+                <div class="modal-results" id="modalBuscaFrascoResults">
+
+                    <div th:each="f : ${frascos}" style="padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                        <form th:action="@{/analiseSolicitacao/selecionaFrasco}" method="post" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: 0;">
+                            <input type="hidden" name="analiseSolicitacao.codigo" th:value="${analise.codigo}">
+                            <input type="hidden" name="frasco.codigo" th:value="${f.codigo}">
+                            <input type="hidden" name="codSolicitacao" th:value="${analise.solicitacao.codigo}">
+                            <div style="display: flex; flex-direction: column;">
+                                <strong th:text="${f.identificacao != null ? f.identificacao : 'FR-' + f.codigo}"></strong>
+                                <span style="font-size: 0.85em; opacity: 0.7;" th:text="'Disponível: ' + ${f.quantidade} + ' dentes'"></span>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input class="form-control" type="number" name="quantidade" min="1" th:max="${f.quantidade}" value="1" required style="width: 80px; padding: 5px;">
+                                <button type="submit" class="btn btn-primary" style="padding: 5px 15px;">
+                                    <i class="icon" data-lucide="plus"></i> Adicionar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <p class="modal-empty" id="modalBuscaFrascoEmpty" th:if="${frascos == null or #lists.isEmpty(frascos)}">
+                    Nenhum frasco encontrado com esses critérios.
+                </p>
+            </div>
+        </div>
+
+        <footer class="modal__footer">
+            <span class="modal__footer-hint" id="modalBuscaFrascoCount" th:text="${frascos != null ? #lists.size(frascos) : 0} + ' frascos encontrados'">0 frascos encontrados</span>
+
+            <div class="pagination__nav">
+                <span class="pagination__range" id="modalPaginationRange">1-1</span>
+
+                <button type="button" class="btn btn-pagination" id="modalPaginationPrev" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                    <i class="icon" data-lucide="chevron-left"></i>
+                </button>
+
+                <button type="button" class="btn btn-pagination" id="modalPaginationNext" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                    <i class="icon" data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script th:src="@{/js/includes.js}"></script>
 <script th:src="@{/js/forms.js}"></script>
 <script th:src="@{/js/analysis.js}"></script>
+<script th:src="@{/js/requests.js}"></script>
+
+<script th:inline="javascript">
+    window.DADOS_ANALISE = {
+        codAnalise: /*[[${analise.codigo}]]*/ null,
+        codSolicitacao: /*[[${analise.solicitacao.codigo}]]*/ null,
+        totalSolicitado: /*[[${analise.solicitacao.quantidade}]]*/ 0,
+        frascosDisponiveis: /*[[${frascos}]]*/ [],
+        itensSalvos: /*[[${itensSalvos}]]*/ []
+    };
+
+    function confirmarSeparacao(event) {
+        event.preventDefault();
+        const form = event.target;
+        Swal.fire({
+            title: 'Confirmar Separação',
+            text: 'Deseja realmente finalizar a separação e colocar o pedido como aguardando retirada?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        return false;
+    }
+
+    function confirmarRetirada(event) {
+        event.preventDefault();
+        const form = event.target;
+        Swal.fire({
+            title: 'Confirmar Retirada',
+            text: 'Deseja realmente concluir a solicitação?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, concluir',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        return false;
+    }
+</script>
+
+<script th:src="@{/js/frasco-search-solicitacao.js}"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+
+        var msgSucesso = [[${mensagemSucesso != null ? mensagemSucesso : session.mensagemSucesso != null ? session.mensagemSucesso : ''}]];
+        var msgErro = [[${mensagemErro != null ? mensagemErro : session.mensagemErro != null ? session.mensagemErro : ''}]];
+
+        if (msgSucesso && msgSucesso.trim() !== "") {
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: msgSucesso,
+                showConfirmButton: false,
+                timer: 5000,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+
+        if (msgErro && msgErro.trim() !== "") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ops...',
+                text: msgErro,
+                showConfirmButton: true,
+                confirmButtonColor: '#d33'
+            });
+        }
+
+        const btnCancelar = document.getElementById('cancelRequestBtn');
+        if(btnCancelar) {
+            btnCancelar.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Cancelar Pedido',
+                    text: 'Informe o motivo do cancelamento/negação deste pedido:',
+                    input: 'textarea',
+                    inputPlaceholder: 'Digite a justificativa...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Voltar',
+                    inputValidator: (value) => {
+                        if (!value || value.trim() === '') {
+                            return 'A justificativa é obrigatória!';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('justificativaNegacao').value = result.value;
+                        document.getElementById('formNegarAnalise').submit();
+                    }
+                });
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -105,3 +105,57 @@
     opacity: var(--glass-frost-strong-noise-opacity, 0.05);
     mix-blend-mode: overlay;
 }
+
+/* Vidro esverdeado de sucesso — toast "Frasco cadastrado" (ver showToast
+   em includes.js). Mesma receita do .glass-frost (gradiente + blur +
+   ruído), mas com o dobro do blur: aqui o fundo por trás muda a cada
+   página, então precisa desfocar bem mais forte pra manter o efeito
+   consistente, sem deixar de dar pra perceber que é translúcido. */
+.glass-success {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    /* 3 paradas (menta -> verde -> floresta) em vez de 2 — o degradê
+       fica mais diluído/esfumado do que uma transição direta entre
+       só dois tons. */
+    background:
+        linear-gradient(
+            135deg,
+            var(--glass-success-bg-start),
+            var(--glass-success-bg-mid) 55%,
+            var(--glass-success-bg-end)
+        );
+
+    backdrop-filter: blur(36px) saturate(170%);
+    -webkit-backdrop-filter: blur(36px) saturate(170%);
+
+    border: 1px solid var(--glass-success-border);
+    border-radius: 12px;
+
+    /* O highlight interno é o que dá o "rim" de luz do acrílico do
+       Windows 11 — mais forte no topo, some pra baixo, por cima da borda
+       branca já sólida (--glass-success-border) por fora. */
+    box-shadow:
+        var(--glass-success-shadow),
+        inset 0 1px 0 rgba(255,255,255,0.5),
+        inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.glass-success::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* Mesmo tile das outras .glass-frost*, mas exibido BEM menor (90px
+       nativo escalado pra baixo, não pra cima) — o grão do ruído acompanha
+       o tamanho do tile, então encolher o tile encolhe o grão junto,
+       ficando fino em vez de granulado. */
+    background-size: 40px 40px;
+
+    opacity: var(--glass-success-noise-opacity, 0.1);
+    mix-blend-mode: overlay;
+}

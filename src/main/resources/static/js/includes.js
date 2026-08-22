@@ -83,7 +83,11 @@ function setupThemeToggle() {
         toggles.forEach((toggle) => renderIcon(toggle, theme, options));
     }
 
-    const savedTheme = localStorage.getItem("theme") || "light";
+    // Sem escolha salva ainda, cai na preferência do SO/navegador em vez
+    // de sempre nascer clara — mesmo fallback do script inline no <head>
+    // de cada página (ver applyTheme acima).
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const savedTheme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
     setTheme(savedTheme);
 
     toggles.forEach((toggle) => {
@@ -116,6 +120,17 @@ async function loadIncludes() {
     setupNavbarDropdowns();
     setupStickyPagination();
     setupScrollToTopButton();
+
+    // setupFrascoSearchModal só existe nas páginas que carregam
+    // frasco-search-solicitacao.js ou frasco-search-movimentacao.js (o
+    // modal em si só chega ao DOM depois do fetch acima, então precisa
+    // rodar por aqui, junto dos outros setups pós-include) — typeof
+    // evita ReferenceError nas páginas sem o modal. Os dois arquivos
+    // usam o mesmo nome de função de propósito: cada página carrega só
+    // um deles, então nunca colidem.
+    if (typeof setupFrascoSearchModal === "function") {
+        setupFrascoSearchModal();
+    }
 }
 
 function setupNavbarDropdowns() {
@@ -444,7 +459,55 @@ function setupScrollToTopButton() {
     });
 }
 
-const savedTheme = localStorage.getItem("theme") || "light";
+// Notificação "flash": alguma ação (ex.: cadastro de frasco) grava uma
+// mensagem aqui antes de redirecionar, e a página de destino a lê, exibe
+// e descarta assim que carrega — sobrevive à navegação porque mora no
+// sessionStorage, não em variável de JS. Mesmo padrão de flash message
+// que o backend Spring/Thymeleaf vai usar no projeto final.
+const FLASH_TOAST_KEY = "flashToastMessage";
+
+function showToast(html) {
+    // Nem toda página carrega o SweetAlert2 (só as com formulário/ações
+    // que precisam dele) — sem essa guarda, uma página sem Swal quebraria
+    // ao tentar mostrar um toast pendente do sessionStorage.
+    if (typeof Swal === "undefined") return;
+
+    Swal.fire({
+        toast: true,
+        position: "top",
+        icon: "success",
+        html,
+        showConfirmButton: false,
+        timer: 6000,
+        timerProgressBar: true,
+        customClass: {
+            // .glass-success (ver glass.css): vidro esverdeado bem
+            // desfocado, no lugar do fundo sólido padrão do toast.
+            popup: "glass-success",
+        },
+        didOpen: (toastEl) => {
+            toastEl.addEventListener("mouseenter", Swal.stopTimer);
+            toastEl.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+    });
+}
+
+function setupFlashToast() {
+    const mensagem = sessionStorage.getItem(FLASH_TOAST_KEY);
+
+    if (!mensagem) return;
+
+    // Remove antes de mostrar: um F5 na página de destino não pode fazer
+    // a mesma notificação aparecer de novo.
+    sessionStorage.removeItem(FLASH_TOAST_KEY);
+    showToast(mensagem);
+}
+
+// Sem escolha salva ainda, cai na preferência do SO/navegador em vez de
+// sempre nascer clara — mesmo fallback usado em setupThemeToggle acima.
+const savedTheme = localStorage.getItem("theme")
+    || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 applyTheme(savedTheme);
 
 loadIncludes();
+setupFlashToast();

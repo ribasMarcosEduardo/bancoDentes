@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script>
-
     (function () {
-        var theme = localStorage.getItem("theme") || "light";
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
         document.documentElement.classList.add(theme);
     })();
   </script>
@@ -99,7 +99,6 @@
     </div>
 
     <section class="main-panel">
-
       <header class="page-header">
         <h1>Painel de Frascos</h1>
         <p>Consulte, filtre e gerencie os frascos cadastrados.</p>
@@ -140,12 +139,10 @@
             <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
               <i class="icon" data-lucide="filter"></i>
             </button>
-
             <button class="btn btn-secondary" id="btnSortOrder">
               <span class="btn__label">Ordenar</span>
               <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
             </button>
-
             <a th:href="@{/frasco}" class="btn btn-primary">
               <i class="orderBy-icon" data-lucide="plus"></i> Novo frasco
             </a>
@@ -158,8 +155,7 @@
           <div class="active-filters-bar__header">
             <span class="active-filters-bar__label">Filtros ativos:</span>
             <button class="filters-clear" type="button">
-              <i class="icon" data-lucide="rotate-ccw"></i>
-              Resetar Filtros
+              <i class="icon" data-lucide="rotate-ccw"></i> Resetar Filtros
             </button>
           </div>
           <div class="active-filters" id="activeFilters"></div>
@@ -169,7 +165,7 @@
       <div class="list-panel">
         <div class="pagination">
           <div class="low-opacity">
-            <strong id="paginationInfo" th:text="${#lists.size(frascos)} + ' Resultados Encontrados - Mais Recentes'">0 Resultados Encontrados</strong>
+            <strong id="paginationInfo" th:text="${#lists.size(frascos)} + ' Resultados Encontrados'">0 Resultados Encontrados</strong>
           </div>
           <div class="pagination__actions">
             <div class="sector-switch" id="sectorSwitch">
@@ -180,18 +176,18 @@
             </div>
 
             <div class="pagination__nav">
-              <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
+              <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior">
                 <i data-lucide="chevron-left"></i>
               </button>
-              <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
+              <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página">
                 <i data-lucide="chevron-right"></i>
               </button>
             </div>
           </div>
         </div>
 
-        <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info shadow-sm mt-4" role="alert" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
-          <i data-lucide="info" class="me-2"></i> Não há nenhum frasco cadastrado no momento.
+        <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
+          <i data-lucide="info" class="me-2"></i> Não há nenhum frasco cadastrado no banco de dados.
         </div>
 
         <section th:if="${!#lists.isEmpty(frascos)}" class="results results--grid" id="resultsView">
@@ -217,19 +213,18 @@
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <div class="result-list">
-                <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">PMbd-01</span>
+                <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
                 <span th:text="${frasco.tipoDente}">Grupo</span>
                 <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
-                <span>Bdh</span>
-                <span th:text="${frasco.quantidade}">0</span>
-                <span th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy')}">00/00/00</span>
-                <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yy') : '-'}">00/00/00</span>
+                <span>Bdh</span> <span th:text="${frasco.quantidade}">0</span>
+                <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">00/00/00</span>
+                <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
 
                 <div class="result-list__actions">
-                  <a th:href="@{/frasco/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Movimentação" aria-label="Movimentação">
+                  <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
-                  <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir frasco">
+                  <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir">
                     <i class="icon" data-lucide="chevron-down"></i>
                   </button>
                 </div>
@@ -267,7 +262,6 @@
                         </div>
                       </div>
                     </section>
-
                     <section class="request-panel">
                       <h4 class="request-panel__title">Local e Datas</h4>
                       <div class="request-details__grid request-details__grid--single">
@@ -277,25 +271,12 @@
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Data de cadastro</span>
-                          <span th:text="${#temporals.format(frasco.datCad, 'dd/MM/yyyy')}">-</span>
+                          <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Data de manutenção</span>
                           <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
                         </div>
-                      </div>
-                    </section>
-
-                    <section class="request-panel request-panel--frascos-actions">
-                      <h4 class="request-panel__title">Ações Rápidas</h4>
-                      <div class="request-panel__actions">
-                        <a th:href="@{/frasco/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Movimentação">
-                          <i class="icon" data-lucide="pen-line"></i>
-                        </a>
-
-                        <button type="button" class="result-list__action result-list__action--red" data-tooltip="Apagar">
-                          <i class="icon" data-lucide="archive-x"></i>
-                        </button>
                       </div>
                     </section>
                   </div>
@@ -338,12 +319,12 @@
 
               <footer class="card__footer">
                 <div class="card__dates">
-                  <p class="card__date" th:text="'Cadastrado em: ' + ${#temporals.format(frasco.datCad, 'dd/MM/yy')}"></p>
-                  <p class="card__date" th:text="${frasco.datManutencao != null ? 'Manutenção em: ' + #temporals.format(frasco.datManutencao, 'dd/MM/yy') : ''}"></p>
+                  <p class="card__date" th:text="${frasco.datCad != null ? 'Cadastrado em: ' + #temporals.format(frasco.datCad, 'dd/MM/yyyy') : 'Cadastro: -'}"></p>
+                  <p class="card__date" th:text="${frasco.datManutencao != null ? 'Manutenção: ' + #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : ''}"></p>
                 </div>
 
                 <div class="card__actions">
-                  <a th:href="@{/frasco/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Movimentação">
+                  <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
                   <button type="button" class="card__action card__action--red" data-tooltip="Apagar">
@@ -370,51 +351,4 @@
 <script th:src="@{/js/requests.js}"></script>
 <script th:src="@{/js/page-size.js}"></script>
 
-<script th:inline="javascript">
-  document.addEventListener("DOMContentLoaded", function() {
-      lucide.createIcons();
-
-      var msgSucesso = [[${mensagemSucesso != null ? mensagemSucesso : session.mensagemSucesso != null ? session.mensagemSucesso : ''}]];
-      var msgErro = [[${mensagemErro != null ? mensagemErro : session.mensagemErro != null ? session.mensagemErro : ''}]];
-
-      var isReloadOrBack = false;
-      var perfEntries = performance.getEntriesByType("navigation");
-      if (perfEntries.length > 0) {
-          var p = perfEntries[0].type;
-          if (p === 'reload' || p === 'back_forward') {
-              isReloadOrBack = true;
-          }
-      } else if (window.performance && window.performance.navigation) {
-          var t = window.performance.navigation.type;
-          if (t === 1 || t === 2) {
-              isReloadOrBack = true;
-          }
-      }
-
-      if (!isReloadOrBack) {
-          if (msgSucesso && msgSucesso.trim() !== "") {
-              Swal.fire({
-                  icon: 'success',
-                  title: 'Sucesso!',
-                  text: msgSucesso,
-                  showConfirmButton: false,
-                  timer: 5000,
-                  toast: true,
-                  position: 'top-end'
-              });
-          }
-
-          if (msgErro && msgErro.trim() !== "") {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Ops...',
-                  text: msgErro,
-                  showConfirmButton: true,
-                  confirmButtonColor: '#d33'
-              });
-          }
-      }
-  });
-</script>
 </body>
-</html>
