@@ -1,0 +1,186 @@
+.toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+    z-index: 1;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    padding: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toolbar input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    font-family: inherit;
+    max-width: 360px;
+}
+
+.toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/*
+    Cada .toolbar__row agrupa um conjunto de controles (ex.: Exibir +
+    filtro + view-switch, ou Ordenar + Novo) que deve permanecer junto
+    na mesma linha. Em telas largas isso não muda nada visualmente —
+    os grupos ficam lado a lado como sempre estiveram.
+*/
+.toolbar__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toolbar__filter-toggle {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 0.75rem;
+
+    background: var(--toggle-bg);
+    color: var(--text-soft);
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.toolbar__filter-toggle:hover {
+    background: var(--toggle-bg-hover);
+    transform: translateY(-1px);
+}
+
+.toolbar__filter-toggle .icon {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+@media (max-width: 607px) {
+
+    .toolbar__actions {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .toolbar__row {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* Ordenar/Novo em cima, Exibir/view-switch embaixo */
+    .toolbar__row--buttons {
+        order: 1;
+    }
+
+    .toolbar__row--controls {
+        order: 2;
+    }
+
+    .toolbar__row > .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+.toolbar__info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    gap: 0.2rem;
+}
+
+.toolbar__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    color: var(--text-muted);
+
+    line-height: 1;
+
+    padding-left: 0.5rem;
+}
+
+.toolbar__badge {
+    height: var(--btn-height);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+    min-width: 220px;
+
+    padding: 0 1rem;
+
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+
+    background: var(--input-bg);
+    color: var(--text);
+
+    font-size: 0.88rem;
+    font-weight: 600;
+
+    box-shadow: var(--btn-shadow);
+}
+
+.toolbar__stats {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-stat {
+    min-width: 130px;
+
+    display: grid;
+    gap: 0.25rem;
+
+    padding: 0.65rem 0.85rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--surface-soft);
+}
+
+.toolbar-stat span {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.toolbar-stat strong {
+    color: var(--text);
+    font-size: 0.95rem;
+}

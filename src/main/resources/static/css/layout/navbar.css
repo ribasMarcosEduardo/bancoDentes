@@ -1,0 +1,655 @@
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    border-bottom: 1px solid var(--border);
+
+    user-select: none;
+}
+
+.navbar__inner {
+    width: min(var(--container), calc(100% - 2rem));
+    margin: 0 auto;
+    min-height: 92px;
+
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.navbar__brand {
+    text-decoration: none;
+    color: var(--text);
+}
+
+.navbar__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 1rem;
+
+    border-radius: 0.85rem;
+
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    color: var(--text);
+
+    font-weight: 800;
+    letter-spacing: 0.04em;
+
+    transition: 0.2s ease;
+}
+
+.navbar__logo:hover {
+    transform: translateY(-1px);
+    background: var(--surface);
+}
+
+.navbar__nav {
+    justify-self: center;
+
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    padding: 0.55rem 1rem;
+
+    border-radius: 999px;
+    border: 1px solid var(--border);
+
+    background: var(--surface-elevated);
+    box-shadow: var(--shadow);
+}
+
+.navbar__link,
+.navbar__dropdown-btn {
+    height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    padding: 0 1rem;
+
+    border: none;
+    border-radius: 999px;
+
+    background: transparent;
+    color: var(--text-soft);
+
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.navbar__link:hover,
+.navbar__dropdown-btn:hover,
+.navbar__dropdown.is-open .navbar__dropdown-btn {
+    background: var(--surface-elevated);
+    color: var(--text);
+}
+
+.navbar__dropdown-btn .icon--chevron {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+
+    margin-top: 2px;
+
+    transition: transform 0.2s ease;
+}
+
+.navbar__dropdown.is-open .navbar__dropdown-btn .icon--chevron {
+    transform: rotate(180deg);
+}
+
+.navbar__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.navbar__login {
+    height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 1rem;
+
+    border-radius: 0.75rem;
+
+    background: var(--secondary);
+    color: var(--text);
+
+    text-decoration: none;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.navbar__login:hover {
+    background: var(--secondary-hover);
+    border-radius: 0.55rem;
+
+    transform: translateY(-1px);
+}
+
+.navbar__config,
+.navbar__notifications {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--surface-elevated);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.navbar__config .icon,
+.navbar__notifications .icon {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    stroke-width: 2.2;
+
+    transition: transform 0.2s ease;
+}
+
+.navbar__config:hover,
+.navbar__notifications:hover {
+    background: var(--surface);
+    transform: translateY(-1px);
+}
+
+.navbar__config:hover .icon {
+    transform: rotate(90deg);
+}
+
+.navbar__notifications:hover .icon {
+    transform: rotate(-15deg);
+}
+
+.navbar__notifications {
+    position: relative;
+}
+
+.navbar__notifications-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid var(--surface-elevated);
+    border-radius: 999px;
+
+    background: #ef4444;
+    color: #ffffff;
+
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Painel de notificações */
+
+.navbar__notifications-dropdown {
+    position: relative;
+    
+}
+
+.notif-panel {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    left: auto;
+    
+
+    width: 360px;
+    max-width: calc(100vw - 2rem);
+
+    padding: 0.6rem;
+
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+
+    background: var(--surface);
+
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    box-shadow: var(--shadow);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+
+    transition: 0.2s ease;
+}
+
+.navbar__dropdown.is-open .notif-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.notif-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    padding: 0.35rem 0.5rem 0.6rem;
+}
+
+.notif-panel__title {
+    color: var(--text);
+
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.notif-panel__badge {
+    padding: 0.15rem 0.55rem;
+
+    border-radius: 999px;
+
+    background: var(--surface-muted);
+    color: var(--text-muted);
+
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.notif-panel__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    max-height: 380px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.notif-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+
+    padding: 0.6rem 0.65rem;
+
+    border-radius: 0.85rem;
+    border-left: 3px solid var(--border);
+
+    background: var(--surface-muted);
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+.notif-card:hover {
+    background: var(--surface-elevated);
+    transform: translateX(2px);
+}
+
+.notif-card__icon {
+    flex-shrink: 0;
+
+    width: 32px;
+    height: 32px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+}
+
+.notif-card__icon .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    stroke-width: 2.2;
+}
+
+.notif-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    min-width: 0;
+}
+
+.notif-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.notif-card__tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.notif-card__time {
+    flex-shrink: 0;
+
+    color: var(--text-muted);
+    font-size: 0.7rem;
+}
+
+.notif-card__title {
+    color: var(--text);
+
+    font-size: 0.87rem;
+    font-weight: 600;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notif-card__meta {
+    color: var(--text-soft);
+    font-size: 0.78rem;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tipos de notificação — mesma paleta semântica das status-pill
+   (list.css): azul p/ solicitação, âmbar p/ manutenção próxima,
+   vermelho p/ manutenção hoje (mais urgente) */
+
+.notif-card--solicitacao {
+    border-left-color: #3b82f6;
+}
+
+.notif-card--solicitacao .notif-card__icon {
+    background: rgba(59, 130, 246, 0.16);
+    color: #3b82f6;
+}
+
+.notif-card--solicitacao .notif-card__tag {
+    color: #3b82f6;
+}
+
+.notif-card--manutencao-proxima {
+    border-left-color: #f59e0b;
+}
+
+.notif-card--manutencao-proxima .notif-card__icon {
+    background: rgba(245, 158, 11, 0.16);
+    color: #f59e0b;
+}
+
+.notif-card--manutencao-proxima .notif-card__tag {
+    color: #f59e0b;
+}
+
+.notif-card--manutencao-hoje {
+    border-left-color: #ef4444;
+}
+
+.notif-card--manutencao-hoje .notif-card__icon {
+    background: rgba(239, 68, 68, 0.16);
+    color: #ef4444;
+}
+
+.notif-card--manutencao-hoje .notif-card__tag {
+    color: #ef4444;
+}
+
+.notif-panel__footer {
+    display: block;
+
+    margin-top: 0.5rem;
+    padding: 0.55rem;
+
+    border-radius: 0.75rem;
+
+    color: var(--text-soft);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+.notif-panel__footer:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+/* Dropdown */
+
+.navbar__dropdown {
+    position: relative;
+    z-index: 0;
+}
+
+.navbar__dropdown.is-open {
+    z-index: 1;
+}
+
+/* Ponte invisível cobrindo o espaço entre o botão e o menu/painel,
+   evitando que o hover "pisque" ou feche ao descer o mouse. Fica
+   ancorada no próprio menu/painel (não no botão, que é bem menor),
+   herdando a largura e o alinhamento reais dele — assim nunca "vaza"
+   por cima de outros itens da navbar. Não altera o espaçamento
+   visual, só mantém o hover contínuo. */
+.navbar__dropdown-menu::before,
+.notif-panel::before {
+    content: "";
+    position: absolute;
+    top: -0.75rem;
+    left: 0;
+    right: 0;
+
+    height: 0.75rem;
+}
+
+.navbar__dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 0;
+
+    min-width: 190px;
+
+    padding: 0.5rem;
+
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+
+    background: var(--surface-soft);
+
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+    box-shadow: var(--shadow);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+
+    transition: 0.2s ease;
+}
+
+.navbar__dropdown.is-open .navbar__dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.navbar__dropdown-menu a {
+    display: block;
+
+    padding: 0.75rem 0.85rem;
+
+    border-radius: 0.75rem;
+
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.navbar__dropdown-menu a:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+/* Entre ~1150px e 1000px (onde mobile-menu.css assume com o menu
+   hambúrguer), o conjunto logo + links + ações não cabe mais em uma
+   linha só. Sem isso, o conteúdo simplesmente transborda e é cortado
+   pelo overflow-x:hidden do body (ver base/globals.css) — o botão de
+   Login some aos poucos ao invés da navbar encolher de forma
+   controlada. Aperta espaçamento/fonte progressivamente pra manter
+   tudo visível até o hand-off pro menu mobile. */
+@media (max-width: 1150px) {
+
+    .navbar__inner {
+        gap: 0.85rem;
+    }
+
+    .navbar__logo {
+        padding: 0.7rem;
+    }
+
+    .navbar__nav {
+        gap: 0.2rem;
+        padding: 0.45rem 0.6rem;
+    }
+
+    .navbar__link,
+    .navbar__dropdown-btn {
+        padding: 0 0.6rem;
+        font-size: 0.82rem;
+    }
+
+    .navbar__actions {
+        gap: 0.5rem;
+    }
+
+    .navbar__login {
+        padding: 0 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
+.navbar__theme-toggle {
+    position: relative;
+
+    width: 40px;
+    height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--surface-soft);
+
+    color: var(--text);
+
+    backdrop-filter: blur(10px);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.navbar__theme-toggle:hover {
+    background: var(--surface-elevated);
+
+    transform: translateY(-1px);
+}
+
+.navbar__theme-toggle:hover .theme-toggle-icon {
+    transform: translate(-50%, -50%) rotate(15deg);
+}
+
+.theme-toggle-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s ease;
+}
+
+.theme-toggle-icon--exit {
+    animation: theme-icon-out 0.35s ease forwards;
+}
+
+.theme-toggle-icon--enter {
+    animation: theme-icon-in 0.35s ease forwards;
+}
+
+@keyframes theme-icon-out {
+    to {
+        transform: translate(-50%, -50%) rotate(110deg) scale(0.4);
+        opacity: 0;
+    }
+}
+
+@keyframes theme-icon-in {
+    from {
+        transform: translate(-50%, -50%) rotate(-110deg) scale(0.4);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}

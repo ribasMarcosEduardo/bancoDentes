@@ -1,0 +1,25 @@
+.results {
+    display: block;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
+    gap: 1.5rem;
+}
+
+.results--list {
+    grid-template-columns: 1fr;
+}
+
+.results--grid .result-table {
+    display: none;
+}
+
+.results--list .results-grid {
+    display: none;
+}
+
+.results--list .result-table {
+    display: block;
+}

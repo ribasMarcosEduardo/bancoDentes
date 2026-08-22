@@ -1,0 +1,190 @@
+<th:block th:fragment="navbar">
+    <header class="navbar glass">
+        <div class="navbar__inner">
+
+            <a href="index.html" class="navbar__brand tooltip-below" data-tooltip="Início" aria-label="Início">
+                <span class="navbar__logo">
+                    <i class="icon icon--logo" data-lucide="home"></i>
+                </span>
+            </a>
+
+            <nav class="navbar__nav glass-soft">
+                <a href="index.html" class="navbar__link">Dashboard</a>
+                <a th:href="@{/frasco/painel}" class="navbar__link">Frascos</a>
+                <a href="movimentacoes.html" class="navbar__link">Movimentações</a>
+                <a href="usuarios.html" class="navbar__link">Usuários</a>
+                <div class="navbar__dropdown">
+                    <button class="navbar__link navbar__dropdown-btn">
+                        Solicitações
+                        <i class="icon icon--chevron" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="navbar__dropdown-menu">
+                        <a th:href="@{/solicitacao/painel}">Minhas Solicitações</a>
+                        <a th:href="@{/analiseSolicitacao/painel}">Painel de Solicitações</a>
+                    </div>
+                </div>
+
+                <div class="navbar__dropdown">
+                    <button class="navbar__link navbar__dropdown-btn">
+                        Cadastros
+                        <i class="icon icon--chevron" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="navbar__dropdown-menu">
+                        <a th:href="@{/frasco}">Cadastrar frasco</a>
+                        <a href="cadastro_movimentacao.html">Cadastrar movimentação</a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="navbar__actions">
+                <button class="navbar__theme-toggle theme-toggle-btn tooltip-below" id="themeToggle" type="button" data-tooltip="Mudar Tema" aria-label="Mudar Tema">
+                    <i class="icon" id="themeIcon" data-lucide="moon"></i>
+                </button>
+
+                <div class="navbar__dropdown navbar__notifications-dropdown">
+                    <button class="navbar__notifications navbar__dropdown-btn glass" type="button" aria-haspopup="true" aria-label="Notificações">
+                        <i class="icon icon--md" data-lucide="bell"></i>
+                        <span class="navbar__notifications-badge">4</span>
+                    </button>
+
+                    <div class="notif-panel">
+                        <div class="notif-panel__header">
+                            <span class="notif-panel__title">Notificações</span>
+                            <span class="notif-panel__badge">4 novas</span>
+                        </div>
+
+                        <div class="notif-panel__list">
+                            <a th:href="@{/frasco/painel}" class="notif-card notif-card--manutencao-hoje">
+                                <span class="notif-card__icon">
+                                    <i class="icon" data-lucide="toolbox"></i>
+                                </span>
+
+                                <span class="notif-card__body">
+                                    <span class="notif-card__head">
+                                        <span class="notif-card__tag">Manutenção hoje</span>
+                                        <span class="notif-card__time">há 40 min</span>
+                                    </span>
+
+                                    <span class="notif-card__title">Frasco PMbd-a0001</span>
+                                    <span class="notif-card__meta">Pré-Molar &middot; 30 dentes &middot; Bdh</span>
+                                </span>
+                            </a>
+
+                            <a href="solicitacoes.html" class="notif-card notif-card--solicitacao">
+                                <span class="notif-card__icon">
+                                    <i class="icon" data-lucide="clipboard-list"></i>
+                                </span>
+
+                                <span class="notif-card__body">
+                                    <span class="notif-card__head">
+                                        <span class="notif-card__tag">Solicitação</span>
+                                        <span class="notif-card__time">há 1h</span>
+                                    </span>
+
+                                    <span class="notif-card__title">Larissa Souza</span>
+                                    <span class="notif-card__meta">Molar &middot; 12 dentes solicitados</span>
+                                </span>
+                            </a>
+
+                            <a th:href="@{/frasco/painel}" class="notif-card notif-card--manutencao-proxima">
+                                <span class="notif-card__icon">
+                                    <i class="icon" data-lucide="toolbox"></i>
+                                </span>
+
+                                <span class="notif-card__body">
+                                    <span class="notif-card__head">
+                                        <span class="notif-card__tag">Manutenção próxima</span>
+                                        <span class="notif-card__time">há 3h</span>
+                                    </span>
+
+                                    <span class="notif-card__title">Frasco CNbb-b0032</span>
+                                    <span class="notif-card__meta">Canino &middot; vence em 3 dias &middot; Biobanco</span>
+                                </span>
+                            </a>
+
+                            <a href="solicitacoes.html" class="notif-card notif-card--solicitacao">
+                                <span class="notif-card__icon">
+                                    <i class="icon" data-lucide="clipboard-list"></i>
+                                </span>
+
+                                <span class="notif-card__body">
+                                    <span class="notif-card__head">
+                                        <span class="notif-card__tag">Solicitação</span>
+                                        <span class="notif-card__time">há 5h</span>
+                                    </span>
+
+                                    <span class="notif-card__title">Pedro Martins</span>
+                                    <span class="notif-card__meta">Incisivo &middot; 6 dentes solicitados</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <a href="#" class="notif-panel__footer">Ver todas as notificações</a>
+                    </div>
+                </div>
+
+                <button class="navbar__config glass tooltip-below" data-tooltip="Configurações" aria-label="Configurações">
+                    <i class="icon icon--md" data-lucide="settings"></i>
+                </button>
+
+                <a href="#" class="navbar__login glass">Login</a>
+            </div>
+
+        </div>
+    </header>
+
+    <button class="mobile-menu-toggle glass" aria-label="Abrir menu">
+        <i class="icon" data-lucide="menu"></i>
+    </button>
+
+    <div class="mobile-menu-overlay"></div>
+
+    <aside class="mobile-menu glass">
+        <div class="mobile-menu__header">
+            <span class="mobile-menu__brand">Banco de Dentes Humanos</span>
+
+            <button class="mobile-menu__close" aria-label="Fechar menu">
+                <i class="icon" data-lucide="x"></i>
+            </button>
+        </div>
+
+        <nav class="mobile-menu__nav">
+            <a href="index.html" class="mobile-menu__link">Dashboard</a>
+            <a th:href="@{/frasco/painel}" class="mobile-menu__link">Frascos</a>
+            <a href="movimentacoes.html" class="mobile-menu__link">Movimentações</a>
+            <a href="usuarios.html" class="mobile-menu__link">Usuários</a>
+
+            <div class="mobile-menu__group">
+                <span class="mobile-menu__group-title">Solicitações</span>
+                <a th:href="@{/solicitacao/painel}" class="mobile-menu__link">Painel de Solicitações</a>
+                <a th:href="@{/analiseSolicitacao/painel}" class="mobile-menu__link">Histórico de Solicitações</a>
+            </div>
+
+            <div class="mobile-menu__group">
+                <span class="mobile-menu__group-title">Cadastros</span>
+                <a th:href="@{/frasco}" class="mobile-menu__link">Cadastrar frasco</a>
+                <a href="cadastro_movimentacao.html" class="mobile-menu__link">Cadastrar movimentação</a>
+            </div>
+        </nav>
+
+        <div class="mobile-menu__footer">
+            <a href="#" class="mobile-menu__login">Login</a>
+
+            <div class="mobile-menu__icons">
+                <button class="mobile-menu__icon-btn theme-toggle-btn" type="button" aria-label="Alternar tema">
+                    <i class="icon" data-lucide="moon"></i>
+                </button>
+
+                <button class="mobile-menu__icon-btn" type="button" aria-label="Notificações">
+                    <i class="icon" data-lucide="bell"></i>
+                </button>
+
+                <button class="mobile-menu__icon-btn" type="button" aria-label="Configurações">
+                    <i class="icon" data-lucide="settings"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+</th:block>

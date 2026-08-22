@@ -1,0 +1,264 @@
+@media (max-width: 360px) {
+
+    .btn__label {
+        display: none;
+    }
+}
+
+@media (max-width: 700px) {
+
+    /*
+        Toolbar simples nessa página (só busca + Exibir/Filtro/Ordenar) —
+        abaixo de 700px a busca ocupa a primeira linha sozinha e o resto
+        dos controles (Exibir à esquerda, Filtro+Ordenar à direita) forma
+        a segunda linha. flex-wrap:nowrap + justify-content:space-between
+        em .toolbar__actions mantêm os dois .toolbar__row juntos nessa
+        mesma linha, sobrepondo o empilhamento genérico de
+        components/toolbar.css (@media max-width:607px), que rodaria os
+        dois .toolbar__row em linhas separadas.
+    */
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+
+    /*
+        components/toolbar.css força ".toolbar__row{width:100%}" a
+        partir de 607px — isso faz o Exibir (um .toolbar__row) ocupar
+        sozinho a linha inteira e empurrar Filtro/Ordenar pra baixo,
+        cancelando o nowrap acima. Volta a ser do tamanho do conteúdo,
+        senão o range 607–700 (onde as duas regras se sobrepõem) reverte
+        pro empilhamento genérico.
+
+        O mesmo arquivo também dá order:1 aos botões e order:2 ao Exibir
+        (pra inverter os dois dentro do .toolbar__actions em telas
+        ≤607px) — reseta a ordem certa: Exibir antes de Filtro/Ordenar.
+    */
+    .toolbar__row {
+        width: auto;
+    }
+
+    .toolbar__row--controls {
+        order: 1;
+    }
+
+    .toolbar__row--buttons {
+        order: 2;
+    }
+}
+
+/*
+    Base do agrupamento intervalo + setas — precisa existir em qualquer
+    largura (não só dentro do media query de 350px), senão vira uma div
+    sem estilo (display:block) e os elementos empilham/quebram em vez
+    de ficar lado a lado.
+*/
+.pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/*
+    Solicitante duplicado na visão expandida só faz sentido quando ele
+    some da linha da lista (ver @media max-width:766px logo abaixo) —
+    nas demais larguras a coluna Solicitante já está visível na própria
+    linha.
+*/
+.request-detail--solicitante {
+    display: none;
+}
+
+@media (max-width: 600px) {
+
+    /*
+        No celular só sobra espaço pro essencial — o resto dá pra ver na
+        área expandida da linha.
+        Ordem dos filhos: 1 Solicitação, 2 Grupo, 3 Solicitante, 4 Qtd.,
+        5 Status, 6 Data, 7 seta. Some Solicitante (e não Solicitação): o
+        identificador (SOL-001...) é mais útil pra identificar a linha de
+        relance do que o nome do solicitante — reaparece na área
+        expandida, acima de Estado (ver .request-detail--solicitante
+        logo abaixo).
+    */
+    .result-table--solicitacoes .result-table__head,
+    .result-table--solicitacoes .result-list {
+        min-width: 0;
+        grid-template-columns: 1.1fr 0.55fr 1fr 40px;
+    }
+
+    .result-table--solicitacoes .result-table__head span:nth-child(2),
+    .result-table--solicitacoes .result-table__head span:nth-child(3),
+    .result-table--solicitacoes .result-table__head span:nth-child(6),
+    .result-table--solicitacoes .result-list > span:nth-child(2),
+    .result-table--solicitacoes .result-list > span:nth-child(3),
+    .result-table--solicitacoes .result-list > span:nth-child(6) {
+        display: none;
+    }
+
+    /*
+        .pagination__range tinha margin-left:auto (regra global, em
+        pagination.css) pra empurrar ela e as setas — suas irmãs diretas
+        — até a direita. Desde que elas viraram um grupo próprio
+        (.pagination__nav), o auto-margin precisa estar no grupo, senão
+        ele empurra só dentro de uma caixa que já está do tamanho do
+        conteúdo, sem efeito nenhum.
+    */
+    .pagination:has(.sector-switch) .pagination__nav {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 400px) {
+
+    /* Sobra só Solicitação, Status e seta — Qtd. também dá pra ver
+       expandindo a linha */
+    .result-table--solicitacoes .result-table__head,
+    .result-table--solicitacoes .result-list {
+        grid-template-columns: 1.2fr 1fr 40px;
+    }
+
+    .result-table--solicitacoes .result-table__head span:nth-child(4),
+    .result-table--solicitacoes .result-list > span:nth-child(4) {
+        display: none;
+    }
+}
+
+/*
+    Solicitante some da linha a partir de 601px (ver bloco 601–766
+    abaixo) e continua sumido até 600px pra baixo — reaparece na área
+    expandida em qualquer uma dessas larguras, sempre acima de Estado
+    (é o primeiro filho de .request-details__grid no HTML).
+*/
+@media (max-width: 766px) {
+
+    .request-detail--solicitante {
+        display: grid;
+    }
+}
+
+/*
+    Entre 601px e 766px ninguém reduz as colunas da tabela (a redução de
+    solicitacoes.css acima só vale a partir de 600px), mas o
+    min-width:720px genérico de list.css (@media max-width:860px) continua
+    valendo. Sem espaço sobrando pra 720px, e como .main-panel não tem
+    min-width:0, o grid inteiro (.dashboard/.main-panel) estoura pra caber
+    a tabela — toolbar, paginação e footer ficam mais largos que a viewport
+    e o overflow-x:hidden do body corta tudo do lado direito (padding
+    direito "sumindo"). Reaproveita o mesmo padrão de frascos.css pra essa
+    faixa: some Grupo e Solicitante (Solicitação, Qtd., Status, Data e a
+    seta já cabem sem estourar) e zera o min-width herdado.
+*/
+@media (min-width: 601px) and (max-width: 766px) {
+
+    /*
+        Nessa faixa a paginação inteira (sector-switch + intervalo +
+        setas) não cabe ao lado do texto de resultados e ficava tudo
+        amontoado à esquerda. Vira 2 linhas: sector-switch à esquerda e
+        setas à direita em cima, texto de resultados embaixo.
+    */
+    .pagination:has(.sector-switch) {
+        flex-direction: column;
+        align-items: stretch;
+
+        /* setas (.pagination__actions, order:1) ficam visualmente acima
+           do texto de resultados (.low-opacity, order:2) — 1.5rem entre
+           os dois em qualquer página que empilhe assim */
+        gap: 1.5rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .low-opacity {
+        order: 2;
+    }
+
+    .result-table--solicitacoes .result-table__head,
+    .result-table--solicitacoes .result-list {
+        min-width: 0;
+        grid-template-columns:
+            var(--list-first-col)
+            repeat(3, 1fr)
+            40px;
+    }
+
+    .result-table--solicitacoes .result-table__head span:nth-child(2),
+    .result-table--solicitacoes .result-table__head span:nth-child(3),
+    .result-table--solicitacoes .result-list span:nth-child(2),
+    .result-table--solicitacoes .result-list span:nth-child(3) {
+        display: none;
+    }
+}
+
+@media (max-width: 350px) {
+
+    /*
+        Linha 1: sector-switch maior, centralizado.
+        Linha 2: intervalo + setas de paginação, alinhados à direita.
+    */
+    .pagination:has(.sector-switch) .pagination__actions {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 0.65rem;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn,
+    .pagination:has(.sector-switch) .sector-switch__indicator {
+        height: 38px;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn {
+        padding: 0 1rem;
+        font-size: 0.85rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav {
+        justify-content: flex-end;
+        align-self: stretch;
+    }
+}
+
+@media (max-width: 450px) {
+
+    /*
+        Setas de paginação menores — mesmo ajuste de frascos.css, com
+        :has(.sector-switch) escopando só as páginas que têm o switch.
+    */
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination {
+        width: 38px;
+        height: 28px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination svg {
+        width: 16px;
+        height: 16px;
+    }
+}

@@ -1,0 +1,250 @@
+/*
+    Alinha os botões de ação com o card de identificação (toolbar__badge),
+    e não com o bloco label + card inteiro — sem isso o align-items:center
+    do .toolbar (base) centraliza os botões contra a label "flutuando"
+    acima do card, deixando os botões visualmente mais altos que o card.
+*/
+.toolbar {
+    align-items: flex-end;
+}
+
+@media (max-width: 1000px) {
+
+    .navbar {
+        display: none;
+    }
+}
+
+@media (max-width: 800px) {
+
+    /*
+        Cancelar continua na mesma linha do card. Salvar e Continuar /
+        Salvar e Sair quebram pra uma segunda linha e dividem o espaço
+        entre si.
+
+        toolbar__actions vira "display: contents" pra sair do caminho:
+        se ele continuasse sendo o item flex (com os 3 botões dentro
+        quebrando em duas linhas), o navegador calcula a largura
+        mínima dele como se as 3 linhas coubessem numa só (medida
+        "max-content" ignora o wrap interno), e isso empurra o grupo
+        inteiro pra debaixo do card. Com display: contents os botões
+        viram itens diretos do .toolbar, e o card, o Cancelar e a
+        quebra de linha (::after) competem pelo espaço igual entre si.
+
+        Usa ::after (não ::before) porque .glass-frost já usa o
+        ::before do .toolbar pro ruído do vidro fosco — reaproveitar
+        o mesmo pseudo-elemento não funciona, já que aquele é
+        position: absolute (fora do fluxo, não conta como item flex).
+    */
+    .toolbar__actions {
+        display: contents;
+    }
+
+    .toolbar__actions > .btn:nth-child(n+2) {
+        order: 3;
+        flex: 1 1 0;
+    }
+
+    .toolbar::after {
+        content: "";
+        order: 2;
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 735px) {
+
+    :root {
+        --page-pad: 1rem;
+    }
+
+    .form-card {
+        padding: 1.25rem;
+    }
+
+    .form-grid,
+    .form-grid-estado {
+        grid-template-columns: 1fr;
+    }
+
+    /* Encolhe dropdowns e campos de data pra abrir espaço à direita —
+       sem isso, a seta do select e o ícone de calendário ficam embaixo
+       do botão flutuante do menu hamburguer (fixed, canto inferior
+       direito). Tem que ser no wrapper (não no input direto) pra seta/
+       ícone — posicionados relativo ao wrapper — encolherem junto. */
+    .select-wrapper,
+    .date-wrapper {
+        max-width: calc(100% - 4rem);
+    }
+
+    /*
+        Abaixo de 736px o toolbar não muda mais de layout — continua
+        com o mesmo comportamento do breakpoint de 800px (Cancelar na
+        linha do card, Salvar e Continuar / Salvar e Sair dividindo a
+        segunda linha).
+    */
+}
+
+@media (max-width: 607px) {
+
+    /*
+        Ainda sem regra própria pro toolbar aqui — o layout do
+        breakpoint de 800px (Cancelar na linha do card, Salvar e
+        Continuar / Salvar e Sair dividindo a segunda linha) continua
+        valendo até esse ponto. O que rola abaixo de 607px fica pra
+        depois.
+    */
+}
+
+@media (max-width: 480px) {
+
+    .page-header {
+        padding: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Ícone do Cancelar só existe pro breakpoint abaixo — no normal fica
+   escondido e o botão mostra só o texto. */
+.toolbar__actions .orderBy-icon {
+    display: none;
+}
+
+@media (max-width: 410px) {
+
+    /*
+        Abaixo disso o Cancelar perde o texto e vira só o ícone (·x·),
+        e o card de identificação encolhe um pouco — senão os dois
+        junto com os botões de Salvar não cabem mais na mesma linha.
+    */
+    .toolbar__actions .btn__label {
+        display: none;
+    }
+
+    .toolbar__actions .orderBy-icon {
+        display: inline-block;
+    }
+
+    .toolbar__badge {
+        min-width: 150px;
+        padding: 0 0.75rem;
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 400px) {
+
+    .number-input--compact {
+        max-width: 74%;
+    }
+
+    .select-wrapper,
+    .date-wrapper {
+        max-width: 100%;
+    }
+}
+
+/* Quantidade em cadastro_solicitacao.html — mesmo componente "fração"
+   dos modais de separação (.number-input--fraction, ver forms.css), só
+   que sem o contexto apertado de linha de resultado, então recebe uma
+   largura própria (não os 130px fixos de .modal-result .number-input--fraction,
+   ver modal.css) em vez de esticar pra ocupar a coluna inteira de
+   .form-grid-estado. */
+#quantidadeGroup .number-input--fraction {
+    max-width: 180px;
+}
+
+/* #avancadosSection some por inteiro (não só trava) quando o grupo é
+   Endo — ver grupoDentario "change" em setupCadastroSolicitacao,
+   js/forms.js. Antes usava o atributo hidden nativo (trocado aqui pela
+   [hidden] esbarrar num empate de especificidade com .form-section, ver
+   forms.css) e a troca era instantânea; esta versão usa a mesma técnica
+   de grid-template-rows 0fr/1fr de .advanced-fields (abaixo) — precisa de
+   um wrapper único (.form-section__collapse-inner, ver HTML) porque um
+   grid com mais de uma linha implícita só colapsaria a primeira.
+   padding-top/border-top-color entram na transição pra a borda que separa
+   das seções vizinhas (ver .form-section + .form-section em forms.css)
+   sumir junto, em vez de deixar uma linha "flutuando" sobre o espaço
+   vazio enquanto Endo está selecionado.
+   Sem "opacity: 1" aqui de propósito — .form-section--disabled (aplicada
+   junto enquanto o Grupo ainda não foi escolhido) já esmaece a seção pra
+   0.45 via classe; um "opacity: 1" fixo nesta regra (ID, especificidade
+   mais alta) sobrescreveria esse esmaecimento sempre que .is-collapsed
+   não estiver presente, mesmo com .form-section--disabled ativa. */
+#avancadosSection {
+    grid-template-rows: 1fr;
+
+    transition:
+        grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease,
+        padding-top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        border-top-color 0.3s ease;
+}
+
+#avancadosSection.is-collapsed {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    padding-top: 0;
+    border-top-color: transparent;
+}
+
+#avancadosSection .form-section__collapse-inner {
+    overflow: hidden;
+    min-height: 0;
+
+    display: grid;
+    gap: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #avancadosSection {
+        transition: none;
+    }
+}
+
+/* "Campos avançados" (Estado/Dentição/Arcada/Numeração) em cadastro_solicitacao.html
+   — mesma técnica de grid-template-rows 0fr/1fr de .active-filters-bar
+   (ver css/components/filters.css), só que sem duplicar aquele
+   componente: aqui é um toggle de formulário puro, não uma barra de
+   filtros ativos. */
+.advanced-fields {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+
+    transition:
+        grid-template-rows 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+}
+
+.advanced-fields.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.advanced-fields__inner {
+    overflow: hidden;
+    min-height: 0;
+
+    display: grid;
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+}
+
+/* Barra separando Estado do dente (sozinho, linha própria) do restante
+   (Dentição + Arcada/Numeração, ver cadastro_solicitacao.html) — mesma
+   convenção visual de .form-section + .form-section (borda fina no topo
+   do bloco seguinte), só que aqui dentro de uma única seção/checkbox. */
+.advanced-fields__inner .form-grid {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .advanced-fields {
+        transition: none;
+    }
+}

@@ -1,0 +1,109 @@
+<div class="modal-results-scroll">
+    <div class="modal-results" id="modalBuscaFrascoResults">
+
+        <div class="frasco-item-row" th:each="f : ${frascos}">
+
+            <th:block
+                    th:with="itemSalvo=${itensSalvos != null ? itensSalvos.^[frasco != null and frasco.codigo == f.codigo] : null}">
+
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1);">
+
+                    <div style="display: flex; flex-direction: column;">
+                        <strong class="frasco-id-texto"
+                                th:text="${f.identificacao != null ? f.identificacao : 'FR-' + f.codigo}"></strong>
+                        <span style="font-size: 0.85em; opacity: 0.7;"
+                              th:text="'Cadastro ' + ${#temporals.format(f.datCad, 'yyyy-MM-dd')} + ' · Manutenção ' + ${#temporals.format(f.datManutencao, 'yyyy-MM-dd')}"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+
+                        <form th:if="${itemSalvo != null}"
+                              th:action="@{/analiseSolicitacao/removerItem/{codigo}(codigo=${itemSalvo.codigo})}"
+                              method="post" style="margin: 0;">
+                            <input type="hidden" name="codSolicitacao" th:value="${analise.solicitacao.codigo}">
+                            <button type="submit"
+                                    style="background: transparent; border: none; color: #6c757d; cursor: pointer; padding: 4px;"
+                                    aria-label="Remover">
+                                <i class="icon" data-lucide="x"></i>
+                            </button>
+                        </form>
+
+                        <form th:action="@{/analiseSolicitacao/selecionaFrasco}" method="post"
+                              style="margin: 0; display: flex; align-items: center;">
+                            <input type="hidden" name="analiseSolicitacao.codigo" th:value="${analise.codigo}">
+                            <input type="hidden" name="frasco.codigo" th:value="${f.codigo}">
+                            <input type="hidden" name="codSolicitacao" th:value="${analise.solicitacao.codigo}">
+
+                            <div class="number-input number-input--fraction">
+
+                                <input class="form-control number-input__field input-quantidade-auto"
+                                       type="number" name="quantidade" min="0"  th:max="${f.quantidade}"
+                                       th:value="${itemSalvo != null ? itemSalvo.quantidade : 1}" readonly>
+
+                                <span class="number-input__max" th:text="'/' + ${f.quantidade}"></span>
+
+                                <div class="number-input__actions">
+                                    <button type="button" class="number-input__btn btn-minus-auto"><i class="icon"
+                                                                                                      data-lucide="minus"></i>
+                                    </button>
+                                    <button type="button" class="number-input__btn btn-plus-auto"><i class="icon"
+                                                                                                     data-lucide="plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+            </th:block>
+        </div>
+
+    </div>
+
+    <div class="modal-empty" id="modalBuscaFrascoEmpty"
+         th:style="${#lists.isEmpty(frascos)} ? 'display:flex;' : 'display:none;'">
+        <i class="icon" data-lucide="package-search"></i>
+        <p>Nenhum frasco encontrado.</p>
+    </div>
+</div>
+
+document.addEventListener('DOMContentLoaded', () => {
+const resultsContainer = document.getElementById('modalBuscaFrascoResults');
+
+if (!resultsContainer) return;
+
+resultsContainer.addEventListener('click', (e) => {
+const btnPlus = e.target.closest('.btn-plus-auto');
+const btnMinus = e.target.closest('.btn-minus-auto');
+
+if (btnPlus || btnMinus) {
+const form = (btnPlus || btnMinus).closest('form');
+const input = form.querySelector('.input-quantidade-auto');
+
+let val = parseInt(input.value) || 0;
+const max = parseInt(input.max) || 999;
+const min = parseInt(input.min) || 0;
+
+if (btnPlus && val < max) {
+val++;
+} else if (btnMinus && val > min) {
+val--;
+}
+
+input.value = val;
+
+if (val <= 0) {
+const row = form.closest('.frasco-item-row');
+const formRemover = row.querySelector('form[action*="removerItem"]');
+
+if (formRemover) {
+formRemover.submit();
+return;
+}
+}
+
+form.submit();
+}
+});
+});

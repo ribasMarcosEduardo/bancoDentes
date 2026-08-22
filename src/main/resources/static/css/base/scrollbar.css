@@ -1,0 +1,47 @@
+/*
+    Rolagem customizada nos dois "dialetos" de CSS pra scrollbar que
+    existem hoje — cada navegador aplica só o bloco que entende, sem
+    conflito entre eles:
+
+    - scrollbar-width / scrollbar-color: propriedades padrão (Firefox,
+      e também suportadas por Chrome/Edge recentes). Dão pra deixar a
+      barra fina e trocar a cor da barra e do fundo, mas não tem
+      controle nenhum sobre as setinhas.
+
+    - ::-webkit-scrollbar e variantes: pseudo-elementos não-padrão do
+      WebKit/Blink (Chrome, Edge, Safari, Opera), só eles permitem
+      esconder/estilizar as setas e ajustar a largura em pixels.
+*/
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}

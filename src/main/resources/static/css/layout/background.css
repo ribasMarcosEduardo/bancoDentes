@@ -1,0 +1,237 @@
+.background {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Base comum */
+
+.blob {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(120px);
+
+    opacity: 0.17;
+}
+
+/* Blob azul */
+
+.blob--blue {
+    width: 900px;
+    height: 900px;
+
+    background: rgb(9, 131, 231);
+
+    right: -200px;
+    bottom: 60px;
+}
+
+/* Blob verde */
+
+.blob--green {
+    width: 900px;
+    height: 950px;
+
+    background: rgb(3, 187, 70);
+
+    left: -210px;
+    bottom: -250px;
+}
+
+/* ==========================================================
+   Fundo "aurora" — variante animada usada em páginas full-bleed
+   (ex.: login), prototipada em teste-background.html/.css.
+
+   Prefixo .aurora- de propósito: são classes totalmente à parte de
+   .background/.blob acima (usadas em várias páginas do dashboard),
+   pra não colidir com elas nem herdar/alterar seu comportamento.
+   ========================================================== */
+
+.aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    overflow: hidden;
+    pointer-events: none;
+    background: #0c0e10;
+}
+
+.aurora-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(220px);
+    mix-blend-mode: screen;
+    will-change: transform;
+    animation-name: aurora-blob-move;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.aurora-blob--blue {
+    background: rgb(7, 105, 185);
+}
+
+.aurora-blob--green {
+    background: rgb(4, 175, 128);
+}
+
+/* Offsets horizontais (left/right) puxados pra perto do centro.
+
+   A altura usa vh (não vmax) de propósito: como vmax é baseado na
+   MAIOR dimensão (a largura, numa tela wide), um blob "quadrado" em
+   vmax fica mais alto que a própria janela e domina a tela inteira
+   mesmo alinhado na borda. Desacoplando altura (vh) de largura (vmax)
+   os blobs ficam mais achatados/elípticos e realmente grudam nas
+   bordas, sobrando espaço livre no meio vertical da tela.
+
+   O offset top/bottom é sempre metade da altura própria do blob
+   (também em vh), pra que o CENTRO fique exatamente colado na borda
+   — "%" não serviria aqui porque top/bottom em % é relativo à altura
+   do container, não ao tamanho do próprio elemento.
+
+   Duração e delay da animação são iguais dentro do mesmo polo (os
+   dois de cima com o mesmo timing, os dois de baixo com o mesmo
+   timing), pra respirarem em sincronia — só a direção do deslocamento
+   (--dx/--dy) muda entre eles.
+
+   Largura aumentada em relação à altura: cada polo tem um blob preso
+   na esquerda e outro na direita, e a largura maior garante que os
+   dois sempre se alcancem/sobreponham no centro da tela, sem abrir um
+   vão escuro separando-os mesmo durante a animação. */
+
+.aurora-blob--blue-1 {
+    width: 70vmax;
+    height: 34vh;
+    top: -17vh;
+    left: -2%;
+    opacity: 0.75;
+    animation-duration: 44s;
+    --dx1: 8vw;  --dy1: 6vh;  --dx2: -4vw; --dy2: 10vh;
+}
+
+.aurora-blob--blue-2 {
+    width: 58vmax;
+    height: 26vh;
+    bottom: -13vh;
+    left: -2%;
+    opacity: 0.65;
+    animation-duration: 52s;
+    --dx1: -7vw; --dy1: -9vh; --dx2: 5vw;  --dy2: -4vh;
+}
+
+.aurora-blob--green-1 {
+    width: 65vmax;
+    height: 30vh;
+    bottom: -15vh;
+    right: -4%;
+    opacity: 0.7;
+    animation-duration: 52s;
+    --dx1: 7vw;  --dy1: -8vh; --dx2: -5vw; --dy2: 6vh;
+}
+
+.aurora-blob--green-2 {
+    width: 55vmax;
+    height: 24vh;
+    top: -12vh;
+    right: -2%;
+    opacity: 0.6;
+    animation-duration: 44s;
+    --dx1: -6vw; --dy1: 8vh;  --dx2: 4vw;  --dy2: -6vh;
+}
+
+@keyframes aurora-blob-move {
+    0%   { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(var(--dx1), var(--dy1)) scale(1.18); }
+    66%  { transform: translate(var(--dx2), var(--dy2)) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+/* Camada de "vidro embaçado" por cima dos blobs (frost frio).
+
+   backdrop-filter borra tudo que está atrás (os blobs), e a cor de
+   fundo é um cinza bem claro e quase transparente — só o suficiente
+   pra dar aquela sensação de vidro fosco frio, sem lavar as cores
+   dos blobs por baixo. Fica ACIMA dos blobs e ABAIXO do grão, porque
+   na vida real a poeira/grão fica na superfície do vidro, por cima
+   do embaçado, não o contrário. */
+
+.aurora-frost {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background: rgba(225, 228, 233, 0.045);
+
+    backdrop-filter: blur(70px) saturate(115%);
+    -webkit-backdrop-filter: blur(70px) saturate(115%);
+}
+
+/* Granulação branca por cima de tudo (efeito vidro fosco).
+
+   O tile do SVG é declarado do MESMO tamanho do background-size
+   (170x170 -> 170px 170px) de propósito: se o tile é esticado além
+   da resolução intrínseca, o navegador faz upscale do ruído e os
+   "grãos" saem borrados/gigantes em vez de finos.
+
+   feTurbulence sozinho gera ruído em tons médios contínuos — se só
+   amplifica o alfa linearmente, a maior parte do canvas fica com
+   alfa alto e pinta um véu branco uniforme por cima de tudo. O
+   feComponentTransfer com gamma resolve isso: valores médios de
+   ruído caem quase a zero de alfa (totalmente transparentes, fundo
+   continua sem cor) e só os picos do ruído sobram como grãos brancos
+   nítidos e esparsos.
+
+   Sem mix-blend-mode por igual motivo: blend modes reagem à cor de
+   baixo; aqui os grãos precisam ser brancos "puros" e sólidos onde
+   aparecem, então a composição é normal (alpha compositing direto). */
+
+.aurora-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0' result='white'/%3E%3CfeComponentTransfer in='white'%3E%3CfeFuncA type='gamma' amplitude='1' exponent='5' offset='0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 170px 170px;
+
+    opacity: 0.2;
+}
+
+/* --- Variante clara (prefers-color-scheme, ver script no <head> de
+   login.html/confirmacao_email.html) ---
+
+   O visual acima (fundo quase preto + blobs em blend "screen") só
+   funciona sobre um fundo escuro: "screen" sempre clareia o que está
+   por baixo, então sobre um fundo já claro os blobs simplesmente
+   estourariam pra branco e sumiriam. A variante clara troca a base pra
+   quase-branco e os blobs voltam pro blend normal (não clareia nem
+   escurece o que está atrás) — só que precisa de bem mais opacidade que
+   o normal/screen do modo escuro pra compensar: sem o "boost" de brilho
+   do screen, o blur de 220px (pensado pra suavizar, não pra sumir)
+   deixa a cor bem mais diluída sobre um fundo claro, quase imperceptível
+   com valores baixos. */
+
+:root.light .aurora-bg {
+    background: #fcfcfc;
+}
+
+:root.light .aurora-blob {
+    mix-blend-mode: normal;
+}
+
+:root.light .aurora-blob--blue-1 { opacity: 0.78; }
+:root.light .aurora-blob--blue-2 { opacity: 0.65; }
+:root.light .aurora-blob--green-1 { opacity: 0.72; }
+:root.light .aurora-blob--green-2 { opacity: 0.58; }
+
+/* O grão branco acima (pensado pra "sujar" um fundo escuro, ver alfa
+   vindo do ruído em .aurora-grain) fica invisível sobre um fundo já
+   quase branco — invertendo as cores do mesmo SVG via filter (sem
+   duplicar o data URI inteiro só pra trocar de branco pra preto), os
+   grãos saem escuros e voltam a aparecer sobre o fundo claro. */
+:root.light .aurora-grain {
+    filter: invert(1);
+}

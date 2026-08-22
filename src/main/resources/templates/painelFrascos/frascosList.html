@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script>
+    (function () {
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+        document.documentElement.classList.add(theme);
+    })();
+  </script>
+
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/frascos.css(v=${#dates.createNow().getTime()})}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <title>Painel de Frascos</title>
+</head>
+
+<body>
+
+<div class="background">
+  <div class="blob blob--blue"></div>
+  <div class="blob blob--green"></div>
+</div>
+
+<div th:replace="~{partials/navbar :: navbar}"></div>
+
+<main class="page">
+  <section class="dashboard">
+
+    <div class="filters-sidebar-desktop">
+      <aside class="filter-sidebar glass-frost-strong">
+        <div class="filters-header">
+          <i class="icon" data-lucide="filter"></i>
+          <h2>Filtros</h2>
+
+          <button type="button" class="filters-mobile-close" aria-label="Fechar filtros">
+            <i class="icon" data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="filter-section">
+          <button class="filter-section__toggle">
+            Grupo dentário
+            <i class="icon" data-lucide="chevron-down"></i>
+          </button>
+          <div class="filter-section__content">
+            <label class="checkbox-filter" th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}">
+              <input type="checkbox" th:value="${nome}" data-filter-group="Grupo dentário">
+              <span th:text="${nome}">Molar</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <button class="filter-section__toggle">
+            Estado do dente
+            <i class="icon" data-lucide="chevron-down"></i>
+          </button>
+          <div class="filter-section__content">
+            <label class="checkbox-filter" th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}">
+              <input type="checkbox" th:value="${e}" data-filter-group="Estado">
+              <span th:text="${e}">Cariado</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <button class="filter-section__toggle">
+            Arcada
+            <i class="icon" data-lucide="chevron-down"></i>
+          </button>
+          <div class="filter-section__content">
+            <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}">
+              <input type="checkbox" th:value="${m}" data-filter-group="Arcada">
+              <span th:text="${m}">Superior</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <button class="filter-section__toggle">
+            Dentição
+            <i class="icon" data-lucide="chevron-down"></i>
+          </button>
+          <div class="filter-section__content">
+            <label class="checkbox-filter" th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}">
+              <input type="checkbox" th:value="${d.nome}" data-filter-group="Dentição">
+              <span th:text="${d.nome}">Permanente</span>
+            </label>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="main-panel">
+      <header class="page-header">
+        <h1>Painel de Frascos</h1>
+        <p>Consulte, filtre e gerencie os frascos cadastrados.</p>
+      </header>
+
+      <div class="toolbar glass-frost">
+        <div class="search-wrapper">
+          <input type="search" id="searchInput" placeholder="Buscar frasco...">
+          <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
+          <i class="search-icon" data-lucide="search"></i>
+        </div>
+
+        <div class="toolbar__actions">
+          <div class="toolbar__row toolbar__row--controls">
+            <div class="page-size-control">
+              <label for="pageSize">Exibir</label>
+              <div class="select-wrapper page-size-control__select">
+                <select class="form-control" id="pageSize">
+                  <option value="10" selected>10</option>
+                  <option value="20">20</option>
+                  <option value="30">30</option>
+                </select>
+                <i class="select-icon icon" data-lucide="chevron-down"></i>
+              </div>
+            </div>
+
+            <div class="view-switch">
+              <button class="btn view-switch__btn active" data-view="grid">
+                <i class="icon" data-lucide="layout-grid"></i>
+              </button>
+              <button class="btn view-switch__btn" data-view="list">
+                <i class="icon" data-lucide="list"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="toolbar__row toolbar__row--buttons">
+            <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
+              <i class="icon" data-lucide="filter"></i>
+            </button>
+            <button class="btn btn-secondary" id="btnSortOrder">
+              <span class="btn__label">Ordenar</span>
+              <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
+            </button>
+            <a th:href="@{/frasco}" class="btn btn-primary">
+              <i class="orderBy-icon" data-lucide="plus"></i> Novo frasco
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="active-filters-bar glass-frost" id="activeFiltersBar">
+        <div class="active-filters-bar__inner">
+          <div class="active-filters-bar__header">
+            <span class="active-filters-bar__label">Filtros ativos:</span>
+            <button class="filters-clear" type="button">
+              <i class="icon" data-lucide="rotate-ccw"></i> Resetar Filtros
+            </button>
+          </div>
+          <div class="active-filters" id="activeFilters"></div>
+        </div>
+      </div>
+
+      <div class="list-panel">
+        <div class="pagination">
+          <div class="low-opacity">
+            <strong id="paginationInfo" th:text="${#lists.size(frascos)} + ' Resultados Encontrados'">0 Resultados Encontrados</strong>
+          </div>
+          <div class="pagination__actions">
+            <div class="sector-switch" id="sectorSwitch">
+              <span class="sector-switch__indicator"></span>
+              <button class="sector-switch__btn active" data-setor="todos">Todos</button>
+              <button class="sector-switch__btn" data-setor="bdh">BDH</button>
+              <button class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
+            </div>
+
+            <div class="pagination__nav">
+              <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior">
+                <i data-lucide="chevron-left"></i>
+              </button>
+              <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página">
+                <i data-lucide="chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
+          <i data-lucide="info" class="me-2"></i> Não há nenhum frasco cadastrado no banco de dados.
+        </div>
+
+        <section th:if="${!#lists.isEmpty(frascos)}" class="results results--grid" id="resultsView">
+
+          <div class="result-table result-table--frascos">
+            <div class="result-table__head">
+              <span>Identificador</span>
+              <span>Grupo</span>
+              <span>Estado</span>
+              <span>Local</span>
+              <span>Qtd.</span>
+              <span>Cadastro</span>
+              <span>Manutenção</span>
+              <span></span>
+            </div>
+
+            <article th:each="frasco : ${frascos}"
+                     class="request-row"
+                     data-setor="bdh"
+                     th:data-grupo="${frasco.tipoDente}"
+                     th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
+                     th:data-arcada="${frasco.maxilar != null ? frasco.maxilar : ''}"
+                     th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
+
+              <div class="result-list">
+                <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
+                <span th:text="${frasco.tipoDente}">Grupo</span>
+                <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
+                <span>Bdh</span> <span th:text="${frasco.quantidade}">0</span>
+                <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">00/00/00</span>
+                <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
+
+                <div class="result-list__actions">
+                  <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                    <i class="icon" data-lucide="pen-line"></i>
+                  </a>
+                  <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir">
+                    <i class="icon" data-lucide="chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="request-details">
+                <div class="request-details__content">
+                  <div class="request-details__layout">
+                    <section class="request-panel">
+                      <h4 class="request-panel__title">Detalhes do Frasco</h4>
+                      <div class="request-details__grid">
+                        <div class="request-detail">
+                          <span class="request-details__label">Grupo dentário</span>
+                          <span th:text="${frasco.tipoDente}">-</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Estado</span>
+                          <span th:text="${frasco.estado != null ? frasco.estado : '-'}">-</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Arcada</span>
+                          <span th:text="${frasco.maxilar != null ? frasco.maxilar : '-'}">-</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Dentição</span>
+                          <span th:text="${frasco.denticao != null ? frasco.denticao.nome : '-'}">-</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Posição</span>
+                          <span th:text="${frasco.posicao != null ? frasco.posicao : '-'}">-</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Quantidade</span>
+                          <span th:text="${frasco.quantidade}">-</span>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="request-panel">
+                      <h4 class="request-panel__title">Local e Datas</h4>
+                      <div class="request-details__grid request-details__grid--single">
+                        <div class="request-detail">
+                          <span class="request-details__label">Local</span>
+                          <span>Banco de Dentes Humanos</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Data de cadastro</span>
+                          <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Data de manutenção</span>
+                          <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="results-grid">
+            <article th:each="frasco : ${frascos}"
+                     class="card"
+                     data-setor="bdh"
+                     th:data-grupo="${frasco.tipoDente}"
+                     th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
+                     th:data-arcada="${frasco.maxilar != null ? frasco.maxilar : ''}"
+                     th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
+
+              <header class="card__header">
+                <div>
+                  <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
+                  <div class="card__meta" th:text="'Bdh | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+                </div>
+                <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
+              </header>
+
+              <div class="card__body">
+                <div class="card__row">
+                  <span class="card__label">Estado:</span>
+                  <span class="card__value" th:text="${frasco.estado != null ? frasco.estado : '-'}">-</span>
+                </div>
+                <div class="card__row">
+                  <span class="card__label">Dentição:</span>
+                  <span class="card__value" th:text="${frasco.denticao != null ? frasco.denticao.nome : '-'}">-</span>
+                </div>
+                <div class="card__row">
+                  <span class="card__label">Arcada:</span>
+                  <span class="card__value" th:text="${frasco.maxilar != null ? frasco.maxilar : '-'}">-</span>
+                </div>
+              </div>
+
+              <footer class="card__footer">
+                <div class="card__dates">
+                  <p class="card__date" th:text="${frasco.datCad != null ? 'Cadastrado em: ' + #temporals.format(frasco.datCad, 'dd/MM/yyyy') : 'Cadastro: -'}"></p>
+                  <p class="card__date" th:text="${frasco.datManutencao != null ? 'Manutenção: ' + #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : ''}"></p>
+                </div>
+
+                <div class="card__actions">
+                  <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
+                    <i class="icon" data-lucide="pen-line"></i>
+                  </a>
+                  <button type="button" class="card__action card__action--red" data-tooltip="Apagar">
+                    <i class="icon" data-lucide="archive-x"></i>
+                  </button>
+                </div>
+              </footer>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </section>
+</main>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/filters.js}"></script>
+<script th:src="@{/js/results.js}"></script>
+<script th:src="@{/js/search.js}"></script>
+<script th:src="@{/js/requests.js}"></script>
+<script th:src="@{/js/page-size.js}"></script>
+
+</body>

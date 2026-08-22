@@ -1,0 +1,94 @@
+.stepper {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.5rem 0;
+
+    margin: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 0.55rem;
+
+    min-width: 140px;
+}
+
+.step__circle {
+    width: 44px;
+    height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--surface-soft);
+    color: var(--text-muted);
+
+    box-shadow: var(--shadow);
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.step__circle .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.step span {
+    color: var(--text-muted);
+
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.stepper__line {
+    flex: 1;
+    height: 4px;
+
+    margin: 0 -1rem 1.75rem;
+
+    border-radius: 999px;
+
+    background: var(--step-line-bg);
+
+    transition:
+        background 0.35s ease,
+        transform 0.35s ease;
+}
+
+.stepper__line.is-filled {
+    background: var(--step-line-active);
+}
+
+.step--done .step__circle,
+.step--active .step__circle {
+    border-color: var(--step-line-active);
+    background: var(--step-line-active);
+    color: var(--badge-text);
+}
+
+.step--active .step__circle {
+    transform: scale(1.06);
+}
+
+.step--active span {
+    color: var(--text);
+}
+
+.step--done span {
+    color: var(--text-soft);
+}

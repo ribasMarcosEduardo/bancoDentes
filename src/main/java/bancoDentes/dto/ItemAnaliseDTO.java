@@ -13,21 +13,21 @@ public record ItemAnaliseDTO(
         Long version,
         AnaliseSolicitacao analiseSolicitacao,
         Frasco frasco,
-        Long quantiade
+        Long quantidade
 
 ) {
 
     public static Object empty(){
-        return new ItemAnaliseDTO(null,null,null,null,null);
+        return new ItemAnaliseDTO(null, null, null, null, null);
     }
 
-    public ItemAnalise mapearItemSolicitacao(AnaliseSolicitacao analiseSolicitacao, Frasco frasco) {
+    public ItemAnalise mapearItemSolicitacao() {
         ItemAnalise itemSol = new ItemAnalise();
         itemSol.setCodigo(this.codigo);
         itemSol.setVersion(this.version);
         itemSol.setAnaliseSolicitacao(analiseSolicitacao);
         itemSol.setFrasco(frasco);
-        itemSol.setQuantidade(this.quantiade);
+        itemSol.setQuantidade(this.quantidade);
         return itemSol;
     }
 

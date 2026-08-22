@@ -1,0 +1,338 @@
+@media (max-width: 607px) {
+
+    /*
+        O filtro sai da 1ª linha (onde ficava à esquerda de Ordenar) e
+        vai pra 2ª linha, ao lado de "Exibir", alinhado à direita da
+        toolbar.
+
+        components/toolbar.css empilha .toolbar__row--buttons (Filtro +
+        Ordenar + Novo Usuário) em cima e .toolbar__row--controls
+        (Exibir) embaixo — mas como caixas inteiras, não dá pra tirar só
+        o filtro de uma delas via order (order só reordena entre irmãos
+        do MESMO container). display:contents em .toolbar__row--buttons
+        resolve isso: ela some como caixa mas continua existindo no DOM
+        (seletores como ".toolbar__row > .btn" em toolbar.css continuam
+        batendo igual) — Filtro, Ordenar e Novo Usuário passam a ser
+        itens soltos do grid, enquanto .toolbar__row--controls continua
+        como uma caixa real (não precisa dissolver: só ela precisava
+        "receber" o filtro, e isso é feito posicionando o filtro por
+        cima da mesma célula, não movendo pra dentro dela).
+
+        Mesmo padrão de movimentacoes.css/frascos.css pra essa faixa.
+    */
+    .toolbar__actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .toolbar__row--buttons {
+        display: contents;
+    }
+
+    /* Ordenar e Novo Usuário preenchem a linha 1, um em cada coluna. */
+    .toolbar__row--buttons .btn {
+        grid-row: 1;
+    }
+
+    /*
+        .toolbar__row--controls (Exibir) ocupa a linha 2 inteira (as
+        duas colunas) — justify-self:end + width:fit-content colam ele
+        na ponta direita, sobrando espaço à esquerda pro filtro (mesma
+        célula, "start") sem colidir.
+    */
+    .toolbar__row--controls {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        width: fit-content;
+        justify-self: end;
+    }
+
+    .toolbar__filter-toggle {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
+@media (max-width: 440px) {
+
+    /*
+        Abaixo de ~440px, "Ordenar" e "Novo Usuário" não cabem mais lado
+        a lado com o botão de filtro na mesma linha — some o texto de
+        Ordenar (fica só o ícone) e o prefixo "Novo" de "Novo Usuário"
+        (fica só "Usuário").
+    */
+    .btn__label {
+        display: none;
+    }
+
+    .btn-label--prefix {
+        display: none;
+    }
+}
+
+@media (max-width: 1115px) {
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        justify-content: right;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+}
+
+/*
+    Entre 607px e 1271px a busca fica sozinha na primeira linha da
+    toolbar; embaixo, Exibir grudado na esquerda e filtro + Ordenar +
+    Novo Usuário na direita, na mesma linha. Vem depois do bloco de
+    1115px acima de propósito: pra faixa em que os dois se sobrepõem
+    (607–1115px), o justify-content:space-between daqui precisa vencer
+    o justify-content:right de lá.
+*/
+@media (min-width: 607px) and (max-width: 1271px) {
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}
+
+/*
+    Painel de usuários tem linha expansível (mesmo padrão de
+    frascos/solicitações) — a área expandida sempre mostra o recap
+    completo (Código, Nome completo, Email, Permissão, Status, Saldo
+    Atual), não só o que sumiu da linha: mesmo padrão de frascos.html,
+    que duplica Grupo/Estado na área expandida mesmo eles já aparecendo
+    na linha. Código e Nome completo entram aqui também (não só os 4
+    campos que podem sumir da linha) pra área expandida funcionar como
+    um resumo autocontido do usuário, sem precisar olhar pra linha de
+    novo. Isso evita a área expandida vazia quando nenhuma coluna está
+    escondida (ver .request-details__grid — sem classes condicionais
+    aqui).
+
+    Nas larguras estreitas, as colunas da linha ainda somem uma a uma,
+    na ordem de prioridade pedida: Código+Nome e Ações sempre visíveis;
+    depois Permissão, Saldo Atual, Status e Email (a última é a primeira
+    a sumir) — a área expandida garante que o dado continue acessível
+    mesmo com a coluna escondida.
+
+    Nota sobre o valor de Status no HTML: a pill (.status-pill) fica
+    dentro de um <span> extra (não é filho direto de .request-detail).
+    ".request-detail span:last-child" (list.css) sobrescreve cor/tamanho/
+    peso da fonte do último span pra deixar o VALOR num tom mais claro
+    que o rótulo — teria mais especificidade que ".status-pill--ativo" e
+    quebraria a cor/tamanho da pill (ela vira o "last-child" direto sem
+    o wrapper). Com o wrapper, quem é o last-child é o <span> vazio (que
+    recebe esse estilo sem efeito visual nenhum) e a pill, um filho dele,
+    mantém as próprias regras. Código não precisa disso: na área
+    expandida ele aparece como texto simples (sem a pill), então não tem
+    conflito de especificidade nenhum ali.
+*/
+
+/*
+    A área expandida tem 2 seções (Detalhes do Usuário + Ações) uma
+    embaixo da outra — sem .request-details__layout (o grid de 2 colunas
+    de frascos/solicitações), porque aqui as 2 seções são empilhadas, não
+    lado a lado (só uma delas por linha, então sobraria uma coluna vazia
+    à direita de "Detalhes do Usuário" se usasse aquele grid). Gap
+    reaproveita o mesmo valor (1.5rem) do gap de .request-details__layout,
+    só pra manter o espaçamento consistente com o resto do site.
+*/
+.result-table--usuarios .request-panel + .request-panel {
+    margin-top: 1.5rem;
+}
+
+/*
+    Nome, Email e Código alinhados à esquerda com corte por reticências
+    em vez de estourar a coluna. Sem width:100%, justify-self:start
+    deixa a caixa do tamanho do conteúdo (não da trilha do grid) — nomes
+    e emails longos (ex.: "Fernanda Rocha" / "fernanda.rocha@unoesc.
+    edu.br") furavam a própria coluna e encostavam no texto vizinho.
+
+    Só o Email corta de fato (overflow/ellipsis): truncar o nome de
+    alguém é pior do que deixá-lo quebrar em 2 linhas, então Nome só
+    ganha o width:100% (pra quebrar dentro da trilha certa, não pra
+    cortar). Código usa max-width em vez de width — assim mantém o
+    tamanho de pill (fit-content) e só corta em casos extremos (nunca
+    deveria acontecer com um código de 6 dígitos, mas é a mesma rede de
+    segurança pedida pro Email).
+
+    justify-self/text-align repetidos aqui (não só em .result-list__name,
+    em list.css) porque ".result-list span" (a regra genérica que
+    centraliza) tem mais especificidade que uma classe sozinha — sem
+    esse reforço aqui, Nome volta a centralizar assim que deixa de ser
+    o primeiro filho (que tinha um :first-child cobrindo isso; Código
+    é o primeiro filho agora).
+*/
+.result-table--usuarios .result-list__name {
+    justify-self: start;
+    text-align: left;
+
+    width: 100%;
+}
+
+.result-table--usuarios .result-list__code {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-table--usuarios .result-list__email {
+    justify-self: start;
+    text-align: left;
+
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Cabeçalho de Nome/Email acompanha o alinhamento à esquerda dos dados. */
+.result-table--usuarios .result-table__head span:nth-child(2),
+.result-table--usuarios .result-table__head span:nth-child(3) {
+    text-align: left;
+    justify-self: start;
+}
+
+/*
+    Thresholds abaixo testados com prototype/_responsive_test.html
+    (iframes lado a lado em várias larguras), com o corte por
+    reticências acima já valendo — cada um marca a largura onde a
+    coluna seguinte passaria a truncar/espremer demais sem esse corte.
+*/
+
+/*
+    Permissão é a primeira a sumir (menor prioridade).
+*/
+@media (max-width: 930px) {
+
+    .result-table--usuarios .result-table__head,
+    .result-table--usuarios .result-list {
+        min-width: 0;
+        grid-template-columns:
+            minmax(90px, 0.6fr)
+            1.6fr
+            1.7fr
+            1fr
+            0.8fr
+            116px;
+    }
+
+    .result-table--usuarios .result-table__head span:nth-child(4),
+    .result-table--usuarios .result-list > span:nth-child(4) {
+        display: none;
+    }
+}
+
+/*
+    Saldo Atual soma na sequência — sobra Código, Nome, Email, Status e
+    Ações.
+*/
+@media (max-width: 810px) {
+
+    .result-table--usuarios .result-table__head,
+    .result-table--usuarios .result-list {
+        grid-template-columns:
+            minmax(90px, 0.6fr)
+            1.6fr
+            1.7fr
+            1fr
+            116px;
+    }
+
+    .result-table--usuarios .result-table__head span:nth-child(6),
+    .result-table--usuarios .result-list > span:nth-child(6) {
+        display: none;
+    }
+}
+
+/*
+    Status é o próximo — sobra Código, Nome, Email e Ações.
+*/
+@media (max-width: 730px) {
+
+    .result-table--usuarios .result-table__head,
+    .result-table--usuarios .result-list {
+        grid-template-columns:
+            minmax(90px, 0.6fr)
+            1.6fr
+            1.7fr
+            116px;
+    }
+
+    .result-table--usuarios .result-table__head span:nth-child(5),
+    .result-table--usuarios .result-list > span:nth-child(5) {
+        display: none;
+    }
+}
+
+/*
+    Email é o último a sumir antes de sobrar só o essencial (Código,
+    Nome e Ações) — mesmo padrão de frascos/solicitações: o resto vira
+    scroll horizontal.
+*/
+@media (max-width: 460px) {
+
+    .result-table--usuarios .result-table__head,
+    .result-table--usuarios .result-list {
+        grid-template-columns:
+            minmax(90px, 0.6fr)
+            var(--list-first-col)
+            116px;
+    }
+
+    .result-table--usuarios .result-table__head span:nth-child(3),
+    .result-table--usuarios .result-list > span:nth-child(3) {
+        display: none;
+    }
+}
+
+/*
+    Abaixo de ~360px os 2 botões de ação (Editar + Bloquear/Desbloquear)
+    já não cabem ao lado da seta de expandir — somem os 2 daqui, mesmo
+    padrão de frascos.css (max-width:350px): a seção "Ações" da área
+    expandida (sempre visível) repõe os mesmos botões, então sobra só a
+    seta.
+*/
+@media (max-width: 360px) {
+
+    .result-table--usuarios .result-table__head,
+    .result-table--usuarios .result-list {
+        grid-template-columns:
+            minmax(80px, 0.6fr)
+            var(--list-first-col)
+            84px;
+    }
+
+    .result-table--usuarios .result-list__actions .result-list__action {
+        display: none;
+    }
+}

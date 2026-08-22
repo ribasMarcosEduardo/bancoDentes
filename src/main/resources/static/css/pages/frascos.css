@@ -1,0 +1,267 @@
+@media (max-width: 1115px) {
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        justify-content: right;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+}
+
+/*
+    Entre 607px e 1271px a busca fica sozinha na primeira linha da
+    toolbar; embaixo, Exibir + view-switch grudam na esquerda e
+    filtro + Ordenar + Novo frasco na direita, na mesma linha. Vem
+    depois do bloco de 1115px acima de propósito: pra faixa em que os
+    dois se sobrepõem (607–1115px), o justify-content:space-between
+    daqui precisa vencer o justify-content:right de lá.
+
+    O limite é 607px (e não 608px) de propósito, pra grudar exatamente
+    no @media (max-width:607px) de components/toolbar.css — com largura
+    fracionária (zoom/escala de tela fora de 100%), a viewport real em
+    CSS px pode cair, por exemplo, em 607.06px: nem "max-width:607px"
+    nem "min-width:608px" seriam verdadeiros, e o toolbar ficava um
+    instante sem o layout de nenhum dos dois breakpoints. Usando o
+    mesmo valor nos dois lados, a união das duas faixas cobre qualquer
+    largura real, sem intervalo morto.
+*/
+@media (min-width: 607px) and (max-width: 1271px) {
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}
+
+/* Seção "Ações" da área expandida do frasco — sempre visível (desktop
+   e mobile), ocupando a largura das outras duas seções quando elas
+   dividem a grade em 2 colunas (ver .request-details__layout em
+   list.css) */
+.request-panel--frascos-actions {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+
+    /*
+        Na lista de frascos, o resto das colunas já dá pra ver na área
+        expandida da linha — no celular só cabe o essencial.
+        Ordem dos filhos: 1 Identificador, 2 Grupo, 3 Estado, 4 Local,
+        5 Qtd., 6 Cadastro, 7 Manutenção, 8 ações.
+    */
+    .result-table--frascos .result-table__head,
+    .result-table--frascos .result-list {
+        min-width: 0;
+        grid-template-columns: 1.3fr 1fr 0.6fr 76px;
+    }
+
+    .result-table--frascos .result-table__head span:nth-child(2),
+    .result-table--frascos .result-table__head span:nth-child(3),
+    .result-table--frascos .result-table__head span:nth-child(6),
+    .result-table--frascos .result-table__head span:nth-child(7),
+    .result-table--frascos .result-list > span:nth-child(2),
+    .result-table--frascos .result-list > span:nth-child(3),
+    .result-table--frascos .result-list > span:nth-child(6),
+    .result-table--frascos .result-list > span:nth-child(7) {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+
+    /* Sobra só Identificador, Qtd. e ações — Local também dá pra ver
+       expandindo a linha */
+    .result-table--frascos .result-table__head,
+    .result-table--frascos .result-list {
+        grid-template-columns: 1.4fr 0.7fr 76px;
+    }
+
+    .result-table--frascos .result-table__head span:nth-child(4),
+    .result-table--frascos .result-list > span:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 390px) {
+
+    /* Só existe em frascos.html — some o texto e deixa só o ícone */
+    .btn__label {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /*
+        .pagination__range tinha margin-left:auto (regra global, em
+        pagination.css) pra empurrar ela e as setas — suas irmãs diretas
+        — até a direita. Desde que elas viraram um grupo próprio
+        (.pagination__nav), o auto-margin precisa estar no grupo, senão
+        ele empurra só dentro de uma caixa que já está do tamanho do
+        conteúdo, sem efeito nenhum.
+    */
+    .pagination:has(.sector-switch) .pagination__nav {
+        margin-left: auto;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 766px) {
+
+    /*
+        Nessa faixa a paginação inteira (sector-switch + intervalo +
+        setas) não cabe ao lado do texto de resultados e ficava tudo
+        amontoado à esquerda. Vira 2 linhas: sector-switch à esquerda e
+        setas à direita em cima, texto de resultados embaixo.
+    */
+    .pagination:has(.sector-switch) {
+        flex-direction: column;
+        align-items: stretch;
+
+        /* setas (.pagination__actions, order:1) ficam visualmente acima
+           do texto de resultados (.low-opacity, order:2) — 1.5rem entre
+           os dois em qualquer página que empilhe assim */
+        gap: 1.5rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .low-opacity {
+        order: 2;
+    }
+
+
+    /*
+        Estado, Cadastro e Manutenção somem daqui — sobra Identificador,
+        Grupo, Local e Qtd. na linha não expandida; os outros dados
+        continuam visíveis expandindo a linha.
+
+        min-width:0 sobrescreve o min-width:720px de list.css (regra
+        genérica pra tabelas com mais colunas, que força scroll
+        horizontal em qualquer largura ≤860px) — com só 4 colunas
+        sobrando aqui, a tabela cabe sem precisar de scroll.
+    */
+    .result-table--frascos .result-table__head,
+    .result-table--frascos .result-list {
+        min-width: 0;
+        grid-template-columns:
+            var(--list-first-col)
+            repeat(3, 1fr)
+            80px;
+    }
+
+    .result-table--frascos .result-table__head span:nth-child(3),
+    .result-table--frascos .result-table__head span:nth-child(6),
+    .result-table--frascos .result-table__head span:nth-child(7),
+    .result-table--frascos .result-list span:nth-child(3),
+    .result-table--frascos .result-list span:nth-child(6),
+    .result-table--frascos .result-list span:nth-child(7) {
+        display: none;
+    }
+}
+
+/*
+    Base do agrupamento intervalo + setas — precisa existir em qualquer
+    largura (não só dentro do media query de 350px), senão vira uma div
+    sem estilo (display:block) e os elementos empilham/quebram em vez
+    de ficar lado a lado.
+*/
+.pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+@media (max-width: 350px) {
+
+    /*
+        Linha 1: sector-switch maior, centralizado.
+        Linha 2: intervalo + setas de paginação, alinhados à direita.
+    */
+    .pagination:has(.sector-switch) .pagination__actions {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 0.65rem;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn,
+    .pagination:has(.sector-switch) .sector-switch__indicator {
+        height: 38px;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn {
+        padding: 0 1rem;
+        font-size: 0.85rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav {
+        justify-content: flex-end;
+        align-self: stretch;
+    }
+
+    /*
+        Nessa largura o botão de ação não cabe mais na linha da lista
+        ao lado do texto e da seta de expandir — some daqui; a seção
+        "Ações" no fim da área expandida (sempre visível) continua
+        dando acesso a ele.
+    */
+    .result-table--frascos .result-list__actions .result-list__action {
+        display: none;
+    }
+}
+
+@media (max-width: 450px) {
+
+    /*
+        Setas de paginação menores — movido de components/pagination.css
+        pra cá (com :has(.sector-switch) escopando) porque era uma
+        regra genérica afetando toda página com paginação; só devia
+        valer pra frascos.
+    */
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination {
+        width: 38px;
+        height: 28px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination svg {
+        width: 16px;
+        height: 16px;
+    }
+}

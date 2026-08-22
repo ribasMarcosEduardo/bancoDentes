@@ -1,5 +1,6 @@
 package bancoDentes.service;
 
+import bancoDentes.exception.EstudanteException;
 import bancoDentes.model.Estudante;
 import bancoDentes.repository.EstudanteRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +13,8 @@ public class EstudanteService {
     //ISSO TUDO É TEMPOÁRIO
     private final EstudanteRepository estudanteRepository;
 
-    public Estudante buscarPorId(Long id) {
+    public Estudante buscarPorId(Long id) throws EstudanteException {
         return estudanteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Estudante com ID " + id + " não encontrado no banco de dados."));
+                .orElseThrow(() -> new EstudanteException("Estudante com ID " + id + " não encontrado no banco de dados."));
     }
 }

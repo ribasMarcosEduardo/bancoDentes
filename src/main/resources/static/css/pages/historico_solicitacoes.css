@@ -1,0 +1,364 @@
+/* Escondido por padrão — só aparece no lugar do texto cheio do botão
+   "Nova solicitação" abaixo de 416px (ver @media (max-width: 416px)) */
+.btn-label--short {
+    display: none;
+}
+
+/*
+    frascos.css (carregado antes desse arquivo nessa página também)
+    esconde .btn__label a partir de 390px — aqui o texto do "Ordenar"
+    deve sumir só a partir de 360px, então reafirma visível por padrão
+    pra essa página e esconde de novo no breakpoint certo lá embaixo.
+*/
+.btn__label {
+    display: inline;
+}
+
+@media (max-width: 360px) {
+
+    .btn__label {
+        display: none;
+    }
+}
+
+@media (max-width: 1271px) {
+
+    /*
+        Toolbar em 2 linhas: estatísticas em cima (Saldo à esquerda,
+        Pendentes + Concluídas grudados à direita) e ações embaixo
+        (Exibir à esquerda, filtro/Ordenar/Nova solicitação à direita).
+    */
+    .toolbar__stats {
+        width: 100%;
+    }
+
+    /* margin-left:auto empurra Pendentes (e Concluídas, que vem logo
+       depois) pro fim da linha, mantendo o gap normal entre os dois */
+    .toolbar-stat:nth-child(2) {
+        margin-left: auto;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+
+    /*
+        Duas fases, sequenciadas via JS (updateVisibility em includes.js)
+        — não dá pra fazer isso só com CSS porque display:grid/flex,
+        contents e order não animam, trocam na hora:
+
+        1. .toolbar--stuck sozinho (assim que a toolbar gruda no topo)
+           só faz Pendentes/Concluídas desaparecerem — opacity+transform,
+           ainda dentro do layout original (grid ou flex, dependendo da
+           largura), sem reorganizar mais nada. Some "no lugar", sem
+           nenhum salto de tamanho.
+        2. Só depois que esse fade termina (STUCK_FADE_MS no JS), a
+           classe .toolbar--reflowed entra — display:flex sobrescreve o
+           grid do bloco de 600px logo abaixo (nele, grid-column/row não
+           têm efeito fora de um grid); com os 5 itens soltos direto no
+           flex-wrap da .toolbar (mesmo truque de display:contents já
+           usado no grid), a ORDEM do HTML resolve o layout sozinha —
+           Saldo, Pendentes, Concluídas, Exibir, Botões — os dois do
+           meio (já zerados desde a fase 1) deixam Saldo e Exibir
+           vizinhos na mesma linha, e flex-basis:100% força os botões
+           pra próxima. Como os cards já estão invisíveis nessa hora, a
+           troca de layout embaixo deles não aparece.
+
+        .toolbar base já tem justify-content:space-between — com Saldo e
+        Exibir soltos na mesma linha (só os dois "visíveis" nela), isso
+        naturalmente joga Saldo pra esquerda e Exibir pra direita.
+    */
+    .toolbar.toolbar--reflowed {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .toolbar.toolbar--reflowed .toolbar__stats,
+    .toolbar.toolbar--reflowed .toolbar__actions {
+        display: contents;
+    }
+
+    .toolbar.toolbar--reflowed .toolbar__row--buttons {
+        flex-basis: 100%;
+        order: 2;
+    }
+
+    /*
+        components/toolbar.css força ".toolbar__row{width:100%}" a
+        partir de 607px — isso pega o Exibir (que também é um
+        .toolbar__row) incondicionalmente e o obriga a ocupar a linha
+        inteira sozinho, cancelando o wrap ao lado do Saldo. Só nesse
+        estado, volta a ser do tamanho do conteúdo.
+
+        O mesmo arquivo também dá order:2 ao Exibir e order:1 aos
+        botões (pra inverter os dois dentro do próprio .toolbar__actions
+        em telas ≤607px — um recurso à parte, sem relação com esse
+        aqui). Como agora os dois viram itens soltos direto na .toolbar
+        (via display:contents), esse order passa a valer no nível dela
+        inteira, e o Exibir (maior que os cards, que ficam em order:0)
+        acaba isolado numa 3ª linha. Reseta a ordem certa: Exibir antes
+        dos botões.
+    */
+    .toolbar.toolbar--reflowed .toolbar__row--controls {
+        width: auto;
+        order: 1;
+    }
+
+    /*
+        Fase 1 — só o fade, dentro do layout original. scaleY a partir
+        do topo faz o card sumir de baixo pra cima (em vez de encolher
+        a largura, que lia como um wipe da esquerda pra direita).
+    */
+    .toolbar-stat:nth-child(2),
+    .toolbar-stat:nth-child(3) {
+        overflow: hidden;
+        transform-origin: top;
+        transform: scaleY(1);
+
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+
+    .toolbar.toolbar--stuck .toolbar-stat:nth-child(2),
+    .toolbar.toolbar--stuck .toolbar-stat:nth-child(3) {
+        opacity: 0;
+        transform: scaleY(0);
+
+        transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+    }
+
+    /*
+        Fase 2 — só entra com .toolbar--reflowed (cards já invisíveis):
+        fecha de vez o espaço que Pendentes/Concluídas ocupavam, o que
+        deixa Exibir subir pra linha do Saldo. min-width:0 already faz
+        parte da .toolbar-stat base, então essas propriedades também já
+        eram 0 aqui — o valor real de antes vinha só do layout original
+        (grid stretch ou flex row cheia), então não tem nada mais pra
+        animar: a essa altura o card já é só um espaço vazio invisível.
+    */
+    .toolbar.toolbar--reflowed .toolbar-stat:nth-child(2),
+    .toolbar.toolbar--reflowed .toolbar-stat:nth-child(3) {
+        flex-grow: 0;
+        flex-shrink: 1;
+        flex-basis: 0%;
+        min-width: 0;
+
+        padding: 0;
+        margin: 0;
+        border-width: 0;
+
+        visibility: hidden;
+    }
+
+    /*
+        Saldo não encolhe (fica visível o tempo todo), mas ainda muda um
+        pouco: no grid de ≤600px o card estica pra preencher a célula
+        (2fr+2fr, bem mais larga que o conteúdo); ao virar flex achatado
+        (fase 2), ele volta a ser do tamanho do conteúdo. Só acontece
+        quando .toolbar--reflowed entra, ou seja, com os vizinhos já
+        invisíveis — sem transição nem precisa, mas mantém por
+        segurança caso o timing do JS varie.
+    */
+    .toolbar-stat:nth-child(1) {
+        transition: width 0.2s ease;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /*
+        3 linhas: Saldo sozinho ocupando a metade esquerda da toolbar;
+        embaixo, Pendentes e Concluídas dividindo essa mesma metade
+        (Pendentes grudado na borda esquerda, Concluídas na borda
+        direita do Saldo), com Exibir na borda direita da toolbar; por
+        fim, os botões.
+
+        .toolbar__stats e .toolbar__actions viram display:contents —
+        eles somem como caixa e deixam os filhos (os 3 cards e os 2
+        .toolbar__row) participarem direto do grid da .toolbar. É o
+        único jeito de intercalar Exibir na mesma linha dos cards, já
+        que são irmãos de containers DOM diferentes.
+    */
+    /*
+        Colunas 2fr 2fr 1fr 1fr em vez de 4 iguais: as 2 primeiras juntas
+        (Saldo) somam ~63% da toolbar, as 2 últimas (Exibir) o resto.
+    */
+    .toolbar {
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr 1fr;
+    }
+
+    .toolbar__stats,
+    .toolbar__actions {
+        display: contents;
+    }
+
+    .toolbar-stat {
+        min-width: 0;
+    }
+
+    .toolbar-stat:nth-child(1) {
+        grid-column: 1 / 3;
+        grid-row: 1;
+    }
+
+    /*
+        :nth-child(2) aqui precisa da MESMA especificidade da regra que
+        põe margin-left:auto nele lá no bloco de 1271px — só
+        ".toolbar-stat { margin-left: 0 }" (uma classe) tem
+        especificidade menor que ".toolbar-stat:nth-child(2)" (classe +
+        pseudo-classe) e perde pra ela, não importa a ordem no arquivo.
+    */
+    .toolbar-stat:nth-child(2) {
+        grid-column: 1;
+        grid-row: 2;
+
+        margin-left: 0;
+    }
+
+    .toolbar-stat:nth-child(3) {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    /*
+        width:100% e justify-content:space-between vêm de
+        ".toolbar__row" no @media (max-width: 607px) de toolbar.css —
+        essa faixa se sobrepõe às nossas (607 > 600 e 416). Sem
+        resetar, o item esticava pra célula inteira do grid e o
+        Exibir (filho único, então space-between não faz nada) ficava
+        colado na esquerda dela em vez de na direita.
+    */
+    .toolbar__row--controls {
+        grid-column: 3 / 5;
+        grid-row: 2;
+
+        width: auto;
+        justify-content: flex-end;
+        justify-self: end;
+    }
+
+    .toolbar__row--buttons {
+        grid-column: 1 / 5;
+        grid-row: 3;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /*
+        No celular só sobra espaço pro essencial — o resto dá pra ver na
+        área expandida da linha.
+        Ordem dos filhos: 1 Solicitação, 2 Grupo, 3 Qtd., 4 Status,
+        5 Data, 6 seta. Some Grupo (e não Solicitação): o identificador
+        (SOL-001...) é mais útil pra identificar a linha de relance do
+        que o grupo dentário.
+    */
+    .result-table--historico .result-table__head,
+    .result-table--historico .result-list {
+        min-width: 0;
+        grid-template-columns: 1.1fr 0.55fr 1fr 40px;
+    }
+
+    .result-table--historico .result-table__head span:nth-child(2),
+    .result-table--historico .result-table__head span:nth-child(5),
+    .result-table--historico .result-list > span:nth-child(2),
+    .result-table--historico .result-list > span:nth-child(5) {
+        display: none;
+    }
+
+    /*
+        Data sumiu da linha (nth-child(5) acima) — reaparece na visão
+        expandida, logo abaixo de Quantidade. Nesta largura o
+        .request-details__grid já virou coluna única (list.css,
+        @media max-width:860px), então bastar entrar no fluxo pra cair
+        na última posição, sem precisar forçar grid-column.
+    */
+    .request-detail--data {
+        display: grid;
+    }
+}
+
+/*
+    Entre 601px e 767px ninguém reduz as colunas da tabela (a redução de
+    historico_solicitacoes.css acima só vale a partir de 600px), mas o
+    min-width:720px genérico de list.css (@media max-width:860px) continua
+    valendo. Sem espaço sobrando pra 720px, e como .main-panel não tem
+    min-width:0, o grid inteiro (.dashboard/.main-panel) estoura pra caber
+    a tabela — toolbar, paginação e footer ficam mais largos que a viewport
+    e o overflow-x:hidden do body corta tudo do lado direito (padding
+    direito "sumindo"). Reaproveita o mesmo padrão de frascos.css pra essa
+    faixa: some só com Grupo (Solicitação, Qtd., Status, Data e a seta já
+    cabem sem estourar) e zera o min-width herdado.
+*/
+@media (min-width: 601px) and (max-width: 767px) {
+
+    .result-table--historico .result-table__head,
+    .result-table--historico .result-list {
+        min-width: 0;
+        grid-template-columns: var(--list-first-col) repeat(3, 1fr) 40px;
+    }
+
+    .result-table--historico .result-table__head span:nth-child(2),
+    .result-table--historico .result-list > span:nth-child(2) {
+        display: none;
+    }
+}
+
+@media (max-width: 416px) {
+
+    /*
+        2 linhas de cards: Saldo e Pendentes dividem a toolbar inteira
+        ao meio; embaixo, Concluídas no tamanho mínimo dele à esquerda
+        e Exibir à direita. Por fim, os botões, com "Nova solicitação"
+        virando só "Solicitar" (mantém o ícone de +).
+
+        Reaproveita o grid de 4 colunas do bloco de 600px acima, mas
+        volta a ser 1fr 1fr 1fr 1fr — aqui Saldo e Pendentes dividem a
+        toolbar meio a meio, não 63/37 como lá em cima.
+    */
+    .toolbar {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .toolbar-stat:nth-child(1) {
+        grid-column: 1 / 3;
+        grid-row: 1;
+    }
+
+    .toolbar-stat:nth-child(2) {
+        grid-column: 3 / 5;
+        grid-row: 1;
+    }
+
+    .toolbar-stat:nth-child(3) {
+        grid-column: 1 / 3;
+        grid-row: 2;
+
+        justify-self: start;
+    }
+
+    .btn-label--full {
+        display: none;
+    }
+
+    .btn-label--short {
+        display: inline;
+    }
+}
+
+@media (max-width: 400px) {
+
+    /* Sobra só Solicitação, Status e seta — Qtd. também dá pra ver
+       expandindo a linha */
+    .result-table--historico .result-table__head,
+    .result-table--historico .result-list {
+        grid-template-columns: 1fr 1.1fr 40px;
+    }
+
+    .result-table--historico .result-table__head span:nth-child(3),
+    .result-table--historico .result-list > span:nth-child(3) {
+        display: none;
+    }
+}

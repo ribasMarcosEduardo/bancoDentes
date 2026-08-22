@@ -1,0 +1,44 @@
+.page-size-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+
+    user-select: none;
+}
+
+.page-size-control__select {
+    width: 72px;
+}
+
+.page-size-control__select .form-control {
+    height: var(--btn-height);
+    padding-left: 0.65rem;
+    padding-right: 1.3rem;
+
+    user-select: none;
+}
+
+/* Seta menor, no mesmo tamanho/estilo das setas de lista e navbar,
+   em vez do padrão maior usado nos selects de formulário. Precisa
+   sobrescrever min-width/min-height porque a classe .icon força 22px. */
+.page-size-control__select .select-icon {
+    right: 0.4rem;
+
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+
+    transition: transform 0.2s ease;
+}
+
+/* Estado controlado via JS (page-size.js) — :focus sozinho não dá pra
+   usar aqui porque o select continua focado depois de fechar (ex.: ao
+   escolher uma opção), o que deixava a seta presa girada */
+.page-size-control__select.is-open .select-icon {
+    transform: translateY(-50%) rotate(180deg);
+}

@@ -40,4 +40,19 @@ public record SolicitacaoDTO(
                 return sol;
         }
 
+        public static SolicitacaoDTO recuperaSolicitacao(Solicitacao solicitacao) {
+                return new SolicitacaoDTO(
+                        solicitacao.getCodigo(),
+                        solicitacao.getVersion(),
+                        solicitacao.getEstudante().getCodEstudante(),
+                        solicitacao.getDatSolicitacao(),
+                        solicitacao.getQuantidade(),
+                        solicitacao.getPosicao(),
+                        solicitacao.getMaxilar(),
+                        solicitacao.getTipoDente(),
+                        solicitacao.getEstado(),
+                        solicitacao.getDenticao(),
+                        solicitacao.getJustificativa()
+                );
+        }
 }

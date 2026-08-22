@@ -1,10 +1,12 @@
 package bancoDentes.model;
 
 import bancoDentes.model.enumModels.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.StringJoiner;
 
 @Getter
@@ -63,6 +65,10 @@ public class Solicitacao {
     @Column(name = "JUSTIFICATIVA", nullable = false)
     private String justificativa;
 
+    @OneToOne(mappedBy = "solicitacao")
+    @JsonIgnore
+    private AnaliseSolicitacao analiseSolicitacao;
+
     @PrePersist
     protected void onCreate() {
         this.datSolicitacao = LocalDateTime.now();
@@ -73,18 +79,48 @@ public class Solicitacao {
         this.statusSolicitacao = StatusSolicitacao.EM_ANALISE;
     }
 
-    public void rejeitar() {
-        this.statusSolicitacao = StatusSolicitacao.RECUSADO;
+    public void negar() {
+        this.statusSolicitacao = StatusSolicitacao.NEGADO;
+    }
+
+    public void aguardandoRetirada() {
+        this.statusSolicitacao = StatusSolicitacao.AGUARDANDO_RETIRADA;
+    }
+
+    public void concluir() {
+        this.statusSolicitacao = StatusSolicitacao.CONCLUIDO;
     }
 
     public boolean isApto() {
-        return this.statusSolicitacao != StatusSolicitacao.CANCELADO;
-
-        //LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4))
-                //&&
+        return LocalDateTime.now().isAfter(this.datSolicitacao.plusHours(4));
     }
 
+    public boolean isEditavel() {
+        return !this.isApto() && StatusSolicitacao.PENDENTE.equals(this.statusSolicitacao);
+    }
 
+    public void emSeparacao(){
+        this.statusSolicitacao = StatusSolicitacao.EM_SEPARACAO;
+    }
 
+    public boolean isNegar() {
+        return StatusSolicitacao.PENDENTE.equals(this.statusSolicitacao)
+                || StatusSolicitacao.EM_ANALISE.equals(this.statusSolicitacao);
+    }
+
+    public boolean isContinuar() {
+        return StatusSolicitacao.EM_ANALISE.equals(this.statusSolicitacao)
+                || StatusSolicitacao.EM_SEPARACAO.equals(this.statusSolicitacao)
+                || StatusSolicitacao.AGUARDANDO_RETIRADA.equals(this.statusSolicitacao);
+    }
+
+    public boolean isReabrir() {
+        return StatusSolicitacao.CONCLUIDO.equals(this.statusSolicitacao)
+                || StatusSolicitacao.NEGADO.equals(this.statusSolicitacao);
+    }
+
+    public boolean isPendente() {
+        return StatusSolicitacao.PENDENTE.equals(this.statusSolicitacao);
+    }
 
 }

@@ -1,0 +1,215 @@
+/* Tela de confirmação de e-mail (etapa seguinte ao login) — herda o
+   mesmo fundo aurora e moldura de cartão da tela de login (ver
+   pages/login.css: .login-shell/.login-card/.login-field), só que com um
+   fluxo de 2 passos chumbado no próprio HTML (sem backend real: ver
+   DEMO_VALID_CODE em js/confirmacao-email.js). */
+
+.confirm-card {
+    text-align: center;
+}
+
+.confirm-intro {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: -0.5rem;
+}
+
+.confirm-title {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.confirm-subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.confirm-stepper {
+    margin: 0.25rem 0;
+}
+
+.confirm-panel {
+    display: grid;
+    gap: 1.25rem;
+    text-align: left;
+}
+
+/* display:grid acima tem a mesma especificidade do [hidden] nativo do
+   navegador — sem essa regra, o painel escondido via atributo (ver
+   goToCodigoStep/goToEmailStep em confirmacao-email.js) continuava
+   ocupando o layout normalmente (mesmo ajuste já existe pra
+   .form-section[hidden] em components/forms.css). */
+.confirm-panel[hidden] {
+    display: none;
+}
+
+.confirm-sent-to {
+    margin: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.confirm-sent-to strong {
+    color: var(--text);
+    /* E-mail digitado pode ser longo — quebra em vez de estourar a
+       largura fixa do .login-card (ver max-width em pages/login.css). */
+    overflow-wrap: anywhere;
+}
+
+/* --- Código de 6 dígitos --- */
+
+.otp-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.otp-input {
+    width: 46px;
+    height: 56px;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--input-bg);
+    color: var(--text);
+
+    text-align: center;
+    font: inherit;
+    font-size: 1.4rem;
+    font-weight: 700;
+
+    outline: none;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.otp-input:focus {
+    border-color: var(--input-border-focus);
+    background: var(--input-bg-focus);
+    box-shadow: 0 0 0 4px var(--input-ring), var(--input-shadow-focus);
+}
+
+/* Estado de erro (código digitado não confere, ver validateCode em
+   confirmacao-email.js) — some sozinho assim que o usuário volta a
+   digitar (qualquer input limpa as classes de estado, ver JS). */
+.otp-row--error .otp-input {
+    border-color: #ef4444;
+    animation: otp-shake 0.4s ease;
+}
+
+.otp-row--success .otp-input {
+    border-color: var(--glass-success-icon);
+    background: var(--glass-success-bg-end);
+}
+
+@keyframes otp-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+.otp-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: -0.5rem 0 0;
+
+    color: #ef4444;
+    font-size: 0.82rem;
+    text-align: center;
+}
+
+/* Mesmo ajuste de .confirm-panel[hidden] acima — display:flex tem a
+   mesma especificidade do [hidden] nativo e vencia o cascade, deixando
+   o aviso de erro visível mesmo antes de qualquer código ser digitado. */
+.otp-error[hidden] {
+    display: none;
+}
+
+.otp-error .icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.otp-demo-hint {
+    margin-top: -0.5rem;
+    text-align: center;
+}
+
+/* --- Trocar e-mail / reenviar código --- */
+
+.confirm-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.confirm-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    border: none;
+    background: none;
+    padding: 0.3rem 0.5rem;
+
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.confirm-link:hover:not(:disabled) {
+    color: var(--text);
+}
+
+.confirm-link:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.confirm-link .icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* --- Spinner do botão "Enviar código" (ver setButtonLoading em
+   confirmacao-email.js) --- */
+
+.btn-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    animation: spin 0.8s linear infinite;
+}
+
+.is-loading .btn-spinner {
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+    .otp-input {
+        width: 40px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .otp-row {
+        gap: 0.4rem;
+    }
+}

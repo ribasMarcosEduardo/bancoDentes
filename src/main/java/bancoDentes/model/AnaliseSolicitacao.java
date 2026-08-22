@@ -44,14 +44,26 @@ public class AnaliseSolicitacao {
         this.dataAlteracao = LocalDateTime.now();
     }
 
-    public void rejeitar(String justificativa) {
+    public void negar(String justificativa) {
         this.justificativa = justificativa;
-        this.solicitacao.rejeitar();
+        this.solicitacao.negar();
     }
 
     public void reabrir() {
         this.justificativa = null;
         this.solicitacao.iniciarAnalise();
+    }
+
+    public void emSeparacao() {
+        this.solicitacao.emSeparacao();
+    }
+
+    public void aguardandoRetirada() {
+        this.solicitacao.aguardandoRetirada();
+    }
+
+    public void concluir() {
+        this.solicitacao.concluir();
     }
 
 }

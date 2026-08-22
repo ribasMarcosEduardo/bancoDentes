@@ -22,5 +22,8 @@ spring:
       filter:
         enabled: true
 
+  messages:
+    encoding: UTF-8
+
 server:
   port: 8080

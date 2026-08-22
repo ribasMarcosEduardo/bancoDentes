@@ -1,294 +1,180 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::title}, ~{::#solicitacaoConteudo}, ~{}, ~{})}">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Nova Solicitação</title>
-</head>
-<body class="py-5">
-
-<div id="solicitacaoConteudo" class="container">
-  <div class="row justify-content-center mb-3">
-    <div class="col-md-10 col-lg-8">
-      <div id="alertSucesso" class="alert alert-success alert-dismissible fade show shadow-sm d-none" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <span>Solicitação enviada com sucesso!</span>
-        <button type="button" class="btn-close" onclick="fecharAlerta('alertSucesso')"></button>
-      </div>
-
-      <div id="alertErro" class="alert alert-danger alert-dismissible fade show shadow-sm d-none" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <span id="msgErro">Erro ao solicitar.</span>
-        <button type="button" class="btn-close" onclick="fecharAlerta('alertErro')"></button>
-      </div>
-    </div>
-  </div>
-
-  <div class="row justify-content-center">
-    <div class="col-md-10 col-lg-8">
-      <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white d-flex align-items-center gap-2 py-3">
-          <i class="bi bi-clipboard2-pulse fs-4"></i>
-          <h1 class="h5 mb-0">Nova Solicitação</h1>
-        </div>
-
-        <div class="card-body p-4">
-
-          <div class="alert alert-info py-2 px-3 mb-4 shadow-sm" style="font-size: 14px;">
-            <i class="bi bi-info-circle-fill me-2"></i>
-            <strong>Modo de Demonstração:</strong> Esta tela simula a visão de um usuário logado.
-          </div>
-
-          <form id="formSolicitacao" th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
-
-            <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}" />
-            <input type="hidden" th:field="*{version}"/>
-
-            <p class="section-divider mb-3"><i class="bi bi-person-badge me-1"></i> Seus Dados</p>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">Usuário Solicitante</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-person"></i></span>
-                  <input type="text" class="form-control bg-light" th:value="${usuarioLogado.nome}" readonly />
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">Seus Créditos Disponíveis</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-coin text-warning"></i></span>
-                  <input type="number" id="creditoEstudante" class="form-control bg-light fw-bold" th:value="${usuarioLogado.credito}" readonly />
-                </div>
-              </div>
-            </div>
-
-            <hr class="my-3" />
-
-            <p class="section-divider mb-3"><i class="bi bi-grid-1x2 me-1"></i> Características do dente</p>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">Tipo do dente</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-type"></i></span>
-                  <select th:field="*{tipoDente}" id="tipoDente" class="form-select" onchange="atualizarCampos(true)" required>
-                    <option value="">-- Selecione o Tipo --</option>
-                    <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
-                            th:value="${nome.name()}" th:text="${nome}"></option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3" id="denticaoContainer">
-                <label class="form-label fw-semibold">Dentição</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                  <select th:field="*{denticao}" id="denticao" class="form-select" required>
-                    <option value="">-- Selecione a Dentição --</option>
-                    <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
-                            th:value="${d.name()}" th:text="${d.nome}"></option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3" id="maxilarContainer">
-                <label class="form-label fw-semibold">Maxilar</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-grip-horizontal"></i></span>
-                  <select th:field="*{maxilar}" id="maxilar" class="form-select" required>
-                    <option value="">-- Selecione o maxilar --</option>
-                    <option th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}"
-                            th:value="${m.name()}" th:text="${m}"></option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3" id="posicaoContainer" style="display: none;">
-                <label class="form-label fw-semibold d-block">Posição:</label>
-                <div class="p-2 border rounded bg-light">
-                  <div id="molarCheckboxes">
-                    <strong>Molar:</strong>
-                    <div class="form-check form-check-inline" th:each="pos : ${new int[]{1,2,3}}">
-                      <input class="form-check-input" type="checkbox" th:field="*{posicao}"
-                             th:value="${pos}" th:id="'pos_' + ${pos}">
-                      <label class="form-check-label" th:for="'pos_' + ${pos}" th:text="${pos}"></label>
-                    </div>
-                  </div>
-                  <div id="preMolarCheckboxes">
-                    <strong>Pré-Molar:</strong>
-                    <div class="form-check form-check-inline" th:each="pos : ${new int[]{14,15,24,25,34,35,44,45}}">
-                      <input class="form-check-input" type="checkbox" th:field="*{posicao}"
-                             th:value="${pos}" th:id="'pos_' + ${pos}">
-                      <label class="form-check-label" th:for="'pos_' + ${pos}" th:text="${pos}"></label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3" id="estadoDenteContainer">
-                <label class="form-label fw-semibold">Estado do dente</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-heart-pulse-fill text-danger"></i></span>
-                  <select th:field="*{estadoDente}" id="estadoDente" class="form-select" required>
-                    <option value="">-- Selecione o estado --</option>
-                    <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
-                            th:value="${e.name()}" th:text="${e}"></option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <hr class="my-3" />
-
-            <p class="section-divider mb-3"><i class="bi bi-123 me-1"></i> Detalhes da Solicitação</p>
-            <div class="row">
-              <div class="col-md-6 mb-3 align-self-start">
-                <label class="form-label fw-semibold">Quantidade solicitada</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-layers"></i></span>
-                  <input type="number" th:field="*{quantidade}" id="quantidade" class="form-control" min="1" value="1" oninput="atualizarFeedback()" required />
-                </div>
-                <div id="creditoFeedback" class="credito-badge credito-ok mt-2 p-2">
-                  <i class="bi bi-check-circle-fill me-1"></i> Verificando créditos...
-                </div>
-              </div>
-
-              <!-- Campo de Justificativa Adicionado Aqui -->
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">Justificativa / Observação</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-pencil-square"></i></span>
-                  <textarea th:field="*{justificativa}" id="justificativa" class="form-control" rows="3"
-                            placeholder="Ex: Trabalho de Endodontia I, pesquisa científica..." required></textarea>
-                </div>
-              </div>
-            </div>
-
-            <hr class="my-4" />
-
-            <div class="d-flex justify-content-end gap-2">
-              <a th:href="@{/solicitacao/painel}" class="btn btn-outline-secondary">
-                <i class="bi bi-x-lg me-1"></i> Cancelar
-              </a>
-              <button type="button" class="btn btn-primary" onclick="validarESubmeter()">
-                <i class="bi bi-save me-1"></i> Enviar Solicitação
-              </button>
-            </div>
-          </form>
-
-        </div>
-      </div>
-    </div>
-  </div>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script>
-    function atualizarFeedback() {
-      const credito = parseInt(document.getElementById('creditoEstudante').value) || 0;
-      const qtd = parseInt(document.getElementById('quantidade').value) || 0;
-      const badge = document.getElementById('creditoFeedback');
-
-      if (qtd > credito) {
-        badge.className = 'credito-badge credito-erro p-2';
-        badge.innerHTML = `<i class="bi bi-x-circle-fill me-1"></i> Saldo insuficiente (Você tem: ${credito})`;
-      } else {
-        badge.className = 'credito-badge credito-ok p-2';
-        badge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Saldo suficiente (Você tem: ${credito})`;
-      }
-    }
-
-    function atualizarCampos(limpar = false) {
-      const valor = document.getElementById('tipoDente').value.trim().toUpperCase();
-      const isMisto = valor === 'MISTO';
-      const isMolar = valor === 'MOLAR';
-      const isPreMolar = valor === 'PRE_MOLAR';
-
-      const denticaoContainer = document.getElementById('denticaoContainer');
-      const denticao = document.getElementById('denticao');
-      const maxilarContainer = document.getElementById('maxilarContainer');
-      const maxilar = document.getElementById('maxilar');
-      const estadoContainer = document.getElementById('estadoDenteContainer');
-      const estado = document.getElementById('estadoDente');
-      const posicaoContainer = document.getElementById('posicaoContainer');
-      const molarCheckboxes = document.getElementById('molarCheckboxes');
-      const preMolarCheckboxes = document.getElementById('preMolarCheckboxes');
-      const checkboxes = document.querySelectorAll('#posicaoContainer input[type="checkbox"]');
-
-      if (isMisto) {
-        denticaoContainer.style.display = 'none';
-        denticao.required = false;
-        maxilarContainer.style.display = 'none';
-        maxilar.required = false;
-        posicaoContainer.style.display = 'none';
-        estadoContainer.style.display = 'none';
-        estado.required = false;
-      } else {
-        denticaoContainer.style.display = 'block';
-        denticao.required = true;
-        maxilarContainer.style.display = 'block';
-        maxilar.required = true;
-        estadoContainer.style.display = 'block';
-        estado.required = true;
-        posicaoContainer.style.display = (isMolar || isPreMolar) ? 'block' : 'none';
-        molarCheckboxes.style.display = isMolar ? 'block' : 'none';
-        preMolarCheckboxes.style.display = isPreMolar ? 'block' : 'none';
-      }
-
-      if (limpar) {
-        if (isMisto) {
-          denticao.value = '';
-          maxilar.value = '';
-          estado.value = '';
-        }
-        checkboxes.forEach(cb => cb.checked = false);
-      }
-    }
-
-    function validarESubmeter() {
-      esconderAlertas();
-
-      const credito = parseInt(document.getElementById('creditoEstudante').value) || 0;
-      const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
-      const tipoDente = document.getElementById('tipoDente').value;
-      const justificativa = document.getElementById('justificativa').value.trim();
-
-      if (!tipoDente) return mostrarErro('Selecione o tipo do dente.');
-
-      if (credito < quantidade) {
-        return mostrarErro(`Seus créditos são insuficientes para solicitar ${quantidade} dente(s).`);
-      }
-
-      // Validação da Justificativa
-      if (justificativa.length < 5) {
-        return mostrarErro('Por favor, informe uma justificativa válida (mínimo 5 caracteres).');
-      }
-
-      document.getElementById('formSolicitacao').submit();
-    }
-
-    function mostrarErro(msg) {
-      document.getElementById('msgErro').textContent = msg;
-      const el = document.getElementById('alertErro');
-      el.classList.remove('d-none');
-      // Scroll para o topo para ver o erro
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function esconderAlertas() {
-      document.getElementById('alertSucesso').classList.add('d-none');
-      document.getElementById('alertErro').classList.add('d-none');
-    }
-
-    function fecharAlerta(id) {
-      document.getElementById(id).classList.add('d-none');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      atualizarFeedback();
-      atualizarCampos(false);
-    });
+    (function () {
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+        document.documentElement.classList.add(theme);
+    })();
   </script>
+
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/cadastro_frasco.css}">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <title>Nova Solicitação</title>
+</head>
+
+<body>
+
+<div id="solicitacaoConteudo">
+
+  <div class="background">
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--green"></div>
+  </div>
+
+  <div th:replace="~{partials/navbar :: navbar}"></div>
+
+  <main class="page">
+    <section class="form-shell">
+
+      <header class="page-header">
+        <h1>Solicitação de Dentes</h1>
+        <p>Preencha os dados da solicitação de acordo com o necessário para sua atividade prática.</p>
+      </header>
+
+      <div class="toolbar glass-frost">
+        <div class="toolbar__info">
+          <span class="toolbar__label">Saldo Disponível:</span>
+          <div class="toolbar__badge" th:text="${usuarioLogado.credito}">0</div>
+          <input type="hidden" id="creditoEstudante" th:value="${usuarioLogado.credito}">
+        </div>
+
+        <div class="toolbar__actions">
+          <a th:href="@{/solicitacao/painel}" class="btn btn-secondary">
+            Cancelar
+          </a>
+          <button type="button" class="btn btn-primary" onclick="validarESubmeter()">
+            Enviar Solicitação
+          </button>
+        </div>
+      </div>
+
+      <form id="formSolicitacao" class="form-card" th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
+        <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}" />
+        <input type="hidden" th:field="*{version}"/>
+        <input type="hidden" th:field="*{codigo}"/>
+
+        <section class="form-section">
+          <div class="form-group">
+            <label>Grupo dentário</label>
+            <div class="select-wrapper">
+              <select class="form-control" th:field="*{tipoDente}" id="tipoDente" onchange="atualizarCampos(true)" required>
+                <option value="">- Selecione o grupo -</option>
+                <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
+                        th:value="${nome.name()}" th:text="${nome}"></option>
+              </select>
+              <i class="select-icon icon" data-lucide="chevron-down"></i>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section form-section--disabled" id="estadoFrascoSection">
+          <div class="form-grid-estado">
+            <div class="form-group" id="estadoGroup">
+              <label>Estado do dente</label>
+              <div class="select-wrapper">
+                <select class="form-control" th:field="*{estadoDente}" id="estadoDente" required disabled>
+                  <option value="" disabled selected>- Selecione o Estado -</option>
+                  <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
+                          th:value="${e.name()}" th:text="${e}"></option>
+                </select>
+                <i class="select-icon icon" data-lucide="chevron-down"></i>
+              </div>
+            </div>
+
+            <div class="form-group form-group--disabled" id="quantidadeGroup">
+              <label>Quantidade</label>
+              <div class="quantidade-inline">
+                <div class="number-input">
+                  <input class="form-control number-input__field" type="number" th:field="*{quantidade}" min="1" value="1" id="quantidade" disabled oninput="atualizarFeedback()">
+                  <div class="number-input__actions">
+                    <button type="button" class="number-input__btn quantidade-control" data-number-action="down" disabled>
+                      <i class="icon" data-lucide="minus"></i>
+                    </button>
+                    <button type="button" class="number-input__btn quantidade-control" data-number-action="up" disabled>
+                      <i class="icon" data-lucide="plus"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <small id="creditoFeedbackText" style="color: #dc3545; display: none; margin-top: 8px; font-weight: 500;"></small>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section form-section--disabled" id="atributosFrascoSection">
+          <div class="form-grid">
+            <div class="form-group" id="maxilarContainer">
+              <label>Arcada</label>
+              <div class="select-wrapper">
+                <select class="form-control atributos-control" th:field="*{maxilar}" id="maxilar" disabled required>
+                  <option value="">Não Informado</option>
+                  <option th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}"
+                          th:value="${m.name()}" th:text="${m}"></option>
+                </select>
+                <i class="select-icon icon" data-lucide="chevron-down"></i>
+              </div>
+            </div>
+
+            <div class="form-group" id="denticaoContainer">
+              <label>Dentição</label>
+              <div class="select-wrapper">
+                <select class="form-control atributos-control" th:field="*{denticao}" id="denticao" disabled required>
+                  <option value="">Não Informado</option>
+                  <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
+                          th:value="${d.name()}" th:text="${d.nome}"></option>
+                </select>
+                <i class="select-icon icon" data-lucide="chevron-down"></i>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section" id="posicaoContainer" style="display: none;">
+          <div class="form-group">
+            <label>Posição do Dente</label>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; padding: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.1);">
+
+              <div id="molarCheckboxes" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <label class="checkbox-filter" th:each="pos : ${new int[]{1,2,3}}">
+                  <input type="checkbox" th:field="*{posicao}" th:value="${pos}">
+                  <span th:text="${pos}"></span>
+                </label>
+              </div>
+
+              <div id="preMolarCheckboxes" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <label class="checkbox-filter" th:each="pos : ${new int[]{14,15,24,25,34,35,44,45}}">
+                  <input type="checkbox" th:field="*{posicao}" th:value="${pos}">
+                  <span th:text="${pos}"></span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="form-group">
+            <label>Justificativa / Observação</label>
+            <textarea class="form-control" th:field="*{justificativa}" id="justificativa" rows="3" placeholder="Ex: Trabalho de Endodontia I, pesquisa científica..." required style="resize: vertical; padding: 12px; min-height: 100px;"></textarea>
+          </div>
+        </section>
+
+      </form>
+    </section>
+  </main>
+
+  <div th:replace="~{partials/footer :: footer}"></div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script th:src="@{/js/includes.js}"></script>
+  <script th:src="@{/js/solicitacao.js}"></script>
 
 </div>
 </body>

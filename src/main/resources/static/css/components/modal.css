@@ -1,0 +1,384 @@
+/* Modal genérico (overlay + painel) — base pensada pra ser reutilizada
+   por qualquer modal futuro do protótipo, não só o de busca de frascos.
+   Estrutura/nomes espelham o que o Thymeleaf vai usar como fragment
+   (th:fragment="modal"), então o miolo aqui não deve depender de nada
+   específico da tela de análise. */
+
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 1.5rem;
+
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    /* 47rem = 680px originais + ~4.2rem (ajustes anteriores de +2.2rem
+       e +1rem, e +1rem agora) — a barrinha divisória + o padding-left
+       de alinhamento com o pill (ambos em .modal-result__stock/__meta)
+       tiraram alguns pixels da coluna de info; medido no navegador, "Cadastro
+       04/05/25 · Manutenção 04/05/26" ficava ~2px maior que o espaço
+       disponível e quebrava em 2 linhas, o que arruinava o alinhamento
+       por justify entre as duas linhas. Esse rem a mais devolve essa
+       folga com margem extra pra variação de fonte entre SOs. */
+    width: min(40rem, 100%);
+
+    /* height (não max-height) — altura FIXA baseada em vh, não só um
+       teto. Com max-height, o modal encolhia pra caber o conteúdo (ex.:
+       a última página de resultados com menos itens que as anteriores),
+       fazendo a altura "pular" a cada troca de página. Com height fixo,
+       .modal-results-scroll (abaixo) é quem absorve a diferença via
+       scroll interno — o modal em si nunca muda de tamanho.
+
+       760px: medido no navegador — com 720px, uma página cheia (4
+       frascos) faltava ~27px pra caber sem precisar de scrollbar
+       interna; 760px sobra uma margem além disso. 85vh continua
+       protegendo telas baixas (abaixo de ~895px de altura, quem manda
+       é o vh, não esse valor fixo). */
+    height: min(760px, 85vh);
+
+    display: flex;
+    flex-direction: column;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    overflow: hidden;
+
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.22s ease;
+}
+
+.modal-overlay.is-open .modal {
+    transform: translateY(0) scale(1);
+}
+
+.modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding: 1.25rem 1.5rem;
+
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.modal__header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+
+    margin: 0;
+
+    color: var(--text);
+    font-size: 1.05rem;
+}
+
+.modal__header h2 .icon {
+    width: 18px;
+    height: 18px;
+
+    color: var(--text-muted);
+}
+
+.modal__close {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: transparent;
+    color: var(--text-muted);
+
+    cursor: pointer;
+
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.modal__close:hover {
+    background: var(--secondary);
+    color: var(--text);
+}
+
+.modal__close .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.modal__body {
+    /* flex + min-height:0 (não o "auto" padrão) é o que deixa o body
+       encolher abaixo do conteúdo dentro do .modal de altura fixa —
+       sem isso, o flex item nunca fica menor que seu conteúdo mínimo. */
+    flex: 1 1 auto;
+    min-height: 0;
+
+    /* O body em si NÃO rola mais — só .modal-results-scroll (dentro
+       dele) tem overflow-y:auto. Isso é o que mantém busca/filtros
+       (.modal__body-fixed) sempre visíveis mesmo quando a lista de
+       resultados precisa de scroll. */
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    padding: 1.5rem;
+
+    overflow: hidden;
+}
+
+.modal__body-fixed {
+    /* flex:none — nunca cresce nem encolhe; sempre ocupa sua altura
+       natural (busca + filtros), sobrando o resto pro
+       .modal-results-scroll abaixo. */
+    flex: none;
+
+    display: grid;
+    gap: 1.25rem;
+}
+
+.modal-results-scroll {
+    /* Única parte do modal com scroll — absorve toda a diferença de
+       altura entre páginas/resultados, então o .modal (altura fixa,
+       ver acima) nunca precisa mudar de tamanho. */
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow-y: auto;
+
+    /* Respiro entre o conteúdo e a barra de rolagem, sem alargar a
+       área clicável/first-child do body (a margem negativa cancela o
+       padding extra, então o alinhamento com .modal__body-fixed acima
+       não muda). */
+    padding-right: 0.35rem;
+    margin-right: -0.35rem;
+}
+
+.modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding: 1rem 1.5rem;
+
+    background: var(--surface-muted);
+    border-top: 1px solid var(--border);
+}
+
+.modal__footer-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Busca + filtros */
+
+.modal-search {
+    max-width: none;
+}
+
+.modal-filters {
+    /* auto-fit em vez de um número fixo de colunas — o modal de
+       solicitação (modal_busca_frasco_solicitacao.html) usa só 2
+       filtros (Status/Ordenar), o de movimentação
+       (modal_busca_frasco_movimentacao.html) usa 3 (Grupo dentário/
+       Estado do dente/Dentição); com auto-fit essa regra serve pra
+       2, 3 ou 4 filtros sem precisar editar o CSS de novo. */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+/* Lista de resultados */
+
+.modal-results {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.modal-result {
+    /* info | ações (X de remover + quantidade em fração) */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+
+    padding: 0.85rem 1rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--surface-muted);
+
+    /* Entrada em cascata — sem precisar de JS: renderResultados() (abrir
+       o modal, trocar de página, buscar/filtrar/ordenar) sempre recria
+       cada linha do zero via createElement, então todo elemento novo
+       já nasce com essa animação e ela dispara sozinha de novo a cada
+       vez, igual .results-view-fade-in em view-switch.css. */
+    animation: fade-slide-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Atraso crescente por posição = efeito cascata, em vez de todas as
+   linhas surgirem juntas. Cobre até o tamanho de página atual (4, ver
+   PAGE_SIZE em frasco-search-solicitacao.js/frasco-search-movimentacao.js)
+   — linhas além disso só herdam o mesmo atraso da última regra, sem
+   cortar a animação. */
+.modal-result:nth-child(2) { animation-delay: 0.05s; }
+.modal-result:nth-child(3) { animation-delay: 0.1s; }
+.modal-result:nth-child(4) { animation-delay: 0.15s; }
+.modal-result:nth-child(n+5) { animation-delay: 0.2s; }
+
+.modal-result__info {
+    display: grid;
+    /* Maior que o gap interno de .modal-result__subinfo (abaixo) —
+       separação "título/subtítulo" entre o identificador e o bloco de
+       características+datas. */
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+/* Sem pill (ver .modal-result__code) não sobra mais nenhum padding
+   herdado a compensar — o texto some encostado na mesma margem
+   esquerda do identificador, sem precisar de padding-left aqui. */
+.modal-result__code {
+    color: var(--text);
+
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.modal-result__subinfo {
+    display: grid;
+    gap: 0.25rem;
+}
+
+/* Estado/arcada/dentição numa linha e as datas em outra, menor — o
+   identificador já cobre grupo (prefixo) e local não aparece mais aqui,
+   então esse é o espaço que sobra antes de precisar quebrar em 2 linhas
+   (sem nowrap/ellipsis: a coluna de info é flexível — 1fr — então deixa
+   quebrar em vez de cortar texto).
+
+   (Chegou a ter text-align-last:justify aqui pra forçar as duas linhas
+   a terminarem no mesmo ponto — revertido a pedido, o comprimento
+   natural de cada linha ficou melhor.) */
+.modal-result__meta {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.modal-result__dates {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
+.modal-result__actions {
+    display: flex;
+    align-items: center;
+    /* Maior que o gap.number-input__actions (setas +/- vs. numerador) —
+       o X é uma ação separada/mais "perigosa" (zera tudo), então pede
+       mais respiro do resto da rolagem pra não parecer parte dela. */
+    gap: 0.85rem;
+}
+
+/* Reserva o espaço mesmo com o X invisível (visibility, não display) —
+   sem isso, a rolagem de quantidade "pularia" de lugar toda vez que o
+   X aparece/some ao cruzar 0 ↔ 1. Menor que o .result-list__action
+   padrão (32px) — do tamanho dos botões +/- da rolagem ao lado
+   (.number-input__btn, 26px), pra não pesar mais que a própria rolagem
+   que ele serve. */
+.modal-result__reset {
+    flex-shrink: 0;
+
+    width: 26px;
+    height: 26px;
+
+    /* Só o ícone, sem o anel vermelho de .result-list__action--red
+       (herdado da classe compartilhada) — mais discreto pra caber ao
+       lado da rolagem sem competir visualmente com ela. */
+    border: none;
+    background: none;
+}
+
+.modal-result__reset .icon {
+    width: 13px;
+    height: 13px;
+}
+
+.modal-result__reset--invisible {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-result .number-input--fraction {
+    /* Largura fixa — igual ao raciocínio do antigo .modal-result__stock:
+       cada .modal-result é um grid independente, então sem isso a
+       largura variaria conforme o número de dígitos de "limite" (ex.:
+       "1/6" vs. "1/20"), desalinhando a coluna ao lado entre as linhas.
+       130px: testado no navegador pro pior caso combinado deste
+       protótipo — até 2 dígitos de cada lado (ex. "99/99"), já que um
+       frasco não costuma passar de ~99 dentes. */
+    width: 130px;
+}
+
+/* Distinção leve pro que já está na seleção — mesmo verde da barra de
+   progresso/status de sucesso usados no resto do protótipo. */
+.modal-result--added {
+    border-color: rgba(34,197,94,0.45);
+}
+
+.modal-empty {
+    margin: 0;
+    padding: 2rem 1rem;
+
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+
+    .modal-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-result {
+        grid-template-columns: 1fr;
+        justify-items: stretch;
+    }
+
+    .modal-result__actions {
+        justify-content: flex-end;
+    }
+}
