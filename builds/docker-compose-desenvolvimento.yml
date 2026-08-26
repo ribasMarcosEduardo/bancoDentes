@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  banco-de-dentes:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SPRING_PROFILE: desenvolvimento
+    image: banco-de-dentes:desenvolvimento
+    container_name: banco-de-dentes
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: "America/Sao_Paulo"
+      PORTA: 8080
+      SPRING_PROFILE: "desenvolvimento"
+      MYSQL_HOST: "banco-de-dentes-db"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "root"
+    depends_on:
+      - banco-de-dentes-db
+    networks:
+      - apps-net
+
+  banco-de-dentes-db:
+    image: mysql:8.0
+    container_name: banco-de-dentes-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: BANCO_DENTES
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - apps-net
+
+volumes:
+  mysql_data:
+
+networks:
+  apps-net:
+    external: true

@@ -72,6 +72,9 @@
 	</dependencies>
 
 	<build>
+
+		<finalName>banco-de-dentes</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
