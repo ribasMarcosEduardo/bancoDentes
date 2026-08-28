@@ -7,18 +7,17 @@ services:
       dockerfile: builds/Dockerfile
     image: banco-de-dentes:desenvolvimento
     container_name: banco-de-dentes
-    hostname: banco-de-dentes
     ports:
       - "8080:8080"
     environment:
       SPRING_PROFILE: "desenvolvimento"
+      MYSQL_HOST: "banco-de-dentes-db"
     depends_on:
       - banco-de-dentes-db
 
   banco-de-dentes-db:
     image: mysql:8.0
     container_name: banco-de-dentes-db
-    hostname: banco-de-dentes-db
     environment:
       MYSQL_DATABASE: BANCO_DENTES
       MYSQL_ROOT_PASSWORD: root
