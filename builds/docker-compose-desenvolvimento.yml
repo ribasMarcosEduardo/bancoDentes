@@ -18,11 +18,10 @@ services:
   banco-de-dentes-db:
     image: mysql:8.0
     container_name: banco-de-dentes-db
+    hostname: banco-de-dentes-db
     environment:
       MYSQL_DATABASE: BANCO_DENTES
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
       TZ: America/Sao_Paulo
     ports:
       - "3306:3306"
