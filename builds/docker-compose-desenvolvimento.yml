@@ -3,8 +3,8 @@ version: '3.8'
 services:
   banco-de-dentes:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: builds/Dockerfile
     image: banco-de-dentes:desenvolvimento
     container_name: banco-de-dentes
     hostname: banco-de-dentes
