@@ -4,7 +4,8 @@ public enum EstadoDente {
 
     CARIADO("Cariado", "C"),
     HIGIDO("Hígido", "H"),
-    RESTAURADO("Restaurado", "R");
+    RESTAURADO("Restaurado", "R"),
+    MISTO("Misto", "M"),;
 
     private final String nome;
     private final String sigla;

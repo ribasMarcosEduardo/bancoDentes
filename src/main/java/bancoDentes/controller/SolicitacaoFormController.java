@@ -23,7 +23,7 @@ import java.util.List;
 @Controller
 @RequestMapping("solicitacao")
 @RequiredArgsConstructor
-public class SolicitacaoFormController extends BaseController{
+public class SolicitacaoFormController extends BaseController {
 
     private final SolicitacaoService solicitacaoService;
     private final EstudanteService estudanteService;

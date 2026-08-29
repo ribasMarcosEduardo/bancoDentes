@@ -6,7 +6,6 @@ import bancoDentes.service.FrascoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("frasco")
 @RequiredArgsConstructor
-public class FrascoFormController {
+public class FrascoFormController extends BaseController {
 
     private final FrascoService frascoService;
 
@@ -39,8 +38,8 @@ public class FrascoFormController {
      *
      * @param model
      */
-    @GetMapping
-    public String cadastrarFrasco(Model model) {
+    @GetMapping("/cadastraFrasco")
+    public String cadastraFrasco(Model model) {
         model.addAttribute("frascoDTO", FrascoDTO.empty());
         return "form/frascoForm";
     }
@@ -70,15 +69,22 @@ public class FrascoFormController {
      */
     @PostMapping("/save")
     public String saveFrasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
+                             @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro,
                              RedirectAttributes redirectAttributes) {
-
         try {
-            frascoService.save(frascoDTO);
-            redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco salvo com sucesso!");
+            Frasco frasco = frascoService.save(frascoDTO);
+            this.saveMessage(this.getText("msg.sucesso.frasco.cadastrado", frasco.getIdentificacao()));
+
+            if (cadastrarOutro) {
+                return "redirect:/frasco/cadastraFrasco";
+            }
+
             return "redirect:/frasco/painel";
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar: " + e.getMessage());
-            return "redirect:/frasco/painel";
+            this.saveError(this.getText("error.cadastro.frasco"));
+            return "redirect:/frasco";
         }
     }
 
@@ -89,8 +95,7 @@ public class FrascoFormController {
      * @param redirectAttributes
      */
     @PostMapping("/excluirFrasco/{codigo}")
-    public String excluirFrasco(@PathVariable("codigo") Long codigo,
-                                RedirectAttributes redirectAttributes) {
+    public String excluirFrasco(@PathVariable("codigo") Long codigo, RedirectAttributes redirectAttributes) {
         try {
             frascoService.excluirFrasco(codigo);
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco excluído com sucesso!");

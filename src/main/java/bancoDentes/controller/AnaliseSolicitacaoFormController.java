@@ -78,7 +78,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      */
     @GetMapping("/visualizaSolicitacao/{codSolicitacao}")
     public String visualizaSolicitacao(@PathVariable("codSolicitacao") Long codSolicitacao, Model model) {
-        try{
+        try {
             Solicitacao solicitacao = solicitacaoService.buscarPorCodigo(codSolicitacao);
             AnaliseSolicitacao analise = analiseSolicitacaoService.buscarPorCodSolicitacao(codSolicitacao);
 
@@ -87,9 +87,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
             model.addAttribute("solicitacao", solicitacao);
             model.addAttribute("analise", analise);
             model.addAttribute("itensSalvos", itensSalvos);
-            model.addAttribute("totalJaSeparado", itensSalvos.stream()
-                    .mapToLong(ItemAnalise::getQuantidade)
-                    .sum());
+            model.addAttribute("totalJaSeparado", itensSalvos.stream().mapToLong(ItemAnalise::getQuantidade).sum());
             model.addAttribute("frascos", frascoService.getFrascosFiltrados(solicitacao));
 
             return "analiseEtapas/visualizaSolicitacao";
