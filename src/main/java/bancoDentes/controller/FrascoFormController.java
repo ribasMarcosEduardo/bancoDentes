@@ -3,6 +3,7 @@ package bancoDentes.controller;
 import bancoDentes.dto.FrascoDTO;
 import bancoDentes.model.Frasco;
 import bancoDentes.service.FrascoService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,6 +71,7 @@ public class FrascoFormController extends BaseController {
     @PostMapping("/save")
     public String saveFrasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
                              @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro,
+                             HttpSession session,
                              RedirectAttributes redirectAttributes) {
         try {
             Frasco frasco = frascoService.save(frascoDTO);
@@ -82,8 +84,7 @@ public class FrascoFormController extends BaseController {
             return "redirect:/frasco/painel";
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar: " + e.getMessage());
-            this.saveError(this.getText("error.cadastro.frasco"));
+            this.saveError("Erro ao processar: " + e.getMessage());
             return "redirect:/frasco";
         }
     }
