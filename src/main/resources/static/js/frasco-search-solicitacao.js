@@ -5,7 +5,7 @@ const MOCK_FRASCOS = DADOS.frascosDisponiveis.map(f => ({
     codFrasco: f.codigo,
     grupo: f.tipoDente || "—",
     estado: f.estadoDente || "—",
-    arcada: f.maxilar || "—",
+    arcada: f.arcada || "—",
     denticao: f.denticao ? f.denticao.nome : "—",
     disponivel: f.quantidade,
     dataCadastro: f.datCad || "—",

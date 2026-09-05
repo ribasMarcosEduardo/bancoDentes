@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -44,8 +42,8 @@ public class Solicitacao {
     private EstadoDente estado;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "MAXILAR",nullable = true)
-    private Maxilar maxilar;
+    @Column(name = "ARCADA",nullable = true)
+    private Arcada arcada;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "DENTICAO", nullable = true)

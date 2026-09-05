@@ -3,7 +3,7 @@ package bancoDentes.model;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.enumModels.Denticao;
 import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
+import bancoDentes.model.enumModels.Arcada;
 import bancoDentes.model.enumModels.TipoDente;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,8 +41,8 @@ public class Frasco {
     private Long posicao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "MAXILAR")
-    private Maxilar maxilar;
+    @Column(name = "ARCADA")
+    private Arcada arcada;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO", nullable = true)
@@ -63,14 +63,14 @@ public class Frasco {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-            String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
+            String siglaArcada = (arcada != null) ? arcada.getSigla() : "";
             String siglaTipo = (tipoDente != null) ? tipoDente.getSigla() : "";
             String siglaEstado = (estado != null) ? estado.getSigla() : "";
             String siglaDenticao = (denticao != null) ? denticao.getSigla() : "";
 
             this.identificacao = String.format("%s%s%s%s-%s",
                     siglaTipo,
-                    siglaMaxilar,
+                    siglaArcada,
                     siglaEstado,
                     siglaDenticao,
                     codigo);

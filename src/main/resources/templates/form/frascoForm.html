@@ -107,7 +107,7 @@
                     <div class="form-group" id="quantidadeGroup">
                         <label>Quantidade <span class="required-mark">*</span></label>
                         <div class="number-input number-input--compact">
-                            <input class="form-control number-input__field" type="number" th:field="*{quantidade}" id="quantidade" min="1" required>
+                            <input class="form-control number-input__field" type="number" name="quantidade" id="quantidade" th:value="${frascoDTO.quantidade != null ? frascoDTO.quantidade : 1}" min="1" required>
                             <div class="number-input__actions">
                                 <button type="button" class="number-input__btn quantidade-control" data-number-action="down">
                                     <i class="icon" data-lucide="minus"></i>
@@ -167,9 +167,9 @@
                     <div class="form-group" id="arcadaGroup">
                         <label>Arcada <span class="optional-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control atributos-control" th:field="*{maxilar}" id="maxilar">
+                            <select class="form-control atributos-control" th:field="*{arcada}" id="arcada">
                                 <option value="" selected>Não Informado</option>
-                                <option th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}"
+                                <option th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}"
                                         th:value="${m.name()}" th:text="${m}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
@@ -194,12 +194,13 @@
                     <div class="form-group">
                         <label>Data de manutenção <span class="required-mark">*</span></label>
                         <div class="date-wrapper">
-
                             <input class="form-control atributos-control"
-                                   type="datetime-local"
-                                   th:field="*{datManutencao}"
+                                   type="date"
+                                   name="datManutencao"
                                    id="datManutencao"
+                                   th:value="${frascoDTO.datManutencao != null ? #temporals.format(frascoDTO.datManutencao, 'yyyy-MM-dd') : ''}"
                                    readonly>
+
                             <button type="button" class="date-icon-trigger atributos-control" data-tooltip="Mostrar seletor de datas" aria-label="Mostrar seletor de datas">
                                 <i class="date-icon icon" data-lucide="calendar-days" aria-hidden="true"></i>
                             </button>

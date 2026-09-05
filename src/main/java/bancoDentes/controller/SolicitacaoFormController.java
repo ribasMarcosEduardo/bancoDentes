@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -67,7 +68,7 @@ public class SolicitacaoFormController extends BaseController {
             this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.salvar", e.getMessage()));
+            this.saveError(this.getText("error.solicitacao.salvar"));
             return "redirect:/solicitacao/painel";
         }
     }

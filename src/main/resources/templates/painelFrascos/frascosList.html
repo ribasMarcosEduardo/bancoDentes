@@ -12,9 +12,9 @@
     })();
   </script>
 
+  <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
-  <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
   <link rel="stylesheet" th:href="@{/css/pages/frascos.css(v=${#dates.createNow().getTime()})}">
 
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -77,7 +77,7 @@
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
           <div class="filter-section__content">
-            <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}">
+            <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}">
               <input type="checkbox" th:value="${m}" data-filter-group="Arcada">
               <span th:text="${m}">Superior</span>
             </label>
@@ -210,7 +210,7 @@
                      data-setor="bdh"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
-                     th:data-arcada="${frasco.maxilar != null ? frasco.maxilar : ''}"
+                     th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <div class="result-list">
@@ -225,6 +225,13 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+
+                  <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                      <i class="icon" data-lucide="archive-x"></i>
+                    </button>
+                  </form>
+
                   <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir">
                     <i class="icon" data-lucide="chevron-down"></i>
                   </button>
@@ -247,7 +254,7 @@
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Arcada</span>
-                          <span th:text="${frasco.maxilar != null ? frasco.maxilar : '-'}">-</span>
+                          <span th:text="${frasco.arcada != null ? frasco.arcada : '-'}">-</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Dentição</span>
@@ -292,7 +299,7 @@
                      data-setor="bdh"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
-                     th:data-arcada="${frasco.maxilar != null ? frasco.maxilar : ''}"
+                     th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <header class="card__header">
@@ -314,7 +321,7 @@
                 </div>
                 <div class="card__row">
                   <span class="card__label">Arcada:</span>
-                  <span class="card__value" th:text="${frasco.maxilar != null ? frasco.maxilar : '-'}">-</span>
+                  <span class="card__value" th:text="${frasco.arcada != null ? frasco.arcada : '-'}">-</span>
                 </div>
               </div>
 
@@ -328,9 +335,11 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
-                  <button type="button" class="card__action card__action--red" data-tooltip="Apagar">
-                    <i class="icon" data-lucide="archive-x"></i>
-                  </button>
+                  <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                      <i class="icon" data-lucide="archive-x"></i>
+                    </button>
+                  </form>
                 </div>
               </footer>
             </article>
@@ -344,12 +353,39 @@
 <div th:replace="~{partials/footer :: footer}"></div>
 
 <script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
 <script th:src="@{/js/includes.js}"></script>
 <script th:src="@{/js/filters.js}"></script>
 <script th:src="@{/js/results.js}"></script>
 <script th:src="@{/js/search.js}"></script>
 <script th:src="@{/js/requests.js}"></script>
 <script th:src="@{/js/page-size.js}"></script>
-<script  th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".delete-form").forEach(form => {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "Deseja realmente excluir este frasco?",
+                text: "Esta ação não poderá ser desfeita.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sim, excluir",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+
+</script>
 
 </body>
+

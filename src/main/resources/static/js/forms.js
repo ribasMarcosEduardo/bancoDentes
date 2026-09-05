@@ -53,7 +53,7 @@ function setupCadastroFrasco() {
     const arcadaGroup = document.querySelector("#arcadaGroup");
 
     const denticaoSelect = document.querySelector("#denticao");
-    const arcadaSelect = document.querySelector("#maxilar");
+    const arcadaSelect = document.querySelector("#arcada");
 
     const posicaoContainer = document.querySelector("#posicaoContainer");
     const molarCheckboxes = document.querySelector("#molarCheckboxes");
@@ -512,7 +512,7 @@ function setupCadastroFrascoSubmit() {
     const denticaoGroup = document.querySelector("#denticaoGroup");
     const denticaoSelect = document.querySelector("#denticao");
     const arcadaGroup = document.querySelector("#arcadaGroup");
-    const arcadaSelect = document.querySelector("#maxilar");
+    const arcadaSelect = document.querySelector("#arcada");
     const posicaoContainer = document.querySelector("#posicaoContainer");
     const dataCadastro = document.querySelector("#datCad");
     const dataManutencao = document.querySelector("#datManutencao");
@@ -1026,7 +1026,7 @@ function setupSincronizacaoDatas() {
         if (datCad.value) {
             const [ano, mes, dia] = datCad.value.split("-");
             const anoQueVem = parseInt(ano) + 1;
-            datManutencao.value = `${anoQueVem}-${mes}-${dia}T08:00`;
+            datManutencao.value = `${anoQueVem}-${mes}-${dia}`;
         } else {
             datManutencao.value = "";
         }

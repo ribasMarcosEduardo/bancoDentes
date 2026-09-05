@@ -294,7 +294,7 @@
                                  th:data-status="${solicitacao.statusSolicitacao.nome}"
                                  th:data-grupo="${solicitacao.tipoDente}"
                                  th:data-estado="${solicitacao.estado != null ? solicitacao.estado.nome : ''}"
-                                 th:data-arcada="${solicitacao.maxilar != null ? solicitacao.maxilar.nome : ''}"
+                                 th:data-arcada="${solicitacao.arcada != null ? solicitacao.arcada.nome : ''}"
                                  th:data-denticao="${solicitacao.denticao != null ? solicitacao.denticao.nome : ''}"
                                  th:data-estudante="${solicitacao.estudante != null ? solicitacao.estudante.nome : ''}"
                                  data-setor="bdh">
@@ -332,7 +332,7 @@
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Arcada</span>
-                                                    <span th:text="${solicitacao.maxilar != null ? solicitacao.maxilar.nome : '-'}">Inferior</span>
+                                                    <span th:text="${solicitacao.arcada != null ? solicitacao.arcada.nome : '-'}">Inferior</span>
                                                 </div>
 
                                                 <div class="request-detail">
