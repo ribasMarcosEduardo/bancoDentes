@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ import java.util.List;
 @Controller
 @RequestMapping("solicitacao")
 @RequiredArgsConstructor
-public class SolicitacaoFormController extends BaseController{
+public class SolicitacaoFormController extends BaseController {
 
     private final SolicitacaoService solicitacaoService;
     private final EstudanteService estudanteService;
@@ -33,7 +34,7 @@ public class SolicitacaoFormController extends BaseController{
      *
      * @param model
      */
-    @GetMapping
+    @GetMapping("/cadastrarSolicitacao")
     public String cadastrarSolicitacao(Model model) {
         try {
             Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
@@ -57,17 +58,23 @@ public class SolicitacaoFormController extends BaseController{
      * @param dto
      */
     @PostMapping("/save")
-    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto) {
+    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto,
+                                  @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
         try {
             solicitacaoService.save(dto);
             this.saveMessage(this.getText("msg.sucesso.solicitacao.enviada"));
+
+            if (cadastrarOutro) {
+                return "redirect:/solicitacao/cadastrarSolicitacao";
+            }
+
             return "redirect:/solicitacao/painel";
 
         } catch (SolicitacaoException e) {
             this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.salvar", e.getMessage()));
+            this.saveError(this.getText("error.solicitacao.salvar"));
             return "redirect:/solicitacao/painel";
         }
     }

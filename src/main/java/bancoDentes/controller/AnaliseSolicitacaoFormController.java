@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -77,8 +78,8 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param model
      */
     @GetMapping("/visualizaSolicitacao/{codSolicitacao}")
-    public String visualizaSolicitacao(@PathVariable("codSolicitacao") Long codSolicitacao, Model model) {
-        try{
+    public String visualizaSolicitacao(@PathVariable("codSolicitacao") Long codSolicitacao, Model model, RedirectAttributes redirectAttributes) {
+        try {
             Solicitacao solicitacao = solicitacaoService.buscarPorCodigo(codSolicitacao);
             AnaliseSolicitacao analise = analiseSolicitacaoService.buscarPorCodSolicitacao(codSolicitacao);
 
@@ -87,9 +88,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
             model.addAttribute("solicitacao", solicitacao);
             model.addAttribute("analise", analise);
             model.addAttribute("itensSalvos", itensSalvos);
-            model.addAttribute("totalJaSeparado", itensSalvos.stream()
-                    .mapToLong(ItemAnalise::getQuantidade)
-                    .sum());
+            model.addAttribute("totalJaSeparado", itensSalvos.stream().mapToLong(ItemAnalise::getQuantidade).sum());
             model.addAttribute("frascos", frascoService.getFrascosFiltrados(solicitacao));
 
             return "analiseEtapas/visualizaSolicitacao";
@@ -110,7 +109,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param request
      */
     @PostMapping("/negarSolicitacao")
-    public String negarSolicitacao(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, HttpServletRequest request) {
+    public String negarSolicitacao(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         try {
             analiseSolicitacaoService.negarSolicitacao(dto);
             this.saveMessage(this.getText("msg.sucesso.analise.finalizada"));
@@ -131,7 +130,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param dto
      */
     @PostMapping("/reabrirSolicitacao")
-    public String reabrirSolicitacao(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto) {
+    public String reabrirSolicitacao(@ModelAttribute("analiseSolicitacaoDTO") AnaliseSolicitacaoDTO dto, RedirectAttributes redirectAttributes) {
         try {
             analiseSolicitacaoService.reabrirSolicitacao(dto);
             this.saveMessage(this.getText("msg.sucesso.analise.reaberta"));
@@ -151,7 +150,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param codSolicitacao
      */
     @PostMapping("/aguardandoRetirada")
-    public String aguardandoRetirada(@RequestParam("codSolicitacao") Long codSolicitacao) {
+    public String aguardandoRetirada(@RequestParam("codSolicitacao") Long codSolicitacao, RedirectAttributes redirectAttributes) {
         try {
             analiseSolicitacaoService.aguardandoRetirada(codSolicitacao);
             this.saveMessage(this.getText("msg.sucesso.separacao.concluida"));
@@ -172,7 +171,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param codSolicitacao
      */
     @PostMapping("/concluirSolicitacao")
-    public String concluirSolicitacao(@RequestParam("codSolicitacao") Long codSolicitacao) {
+    public String concluirSolicitacao(@RequestParam("codSolicitacao") Long codSolicitacao, RedirectAttributes redirectAttributes) {
         try {
             analiseSolicitacaoService.concluirSolicitacao(codSolicitacao);
             return "redirect:/analiseSolicitacao/painel";
@@ -191,7 +190,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param dto
      */
     @PostMapping("/selecionaFrasco")
-    public ResponseEntity<Void> selecionaFrasco(@ModelAttribute ItemAnaliseDTO dto, @RequestParam("codSolicitacao") Long codSolicitacao) {
+    public ResponseEntity<Void> selecionaFrasco(@ModelAttribute ItemAnaliseDTO dto, @RequestParam("codSolicitacao") Long codSolicitacao, RedirectAttributes redirectAttributes) {
         try {
             ItemAnalise itemSalvo = itemAnaliseService.save(dto);
             this.saveMessage(this.getText("msg.sucesso.frasco.alocado"));
@@ -216,7 +215,7 @@ public class AnaliseSolicitacaoFormController extends BaseController {
      * @param codigo
      */
     @PostMapping("/removerItem/{codigo}")
-    public String removerItem(@PathVariable("codigo") Long codigo, @RequestParam("codSolicitacao") Long codSolicitacao) {
+    public String removerItem(@PathVariable("codigo") Long codigo, @RequestParam("codSolicitacao") Long codSolicitacao, RedirectAttributes redirectAttributes) {
         try {
             itemAnaliseService.removerItem(codigo);
             this.saveMessage(this.getText("msg.sucesso.item.removido"));

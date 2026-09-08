@@ -1,13 +1,15 @@
 package bancoDentes.model.enumModels;
 
-public enum Maxilar {
+public enum Arcada {
+    NAO_INFORMADA("Não informada", "N"),
     INFERIOR("Inferior", "I"),
     SUPERIOR("Superior", "S");
+
 
     private final String nome;
     private final String sigla;
 
-    Maxilar(String nome, String sigla) {
+    Arcada(String nome, String sigla) {
         this.nome = nome;
         this.sigla = sigla;
     }
@@ -25,9 +27,9 @@ public enum Maxilar {
         return sigla;
     }
 
-    public static String getSiglaMaxilar(Maxilar maxilar) {
-        if (maxilar == null) return null;
-        return maxilar.getSigla();
+    public static String getSiglaArcada(Arcada arcada) {
+        if (arcada == null) return null;
+        return arcada.getSigla();
     }
 
 }

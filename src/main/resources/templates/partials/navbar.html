@@ -187,4 +187,28 @@
             </div>
         </div>
     </aside>
+
+    <!-- Mensagens de Sucesso -->
+    <th:block th:if="${mensagemSucesso}">
+        <script th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+                Toast.fire({
+                    icon: 'success',
+                    title: /*[[${mensagemSucesso}]]*/ 'Sucesso!'
+                });
+            });
+        </script>
+    </th:block>
+
+    <!-- Mensagens de Erro -->
+    <th:block th:if="${mensagemErro}">
+        <script th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+                ToastError.fire({
+                    icon: 'error',
+                    title: /*[[${mensagemErro}]]*/ 'Erro!'
+                });
+            });
+        </script>
+    </th:block>
 </th:block>

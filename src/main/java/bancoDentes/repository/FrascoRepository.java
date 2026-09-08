@@ -3,7 +3,7 @@ package bancoDentes.repository;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.enumModels.Denticao;
 import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
+import bancoDentes.model.enumModels.Arcada;
 import bancoDentes.model.enumModels.TipoDente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,12 +17,12 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
     SELECT f FROM Frasco f
     WHERE (:dente IS NULL OR f.tipoDente = :dente)
       AND (:status IS NULL OR f.estado = :status)
-      AND (:max IS NULL OR f.maxilar = :max)
+      AND (:max IS NULL OR f.arcada = :max)
 """)
     List<Frasco> getFrascosFiltrados(
             @Param("dente") TipoDente tipoDente,
             @Param("status") EstadoDente estado,
-            @Param("max") Maxilar maxilar
+            @Param("max") Arcada arcada
     );
 
     @Query("""
@@ -50,13 +50,13 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
     @Query("SELECT f FROM Frasco f " +
             "WHERE f.tipoDente = :tipoDente " +
             "AND (:denticao IS NULL OR f.denticao = :denticao) " +
-            "AND (:maxilar IS NULL OR f.maxilar = :maxilar) " +
+            "AND (:arcada IS NULL OR f.arcada = :arcada) " +
             "AND (:estadoDente IS NULL OR f.estado = :estadoDente) " +
             "AND f.quantidade > 0")
     List<Frasco> getFrascosFiltrados(
             @Param("tipoDente") TipoDente tipoDente,
             @Param("denticao") Denticao denticao,
-            @Param("maxilar") Maxilar maxilar,
+            @Param("arcada") Arcada arcada,
             @Param("estadoDente") EstadoDente estadoDente
     );
 }

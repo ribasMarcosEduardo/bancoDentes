@@ -1,10 +1,7 @@
 package bancoDentes.model;
 
 import bancoDentes.exception.FrascoException;
-import bancoDentes.model.enumModels.Denticao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.TipoDente;
+import bancoDentes.model.enumModels.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,8 +38,8 @@ public class Frasco {
     private Long posicao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "MAXILAR")
-    private Maxilar maxilar;
+    @Column(name = "ARCADA")
+    private Arcada arcada;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO", nullable = true)
@@ -58,21 +55,37 @@ public class Frasco {
     @Column(name = "IDENTIFICACAO", nullable = true)
     private  String identificacao;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "LOCAL", nullable = true)
+    private Local local;
+
+    @PrePersist
+    @PreUpdate
+    public void endoPersist() {
+        if (this.tipoDente == TipoDente.ENDO) {
+            this.posicao = null;
+            this.arcada = null;
+            this.estado = null;
+            this.denticao = null;
+        }
+    }
+
     // Método que gera a identificação do frasco
     public void gerarIdentificacao() {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-            String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
+            String siglaArcada = (arcada != null) ? arcada.getSigla() : "";
             String siglaTipo = (tipoDente != null) ? tipoDente.getSigla() : "";
             String siglaEstado = (estado != null) ? estado.getSigla() : "";
             String siglaDenticao = (denticao != null) ? denticao.getSigla() : "";
 
             this.identificacao = String.format("%s%s%s%s-%s",
                     siglaTipo,
-                    siglaMaxilar,
+                    siglaArcada,
                     siglaEstado,
                     siglaDenticao,
                     codigo);
     }
+
 }

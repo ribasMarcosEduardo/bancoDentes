@@ -1,6 +1,7 @@
 package bancoDentes.model.enumModels;
 
 public enum Denticao {
+    NAO_INFORMADA("Não informada", "N"),
     DECIDUA("Decídua", "D"),
     PERMANENTE("Permanente", "P");
 
