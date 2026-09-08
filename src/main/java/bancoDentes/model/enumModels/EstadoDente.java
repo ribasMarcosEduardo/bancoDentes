@@ -1,10 +1,11 @@
 package bancoDentes.model.enumModels;
 
 public enum EstadoDente {
-
+    NAO_INFORMADA("Não informada", "N"),
     CARIADO("Cariado", "C"),
     HIGIDO("Hígido", "H"),
-    RESTAURADO("Restaurado", "R");
+    RESTAURADO("Restaurado", "R"),
+    MISTO("Misto", "M"),;
 
     private final String nome;
     private final String sigla;

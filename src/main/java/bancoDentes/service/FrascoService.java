@@ -74,7 +74,7 @@ public class FrascoService {
         return frascoRepository.getFrascosFiltrados(
                 solicitacao.getTipoDente(),
                 solicitacao.getDenticao(),
-                solicitacao.getMaxilar(),
+                solicitacao.getArcada(),
                 solicitacao.getEstado()
         );
     }

@@ -20,6 +20,7 @@ import java.util.List;
 /**
  * Serviço responsável por centralizar as regras de negócio e operações
  * relacionadas às solicitações
+ *
  * @author Marcos Eduardo Ribas
  */
 @Service
@@ -64,6 +65,7 @@ public class SolicitacaoService extends BaseService {
 
     /**
      * Busca uma solicitação específica no banco de dados a partir do seu código.
+     *
      * @param codSolicitacao
      */
     public Solicitacao buscarPorCodigo(Long codSolicitacao) throws SolicitacaoException {
@@ -74,6 +76,7 @@ public class SolicitacaoService extends BaseService {
     /**
      * Exclui uma solicitação do banco de dados, desde que ela atenda aos
      * critérios de exclusão estabelecidos pelo validador.
+     *
      * @param codigoSol
      */
     @Transactional
@@ -86,6 +89,7 @@ public class SolicitacaoService extends BaseService {
 
     /**
      * Recupera todas as solicitações vinculadas a um estudante específico.
+     *
      * @param codEstudante
      */
     public List<Solicitacao> buscarPorEstudante(Long codEstudante) {
@@ -113,6 +117,7 @@ public class SolicitacaoService extends BaseService {
 
     /**
      * Conta o número total de solicitações cujo status atual seja PENDENTE dentro de uma lista.
+     *
      * @param solicitacoes
      */
     public long getPendentes(List<Solicitacao> solicitacoes) {
@@ -123,6 +128,7 @@ public class SolicitacaoService extends BaseService {
 
     /**
      * Conta o número total de solicitações cujo status atual seja CONCLUIDO dentro de uma lista.
+     *
      * @param solicitacoes
      */
     public long getConcluidas(List<Solicitacao> solicitacoes) {

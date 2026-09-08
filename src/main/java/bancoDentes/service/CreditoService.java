@@ -22,7 +22,7 @@ public class CreditoService {
      * @param quantidadeAntiga
      * @param quantidadeNova
      */
-    public void manipulaCredito(Estudante estudante, Long quantidadeAntiga, Long quantidadeNova){
+    public void manipulaCredito(Estudante estudante, Long quantidadeAntiga, Long quantidadeNova) {
         Long diferenca = quantidadeNova - quantidadeAntiga;
         estudante.setCredito(estudante.getCredito() - diferenca);
     }
