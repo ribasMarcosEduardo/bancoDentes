@@ -68,11 +68,21 @@ public class Solicitacao {
     private AnaliseSolicitacao analiseSolicitacao;
 
     @PrePersist
-    protected void onCreate() {
-        this.datSolicitacao = LocalDateTime.now();
-        this.statusSolicitacao = StatusSolicitacao.PENDENTE;
+    @PreUpdate
+    public void prePersistOrUpdate() {
+        if (this.tipoDente == TipoDente.ENDO) {
+            this.posicao = null;
+            this.arcada = null;
+            this.estado = null;
+            this.denticao = null;
+        }
+        if (this.datSolicitacao == null) {
+            this.datSolicitacao = LocalDateTime.now();
+        }
+        if (this.statusSolicitacao == null) {
+            this.statusSolicitacao = StatusSolicitacao.PENDENTE;
+        }
     }
-
     public void iniciarAnalise(){
         this.statusSolicitacao = StatusSolicitacao.EM_ANALISE;
     }

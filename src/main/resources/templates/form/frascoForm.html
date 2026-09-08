@@ -46,7 +46,10 @@
             </div>
 
             <div class="toolbar__actions">
-                <a th:href="@{/frasco/painel}" class="btn btn-secondary">Cancelar</a>
+                <a th:href="@{/frasco/painel}" class="btn btn-secondary">
+                    <span class="btn__label">Cancelar</span>
+                    <i class="orderBy-icon" data-lucide="x"></i>
+                </a>
 
                 <button type="submit" class="btn btn-tonal" id="salvarContinuarBtn" form="cadastroFrascoForm">
                     Salvar e Continuar
@@ -68,7 +71,6 @@
                         <label>Grupo dentário <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
                             <select class="form-control" th:field="*{tipoDente}" id="tipoDente" required>
-
                                 <option value="">- Selecione o grupo -</option>
                                 <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
                                         th:value="${nome.name()}" th:text="${nome}"></option>
@@ -78,11 +80,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Local <span class="required-mark">*</span></label>
+                        <label>Local <span class="optional-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control" id="localFrasco">
-                                <option value="bdh" selected>Banco de Dentes Humanos</option>
-                                <option value="biobanco">Biobanco</option>
+                            <select class="form-control" th:field="*{local}" id="localFrasco">
+                                <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
+                                        th:value="${l.name()}" th:text="${l}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>
@@ -90,13 +92,12 @@
                 </div>
             </section>
 
-            <section class="form-section" id="estadoFrascoSection">
+            <section class="form-section form-section--disabled" id="estadoFrascoSection">
                 <div class="form-grid-estado">
-                    <div class="form-group">
+                    <div class="form-group" id="estadoDenteGroup">
                         <label>Estado do dente <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control" th:field="*{estadoDente}" id="estadoDente" required>
-                                <option value="">- Selecione o Estado -</option>
+                            <select class="form-control" th:field="*{estadoDente}" id="estadoDente" required disabled>
                                 <option th:each="estado : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
                                         th:value="${estado.name()}" th:text="${estado}"></option>
                             </select>
@@ -104,15 +105,15 @@
                         </div>
                     </div>
 
-                    <div class="form-group" id="quantidadeGroup">
-                        <label>Quantidade <span class="required-mark">*</span></label>
+                    <div class="form-group form-group--disabled" id="quantidadeGroup">
+                        <label>Quantidade</label>
                         <div class="number-input number-input--compact">
-                            <input class="form-control number-input__field" type="number" name="quantidade" id="quantidade" th:value="${frascoDTO.quantidade != null ? frascoDTO.quantidade : 1}" min="1" required>
+                            <input class="form-control number-input__field" type="number" name="quantidade" id="quantidade" th:value="${frascoDTO.quantidade != null ? frascoDTO.quantidade : 1}" min="1" disabled>
                             <div class="number-input__actions">
-                                <button type="button" class="number-input__btn quantidade-control" data-number-action="down">
+                                <button type="button" class="number-input__btn quantidade-control" data-number-action="down" disabled>
                                     <i class="icon" data-lucide="minus"></i>
                                 </button>
-                                <button type="button" class="number-input__btn quantidade-control" data-number-action="up">
+                                <button type="button" class="number-input__btn quantidade-control" data-number-action="up" disabled>
                                     <i class="icon" data-lucide="plus"></i>
                                 </button>
                             </div>
@@ -121,42 +122,12 @@
                 </div>
             </section>
 
-            <section class="form-section" id="posicaoContainer" style="display: none;">
-                <div class="form-group">
-                    <label>Numeração do Dente <span class="optional-mark">*</span></label>
-                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; padding: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.1);">
-
-                        <div id="molarCheckboxes" style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong>Molar:</strong>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <label class="checkbox-filter" th:each="pos : ${new int[]{1,2,3}}">
-                                    <input type="checkbox" th:field="*{posicao}" th:value="${pos}">
-                                    <span th:text="${pos}"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div id="preMolarCheckboxes" style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong>Pré-Molar:</strong>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <label class="checkbox-filter" th:each="pos : ${new int[]{14,15,24,25,34,35,44,45}}">
-                                    <input type="checkbox" th:field="*{posicao}" th:value="${pos}">
-                                    <span th:text="${pos}"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-            <section class="form-section" id="atributosFrascoSection">
+            <section class="form-section form-section--disabled" id="atributosFrascoSection">
                 <div class="form-grid">
                     <div class="form-group" id="denticaoGroup">
                         <label>Dentição <span class="optional-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control atributos-control" th:field="*{denticao}" id="denticao">
-                                <option value="" selected>Não Informado</option>
+                            <select class="form-control atributos-control" th:field="*{denticao}" id="denticao" disabled>
                                 <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
                                         th:value="${d.name()}" th:text="${d.nome}"></option>
                             </select>
@@ -167,13 +138,23 @@
                     <div class="form-group" id="arcadaGroup">
                         <label>Arcada <span class="optional-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control atributos-control" th:field="*{arcada}" id="arcada">
-                                <option value="" selected>Não Informado</option>
+                            <select class="form-control atributos-control" th:field="*{arcada}" id="arcada" disabled>
                                 <option th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}"
                                         th:value="${m.name()}" th:text="${m}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>
+                    </div>
+
+                    <div class="form-group" id="numeracaoGroup" hidden>
+                        <label>Numeração <span class="optional-mark">*</span></label>
+                        <div class="select-wrapper">
+                            <select class="form-control atributos-control" th:field="*{posicao}" id="numeracaoSelect" th:data-valor-inicial="${frascoDTO.posicao}">
+                                <option value="">- Selecione a Dentição -</option>
+                            </select>
+                            <i class="select-icon icon" data-lucide="chevron-down"></i>
+                        </div>
+                        <p class="field-hint" id="numeracaoHint"></p>
                     </div>
 
                     <div class="form-group">
@@ -184,8 +165,8 @@
                                    id="datCad"
                                    name="datCad"
                                    th:value="${frascoDTO.datCad != null ? #temporals.format(frascoDTO.datCad, 'yyyy-MM-dd') : ''}"
-                                   required>
-                            <button type="button" class="date-icon-trigger atributos-control" data-tooltip="Mostrar seletor de datas" aria-label="Mostrar seletor de datas">
+                                   required disabled>
+                            <button type="button" class="date-icon-trigger atributos-control" data-tooltip="Mostrar seletor de datas" aria-label="Mostrar seletor de datas" disabled>
                                 <i class="date-icon icon" data-lucide="calendar-days" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -199,9 +180,9 @@
                                    name="datManutencao"
                                    id="datManutencao"
                                    th:value="${frascoDTO.datManutencao != null ? #temporals.format(frascoDTO.datManutencao, 'yyyy-MM-dd') : ''}"
-                                   readonly>
+                                   required disabled>
 
-                            <button type="button" class="date-icon-trigger atributos-control" data-tooltip="Mostrar seletor de datas" aria-label="Mostrar seletor de datas">
+                            <button type="button" class="date-icon-trigger atributos-control" data-tooltip="Mostrar seletor de datas" aria-label="Mostrar seletor de datas" disabled>
                                 <i class="date-icon icon" data-lucide="calendar-days" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -219,9 +200,9 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script  th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-<script  th:src="@{/js/includes.js}"></script>
-<script  th:src="@{/js/forms.js}"></script>
+<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/forms.js}"></script>
 
 </body>
 </html>

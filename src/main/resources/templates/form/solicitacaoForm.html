@@ -12,174 +12,187 @@
     })();
   </script>
 
+  <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <link rel="stylesheet" th:href="@{/css/pages/cadastro_frasco.css}">
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <title>Nova Solicitação</title>
+  <title>Solicitação de Dentes</title>
 </head>
 
 <body>
 
-<div id="solicitacaoConteudo">
+<div class="background">
+  <div class="blob blob--blue"></div>
+  <div class="blob blob--green"></div>
+</div>
 
-  <div class="background">
-    <div class="blob blob--blue"></div>
-    <div class="blob blob--green"></div>
-  </div>
+<div th:replace="~{partials/navbar :: navbar}"></div>
 
-  <div th:replace="~{partials/navbar :: navbar}"></div>
+<main class="page">
+  <section class="form-shell">
 
-  <main class="page">
-    <section class="form-shell">
+    <header class="page-header">
+      <h1>Solicitação de Dentes</h1>
+      <p>Preencha os dados da solicitação de acordo com o necessário para sua atividade prática.</p>
+    </header>
 
-      <header class="page-header">
-        <h1>Solicitação de Dentes</h1>
-        <p>Preencha os dados da solicitação de acordo com o necessário para sua atividade prática.</p>
-      </header>
-
-      <div class="toolbar glass-frost">
-        <div class="toolbar__info">
-          <span class="toolbar__label">Saldo Disponível:</span>
-          <div class="toolbar__badge" th:text="${usuarioLogado.credito}">0</div>
-          <input type="hidden" id="creditoEstudante" th:value="${usuarioLogado.credito}">
-        </div>
-
-        <div class="toolbar__actions">
-          <a th:href="@{/solicitacao/painel}" class="btn btn-secondary">
-            Cancelar
-          </a>
-          <button type="button" class="btn btn-primary" onclick="validarESubmeter()">
-            Enviar Solicitação
-          </button>
-        </div>
+    <div class="toolbar glass-frost">
+      <div class="toolbar__info">
+        <span class="toolbar__label">Saldo Disponível:</span>
+        <div class="toolbar__badge" th:text="${usuarioLogado.credito}">0</div>
+        <input type="hidden" id="creditoEstudante" th:value="${usuarioLogado.credito}">
       </div>
 
-      <form id="formSolicitacao" class="form-card" th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
-        <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}" />
-        <input type="hidden" th:field="*{version}"/>
-        <input type="hidden" th:field="*{codigo}"/>
+      <div class="toolbar__actions">
+        <a th:href="@{/solicitacao/painel}" class="btn btn-secondary">
+          <span class="btn__label">Cancelar</span>
+          <i class="orderBy-icon" data-lucide="x"></i>
+        </a>
 
-        <section class="form-section">
+        <button type="submit" class="btn btn-tonal" id="salvarContinuarBtn" form="cadastroSolicitacaoForm">
+          Salvar e Continuar
+        </button>
+
+        <button type="submit" class="btn btn-primary" id="salvarSairBtn" form="cadastroSolicitacaoForm">
+          Salvar e Sair
+        </button>
+      </div>
+    </div>
+
+    <form class="form-card" id="cadastroSolicitacaoForm" th:action="@{/solicitacao/save}" th:object="${solicitacaoDTO}" method="post">
+      <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}"/>
+      <input type="hidden" th:field="*{version}"/>
+      <input type="hidden" th:field="*{codigo}"/>
+
+      <section class="form-section">
+        <div class="form-grid-estado">
           <div class="form-group">
             <label>Grupo dentário <span class="required-mark">*</span></label>
             <div class="select-wrapper">
-              <select class="form-control" th:field="*{tipoDente}" id="tipoDente" onchange="atualizarCampos(true)" required>
+              <select class="form-control" th:field="*{tipoDente}" id="grupoDentario" required>
                 <option value="">- Selecione o grupo -</option>
-                <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
-                        th:value="${nome.name()}" th:text="${nome}"></option>
+                <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}" th:value="${nome.name()}" th:text="${nome}"></option>
               </select>
               <i class="select-icon icon" data-lucide="chevron-down"></i>
             </div>
           </div>
-        </section>
 
-        <section class="form-section " id="estadoFrascoSection">
-          <div class="form-grid-estado">
-            <div class="form-group" id="estadoGroup">
-              <label>Estado do dente <span class="required-mark">*</span></label>
-              <div class="select-wrapper">
-                <select class="form-control" th:field="*{estadoDente}" id="estadoDente" required disabled>
-                  <option value="">- Selecione o Estado -</option>
-                  <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
-                          th:value="${e.name()}" th:text="${e}"></option>
-                </select>
-                <i class="select-icon icon" data-lucide="chevron-down"></i>
+          <div class="form-group form-group--disabled" id="quantidadeGroup">
+            <label>Quantidade</label>
+            <div class="number-input number-input--fraction">
+              <input class="form-control number-input__field" type="number" name="quantidade" min="1" th:value="${solicitacaoDTO.quantidade != null ? solicitacaoDTO.quantidade : 1}" id="quantidade" disabled>
+              <span class="number-input__max" id="quantidadeMax"></span>
+              <div class="number-input__actions">
+                <button type="button" class="number-input__btn quantidade-control" data-number-action="down" disabled>
+                  <i class="icon" data-lucide="minus"></i>
+                </button>
+                <button type="button" class="number-input__btn quantidade-control" data-number-action="up" disabled>
+                  <i class="icon" data-lucide="plus"></i>
+                </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div class="form-group form-group--disabled" id="quantidadeGroup">
-              <label>Quantidade</label>
-              <div class="quantidade-inline">
-                <div class="number-input">
-                  <input class="form-control number-input__field" type="number" name="quantidade" id="quantidade" th:value="${solicitacaoDTO.quantidade != null ? solicitacaoDTO.quantidade : 1}" min="1" disabled oninput="atualizarFeedback()">
-                  <div class="number-input__actions">
-                    <button type="button" class="number-input__btn quantidade-control" data-number-action="down" disabled>
-                      <i class="icon" data-lucide="minus"></i>
-                    </button>
-                    <button type="button" class="number-input__btn quantidade-control" data-number-action="up" disabled>
-                      <i class="icon" data-lucide="plus"></i>
-                    </button>
-                  </div>
+        <p class="field-hint" id="grupoEndoHint" hidden>
+          Dentes destinados a trabalhos de tratamento endodôntico, e para uso na disciplina de Endodontia.
+        </p>
+      </section>
+
+      <section class="form-section form-section--disabled" id="avancadosSection">
+        <div class="form-section__collapse-inner">
+          <div class="form-group">
+            <label class="checkbox-filter">
+              <input type="checkbox" id="avancadosToggle" disabled>
+              <span>Adicionar campos avançados</span>
+            </label>
+            <p class="field-hint">Estado, dentição, arcada/numeração do dente. Marque só se realmente precisar dessa especificação; do contrário, qualquer opção disponível é aceita.</p>
+          </div>
+
+          <div class="advanced-fields" id="advancedFields">
+            <div class="advanced-fields__inner">
+              <div class="form-group" id="estadoGroup">
+                <label>Estado do dente <span class="optional-mark">*</span></label>
+                <div class="select-wrapper">
+                  <select class="form-control atributos-control" th:field="*{estadoDente}" id="estadoDente" disabled>
+                    <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
+                            th:value="${e.name()}"
+                            th:text="${e}"
+                            th:selected="${solicitacaoDTO.estadoDente == e or (solicitacaoDTO.estadoDente == null and e.name() == 'NAO_INFORMADA')}">
+                    </option>
+                  </select>
+                  <i class="select-icon icon" data-lucide="chevron-down"></i>
                 </div>
               </div>
-              <small id="creditoFeedbackText" style="color: #dc3545; display: none; margin-top: 8px; font-weight: 500;"></small>
-            </div>
-          </div>
-        </section>
 
-        <section class="form-section" id="atributosFrascoSection">
-          <div class="form-grid">
-            <div class="form-group" id="arcadaContainer">
-              <label>Arcada <span class="required-mark">*</span></label>
-              <div class="select-wrapper">
-                <select class="form-control atributos-control" th:field="*{arcada}" id="arcada" disabled required>
-                  <option value="">Não Informado</option>
-                  <option th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}"
-                          th:value="${m.name()}" th:text="${m}"></option>
-                </select>
-                <i class="select-icon icon" data-lucide="chevron-down"></i>
+              <div class="form-grid" id="atributosFrascoSection">
+                <div class="form-group" id="denticaoGroup">
+                  <label>Dentição <span class="optional-mark">*</span></label>
+                  <div class="select-wrapper">
+                    <select class="form-control atributos-control" th:field="*{denticao}" id="denticao" disabled>
+                      <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
+                              th:value="${d.name()}"
+                              th:text="${d.nome}"
+                              th:selected="${solicitacaoDTO.denticao == d or (solicitacaoDTO.denticao == null and d.name() == 'NAO_INFORMADA')}">
+                      </option>
+                    </select>
+                    <i class="select-icon icon" data-lucide="chevron-down"></i>
+                  </div>
+                </div>
+
+                <div class="form-group" id="arcadaGroup">
+                  <label>Arcada <span class="optional-mark">*</span></label>
+                  <div class="select-wrapper">
+                    <select class="form-control atributos-control" th:field="*{arcada}" id="arcada" disabled>
+                      <option th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}"
+                              th:value="${m.name()}"
+                              th:text="${m}"
+                              th:selected="${solicitacaoDTO.arcada == m}">
+                      </option>
+                    </select>
+                    <i class="select-icon icon" data-lucide="chevron-down"></i>
+                  </div>
+                </div>
+
+                <div class="form-group" id="numeracaoGroup" hidden>
+                  <label>Numeração <span class="optional-mark">*</span></label>
+                  <div class="select-wrapper">
+                    <select class="form-control atributos-control" th:field="*{posicao}" id="numeracaoSelect" disabled>
+                    </select>
+                    <i class="select-icon icon" data-lucide="chevron-down"></i>
+                  </div>
+                  <p class="field-hint" id="numeracaoHint"></p>
+                </div>
               </div>
             </div>
-
-            <div class="form-group" id="denticaoContainer">
-              <label>Dentição <span class="required-mark">*</span></label>
-              <div class="select-wrapper">
-                <select class="form-control atributos-control" th:field="*{denticao}" id="denticao" disabled required>
-                  <option value="">Não Informado</option>
-                  <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
-                          th:value="${d.name()}" th:text="${d.nome}"></option>
-                </select>
-                <i class="select-icon icon" data-lucide="chevron-down"></i>
-              </div>
-            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="form-section" id="posicaoContainer" style="display: none;">
-          <div class="form-group">
-            <label>Posição do Dente</label>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; padding: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.1);">
-
-              <div id="molarCheckboxes" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <label class="checkbox-filter" th:each="pos : ${new int[]{1,2,3}}">
-                  <input type="checkbox" th:field="*{posicao}" th:value="${pos}">
-                  <span th:text="${pos}"></span>
-                </label>
-              </div>
-
-              <div id="preMolarCheckboxes" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <label class="checkbox-filter" th:each="pos : ${new int[]{14,15,24,25,34,35,44,45}}">
-                  <input type="checkbox" th:field="*{posicao}" th:value="${pos}">
-                  <span th:text="${pos}"></span>
-                </label>
-              </div>
-
-            </div>
+      <section class="form-section form-section--disabled" id="observacoesSection">
+        <div class="form-group">
+          <label for="observacoesSolicitacao">Justificativa / Observação <span class="required-mark">*</span></label>
+          <div class="textarea-veil-wrapper">
+            <textarea class="form-control textarea-control" th:field="*{justificativa}" id="observacoesSolicitacao" rows="4" maxlength="250" placeholder="Ex: Trabalho de Endodontia I, pesquisa científica..." required disabled></textarea>
+            <span class="textarea-counter">0/250</span>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="form-section">
-          <div class="form-group">
-            <label>Justificativa / Observação <span class="required-mark">*</span></label>
-            <textarea class="form-control" th:field="*{justificativa}" id="justificativa" rows="3" placeholder="Ex: Trabalho de Endodontia I, pesquisa científica..." required style="resize: vertical; padding: 12px; min-height: 100px;"></textarea>
-          </div>
-        </section>
+      <p class="form-legend">
+        <span class="required-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Obrigatório.</span>
+        <span class="optional-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Opcional.</span>
+      </p>
+    </form>
+  </section>
+</main>
 
-        <p class="form-legend">
-          <span class="required-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Obrigatório.</span>
+<div th:replace="~{partials/footer :: footer}"></div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/forms.js}"></script>
 
-        </p>
-      </form>
-    </section>
-  </main>
-
-  <div th:replace="~{partials/footer :: footer}"></div>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script th:src="@{/js/includes.js}"></script>
-  <script th:src="@{/js/solicitacao.js}"></script>
-
-</div>
 </body>
 </html>

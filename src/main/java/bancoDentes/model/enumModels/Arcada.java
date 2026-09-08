@@ -1,9 +1,10 @@
 package bancoDentes.model.enumModels;
 
 public enum Arcada {
+    NAO_INFORMADA("Não informada", "N"),
     INFERIOR("Inferior", "I"),
-    SUPERIOR("Superior", "S"),
-    NAO_INFORMADA("Não informada", "N");
+    SUPERIOR("Superior", "S");
+
 
     private final String nome;
     private final String sigla;

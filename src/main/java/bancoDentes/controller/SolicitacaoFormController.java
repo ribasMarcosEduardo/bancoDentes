@@ -34,7 +34,7 @@ public class SolicitacaoFormController extends BaseController {
      *
      * @param model
      */
-    @GetMapping
+    @GetMapping("/cadastrarSolicitacao")
     public String cadastrarSolicitacao(Model model) {
         try {
             Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
@@ -58,10 +58,16 @@ public class SolicitacaoFormController extends BaseController {
      * @param dto
      */
     @PostMapping("/save")
-    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto) {
+    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto,
+                                  @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
         try {
             solicitacaoService.save(dto);
             this.saveMessage(this.getText("msg.sucesso.solicitacao.enviada"));
+
+            if (cadastrarOutro) {
+                return "redirect:/solicitacao/cadastrarSolicitacao";
+            }
+
             return "redirect:/solicitacao/painel";
 
         } catch (SolicitacaoException e) {

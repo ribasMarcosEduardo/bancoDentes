@@ -1,7 +1,7 @@
 package bancoDentes.model.enumModels;
 
 public enum EstadoDente {
-
+    NAO_INFORMADA("Não informada", "N"),
     CARIADO("Cariado", "C"),
     HIGIDO("Hígido", "H"),
     RESTAURADO("Restaurado", "R"),

@@ -1,17 +1,4 @@
 const NUMERACAO_POR_GRUPO_E_DENTICAO = {
-    premolar: {
-        permanente: [
-            { value: "14", label: "1º Pré-molar Superior Direito" },
-            { value: "15", label: "2º Pré-molar Superior Direito" },
-            { value: "24", label: "1º Pré-molar Superior Esquerdo" },
-            { value: "25", label: "2º Pré-molar Superior Esquerdo" },
-            { value: "34", label: "1º Pré-molar Inferior Esquerdo" },
-            { value: "35", label: "2º Pré-molar Inferior Esquerdo" },
-            { value: "44", label: "1º Pré-molar Inferior Direito" },
-            { value: "45", label: "2º Pré-molar Inferior Direito" },
-        ],
-        decidua: [],
-    },
     molar: {
         permanente: [
             { value: "16", label: "1º Molar Superior Direito" },
@@ -38,12 +25,25 @@ const NUMERACAO_POR_GRUPO_E_DENTICAO = {
             { value: "85", label: "2º Molar Decíduo Inferior Direito" },
         ],
     },
+    premolar: {
+        permanente: [
+            { value: "14", label: "1º Pré-molar Superior Direito" },
+            { value: "15", label: "2º Pré-molar Superior Direito" },
+            { value: "24", label: "1º Pré-molar Superior Esquerdo" },
+            { value: "25", label: "2º Pré-molar Superior Esquerdo" },
+            { value: "34", label: "1º Pré-molar Inferior Esquerdo" },
+            { value: "35", label: "2º Pré-molar Inferior Esquerdo" },
+            { value: "44", label: "1º Pré-molar Inferior Direito" },
+            { value: "45", label: "2º Pré-molar Inferior Direito" },
+        ],
+        decidua: [],
+    },
 };
 
-// Controla a lógica de exibição, bloqueio e interatividade da tela de cadastro de frascos
 function setupCadastroFrasco() {
     const tipoDente = document.querySelector("#tipoDente");
     const estadoFrascoSection = document.querySelector("#estadoFrascoSection");
+    const estadoDenteGroup = document.querySelector("#estadoDenteGroup");
     const estadoDente = document.querySelector("#estadoDente");
     const quantidadeGroup = document.querySelector("#quantidadeGroup");
     const quantidadeInput = document.querySelector("#quantidade");
@@ -51,13 +51,15 @@ function setupCadastroFrasco() {
     const atributosFrascoSection = document.querySelector("#atributosFrascoSection");
     const denticaoGroup = document.querySelector("#denticaoGroup");
     const arcadaGroup = document.querySelector("#arcadaGroup");
-
     const denticaoSelect = document.querySelector("#denticao");
     const arcadaSelect = document.querySelector("#arcada");
+    const numeracaoGroup = document.querySelector("#numeracaoGroup");
+    const numeracaoSelect = document.querySelector("#numeracaoSelect");
+    const numeracaoHint = document.querySelector("#numeracaoHint");
 
-    const posicaoContainer = document.querySelector("#posicaoContainer");
-    const molarCheckboxes = document.querySelector("#molarCheckboxes");
-    const preMolarCheckboxes = document.querySelector("#preMolarCheckboxes");
+    const codigoInput = document.querySelector("input[name='codigo']");
+    const isEdicao = codigoInput && codigoInput.value !== "" && codigoInput.value !== "null";
+    const valorInicialNumeracao = numeracaoSelect ? numeracaoSelect.value : "";
 
     if (!tipoDente || !estadoFrascoSection || !estadoDente || !quantidadeInput || !atributosFrascoSection) {
         return;
@@ -65,60 +67,160 @@ function setupCadastroFrasco() {
 
     const atributosControls = atributosFrascoSection.querySelectorAll(".atributos-control");
 
-    // Remove a classe visual de desabilitado de uma seção do formulário
+    const originalDenticaoOptions = Array.from(denticaoSelect ? denticaoSelect.options : []).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        selected: opt.selected
+    }));
+
     function enableSection(section) {
         section.classList.remove("form-section--disabled");
     }
 
-    // Adiciona a classe visual de desabilitado em uma seção do formulário
     function disableSection(section) {
         section.classList.add("form-section--disabled");
     }
 
-    // Altera o estado de desabilitado de uma lista de elementos HTML
     function setDisabled(elements, disabled) {
         elements.forEach((el) => {
             el.disabled = disabled;
         });
     }
 
-    // Retorna o valor do tipo de dente selecionado convertido em letras maiúsculas
     function getGrupo() {
-        return tipoDente.value.toUpperCase();
+        return tipoDente.value ? tipoDente.value.toLowerCase() : "";
     }
 
-    // Verifica se o grupo dentário selecionado é Endodontia (ENDO)
     function isEndo() {
-        return getGrupo() === "ENDO";
+        return getGrupo() === "endo";
     }
 
-    // Gerencia quais campos e blocos de numeração/atributos devem aparecer conforme o tipo de dente
+    function usaNumeracao() {
+        const grupo = getGrupo();
+        return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
+    }
+
+    function usaArcada() {
+        const grupo = getGrupo();
+        return grupo === "canino" || grupo === "incisivo";
+    }
+
+    function isPreMolar() {
+        const grupo = getGrupo();
+        return grupo === "premolar" || grupo === "pre_molar";
+    }
+
     function atualizarVisibilidadeCamposAtributos() {
         const endo = isEndo();
-        const grupo = getGrupo();
-        const isMolar = grupo === "MOLAR";
-        const isPreMolar = grupo === "PRE_MOLAR";
-        const mostrarNumeracao = isMolar || isPreMolar;
+        const mostrarNumeracao = usaNumeracao();
+        const mostrarArcada = usaArcada();
 
         if (denticaoGroup) denticaoGroup.hidden = endo;
-        if (arcadaGroup) arcadaGroup.hidden = endo || mostrarNumeracao;
+        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
+        if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
 
-        if (posicaoContainer) {
-            if (endo || !mostrarNumeracao) {
-                posicaoContainer.style.display = "none";
-            } else {
-                posicaoContainer.style.display = "block";
-                if (molarCheckboxes) molarCheckboxes.style.display = isMolar ? "flex" : "none";
-                if (preMolarCheckboxes) preMolarCheckboxes.style.display = isPreMolar ? "flex" : "none";
+        if (denticaoSelect) {
+            const currentVal = denticaoSelect.value;
+            denticaoSelect.innerHTML = "";
+            originalDenticaoOptions.forEach(optData => {
+                if (isPreMolar() && optData.value.toLowerCase() === "decidua") {
+                    return;
+                }
+                const opt = document.createElement("option");
+                opt.value = optData.value;
+                opt.textContent = optData.text;
+                if (optData.value === currentVal) {
+                    opt.selected = true;
+                }
+                denticaoSelect.appendChild(opt);
+            });
+            if (isPreMolar() && currentVal.toLowerCase() === "decidua") {
+                denticaoSelect.value = "NAO_INFORMADA";
             }
         }
     }
 
-    // Libera ou bloqueia a quantidade e os atributos dependendo se o estado do dente foi preenchido
-    function aplicarEstadoSelecionado() {
-        const hasEstado = estadoDente.value !== "";
+    function popularOpcoesNumeracao() {
+        if (!numeracaoSelect) return;
 
-        if (hasEstado) {
+        let grupoKey = tipoDente.value.toLowerCase().replace("-", "").replace("_", "");
+        if (grupoKey === "premolar") grupoKey = "premolar";
+        if (grupoKey === "molar") grupoKey = "molar";
+
+        const denticao = denticaoSelect ? denticaoSelect.value.toLowerCase() : "";
+        const opcoes = (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoKey] || {})[denticao] || [];
+
+        const valorAlvo = numeracaoSelect.value || valorInicialNumeracao;
+
+        numeracaoSelect.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.selected = true;
+
+        if (!denticao || denticao === "nao_informada") {
+            placeholder.textContent = "- Selecione a Dentição -";
+            numeracaoSelect.appendChild(placeholder);
+            sincronizarDisabledNumeracao();
+            return;
+        }
+
+        if (opcoes.length === 0) {
+            placeholder.textContent = "Não disponível";
+            numeracaoSelect.appendChild(placeholder);
+            sincronizarDisabledNumeracao();
+            return;
+        }
+
+        placeholder.disabled = true;
+        placeholder.textContent = "- Selecione a Numeração -";
+        numeracaoSelect.appendChild(placeholder);
+
+        let encontrou = false;
+        opcoes.forEach(({ value, label }) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            option.dataset.label = label;
+
+            if (value === String(valorAlvo)) {
+                option.selected = true;
+                encontrou = true;
+            }
+
+            numeracaoSelect.appendChild(option);
+        });
+
+        if (encontrou) {
+            placeholder.selected = false;
+        }
+
+        sincronizarDisabledNumeracao();
+        atualizarDicaNumeracao();
+    }
+
+    function sincronizarDisabledNumeracao() {
+        if (!denticaoSelect || !numeracaoSelect) return;
+
+        const atributosLiberados = !atributosFrascoSection.classList.contains("form-section--disabled");
+        const temDenticao = denticaoSelect.value !== "" && denticaoSelect.value !== "NAO_INFORMADA";
+        const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
+
+        numeracaoSelect.disabled = !(atributosLiberados && temDenticao && temOpcoes);
+    }
+
+    function atualizarDicaNumeracao() {
+        if (!numeracaoSelect || !numeracaoHint) return;
+
+        const opcaoSelecionada = numeracaoSelect.selectedOptions[0];
+        const label = opcaoSelecionada ? opcaoSelecionada.dataset.label : undefined;
+        numeracaoHint.textContent = label ? `(${label})` : "";
+    }
+
+    function aplicarEstadoSelecionado() {
+        const hasGrupo = tipoDente.value !== "";
+
+        if (hasGrupo) {
             quantidadeGroup.classList.remove("form-group--disabled");
             quantidadeInput.disabled = false;
             setDisabled(quantidadeControls, false);
@@ -131,10 +233,13 @@ function setupCadastroFrasco() {
             disableSection(atributosFrascoSection);
             setDisabled(atributosControls, true);
         }
+
+        sincronizarDisabledNumeracao();
     }
 
     tipoDente.addEventListener("change", () => {
         const hasGrupo = tipoDente.value !== "";
+        const endo = isEndo();
 
         if (hasGrupo) {
             enableSection(estadoFrascoSection);
@@ -142,29 +247,64 @@ function setupCadastroFrasco() {
             disableSection(estadoFrascoSection);
         }
 
-        estadoDente.disabled = !hasGrupo;
-        estadoDente.value = "";
+        if (endo) {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            estadoDente.required = false;
+            estadoDente.value = "misto";
+        } else {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            estadoDente.required = true;
+            estadoDente.disabled = !hasGrupo;
+        }
 
-        if (denticaoSelect) denticaoSelect.value = "";
-        if (arcadaSelect) arcadaSelect.value = "";
-
-        if (posicaoContainer) {
-            posicaoContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        if (!isEdicao) {
+            if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
+            if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
+            if (!endo) {
+                estadoDente.value = "NAO_INFORMADO";
+            }
         }
 
         atualizarVisibilidadeCamposAtributos();
+        popularOpcoesNumeracao();
+        atualizarDicaNumeracao();
         aplicarEstadoSelecionado();
     });
 
     estadoDente.addEventListener("change", aplicarEstadoSelecionado);
 
-    atualizarVisibilidadeCamposAtributos();
-    aplicarEstadoSelecionado();
+    denticaoSelect?.addEventListener("change", () => {
+        popularOpcoesNumeracao();
+        sincronizarDisabledNumeracao();
+        atualizarDicaNumeracao();
+    });
+
+    numeracaoSelect?.addEventListener("change", () => {
+        atualizarDicaNumeracao();
+    });
+
+    if (isEdicao && tipoDente.value !== "") {
+        enableSection(estadoFrascoSection);
+        estadoDente.disabled = false;
+        if (isEndo()) {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            estadoDente.required = false;
+        } else {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            estadoDente.required = true;
+        }
+        atualizarVisibilidadeCamposAtributos();
+        popularOpcoesNumeracao();
+        atualizarDicaNumeracao();
+        aplicarEstadoSelecionado();
+    } else {
+        atualizarVisibilidadeCamposAtributos();
+        popularOpcoesNumeracao();
+    }
 }
 
 setupCadastroFrasco();
 
-// Controla a interatividade e as regras dinâmicas da tela de cadastro de solicitações
 function setupCadastroSolicitacao() {
     const grupoDentario = document.querySelector("#grupoDentario");
     const grupoEndoHint = document.querySelector("#grupoEndoHint");
@@ -176,9 +316,10 @@ function setupCadastroSolicitacao() {
     const avancadosToggle = document.querySelector("#avancadosToggle");
     const advancedFields = document.querySelector("#advancedFields");
     const estadoDente = document.querySelector("#estadoDente");
-    const denticaoSelect = document.querySelector("#denticaoSelect");
+    const denticaoGroup = document.querySelector("#denticaoGroup");
     const arcadaGroup = document.querySelector("#arcadaGroup");
-    const arcadaSelect = document.querySelector("#arcadaSelect");
+    const denticaoSelect = document.querySelector("#denticao");
+    const arcadaSelect = document.querySelector("#arcada");
     const numeracaoGroup = document.querySelector("#numeracaoGroup");
     const numeracaoSelect = document.querySelector("#numeracaoSelect");
     const numeracaoHint = document.querySelector("#numeracaoHint");
@@ -195,42 +336,70 @@ function setupCadastroSolicitacao() {
     quantidadeInput.max = saldoDisponivel || "";
     if (quantidadeMax) quantidadeMax.textContent = `/${saldoDisponivel}`;
 
-    // Verifica se o grupo selecionado na solicitação utiliza numeração de dentes
+    const originalDenticaoOptions = Array.from(denticaoSelect ? denticaoSelect.options : []).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        selected: opt.selected
+    }));
+
+    function setDisabled(elements, disabled) {
+        elements.forEach((el) => {
+            el.disabled = disabled;
+        });
+    }
+
     function usaNumeracao() {
-        return grupoDentario.value === "molar" || grupoDentario.value === "premolar";
+        const grupo = grupoDentario.value.toLowerCase();
+        return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
     }
 
-    // Verifica se o grupo selecionado na solicitação é endodontia
     function isEndo() {
-        return grupoDentario.value === "endo";
+        return grupoDentario.value.toLowerCase() === "endo";
     }
 
-    // Atualiza quais campos avançados aparecem com base no grupo selecionado
+    function isPreMolar() {
+        const grupo = grupoDentario.value.toLowerCase();
+        return grupo === "premolar" || grupo === "pre_molar";
+    }
+
     function atualizarVisibilidadeCamposAtributos() {
+        const endo = isEndo();
         const mostrarNumeracao = usaNumeracao();
+        const grupo = grupoDentario.value.toLowerCase();
+        const mostrarArcada = grupo === "canino" || grupo === "incisivo";
 
-        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao;
+        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
         if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
+
+        if (denticaoSelect) {
+            const currentVal = denticaoSelect.value;
+            denticaoSelect.innerHTML = "";
+            originalDenticaoOptions.forEach(optData => {
+                if (isPreMolar() && optData.value.toLowerCase() === "decidua") {
+                    return;
+                }
+                const opt = document.createElement("option");
+                opt.value = optData.value;
+                opt.textContent = optData.text;
+                if (optData.value === currentVal) {
+                    opt.selected = true;
+                }
+                denticaoSelect.appendChild(opt);
+            });
+            if (isPreMolar() && currentVal.toLowerCase() === "decidua") {
+                denticaoSelect.value = "NAO_INFORMADA";
+            }
+        }
     }
 
-    // Sincroniza se o select de numeração deve estar habilitado ou não na solicitação
-    function sincronizarDisabledNumeracao() {
-        if (!denticaoSelect || !numeracaoSelect) return;
-
-        const avancadosAbertos = advancedFields.classList.contains("is-open");
-        const temDenticaoEspecifica = denticaoSelect.value !== "" && denticaoSelect.value !== "nao_especificado";
-        const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
-
-        numeracaoSelect.disabled = !(avancadosAbertos && temDenticaoEspecifica && temOpcoes);
-    }
-
-    // Popula dinamicamente as opções do select de numeração com base na dentição
     function popularOpcoesNumeracao() {
-        if (!denticaoSelect || !numeracaoSelect) return;
+        if (!numeracaoSelect) return;
 
-        const denticao = denticaoSelect.value;
-        const semDenticaoEspecifica = denticao === "" || denticao === "nao_especificado";
-        const opcoes = semDenticaoEspecifica ? [] : (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoDentario.value] || {})[denticao] || [];
+        let grupoKey = grupoDentario.value.toLowerCase().replace("-", "").replace("_", "");
+        const denticao = denticaoSelect ? denticaoSelect.value.toLowerCase() : "";
+        const opcoes = (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoKey] || {})[denticao] || [];
+
+        const valorAlvo = numeracaoSelect.value;
 
         numeracaoSelect.innerHTML = "";
 
@@ -238,7 +407,7 @@ function setupCadastroSolicitacao() {
         placeholder.value = "";
         placeholder.selected = true;
 
-        if (semDenticaoEspecifica) {
+        if (!denticao || denticao === "nao_informada") {
             placeholder.textContent = "- Selecione a Dentição -";
             numeracaoSelect.appendChild(placeholder);
             sincronizarDisabledNumeracao();
@@ -261,13 +430,28 @@ function setupCadastroSolicitacao() {
             option.value = value;
             option.textContent = value;
             option.dataset.label = label;
+
+            if (value === String(valorAlvo)) {
+                option.selected = true;
+            }
+
             numeracaoSelect.appendChild(option);
         });
 
         sincronizarDisabledNumeracao();
+        atualizarDicaNumeracao();
     }
 
-    // Atualiza a dica textual descritiva da numeração selecionada
+    function sincronizarDisabledNumeracao() {
+        if (!denticaoSelect || !numeracaoSelect) return;
+
+        const avancadosAbertos = advancedFields.classList.contains("is-open");
+        const temDenticaoEspecifica = denticaoSelect.value !== "" && denticaoSelect.value !== "NAO_INFORMADA";
+        const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
+
+        numeracaoSelect.disabled = !(avancadosAbertos && temDenticaoEspecifica && temOpcoes);
+    }
+
     function atualizarDicaNumeracao() {
         if (!numeracaoSelect || !numeracaoHint) return;
 
@@ -276,21 +460,12 @@ function setupCadastroSolicitacao() {
         numeracaoHint.textContent = label ? `(${label})` : "";
     }
 
-    // Altera o estado disabled de um conjunto de elementos fornecidos
-    function setDisabled(elements, disabled) {
-        elements.forEach((el) => {
-            el.disabled = disabled;
-        });
-    }
-
-    // Fecha e desabilita a seção de campos avançados
     function fecharAvancados() {
         avancadosToggle.checked = false;
         advancedFields.classList.remove("is-open");
         setDisabled(atributosControls, true);
     }
 
-    // Abre e habilita a seção de campos avançados
     function abrirAvancados() {
         advancedFields.classList.add("is-open");
         setDisabled(atributosControls, false);
@@ -319,9 +494,9 @@ function setupCadastroSolicitacao() {
             fecharAvancados();
         }
 
-        if (estadoDente) estadoDente.value = "nao_especificado";
-        if (denticaoSelect) denticaoSelect.value = "nao_especificado";
-        if (arcadaSelect) arcadaSelect.value = "nao_especificado";
+        if (estadoDente) estadoDente.value = "NAO_INFORMADO";
+        if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
+        if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
 
         atualizarVisibilidadeCamposAtributos();
         popularOpcoesNumeracao();
@@ -338,6 +513,7 @@ function setupCadastroSolicitacao() {
 
     denticaoSelect?.addEventListener("change", () => {
         popularOpcoesNumeracao();
+        sincronizarDisabledNumeracao();
         atualizarDicaNumeracao();
     });
 
@@ -349,15 +525,14 @@ function setupCadastroSolicitacao() {
 
 setupCadastroSolicitacao();
 
-// Intercepta o envio do formulário de solicitação para validar campos e exibir o resumo de confirmação
 function setupCadastroSolicitacaoSubmit() {
     const form = document.querySelector("#cadastroSolicitacaoForm");
     const grupoDentario = document.querySelector("#grupoDentario");
     const quantidade = document.querySelector("#quantidade");
     const avancadosToggle = document.querySelector("#avancadosToggle");
     const estadoDente = document.querySelector("#estadoDente");
-    const denticaoSelect = document.querySelector("#denticaoSelect");
-    const arcadaSelect = document.querySelector("#arcadaSelect");
+    const denticaoSelect = document.querySelector("#denticao");
+    const arcadaSelect = document.querySelector("#arcada");
     const numeracaoGroup = document.querySelector("#numeracaoGroup");
     const numeracaoSelect = document.querySelector("#numeracaoSelect");
     const observacoesField = document.querySelector("#observacoesSolicitacao");
@@ -366,15 +541,13 @@ function setupCadastroSolicitacaoSubmit() {
         return;
     }
 
-    // Retorna o texto formatado da opção selecionada em um select
     function textoSelecionado(select) {
-        if (!select || select.value === "" || select.value === "nao_especificado") {
+        if (!select || select.value === "" || select.value === "NAO_INFORMADA") {
             return "Não especificado";
         }
         return select.selectedOptions[0]?.textContent.trim() || "Não especificado";
     }
 
-    // Monta o HTML com o resumo detalhado dos dados informados para exibir no modal
     function montarResumoCadastro() {
         const saldoAtual = Number(document.querySelector(".toolbar__badge")?.textContent.trim()) || 0;
         const qtdSolicitada = Number(quantidade?.value) || 0;
@@ -427,7 +600,7 @@ function setupCadastroSolicitacaoSubmit() {
             return;
         }
 
-        const continuar = event.submitter?.id === "salvarContinuarBtn";
+        const isSalvarEContinuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
             icon: "question",
@@ -448,25 +621,22 @@ function setupCadastroSolicitacaoSubmit() {
                 return;
             }
 
-            const codigo = "SOL-0043";
-            const mensagem = `Solicitação <strong>${codigo}</strong> cadastrada com sucesso.`;
-
-            if (continuar) {
-                form.reset();
-                grupoDentario?.dispatchEvent(new Event("change"));
-                observacoesField?.dispatchEvent(new Event("input"));
-                showToast(mensagem);
-            } else {
-                sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
-                window.location.href = "historico_solicitacoes.html";
+            let inputCadastrarOutro = form.querySelector("input[name='cadastrarOutro']");
+            if (!inputCadastrarOutro) {
+                inputCadastrarOutro = document.createElement("input");
+                inputCadastrarOutro.type = "hidden";
+                inputCadastrarOutro.name = "cadastrarOutro";
+                form.appendChild(inputCadastrarOutro);
             }
+            inputCadastrarOutro.value = isSalvarEContinuar;
+
+            HTMLFormElement.prototype.submit.call(form);
         });
     });
 }
 
 setupCadastroSolicitacaoSubmit();
 
-// Intercepta o clique no botão de cancelar na tela de solicitações exibindo confirmação via modal
 function setupCadastroSolicitacaoCancel() {
     const form = document.querySelector("#cadastroSolicitacaoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
@@ -502,7 +672,6 @@ function setupCadastroSolicitacaoCancel() {
 
 setupCadastroSolicitacaoCancel();
 
-// Intercepta o envio do formulário de cadastro de frasco para validação e exibição do resumo de confirmação
 function setupCadastroFrascoSubmit() {
     const form = document.querySelector("#cadastroFrascoForm");
     const grupoDentario = document.querySelector("#tipoDente");
@@ -510,10 +679,11 @@ function setupCadastroFrascoSubmit() {
     const estadoDente = document.querySelector("#estadoDente");
     const quantidade = document.querySelector("#quantidade");
     const denticaoGroup = document.querySelector("#denticaoGroup");
-    const denticaoSelect = document.querySelector("#denticao");
     const arcadaGroup = document.querySelector("#arcadaGroup");
+    const denticaoSelect = document.querySelector("#denticao");
     const arcadaSelect = document.querySelector("#arcada");
-    const posicaoContainer = document.querySelector("#posicaoContainer");
+    const numeracaoGroup = document.querySelector("#numeracaoGroup");
+    const numeracaoSelect = document.querySelector("#numeracaoSelect");
     const dataCadastro = document.querySelector("#datCad");
     const dataManutencao = document.querySelector("#datManutencao");
 
@@ -554,14 +724,8 @@ function setupCadastroFrascoSubmit() {
             linhas.push(["Arcada", textoSelecionado(arcadaSelect)]);
         }
 
-        if (posicaoContainer && posicaoContainer.style.display !== "none") {
-            const checkboxesSelecionados = Array.from(posicaoContainer.querySelectorAll('input[type="checkbox"]:checked'));
-            if (checkboxesSelecionados.length > 0) {
-                const posicoes = checkboxesSelecionados.map(cb => cb.nextElementSibling.textContent.trim()).join(", ");
-                linhas.push(["Numeração", posicoes]);
-            } else {
-                linhas.push(["Numeração", "Não Informado"]);
-            }
+        if (numeracaoGroup && !numeracaoGroup.hidden) {
+            linhas.push(["Numeração", textoSelecionado(numeracaoSelect)]);
         }
 
         linhas.push(["Data de cadastro", formatarData(dataCadastro)]);
@@ -628,7 +792,8 @@ function setupCadastroFrascoSubmit() {
     });
 }
 
-// Intercepta o clique no botão de cancelar no cadastro de frascos exibindo um alerta de confirmação
+setupCadastroFrascoSubmit();
+
 function setupCadastroFrascoCancel() {
     const form = document.querySelector("#cadastroFrascoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
@@ -662,10 +827,8 @@ function setupCadastroFrascoCancel() {
     });
 }
 
-setupCadastroFrascoSubmit();
 setupCadastroFrascoCancel();
 
-// Gerencia o fluxo de etapas dependentes (local e tipo) na tela de cadastro de movimentações
 function setupCadastroMovimentacao() {
     const localSelect = document.querySelector("#localMovimentacao");
     const tipoSection = document.querySelector("#tipoMovimentacaoSection");
@@ -709,7 +872,6 @@ function setupCadastroMovimentacao() {
 
 setupCadastroMovimentacao();
 
-// Atualiza em tempo real o contador de caracteres visíveis para campos de texto livre (textarea)
 function setupObservacoesCounter() {
     const counters = document.querySelectorAll(".textarea-counter");
 
@@ -731,7 +893,6 @@ function setupObservacoesCounter() {
 
 setupObservacoesCounter();
 
-// Gerencia a validação, montagem de resumo e submissão da tela de cadastro de movimentações
 function setupCadastroMovimentacaoSubmit() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
     const localSelect = document.querySelector("#localMovimentacao");
@@ -849,7 +1010,6 @@ function setupCadastroMovimentacaoSubmit() {
 
 setupCadastroMovimentacaoSubmit();
 
-// Intercepta o clique de cancelamento no cadastro de movimentações exibindo alerta de confirmação
 function setupCadastroMovimentacaoCancel() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
@@ -885,7 +1045,6 @@ function setupCadastroMovimentacaoCancel() {
 
 setupCadastroMovimentacaoCancel();
 
-// Configura o comportamento interativo dos botões de incremento e decremento numérico de quantidade
 function setupNumberInputs() {
     const numberInputs = document.querySelectorAll(".number-input");
 
@@ -958,7 +1117,6 @@ function setupNumberInputs() {
 
 setupNumberInputs();
 
-// Adiciona animações visuais de rotação para os ícones de seleção (selects) dos formulários
 function setupFormSelectAnimations() {
     const wrappers = document.querySelectorAll(".form-card .select-wrapper");
 
@@ -990,7 +1148,6 @@ function setupFormSelectAnimations() {
 
 setupFormSelectAnimations();
 
-// Garante que o clique no ícone customizado de calendário abra o seletor nativo de datas do input
 function setupDateIcons() {
     const triggers = document.querySelectorAll(".form-card .date-icon-trigger");
 
@@ -1013,7 +1170,6 @@ function setupDateIcons() {
 
 setupDateIcons();
 
-// Preenche automaticamente a data de manutenção para exatamente um ano após a data de cadastro escolhida
 function setupSincronizacaoDatas() {
     const datCad = document.querySelector("#datCad");
     const datManutencao = document.querySelector("#datManutencao");

@@ -1,10 +1,7 @@
 package bancoDentes.model;
 
 import bancoDentes.exception.FrascoException;
-import bancoDentes.model.enumModels.Denticao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Arcada;
-import bancoDentes.model.enumModels.TipoDente;
+import bancoDentes.model.enumModels.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -58,6 +55,21 @@ public class Frasco {
     @Column(name = "IDENTIFICACAO", nullable = true)
     private  String identificacao;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "LOCAL", nullable = true)
+    private Local local;
+
+    @PrePersist
+    @PreUpdate
+    public void endoPersist() {
+        if (this.tipoDente == TipoDente.ENDO) {
+            this.posicao = null;
+            this.arcada = null;
+            this.estado = null;
+            this.denticao = null;
+        }
+    }
+
     // Método que gera a identificação do frasco
     public void gerarIdentificacao() {
         if (codigo == null) {
@@ -75,4 +87,5 @@ public class Frasco {
                     siglaDenticao,
                     codigo);
     }
+
 }

@@ -1,9 +1,9 @@
 package bancoDentes.model.enumModels;
 
 public enum Denticao {
+    NAO_INFORMADA("Não informada", "N"),
     DECIDUA("Decídua", "D"),
-    PERMANENTE("Permanente", "P"),
-    NAO_INFORMADA("Não informada", "N");
+    PERMANENTE("Permanente", "P");
 
     private final String nome;
     private final String sigla;

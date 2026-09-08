@@ -1,10 +1,7 @@
 package bancoDentes.dto;
 
 import bancoDentes.model.Frasco;
-import bancoDentes.model.enumModels.Denticao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Arcada;
-import bancoDentes.model.enumModels.TipoDente;
+import bancoDentes.model.enumModels.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -22,11 +19,12 @@ public record FrascoDTO(
         Long posicao,
         Arcada arcada,
         Denticao denticao,
-        String identificacao
+        String identificacao,
+        Local local
 ) {
 
     public static FrascoDTO empty() {
-        return new FrascoDTO(null,null,null, null, null, null, null, null, null,null,null);
+        return new FrascoDTO(null,null,null,null, null, null, null, null, null, null,null,null);
     }
 
     public Frasco mapearFrasco(){
@@ -45,6 +43,7 @@ public record FrascoDTO(
         frasco.setPosicao(this.posicao);
         frasco.setArcada(this.arcada);
         frasco.setDenticao(this.denticao);
+        frasco.setLocal(this.local);
         return frasco;
     }
 
@@ -59,7 +58,8 @@ public record FrascoDTO(
                 frasco.getPosicao(),
                 frasco.getArcada(),
                 frasco.getDenticao(),
-                frasco.getIdentificacao()
+                frasco.getIdentificacao(),
+                frasco.getLocal()
         );
     }
 }

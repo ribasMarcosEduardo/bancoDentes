@@ -34,6 +34,4 @@ public enum TipoDente {
         return tipoDente.getSigla();
     }
 
-
-
 }
