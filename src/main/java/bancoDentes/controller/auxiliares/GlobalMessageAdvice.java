@@ -1,4 +1,4 @@
-package bancoDentes.controller;
+package bancoDentes.controller.auxiliares;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

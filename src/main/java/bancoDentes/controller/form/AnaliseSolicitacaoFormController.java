@@ -1,5 +1,6 @@
-package bancoDentes.controller;
+package bancoDentes.controller.form;
 
+import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.AnaliseSolicitacaoDTO;
 import bancoDentes.dto.ItemAnaliseDTO;
 import bancoDentes.exception.AnaliseException;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -37,18 +37,6 @@ public class AnaliseSolicitacaoFormController extends BaseController {
     private final SolicitacaoService solicitacaoService;
     private final FrascoService frascoService;
     private final ItemAnaliseService itemAnaliseService;
-
-    /**
-     * Exibe o painel principal do avaliador, listando todas as solicitações que
-     * estão aptas para passarem por análise.
-     *
-     * @param model
-     */
-    @GetMapping("/painel")
-    public String exibePainelSolicitacoes(Model model) {
-        model.addAttribute("solicitacoes", solicitacaoService.getSolicitacoesAptas());
-        return "painelAnalise/analiseList";
-    }
 
     /**
      * Inicia formalmente o processo de análise de uma solicitação, alterando

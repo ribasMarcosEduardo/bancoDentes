@@ -207,7 +207,7 @@
 
             <article th:each="frasco : ${frascos}"
                      class="request-row"
-                     data-setor="bdh"
+                     th:data-setor="${frasco.local}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
@@ -217,7 +217,10 @@
                 <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
                 <span th:text="${frasco.tipoDente}">Grupo</span>
                 <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
-                <span>Bdh</span> <span th:text="${frasco.quantidade}">0</span>
+
+                <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">Local</span>
+                <span th:text="${frasco.quantidade}">0</span>
+
                 <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">00/00/00</span>
                 <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
 
@@ -273,10 +276,12 @@
                     <section class="request-panel">
                       <h4 class="request-panel__title">Local e Datas</h4>
                       <div class="request-details__grid request-details__grid--single">
+
                         <div class="request-detail">
                           <span class="request-details__label">Local</span>
-                          <span>Banco de Dentes Humanos</span>
+                          <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">-</span>
                         </div>
+
                         <div class="request-detail">
                           <span class="request-details__label">Data de cadastro</span>
                           <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
@@ -296,7 +301,7 @@
           <div class="results-grid">
             <article th:each="frasco : ${frascos}"
                      class="card"
-                     data-setor="bdh"
+                     th:data-setor="${frasco.local}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
@@ -305,7 +310,9 @@
               <header class="card__header">
                 <div>
                   <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
-                  <div class="card__meta" th:text="'Bdh | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+
+                  <div class="card__meta" th:text="${frasco.local != null ? frasco.local.nome : '-'} + ' | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+
                 </div>
                 <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
               </header>
@@ -388,4 +395,4 @@
 </script>
 
 </body>
-
+</html>

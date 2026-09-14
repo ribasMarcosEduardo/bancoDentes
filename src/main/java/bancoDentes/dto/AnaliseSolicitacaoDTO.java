@@ -17,7 +17,7 @@ public record AnaliseSolicitacaoDTO(
         Estudante analista
 ) {
 
-    public static Object empty() {
+    public static AnaliseSolicitacaoDTO empty() {
         return new AnaliseSolicitacaoDTO(null, null, null, null, null, null);
     }
 

@@ -1,23 +1,17 @@
 package bancoDentes.model.enumModels;
 
 public enum Denticao {
-    NAO_INFORMADA("Não informada", "N"),
-    DECIDUA("Decídua", "D"),
-    PERMANENTE("Permanente", "P");
+    NAO_INFORMADA("Não informada"),
+    DECIDUA("Decídua"),
+    PERMANENTE("Permanente");
 
     private final String nome;
-    private final String sigla;
 
-    Denticao(String nome,String sigla){
+    Denticao(String nome){
         this.nome = nome;
-        this.sigla = sigla;
     }
 
     public String getNome() {
         return nome;
-    }
-
-    public String getSigla() {
-        return sigla;
     }
 }

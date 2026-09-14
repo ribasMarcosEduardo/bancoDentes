@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        (function () {
+            var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+            document.documentElement.classList.add(theme);
+        })();
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/historico_solicitacoes.css(v=${#dates.createNow().getTime()})}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap"
+          rel="stylesheet">
+
+    <title>Painel de Movimentações</title>
+</head>
+
+<body>
+
+<div class="background">
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--green"></div>
+</div>
+
+<div th:replace="~{partials/navbar :: navbar}"></div>
+
+<main class="page">
+    <section class="dashboard">
+
+        <div class="filters-sidebar-desktop">
+            <aside class="filter-sidebar glass-frost-strong">
+                <div class="filters-header">
+                    <i class="icon" data-lucide="filter"></i>
+                    <h2>Filtros</h2>
+
+                    <button type="button" class="filters-mobile-close" aria-label="Fechar filtros">
+                        <i class="icon" data-lucide="x"></i>
+                    </button>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Tipo de movimentação
+                        <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Entrada" data-filter-group="Tipo">
+                            <span>Entrada</span>
+                        </label>
+
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Saída" data-filter-group="Tipo">
+                            <span>Saída</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button class="filter-section__toggle">
+                        Grupo dentário
+                        <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="filter-section__content">
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
+                            <span>Molar</span>
+                        </label>
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
+                            <span>Pré-Molar</span>
+                        </label>
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
+                            <span>Canino</span>
+                        </label>
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
+                            <span>Incisivo</span>
+                        </label>
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
+                            <span>Endo</span>
+                        </label>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="main-panel">
+
+            <header class="page-header">
+                <h1>Painel de Movimentações</h1>
+                <p>Consulte, filtre e acompanhe as entradas e saídas registradas.</p>
+            </header>
+
+            <div class="toolbar glass-frost">
+                <div class="search-wrapper">
+                    <input type="search" placeholder="Buscar movimentação...">
+                    <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
+                    <i class="search-icon" data-lucide="search"></i>
+                </div>
+
+                <div class="toolbar__actions">
+                    <div class="toolbar__row toolbar__row--controls">
+                        <div class="page-size-control">
+                            <label for="pageSize">Exibir</label>
+
+                            <div class="select-wrapper page-size-control__select">
+                                <select class="form-control" id="pageSize">
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                </select>
+                                <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar__row toolbar__row--buttons">
+                        <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
+                            <i class="icon" data-lucide="filter"></i>
+                        </button>
+
+                        <button class="btn btn-secondary">
+                            <span class="btn__label">Ordenar</span>
+                            <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
+                        </button>
+
+                        <a th:href="@{/movimentacao/cadastrarMovimentacao}" class="btn btn-primary">
+                            <i class="orderBy-icon" data-lucide="plus"></i>
+                            <span class="btn-label--prefix">Nova </span>Movimentação
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="active-filters-bar glass-frost" id="activeFiltersBar">
+                <div class="active-filters-bar__inner">
+                    <div class="active-filters-bar__header">
+                        <span class="active-filters-bar__label">Filtros ativos:</span>
+
+                        <button class="filters-clear" type="button">
+                            <i class="icon" data-lucide="rotate-ccw"></i>
+                            Resetar Filtros
+                        </button>
+                    </div>
+                    <div class="active-filters" id="activeFilters"></div>
+                </div>
+            </div>
+
+            <div class="list-panel">
+                <div class="pagination">
+                    <div class="low-opacity">
+                        <!-- Texto de paginação dinâmico -->
+                        <strong th:text="${#lists.size(movimentacao)} + ' Movimentações Encontradas - Mais Recentes'">0 Movimentações Encontradas</strong>
+                    </div>
+
+                    <div class="pagination__actions">
+                        <div class="pagination__nav">
+                            <button class="btn btn-pagination" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                                <i data-lucide="chevron-left"></i>
+                            </button>
+                            <button class="btn btn-pagination" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="results results--list" id="resultsView">
+
+                    <!-- Mensagem caso a lista venha vazia do banco -->
+                    <div th:if="${#lists.isEmpty(movimentacao)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
+                        <i data-lucide="info" class="me-2"></i> Não há nenhuma movimentação registrada.
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(movimentacao)}" class="result-table result-table--movimentacoes">
+                        <div class="result-table__head">
+                            <span>Movimentação</span>
+                            <span>Frasco</span>
+                            <span>Grupo</span>
+                            <span>Tipo</span>
+                            <span>Qtd.</span>
+                            <span>Data</span>
+                            <span></span>
+                        </div>
+
+                        <!-- Iteração Thymeleaf puxando do model atributo "movimentacao" -->
+                        <article th:each="mov : ${movimentacao}"
+                                 class="request-row"
+                                 th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
+                                 th:data-tipo="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}"
+                                 th:data-grupo="${mov.frasco.tipoDente}">
+
+                            <div class="result-list">
+                                <span class="result-list__code" th:text="'MOV-' + ${#numbers.formatInteger(mov.codigo, 3)}">MOV-000</span>
+                                <span th:text="${mov.frasco.identificacao != null ? mov.frasco.identificacao : 'FR-' + mov.frasco.codigo}">FR-000</span>
+                                <span th:text="${mov.frasco.tipoDente}">Grupo</span>
+
+                                <span class="status-pill"
+                                      th:classappend="'status-pill--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
+                                      th:text="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}">Tipo</span>
+
+                                <span th:text="${mov.quantidade}">0</span>
+                                <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yy')}">00/00/00</span>
+
+                                <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir movimentação">
+                                    <i class="icon" data-lucide="chevron-down"></i>
+                                </button>
+                            </div>
+
+                            <div class="request-details">
+                                <div class="request-details__content">
+                                    <div class="request-details__layout">
+                                        <section class="request-panel">
+                                            <h4 class="request-panel__title">Detalhes da Movimentação</h4>
+
+                                            <div class="request-details__grid">
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Tipo</span>
+                                                    <span th:text="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Quantidade</span>
+                                                    <span th:text="${mov.quantidade}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Local da Movimentação</span>
+                                                    <span>Banco de Dentes Humanos</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Data da Movimentação</span>
+                                                    <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yyyy')}">-</span>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section class="request-panel">
+                                            <h4 class="request-panel__title">Detalhes do Frasco Referente</h4>
+
+                                            <div class="request-details__grid">
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Grupo dentário</span>
+                                                    <span th:text="${mov.frasco.tipoDente}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Estado</span>
+                                                    <span th:text="${mov.frasco.estado != null ? mov.frasco.estado : '-'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Arcada</span>
+                                                    <span th:text="${mov.frasco.arcada != null ? mov.frasco.arcada : '-'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Posição</span>
+                                                    <span th:text="${mov.frasco.posicao != null ? mov.frasco.posicao : '-'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Data de cadastro (Frasco)</span>
+                                                    <span th:text="${mov.frasco.datCad != null ? #temporals.format(mov.frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Qtd. atual do Frasco</span>
+                                                    <span th:text="${mov.frasco.quantidade}">-</span>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                </section>
+            </div>
+
+        </section>
+
+    </section>
+</main>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/filters.js}"></script>
+<script th:src="@{/js/results.js}"></script>
+<script th:src="@{/js/requests.js}"></script>
+<script th:src="@{/js/search.js}"></script>
+<script th:src="@{/js/page-size.js}"></script>
+
+</body>
+</html>

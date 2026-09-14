@@ -1,18 +1,16 @@
 package bancoDentes.model.enumModels;
 
 public enum EstadoDente {
-    NAO_INFORMADA("Não informada", "N"),
-    CARIADO("Cariado", "C"),
-    HIGIDO("Hígido", "H"),
-    RESTAURADO("Restaurado", "R"),
-    MISTO("Misto", "M"),;
+    NAO_INFORMADA("Não informada"),
+    CARIADO("Cariado"),
+    HIGIDO("Hígido"),
+    RESTAURADO("Restaurado"),
+    MISTO("Misto"),;
 
     private final String nome;
-    private final String sigla;
 
-    EstadoDente(String nome, String sigla) {
+    EstadoDente(String nome) {
         this.nome = nome;
-        this.sigla = sigla;
     }
 
     @Override
@@ -22,9 +20,5 @@ public enum EstadoDente {
 
     public String getNome() {
         return nome;
-    }
-
-    public String getSigla() {
-        return sigla;
     }
 }

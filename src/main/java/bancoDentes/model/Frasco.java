@@ -70,21 +70,16 @@ public class Frasco {
         }
     }
 
-    // Método que gera a identificação do frasco
     public void gerarIdentificacao() {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-            String siglaArcada = (arcada != null) ? arcada.getSigla() : "";
             String siglaTipo = (tipoDente != null) ? tipoDente.getSigla() : "";
-            String siglaEstado = (estado != null) ? estado.getSigla() : "";
-            String siglaDenticao = (denticao != null) ? denticao.getSigla() : "";
+            String siglaLocal = (local != null) ? local.getSigla() : "";
 
-            this.identificacao = String.format("%s%s%s%s-%s",
+            this.identificacao = String.format("%s%s-%s",
                     siglaTipo,
-                    siglaArcada,
-                    siglaEstado,
-                    siglaDenticao,
+                    siglaLocal,
                     codigo);
     }
 

@@ -1,4 +1,4 @@
-package bancoDentes.controller;
+package bancoDentes.controller.auxiliares;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;

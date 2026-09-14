@@ -1,17 +1,15 @@
-package bancoDentes.controller;
+package bancoDentes.controller.form;
 
+import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
-import bancoDentes.exception.SolicitacaoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.service.FrascoService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller para requisições de frascos
@@ -24,17 +22,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class FrascoFormController extends BaseController {
 
     private final FrascoService frascoService;
-
-    /**
-     * Exibe o painel principal com a listagem de todos os frascos cadastrados.
-     *
-     * @param model
-     */
-    @GetMapping("/painel")
-    public String exibePainelFrascos(Model model) {
-        model.addAttribute("frascos", frascoService.getFrascos());
-        return "painelFrascos/frascosList";
-    }
 
     /**
      * Renderiza o formulário de cadastro em branco para um novo frasco.

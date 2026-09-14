@@ -68,12 +68,14 @@ function setupSectorSwitch() {
         moveIndicator(activeButton);
 
         items.forEach((item) => {
-            const matches = setor === "todos" || item.dataset.setor === setor;
+            const setorItem = (item.dataset.setor || "").toLowerCase();
+            const matches = setor === "todos" || setorItem === setor || setorItem.includes(setor);
             item.style.display = matches ? "" : "none";
         });
 
         localStorage.setItem("frascosSectorFilter", setor);
     }
+
 
     const savedSector = localStorage.getItem("frascosSectorFilter") || "todos";
     setSector(savedSector);

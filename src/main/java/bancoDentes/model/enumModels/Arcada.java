@@ -1,17 +1,13 @@
 package bancoDentes.model.enumModels;
 
 public enum Arcada {
-    NAO_INFORMADA("Não informada", "N"),
-    INFERIOR("Inferior", "I"),
-    SUPERIOR("Superior", "S");
-
+    NAO_INFORMADA("Não informada"),
+    INFERIOR("Inferior"),
+    SUPERIOR("Superior");
 
     private final String nome;
-    private final String sigla;
-
-    Arcada(String nome, String sigla) {
+    Arcada(String nome) {
         this.nome = nome;
-        this.sigla = sigla;
     }
 
     @Override
@@ -21,15 +17,6 @@ public enum Arcada {
 
     public String getNome() {
         return nome;
-    }
-
-    public String getSigla() {
-        return sigla;
-    }
-
-    public static String getSiglaArcada(Arcada arcada) {
-        if (arcada == null) return null;
-        return arcada.getSigla();
     }
 
 }

@@ -210,12 +210,46 @@ body.modal-open {
     /* auto-fit em vez de um número fixo de colunas — o modal de
        solicitação (modal_busca_frasco_solicitacao.html) usa só 2
        filtros (Status/Ordenar), o de movimentação
-       (modal_busca_frasco_movimentacao.html) usa 3 (Grupo dentário/
+       (modal_busca_frasco_movimentacao_saida.html) usa 3 (Grupo dentário/
        Estado do dente/Dentição); com auto-fit essa regra serve pra
        2, 3 ou 4 filtros sem precisar editar o CSS de novo. */
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 0.75rem;
+}
+
+/* Seleciona/desmarca de uma vez todos os resultados que batem com a
+   busca/filtros atuais (não só a página visível) — ver
+   modal_busca_frasco_etiqueta.html, primeiro modal do protótipo com essa
+   necessidade (achar MUITOS frascos de uma vez, não só um por um). */
+.modal-select-all {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    padding: 0.6rem 0.85rem;
+
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+
+    color: var(--text-soft);
+    font-size: 0.82rem;
+
+    cursor: pointer;
+}
+
+.modal-select-all input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+
+    accent-color: var(--step-line-active);
+    cursor: pointer;
+}
+
+.modal-select-all input:disabled {
+    cursor: not-allowed;
 }
 
 /* Lista de resultados */
@@ -356,6 +390,18 @@ body.modal-open {
    progresso/status de sucesso usados no resto do protótipo. */
 .modal-result--added {
     border-color: rgba(34,197,94,0.45);
+}
+
+/* modal_busca_frasco_movimentacao_entrada.html: sem rolagem de
+   quantidade (seleção única, sem quantidade nesse passo) — só esse botão
+   ocupa o lugar do .number-input--fraction de Saída. Mesma largura fixa
+   (130px) pelo mesmo motivo de lá: "Selecionar" e "Selecionado" têm
+   comprimentos diferentes, sem isso o botão mudaria de largura ao
+   selecionar/desselecionar. */
+.modal-result__select {
+    flex-shrink: 0;
+    justify-content: center;
+    width: 130px;
 }
 
 .modal-empty {

@@ -830,48 +830,35 @@ function setupCadastroFrascoCancel() {
 setupCadastroFrascoCancel();
 
 function setupCadastroMovimentacao() {
-    const localSelect = document.querySelector("#localMovimentacao");
-    const tipoSection = document.querySelector("#tipoMovimentacaoSection");
-    const tipoGroup = document.querySelector("#tipoMovimentacaoGroup");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
-    const tipoHint = document.querySelector("#tipoMovimentacaoHint");
     const escolherFrascosBtn = document.querySelector("#escolherFrascosBtn");
+    const escolherFrascosLabel = escolherFrascosBtn?.querySelector(".btn__label");
 
-    if (!localSelect || !tipoSection || !tipoGroup || !tipoSelect || !escolherFrascosBtn) {
+    if (!tipoSelect || !escolherFrascosBtn) {
         return;
     }
 
-    function aplicarTipoSelecionado() {
+    tipoSelect.addEventListener("change", () => {
         escolherFrascosBtn.disabled = tipoSelect.value === "";
-    }
 
-    function aplicarLocalSelecionado() {
-        const local = localSelect.value;
-        const hasLocal = local !== "";
-        const isBiobanco = local === "biobanco";
-
-        tipoSection.classList.toggle("form-section--disabled", !hasLocal);
-
-        tipoSelect.value = "";
-        tipoSelect.disabled = !hasLocal;
-
-        if (isBiobanco) {
-            tipoSelect.value = "saida";
-            tipoSelect.disabled = true;
+        // Singular só em Entrada (o modal de lá só deixa escolher um
+        // frasco de destino — ver modal_busca_frasco_movimentacao_entrada.html/
+        // setupFrascoSearchModal em frasco-search-movimentacao.js); Saída
+        // mantém o plural de sempre.
+        if (escolherFrascosLabel) {
+            escolherFrascosLabel.textContent = tipoSelect.value === "entrada" ? "Escolher Frasco" : "Escolher Frascos";
         }
-
-        tipoGroup.classList.toggle("form-group--disabled", isBiobanco);
-        if (tipoHint) tipoHint.hidden = !isBiobanco;
-
-        aplicarTipoSelecionado();
-    }
-
-    localSelect.addEventListener("change", aplicarLocalSelecionado);
-    tipoSelect.addEventListener("change", aplicarTipoSelecionado);
+    });
 }
 
 setupCadastroMovimentacao();
 
+// Contador "0/250" no canto do
+// textarea de Observações — reflete o próprio maxlength do HTML, só exibe
+// o que o navegador já reforça. Varre todo ".textarea-counter" da página
+// (não ids fixos) porque mais de uma página tem seu próprio campo de
+// Observações — cada contador liga no ".textarea-control" logo antes dele
+// no HTML (ver marcação em cadastro_movimentacao.html/cadastro_solicitacao.html).
 function setupObservacoesCounter() {
     const counters = document.querySelectorAll(".textarea-counter");
 
@@ -893,12 +880,26 @@ function setupObservacoesCounter() {
 
 setupObservacoesCounter();
 
+// "Salvar e Continuar"/"Salvar e Sair" ficam na toolbar, fora do <form>
+// (ver form="cadastroMovimentacaoForm" em cadastro_movimentacao.html) —
+// mesmo esquema de setupCadastroFrascoSubmit acima. A seleção de frascos
+// não é um <input> nativo (vive num Map dentro de setupFrascoSearchModal,
+// em frasco-search-movimentacao.js), então checkValidity() sozinho não
+// pega "nenhum frasco escolhido" — por isso o frascosSelecionados() abaixo
+// checa à parte, lendo direto da lista "Frascos selecionados" já
+// renderizada no DOM (ver renderSelecionados/criarLinhaSelecionada
+// naquele arquivo).
 function setupCadastroMovimentacaoSubmit() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
     const localSelect = document.querySelector("#localMovimentacao");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
     const observacoesField = document.querySelector("#observacoesMovimentacao");
-    const selectedFlasksList = document.querySelector(".selected-flasks");
+    // id, não a classe — #origemFrascosList (abaixo) também é uma
+    // ".selected-flasks" (ver frasco-search-movimentacao.js).
+    const selectedFlasksList = document.querySelector("#selectedFlasksList");
+    const origemDentesSelect = document.querySelector("#origemDentes");
+    const quantidadeDoacaoInput = document.querySelector("#quantidadeDoacao");
+    const origemFrascosList = document.querySelector("#origemFrascosList");
 
     if (!form || typeof Swal === "undefined") {
         return;
@@ -909,26 +910,61 @@ function setupCadastroMovimentacaoSubmit() {
         return select.selectedOptions[0]?.textContent.trim() || "Não Informado";
     }
 
+    // Cada linha de ".selected-flasks .request-row" já traz identificador
+    // e quantidade prontos (ver criarLinhaSelecionada) — lê do DOM em vez
+    // de importar o Map privado do outro módulo. Em Entrada não existe um
+    // segundo <span> ali (sem quantidade nesse passo — ver
+    // frasco-search-movimentacao.js): null, não "0", pra distinguir "essa
+    // linha não tem quantidade nesse fluxo" de "quantidade zerada".
     function frascosSelecionados() {
         return Array.from(selectedFlasksList?.querySelectorAll(".request-row") || []).map((row) => {
             const spans = row.querySelectorAll(".selected-flask > span");
             return {
                 id: row.dataset.frascoId || spans[0]?.textContent.trim() || "—",
-                quantidade: spans[1]?.textContent.trim() || "0",
+                quantidade: spans[1] ? spans[1].textContent.trim() : null,
             };
         });
     }
 
+    // Cada linha de "#origemFrascosList .request-row" traz frasco +
+    // quantidade transferida prontos (ver criarLinhaOrigemFrasco) — soma
+    // direto do DOM, mesmo esquema de frascosSelecionados() acima.
+    function totalDentesOrigemFrascos() {
+        return Array.from(origemFrascosList?.querySelectorAll(".request-row") || []).reduce((soma, row) => {
+            const quantidade = Number(row.querySelectorAll(".selected-flask > span")[1]?.textContent) || 0;
+            return soma + quantidade;
+        }, 0);
+    }
+
     function montarResumoMovimentacao(frascos) {
-        const linhasHtml = [
+        const linhas = [
             ["Local", textoSelecionado(localSelect)],
             ["Tipo", textoSelecionado(tipoSelect)],
-        ]
+        ];
+
+        // Origem dos Dentes só existe pra Entrada (ver
+        // cadastro_movimentacao.html) — é ali, não no frasco de destino
+        // escolhido acima, que a quantidade de verdade é decidida.
+        if (tipoSelect?.value === "entrada") {
+            linhas.push(["Origem dos Dentes", textoSelecionado(origemDentesSelect)]);
+
+            if (origemDentesSelect?.value === "doacao") {
+                linhas.push(["Quantidade de dentes", `${quantidadeDoacaoInput?.value || "1"} dentes`]);
+            } else if (origemDentesSelect?.value === "frascos") {
+                linhas.push(["Quantidade total recebida", `${totalDentesOrigemFrascos()} dentes`]);
+            }
+        }
+
+        const linhasHtml = linhas
             .map(([label, valor]) => `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`)
             .join("");
 
         const frascosHtml = frascos
-            .map(({ id, quantidade }) => `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`)
+            .map(({ id, quantidade }) =>
+                quantidade === null
+                    ? `<div class="swal-resumo__row"><span>${id}</span></div>`
+                    : `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`
+            )
             .join("");
 
         const obsTexto = (observacoesField?.value || "").trim() || "Não Informado";
@@ -958,6 +994,10 @@ function setupCadastroMovimentacaoSubmit() {
 
         const frascos = frascosSelecionados();
 
+        // Passa no checkValidity() mesmo sem frasco algum: Observações só
+        // vira required "de verdade" quando a seção libera (ver
+        // sincronizarObservacoes em frasco-search-movimentacao.js) — até lá
+        // ela está disabled, e o navegador ignora campo required+disabled.
         if (frascos.length === 0) {
             Swal.fire({
                 icon: "warning",
@@ -972,6 +1012,27 @@ function setupCadastroMovimentacaoSubmit() {
             return;
         }
 
+        // Mesmo caso do "frascos.length === 0" acima: "Selecionar Frascos"
+        // não é um <input> nativo, checkValidity() sozinho não pega
+        // "Origem = Outro(s) frasco(s) mas nenhum frasco de origem
+        // escolhido ainda".
+        if (tipoSelect?.value === "entrada" && origemDentesSelect?.value === "frascos" && !origemFrascosList?.querySelector(".request-row")) {
+            Swal.fire({
+                icon: "warning",
+                title: "Preenchimento incompleto",
+                text: "Selecione ao menos um frasco de origem antes de salvar.",
+                confirmButtonText: "Entendi",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                },
+            });
+            return;
+        }
+
+        // event.submitter é o botão que de fato disparou o submit — como
+        // os dois (Continuar/Sair) são type="submit" pro mesmo form, é
+        // assim que sabe qual dos dois fluxos seguir depois da confirmação.
         const continuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
@@ -996,11 +1057,27 @@ function setupCadastroMovimentacaoSubmit() {
             const mensagem = "Movimentação cadastrada com sucesso.";
 
             if (continuar) {
+                // form.reset() não desfaz o que o JS mudou via .disabled nem
+                // limpa a lista "Frascos selecionados" (elementos montados à
+                // mão, fora do form) — dispara "change" em vez de reimplementar
+                // essa limpeza aqui: o listener de tipo (setupCadastroMovimentacao,
+                // acima) re-trava/renomeia "Escolher Frasco(s)"; o de local em
+                // frasco-search-movimentacao.js dá selecionados.clear() + re-render
+                // (o que também recolhe "Origem dos Dentes"/"Frascos de Origem",
+                // ver renderSelecionados/atualizarOrigemDentes lá).
                 form.reset();
+                tipoSelect?.dispatchEvent(new Event("change"));
                 localSelect?.dispatchEvent(new Event("change"));
+                // form.reset() não dispara "input" sozinho — sem isso o
+                // contador (setupObservacoesCounter) ficava com a contagem
+                // antiga até o usuário digitar de novo.
                 observacoesField?.dispatchEvent(new Event("input"));
                 showToast(mensagem);
             } else {
+                // A notificação precisa sobreviver ao redirect — fica
+                // guardada até movimentacoes.html ler e descartar em
+                // setupFlashToast() (ver includes.js), que roda em toda
+                // carga de página.
                 sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
                 window.location.href = "movimentacoes.html";
             }
@@ -1010,6 +1087,8 @@ function setupCadastroMovimentacaoSubmit() {
 
 setupCadastroMovimentacaoSubmit();
 
+// "Cancelar" (link pro painel de movimentações) — mesma confirmação de
+// setupCadastroFrascoCancel, só que ancorada em #cadastroMovimentacaoForm.
 function setupCadastroMovimentacaoCancel() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
@@ -1045,10 +1124,26 @@ function setupCadastroMovimentacaoCancel() {
 
 setupCadastroMovimentacaoCancel();
 
+// botoes +/- quantidade
+
 function setupNumberInputs() {
     const numberInputs = document.querySelectorAll(".number-input");
 
     numberInputs.forEach((numberInput) => {
+        // Chamada de novo toda vez que um modal de busca re-renderiza
+        // (abrir, digitar na busca, trocar filtro/página — ver
+        // renderResultados em frasco-search-movimentacao.js/
+        // frasco-search-solicitacao.js), pra religar as linhas novas que
+        // acabaram de entrar no DOM. Sem essa trava, um .number-input que
+        // sobrevive entre re-renders (ex.: #quantidadeDoacao em
+        // cadastro_movimentacao.html, fora do modal) ganhava mais um par
+        // de listeners pointerdown a cada chamada — depois de algumas
+        // buscas, um clique só em +/- disparava changeQuantity() várias
+        // vezes de uma vez (o valor pulava de mais de 1 em 1).
+        if (numberInput.dataset.numberWired === "true") {
+            return;
+        }
+
         const input = numberInput.querySelector(".number-input__field");
         const decreaseBtn = numberInput.querySelector("[data-number-action='down']");
         const increaseBtn = numberInput.querySelector("[data-number-action='up']");
@@ -1056,6 +1151,8 @@ function setupNumberInputs() {
         if (!input || !decreaseBtn || !increaseBtn) {
             return;
         }
+
+        numberInput.dataset.numberWired = "true";
 
         let repeatTimeout;
         let repeatInterval;
@@ -1117,6 +1214,9 @@ function setupNumberInputs() {
 
 setupNumberInputs();
 
+// seta dos selects do formulário gira ao abrir/fechar (mesmo padrão do
+// page-size-control, ver page-size.js)
+
 function setupFormSelectAnimations() {
     const wrappers = document.querySelectorAll(".form-card .select-wrapper");
 
@@ -1147,6 +1247,11 @@ function setupFormSelectAnimations() {
 }
 
 setupFormSelectAnimations();
+
+// clique no botão do ícone de calendário abre o seletor nativo — o botão
+// tampa o ::-webkit-calendar-picker-indicator (ver forms.css), então ele
+// precisa disparar a abertura sozinho. Enter/Espaço já funcionam de
+// graça por ser um <button> de verdade.
 
 function setupDateIcons() {
     const triggers = document.querySelectorAll(".form-card .date-icon-trigger");
