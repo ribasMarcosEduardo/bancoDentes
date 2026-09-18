@@ -12,15 +12,11 @@ function setupFilters() {
     const btnPrevPage = document.getElementById("btnPrevPage");
     const btnNextPage = document.getElementById("btnNextPage");
     const paginationInfo = document.getElementById("paginationInfo");
+    const paginationLabel = paginationInfo ? (paginationInfo.getAttribute("data-label") || "Resultados Encontrados") : "";
 
     let sortAscending = false;
     let currentPage = 1;
     let rowsPerPage = parseInt(pageSizeSelect ? pageSizeSelect.value : 10);
-
-    // Esconde a barra de filtros ativos no carregamento da página
-    if (activeFiltersBar) {
-        activeFiltersBar.style.display = 'none';
-    }
 
     // Configura o comportamento de abrir/fechar as seções do menu lateral de filtros
     sections.forEach((section) => {
@@ -153,7 +149,7 @@ function setupFilters() {
         });
 
         if (paginationInfo) {
-            paginationInfo.innerHTML = `${totalRows} Solicitações Encontradas <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
+            paginationInfo.innerHTML = `${totalRows} ${paginationLabel} <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
         }
 
         if (btnPrevPage) btnPrevPage.disabled = (currentPage === 1);
@@ -218,9 +214,7 @@ function setupFilters() {
         });
 
         if (activeFiltersBar) {
-            const hasActive = chipsByCheckbox.size > 0;
-            activeFiltersBar.style.display = hasActive ? '' : 'none';
-            activeFiltersBar.classList.toggle("has-active", hasActive);
+            activeFiltersBar.classList.toggle("has-active", chipsByCheckbox.size > 0);
         }
     }
 
