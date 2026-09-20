@@ -238,6 +238,57 @@
 <script th:src="@{/js/includes.js}"></script>
 <script th:src="@{/js/forms.js}"></script>
 <script th:src="@{/js/results.js}"></script>
+
+<script>
+    window.catalogoFrascosCache = null;
+
+    window.carregarCatalogoFrascos = async function() {
+        if (window.catalogoFrascosCache !== null) {
+            return window.catalogoFrascosCache;
+        }
+
+        try {
+            const response = await fetch('/movimentacao/frascosMovimentacao');
+            if (!response.ok) throw new Error("Erro ao buscar frascos");
+
+            const data = await response.json();
+
+            const formatarData = (dataBase) => {
+                if (!dataBase) return "—";
+                let d;
+
+                if (Array.isArray(dataBase)) {
+                    d = new Date(dataBase[0], dataBase[1] - 1, dataBase[2]);
+                } else {
+                    d = new Date(dataBase);
+                }
+                if (isNaN(d)) return "—";
+                return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            };
+
+            window.catalogoFrascosCache = data.map(item => ({
+                codigo: item.codigo,
+                id: item.identificacao || String(item.codigo),
+                grupo: item.tipoDente || "",
+                estado: item.estado || "",
+                arcada: item.arcada || "",
+                denticao: item.denticao || "",
+                setor: item.local ? item.local.toLowerCase() : "",
+                disponivel: item.quantidade || 0,
+                dataCadastro: formatarData(item.datCad),
+                dataManutencao: formatarData(item.datManutencao)
+            }));
+
+            return window.catalogoFrascosCache;
+
+        } catch (error) {
+            console.error(error);
+            if (window.Swal) Swal.fire('Erro', 'Falha ao carregar frascos.', 'error');
+            return [];
+        }
+    };
+</script>
+
 <script th:src="@{/js/frasco-search-movimentacao.js}"></script>
 
 </body>

@@ -1,50 +1,21 @@
-// Mock temporário: no projeto completo esses frascos vêm de uma consulta
-// ao backend, já recortada pelo Local (BDH/Biobanco) escolhido lá em cima
-// no formulário. Aqui é só um catálogo único com os dois setores
-// misturados (campo "setor"), e o JS filtra pelo que #localMovimentacao
-// tiver selecionado. Cobre também "Endo" (sem arcada/dentição/numeração,
-// mesma regra de cadastro_frasco.html/forms.js) pra exercitar o exemplo
-// de uso real: aula de Endodontia pedindo 30 dentes, atendida com 2
-// frascos Endo do BDH (ENbd-a0001 com 22, ENbd-a0002 com 30 disponíveis).
-//
-// Identificador: {grupo}{setor}-a{seq}. Grupo sempre com 2 letras — PM
-// (Pré-Molar), MO (Molar), EN (Endo), CN (Canino), IN (Incisivo); setor
-// "bd" (BDH) ou "bb" (Biobanco); o "a" no meio é fixo, não representa
-// nada (mesmo modelo usado em frascos.html/movimentacoes.html).
-const MOCK_FRASCOS_MOVIMENTACAO = [
-    { id: "ENbd-a0001", grupo: "Endo", estado: "Misto", arcada: "", denticao: "", setor: "bdh", disponivel: 22, dataCadastro: "05/01/25", dataManutencao: "05/01/26" },
-    { id: "ENbd-a0002", grupo: "Endo", estado: "Misto", arcada: "", denticao: "", setor: "bdh", disponivel: 30, dataCadastro: "14/02/25", dataManutencao: "14/02/26" },
-    { id: "ENbb-a0003", grupo: "Endo", estado: "Misto", arcada: "", denticao: "", setor: "biobanco", disponivel: 12, dataCadastro: "20/03/25", dataManutencao: "20/03/26" },
-    { id: "PMbd-a0004", grupo: "Pré-Molar", estado: "Hígido", arcada: "Inferior", denticao: "Permanente", setor: "bdh", disponivel: 14, dataCadastro: "12/03/25", dataManutencao: "12/03/26" },
-    { id: "PMbd-a0005", grupo: "Pré-Molar", estado: "Cariado", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 9, dataCadastro: "04/05/25", dataManutencao: "04/05/26" },
-    { id: "PMbb-a0006", grupo: "Pré-Molar", estado: "Hígido", arcada: "Inferior", denticao: "Decídua", setor: "biobanco", disponivel: 11, dataCadastro: "09/02/25", dataManutencao: "09/02/26" },
-    { id: "MObd-a0007", grupo: "Molar", estado: "Hígido", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 20, dataCadastro: "30/01/25", dataManutencao: "30/01/26" },
-    { id: "MObb-a0008", grupo: "Molar", estado: "Restaurado", arcada: "Inferior", denticao: "Permanente", setor: "biobanco", disponivel: 8, dataCadastro: "25/06/25", dataManutencao: "25/06/26" },
-    { id: "CNbd-a0009", grupo: "Canino", estado: "Restaurado", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 6, dataCadastro: "02/03/25", dataManutencao: "02/03/26" },
-    { id: "CNbb-a0010", grupo: "Canino", estado: "Hígido", arcada: "Inferior", denticao: "Decídua", setor: "biobanco", disponivel: 5, dataCadastro: "18/06/25", dataManutencao: "18/06/26" },
-    { id: "INbd-a0011", grupo: "Incisivo", estado: "Misto", arcada: "Inferior", denticao: "Permanente", setor: "bdh", disponivel: 18, dataCadastro: "18/06/25", dataManutencao: "18/06/26" },
-    { id: "INbb-a0012", grupo: "Incisivo", estado: "Hígido", arcada: "Superior", denticao: "Decídua", setor: "biobanco", disponivel: 6, dataCadastro: "10/04/25", dataManutencao: "10/04/26" },
-
-    // A partir daqui: "irmãos" de propósito (mesmo grupo/estado/arcada/
-    // denticao de um frasco BDH acima) — servem pra exercitar o modal
-    // "Selecionar Frascos" (Origem dos Dentes = "Outro(s) frasco(s)" em
-    // cadastro_movimentacao.html), que só mostra frascos com os MESMOS
-    // atributos dentários do frasco de destino escolhido (ver
-    // candidatosOutrosFrascos, mais abaixo). Sem esses pares, cada
-    // combinação ali em cima era única e o modal nunca tinha candidato
-    // nenhum pra listar. Endo (ENbd-a0001/a0002) já tinha um par de
-    // propósito desde o início — o resto ganha o mesmo tratamento aqui.
-    { id: "ENbd-a0013", grupo: "Endo", estado: "Misto", arcada: "", denticao: "", setor: "bdh", disponivel: 15, dataCadastro: "08/07/25", dataManutencao: "08/07/26" },
-    { id: "PMbd-a0014", grupo: "Pré-Molar", estado: "Hígido", arcada: "Inferior", denticao: "Permanente", setor: "bdh", disponivel: 10, dataCadastro: "15/07/25", dataManutencao: "15/07/26" },
-    { id: "PMbd-a0015", grupo: "Pré-Molar", estado: "Cariado", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 7, dataCadastro: "22/08/25", dataManutencao: "22/08/26" },
-    { id: "MObd-a0016", grupo: "Molar", estado: "Hígido", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 16, dataCadastro: "03/09/25", dataManutencao: "03/09/26" },
-    { id: "MObd-a0017", grupo: "Molar", estado: "Hígido", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 25, dataCadastro: "11/10/25", dataManutencao: "11/10/26" },
-    { id: "CNbd-a0018", grupo: "Canino", estado: "Restaurado", arcada: "Superior", denticao: "Permanente", setor: "bdh", disponivel: 4, dataCadastro: "19/11/25", dataManutencao: "19/11/26" },
-    { id: "INbd-a0019", grupo: "Incisivo", estado: "Misto", arcada: "Inferior", denticao: "Permanente", setor: "bdh", disponivel: 12, dataCadastro: "27/12/25", dataManutencao: "27/12/26" },
-];
+// "PRE_MOLAR" (nome cru do enum Java, como o back-end manda) precisa bater
+// com "Pré-Molar" (texto de exibição da <option>) — mesma ideia pra
+// EstadoDente ("HIGIDO" x "Hígido") e Denticao ("DECIDUA" x "Decídua").
+// Sem essa normalização, "===" nunca bate entre os dois formatos e o
+// filtro escolhido derruba a lista pra vazio mesmo havendo frasco
+// correspondente no catálogo (o "sem filtro" nunca passa por aqui, por
+// isso só o comportamento COM filtro parecia quebrado).
+function normalizarTexto(str) {
+    return (str || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove acentos
+        .replace(/[_-]/g, " ") // underscore/hífen tratados como espaço
+        .trim()
+        .toLowerCase();
+}
 
 // "21/06/25" -> Date — formato usado em todo o protótipo (dd/mm/aa).
 function parseDataBr(data) {
+    if (!data) return new Date(); // Fallback caso venha nulo
     const [dia, mes, ano] = data.split("/").map(Number);
     return new Date(2000 + ano, mes - 1, dia);
 }
@@ -109,16 +80,18 @@ function montarDetalhesFrasco(frasco, extrasHtml = "") {
 // Alguns filtros são "sem volta" depois da primeira escolha: assim que o
 // usuário sai do placeholder (value=""), esse placeholder nunca mais
 // reaparece — impede o clique acidental de voltar pro estado "ainda não
-// decidi". Grupo dentário/Ordenar (rotuloQualquer omitido) perdem o "sem
-// filtro" de vez, já que são os filtros que definem o critério principal
-// da busca/ordenação. Estado do dente/Dentição (rotuloQualquer =
-// "Qualquer Estado"/"Qualquer Dentição") só perdem o TEXTO original — o
-// próprio placeholder vira essa opção de verdade, específica de cada
-// filtro (evita um "Qualquer" genérico igual nos dois, que não diz a
-// qual filtro pertence), disponível dali em diante pra voltar a "sem
-// filtro" quantas vezes quiser. Status (Todos/Já Escolhidos/Em
-// Manutenção) não passa por aqui: "Todos" já é uma opção normal, sempre
-// selecionável, não um placeholder.
+// decidi". Ordenar (rotuloQualquer omitido) é o único que ainda faz isso:
+// sem resultado nenhum depende dele (só afeta a ORDEM de uma lista que já
+// aparece sozinha), então perder a volta não trava filtro nenhum. Grupo
+// dentário, Estado do dente e Dentição (rotuloQualquer = "Qualquer
+// Grupo"/"Qualquer Estado"/"Qualquer Dentição") só perdem o TEXTO
+// original — o próprio placeholder vira essa opção de verdade, específica
+// de cada filtro (evita um "Qualquer" genérico igual nos três, que não
+// diz a qual filtro pertence), disponível dali em diante pra voltar a
+// "sem filtro" quantas vezes quiser — necessário pra Grupo desde que ele
+// deixou de ser o gatilho obrigatório da busca (ver temGatilhoDeBusca).
+// Status (Todos/Já Escolhidos/Em Manutenção) não passa por aqui: "Todos"
+// já é uma opção normal, sempre selecionável, não um placeholder.
 function travarPlaceholderDoFiltro(select, rotuloQualquer) {
     if (!select) return;
 
@@ -619,7 +592,7 @@ function setupFrascoSearchModal() {
         criarLinhaResultado,
         ligarInteracaoResultados,
         estaSelecionado,
-        obterCatalogo = () => MOCK_FRASCOS_MOVIMENTACAO,
+        obterCatalogo = () => window.catalogoFrascosCache || [],
         semGatilho = false,
     }) {
         const {
@@ -657,18 +630,14 @@ function setupFrascoSearchModal() {
             document.body.classList.remove("modal-open");
         }
 
-        // true só quando existe um motivo real pra rodar a busca (grupo
-        // escolhido ou termo digitado) — é o que mantém a listagem vazia
-        // (com o aviso de "escolha um grupo ou pesquise") logo ao abrir,
-        // em vez de despejar o setor inteiro de uma vez. semGatilho pula
-        // essa espera: o modal "Selecionar Frascos" já nasce filtrado
-        // pelos atributos do destino (ver obterCatalogo), não sobra
-        // escolha nenhuma pro usuário fazer antes de ver resultado.
+        // Sempre "true": o modal lista todos os frascos do setor atual
+        // (BDH/Biobanco, ver bateSetor em getFiltrados) assim que abre —
+        // termo digitado e filtros só refinam essa lista, não são mais
+        // pré-requisito pra ela aparecer. semGatilho (modal "Selecionar
+        // Frascos") continua sem efeito prático aqui, já que o resultado
+        // final é o mesmo (sempre gatilho).
         function temGatilhoDeBusca() {
-            if (semGatilho) return true;
-
-            const termo = (searchInput?.value || "").trim();
-            return termo.length > 0 || (filtroGrupo?.value || "") !== "";
+            return true;
         }
 
         function getFiltrados() {
@@ -683,9 +652,9 @@ function setupFrascoSearchModal() {
             const filtrados = obterCatalogo().filter((frasco) => {
                 const bateSetor = frasco.setor === setor;
                 const bateTermo = !termo || frasco.id.toLowerCase().includes(termo);
-                const bateGrupo = !grupo || frasco.grupo === grupo;
-                const bateEstado = !estado || frasco.estado === estado;
-                const bateDenticao = !denticao || frasco.denticao === denticao;
+                const bateGrupo = !grupo || normalizarTexto(frasco.grupo) === normalizarTexto(grupo);
+                const bateEstado = !estado || normalizarTexto(frasco.estado) === normalizarTexto(estado);
+                const bateDenticao = !denticao || normalizarTexto(frasco.denticao) === normalizarTexto(denticao);
 
                 // "Já Escolhidos" é o único valor com filtro de verdade
                 // aplicado aqui. "Em Manutenção" ainda não filtra nada —
@@ -711,8 +680,7 @@ function setupFrascoSearchModal() {
         }
 
         function renderResultados() {
-            const gatilho = temGatilhoDeBusca();
-            const filtrados = gatilho ? getFiltrados() : [];
+            const filtrados = getFiltrados();
 
             const totalPaginas = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
             paginaAtual = Math.min(Math.max(paginaAtual, 1), totalPaginas);
@@ -726,9 +694,7 @@ function setupFrascoSearchModal() {
             if (emptyState) {
                 emptyState.hidden = filtrados.length > 0;
 
-                if (!gatilho) {
-                    emptyState.textContent = "Escolha um grupo dentário ou pesquise por um identificador para ver os frascos disponíveis.";
-                } else if (filtroStatus?.value === "escolhidos") {
+                if (filtroStatus?.value === "escolhidos") {
                     emptyState.textContent = "Nenhum frasco escolhido ainda.";
                 } else {
                     emptyState.textContent = "Nenhum frasco encontrado com esses critérios.";
@@ -736,12 +702,8 @@ function setupFrascoSearchModal() {
             }
 
             if (countLabel) {
-                if (!gatilho) {
-                    countLabel.textContent = "Nenhuma busca realizada";
-                } else {
-                    const plural = filtrados.length === 1 ? "" : "s";
-                    countLabel.textContent = `${filtrados.length} frasco${plural} encontrado${plural}`;
-                }
+                const plural = filtrados.length === 1 ? "" : "s";
+                countLabel.textContent = `${filtrados.length} frasco${plural} encontrado${plural}`;
             }
 
             if (paginationRange) {
@@ -816,7 +778,7 @@ function setupFrascoSearchModal() {
             });
         });
 
-        travarPlaceholderDoFiltro(filtroGrupo);
+        travarPlaceholderDoFiltro(filtroGrupo, "Qualquer Grupo");
         travarPlaceholderDoFiltro(filtroEstado, "Qualquer Estado");
         travarPlaceholderDoFiltro(filtroDenticao, "Qualquer Dentição");
         travarPlaceholderDoFiltro(ordenarSelect);
@@ -910,7 +872,7 @@ function setupFrascoSearchModal() {
                 if (!resetBtn) return;
 
                 const linha = resetBtn.closest(".modal-result");
-                const frasco = MOCK_FRASCOS_MOVIMENTACAO.find((item) => item.id === linha.dataset.frascoId);
+                const frasco = (window.catalogoFrascosCache || []).find((item) => item.id === linha.dataset.frascoId);
                 if (!frasco) return;
 
                 selecionados.delete(frasco.id);
@@ -939,7 +901,7 @@ function setupFrascoSearchModal() {
                 if (!quantidadeInput) return;
 
                 const linha = quantidadeInput.closest(".modal-result");
-                const frasco = MOCK_FRASCOS_MOVIMENTACAO.find((item) => item.id === linha?.dataset.frascoId);
+                const frasco = (window.catalogoFrascosCache || []).find((item) => item.id === linha?.dataset.frascoId);
                 if (!frasco) return;
 
                 const limite = maxPermitido(frasco);
@@ -979,8 +941,20 @@ function setupFrascoSearchModal() {
             estaSelecionado: (frasco) => selecionados.has(frasco.id),
         });
 
-        trigger.addEventListener("click", () => {
+        trigger.addEventListener("click", async () => {
             if (isEntrada()) return;
+
+            const originalHtml = trigger.innerHTML;
+            trigger.innerHTML = '<i class="icon" data-lucide="loader"></i> <span class="btn__label">Carregando...</span>';
+            trigger.disabled = true;
+            if (window.lucide) lucide.createIcons();
+
+            await window.carregarCatalogoFrascos();
+
+            trigger.innerHTML = originalHtml;
+            trigger.disabled = false;
+            if (window.lucide) lucide.createIcons();
+
             modalSaida?.open();
         });
     }
@@ -1030,7 +1004,7 @@ function setupFrascoSearchModal() {
                 if (!selectBtn) return;
 
                 const linha = selectBtn.closest(".modal-result");
-                const frasco = MOCK_FRASCOS_MOVIMENTACAO.find((item) => item.id === linha.dataset.frascoId);
+                const frasco = (window.catalogoFrascosCache || []).find((item) => item.id === linha.dataset.frascoId);
                 if (!frasco) return;
 
                 const jaEraSelecionado = selecionados.has(frasco.id);
@@ -1053,8 +1027,20 @@ function setupFrascoSearchModal() {
             estaSelecionado: (frasco) => selecionados.has(frasco.id),
         });
 
-        trigger.addEventListener("click", () => {
+        trigger.addEventListener("click", async () => {
             if (!isEntrada()) return;
+
+            const originalHtml = trigger.innerHTML;
+            trigger.innerHTML = '<i class="icon" data-lucide="loader"></i> <span class="btn__label">Carregando...</span>';
+            trigger.disabled = true;
+            if (window.lucide) lucide.createIcons();
+
+            await window.carregarCatalogoFrascos();
+
+            trigger.innerHTML = originalHtml;
+            trigger.disabled = false;
+            if (window.lucide) lucide.createIcons();
+
             modalEntrada?.open();
         });
     }
@@ -1075,7 +1061,7 @@ function setupFrascoSearchModal() {
             // transportar, por exemplo, Molares pra dentro de um frasco de
             // Incisivos. O próprio destino nunca aparece como opção de
             // origem dele mesmo.
-            return MOCK_FRASCOS_MOVIMENTACAO.filter((frasco) =>
+            return (window.catalogoFrascosCache || []).filter((frasco) =>
                 frasco.id !== destino.id &&
                 frasco.grupo === destino.grupo &&
                 frasco.estado === destino.estado &&
@@ -1128,7 +1114,7 @@ function setupFrascoSearchModal() {
                 if (!selectBtn) return;
 
                 const linha = selectBtn.closest(".modal-result");
-                const frasco = MOCK_FRASCOS_MOVIMENTACAO.find((item) => item.id === linha.dataset.frascoId);
+                const frasco = (window.catalogoFrascosCache || []).find((item) => item.id === linha.dataset.frascoId);
                 if (!frasco) return;
 
                 // Seleção múltipla de verdade — diferente de Entrada, um
@@ -1153,7 +1139,22 @@ function setupFrascoSearchModal() {
             semGatilho: true,
         });
 
-        selecionarFrascosOrigemBtn?.addEventListener("click", () => modalOutrosFrascos?.open());
+        if (selecionarFrascosOrigemBtn) {
+             selecionarFrascosOrigemBtn.addEventListener("click", async () => {
+                const originalHtml = selecionarFrascosOrigemBtn.innerHTML;
+                selecionarFrascosOrigemBtn.innerHTML = '<i class="icon" data-lucide="loader"></i> Carregando...';
+                selecionarFrascosOrigemBtn.disabled = true;
+                if (window.lucide) lucide.createIcons();
+
+                await window.carregarCatalogoFrascos();
+
+                selecionarFrascosOrigemBtn.innerHTML = originalHtml;
+                selecionarFrascosOrigemBtn.disabled = false;
+                if (window.lucide) lucide.createIcons();
+
+                modalOutrosFrascos?.open();
+             });
+        }
     }
 
     // renderSelecionados() já chama atualizarOrigemDentes() no final (ver
