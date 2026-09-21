@@ -189,11 +189,16 @@
           </div>
         </div>
 
-        <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
-          <i data-lucide="info" class="me-2"></i> Não há nenhum frasco cadastrado no banco de dados.
-        </div>
+        <th:block th:if="${#lists.isEmpty(frascos)}">
+          <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhum frasco cadastrado', 'Ainda não há frascos registrados no banco de dados. Cadastre o primeiro frasco para começar.', false)}">
+          </div>
+        </th:block>
 
         <section th:if="${!#lists.isEmpty(frascos)}" class="results results--grid" id="resultsView">
+
+          <div id="emptyStateFiltro" hidden
+               th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhum frasco encontrado', 'Nenhum frasco corresponde aos filtros aplicados. Tente ajustar ou resetar os filtros.', true)}">
+          </div>
 
           <div class="result-table result-table--frascos">
             <div class="result-table__head">

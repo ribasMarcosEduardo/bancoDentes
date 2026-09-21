@@ -4,9 +4,10 @@ function setupFilters() {
     const checkboxes = document.querySelectorAll(".checkbox-filter input");
     const activeFilters = document.querySelector("#activeFilters");
     const activeFiltersBar = document.querySelector(".active-filters-bar");
-    const clearButton = document.querySelector(".filters-clear");
+    const clearButtons = document.querySelectorAll(".filters-clear");
     const tableContainer = document.querySelector(".result-table");
     const gridContainer = document.querySelector(".results-grid");
+    const emptyStateFiltro = document.getElementById("emptyStateFiltro");
     const btnSortOrder = document.getElementById("btnSortOrder");
     const sortSelect = document.getElementById("sort-requests");
     const pageSizeSelect = document.getElementById("pageSize");
@@ -155,7 +156,10 @@ function setupFilters() {
             cardByCodigo.set(card.getAttribute("data-codigo"), card);
         });
 
-        const visibleRows = currentRows.filter(row => !row.classList.contains('is-hidden-by-filter'));
+        const visibleRows = currentRows.filter(row =>
+            !row.classList.contains('is-hidden-by-filter') &&
+            !row.classList.contains('is-hidden-by-sector')
+        );
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
 
@@ -188,7 +192,29 @@ function setupFilters() {
 
         if (btnPrevPage) btnPrevPage.disabled = (currentPage === 1);
         if (btnNextPage) btnNextPage.disabled = (currentPage === totalPages);
+
+        // Estado vazio por filtro/busca — o elemento só existe no DOM
+        // quando a página já tem pelo menos 1 item vindo do banco (ele
+        // é renderizado dentro de <section th:if="!isEmpty(...)">); o
+        // banco vazio de verdade já tem seu próprio aviso, fora dessa
+        // section, então não passa por aqui. tableContainer/gridContainer
+        // (não a .results inteira) porque o próprio emptyStateFiltro
+        // mora dentro de .results, como irmão dos dois.
+        if (emptyStateFiltro) {
+            const semResultado = totalRows === 0;
+            emptyStateFiltro.hidden = !semResultado;
+            if (tableContainer) tableContainer.style.display = semResultado ? "none" : "";
+            if (gridContainer) gridContainer.style.display = semResultado ? "none" : "";
+        }
     }
+
+    // Exposto global pro setSector (results.js) recalcular contagem/
+    // paginação/estado vazio ao trocar Todos/BDH/Biobanco — setSector
+    // só marca a classe is-hidden-by-sector em cada item, quem decide
+    // o que fica visível de fato é sempre esta função. results.js roda
+    // depois de filters.js (ver ordem dos <script> nas páginas que têm
+    // #sectorSwitch), então já encontra isto definido.
+    window.applyPagination = applyPagination;
 
     // Gerencia a criação, remoção e exibição dos chips visuais de filtros ativos
     const chipsByCheckbox = new Map();
@@ -273,7 +299,10 @@ function setupFilters() {
     if (btnNextPage) {
             btnNextPage.addEventListener("click", () => {
                 const currentRows = document.querySelectorAll(".request-row");
-                const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
+                const visibleRows = Array.from(currentRows).filter(row =>
+                    !row.classList.contains('is-hidden-by-filter') &&
+                    !row.classList.contains('is-hidden-by-sector')
+                );
                 const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 
                 if (currentPage < totalPages) {
@@ -292,7 +321,10 @@ function setupFilters() {
     });
 
     // Limpa todos os filtros selecionados e redefine a tabela ao clicar em resetar
-    if (clearButton) {
+    // (querySelectorAll, não só o da barra de filtros ativos — o botão
+    // "Resetar Filtros" do estado vazio, ver partials/empty_state.html,
+    // usa a mesma classe e precisa disparar a mesma limpeza)
+    clearButtons.forEach((clearButton) => {
         clearButton.addEventListener("click", () => {
             checkboxes.forEach((checkbox) => {
                 checkbox.checked = false;
@@ -300,7 +332,7 @@ function setupFilters() {
             renderActiveFilters();
             applyFilters();
         });
-    }
+    });
 
     if (paginationRange) {
         sortTable();

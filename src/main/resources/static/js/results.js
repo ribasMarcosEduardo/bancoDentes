@@ -69,10 +69,20 @@ function setupSectorSwitch() {
 
         items.forEach((item) => {
             const matches = setor === "todos" || item.dataset.setor === setor;
-            item.style.display = matches ? "" : "none";
+            item.classList.toggle("is-hidden-by-sector", !matches);
         });
 
         localStorage.setItem("frascosSectorFilter", setor);
+
+        // Só marca a classe acima — quem decide display/contagem/
+        // paginação/estado vazio é sempre applyPagination (filters.js),
+        // senão essas trocas de setor nunca refletiam ali (o "Nenhum
+        // frasco encontrado" nunca aparecia mesmo com o setor zerando
+        // tudo, e a contagem/paginação ficavam contando os itens
+        // escondidos como se estivessem visíveis).
+        if (typeof window.applyPagination === "function") {
+            window.applyPagination();
+        }
     }
 
     const savedSector = localStorage.getItem("frascosSectorFilter") || "todos";
