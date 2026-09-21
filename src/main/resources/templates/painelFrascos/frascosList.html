@@ -388,13 +388,19 @@
             e.preventDefault();
 
             Swal.fire({
+                icon: "warning",
                 title: "Deseja realmente excluir este frasco?",
                 text: "Esta ação não poderá ser desfeita.",
-                icon: "warning",
                 showCancelButton: true,
+                reverseButtons: true,
+                focusCancel: true,
                 confirmButtonText: "Sim, excluir",
                 cancelButtonText: "Cancelar",
-                reverseButtons: true
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-outline btn-outline-danger",
+                    cancelButton: "btn btn-secondary",
+                },
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
