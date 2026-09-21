@@ -261,7 +261,7 @@ function setupCadastroFrasco() {
             if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
             if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
             if (!endo) {
-                estadoDente.value = "NAO_INFORMADO";
+                estadoDente.value = "NAO_INFORMADA";
             }
         }
 
@@ -494,7 +494,7 @@ function setupCadastroSolicitacao() {
             fecharAvancados();
         }
 
-        if (estadoDente) estadoDente.value = "NAO_INFORMADO";
+        if (estadoDente) estadoDente.value = "NAO_INFORMADA";
         if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
         if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
 
