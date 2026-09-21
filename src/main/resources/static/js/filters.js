@@ -6,6 +6,7 @@ function setupFilters() {
     const activeFiltersBar = document.querySelector(".active-filters-bar");
     const clearButton = document.querySelector(".filters-clear");
     const tableContainer = document.querySelector(".result-table");
+    const gridContainer = document.querySelector(".results-grid");
     const btnSortOrder = document.getElementById("btnSortOrder");
     const sortSelect = document.getElementById("sort-requests");
     const pageSizeSelect = document.getElementById("pageSize");
@@ -38,9 +39,10 @@ function setupFilters() {
             return sortAscending ? (codeA - codeB) : (codeB - codeA);
         });
 
-        if (tableContainer) {
-            currentRows.forEach(row => tableContainer.appendChild(row));
-        }
+        currentRows.forEach(row => {
+            const container = row.classList.contains("card") ? gridContainer : tableContainer;
+            if (container) container.appendChild(row);
+        });
 
         currentPage = 1;
         applyPagination();
@@ -56,7 +58,7 @@ function setupFilters() {
             if (icon) {
                 const newIcon = document.createElement("i");
                 newIcon.className = "orderBy-icon";
-                newIcon.setAttribute("data-lucide", sortAscending ? "arrow-up" : "arrow-down");
+                newIcon.setAttribute("data-lucide", sortAscending ? "arrow-down-up" : "arrow-up-down");
 
                 icon.replaceWith(newIcon);
 
