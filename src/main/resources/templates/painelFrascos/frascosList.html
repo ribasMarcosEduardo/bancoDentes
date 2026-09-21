@@ -264,7 +264,7 @@
                           <span th:text="${frasco.denticao != null ? frasco.denticao.nome : '-'}">-</span>
                         </div>
                         <div class="request-detail">
-                          <span class="request-details__label">Posição</span>
+                          <span class="request-details__label">Numeração</span>
                           <span th:text="${frasco.posicao != null ? frasco.posicao : '-'}">-</span>
                         </div>
                         <div class="request-detail">
@@ -288,6 +288,21 @@
                           <span class="request-details__label">Data de manutenção</span>
                           <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
                         </div>
+                      </div>
+                    </section>
+
+                    <section class="request-panel request-panel--frascos-actions">
+                      <h4 class="request-panel__title">Ações</h4>
+                      <div class="request-panel__actions">
+                        <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                          <i class="icon" data-lucide="pen-line"></i>
+                        </a>
+
+                        <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                            <i class="icon" data-lucide="archive-x"></i>
+                          </button>
+                        </form>
                       </div>
                     </section>
                   </div>
