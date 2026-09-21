@@ -134,8 +134,13 @@ function setupFilters() {
 
     // Controla a exibição das linhas por página e atualiza os botões de navegação
     function applyPagination() {
-        const currentRows = document.querySelectorAll(".request-row, .card");
-        const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
+        const currentRows = Array.from(document.querySelectorAll(".request-row"));
+        const cardByCodigo = new Map();
+        document.querySelectorAll(".card").forEach(card => {
+            cardByCodigo.set(card.getAttribute("data-codigo"), card);
+        });
+
+        const visibleRows = currentRows.filter(row => !row.classList.contains('is-hidden-by-filter'));
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
 
@@ -144,11 +149,14 @@ function setupFilters() {
         const startIndex = (currentPage - 1) * rowsPerPage;
         const endIndex = startIndex + rowsPerPage;
 
-        currentRows.forEach(row => row.style.display = 'none');
+        function setVisibility(row, visible) {
+            row.style.display = visible ? '' : 'none';
+            const card = cardByCodigo.get(row.getAttribute("data-codigo"));
+            if (card) card.style.display = visible ? '' : 'none';
+        }
 
-        visibleRows.slice(startIndex, endIndex).forEach(row => {
-            row.style.display = '';
-        });
+        currentRows.forEach(row => setVisibility(row, false));
+        visibleRows.slice(startIndex, endIndex).forEach(row => setVisibility(row, true));
 
         if (paginationInfo) {
             paginationInfo.innerHTML = `${totalRows} ${paginationLabel} <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
@@ -240,7 +248,7 @@ function setupFilters() {
 
     if (btnNextPage) {
             btnNextPage.addEventListener("click", () => {
-                const currentRows = document.querySelectorAll(".request-row, .card");
+                const currentRows = document.querySelectorAll(".request-row");
                 const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
                 const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 
