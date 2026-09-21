@@ -100,11 +100,6 @@ function setupCadastroFrasco() {
         return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
     }
 
-    function usaArcada() {
-        const grupo = getGrupo();
-        return grupo === "canino" || grupo === "incisivo";
-    }
-
     function isPreMolar() {
         const grupo = getGrupo();
         return grupo === "premolar" || grupo === "pre_molar";
@@ -113,10 +108,9 @@ function setupCadastroFrasco() {
     function atualizarVisibilidadeCamposAtributos() {
         const endo = isEndo();
         const mostrarNumeracao = usaNumeracao();
-        const mostrarArcada = usaArcada();
 
         if (denticaoGroup) denticaoGroup.hidden = endo;
-        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
+        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao || endo;
         if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
 
         if (denticaoSelect) {
