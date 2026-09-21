@@ -12,6 +12,7 @@ function setupFilters() {
     const pageSizeSelect = document.getElementById("pageSize");
     const btnPrevPage = document.getElementById("btnPrevPage");
     const btnNextPage = document.getElementById("btnNextPage");
+    const paginationRange = document.getElementById("paginationRange");
     const paginationInfo = document.getElementById("paginationInfo");
     const paginationLabel = paginationInfo ? (paginationInfo.getAttribute("data-label") || "Resultados Encontrados") : "";
 
@@ -159,7 +160,16 @@ function setupFilters() {
         visibleRows.slice(startIndex, endIndex).forEach(row => setVisibility(row, true));
 
         if (paginationInfo) {
-            paginationInfo.innerHTML = `${totalRows} ${paginationLabel} <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
+            if (paginationRange) {
+                const ordenacao = sortAscending ? "Mais Antigos" : "Mais Recentes";
+                paginationInfo.textContent = `${totalRows} ${paginationLabel} - ${ordenacao}`;
+            } else {
+                paginationInfo.innerHTML = `${totalRows} ${paginationLabel} <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
+            }
+        }
+
+        if (paginationRange) {
+            paginationRange.textContent = totalRows === 0 ? "0-0" : `${startIndex + 1}-${Math.min(endIndex, totalRows)}`;
         }
 
         if (btnPrevPage) btnPrevPage.disabled = (currentPage === 1);
@@ -278,7 +288,11 @@ function setupFilters() {
         });
     }
 
-    applyPagination();
+    if (paginationRange) {
+        sortTable();
+    } else {
+        applyPagination();
+    }
 }
 
 // Inicializa o script garantindo que o DOM já foi completamente carregado
