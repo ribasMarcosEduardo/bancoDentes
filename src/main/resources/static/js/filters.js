@@ -66,6 +66,20 @@ function setupFilters() {
                 if (window.lucide) {
                     lucide.createIcons();
                 }
+
+                // lucide.createIcons() troca o <i data-lucide> por um <svg> novo
+                // (mesma classe, nó diferente) — precisa reconsultar depois de
+                // rodar, senão a animação tenta grudar num elemento que já não
+                // está mais no DOM.
+                const spinIcon = btnSortOrder.querySelector(".orderBy-icon");
+                if (spinIcon) {
+                    spinIcon.classList.add("orderBy-icon--spin");
+                    spinIcon.addEventListener(
+                        "animationend",
+                        () => spinIcon.classList.remove("orderBy-icon--spin"),
+                        { once: true }
+                    );
+                }
             }
         });
     }
