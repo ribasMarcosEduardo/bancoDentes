@@ -242,11 +242,11 @@ function setupCadastroFrasco() {
         }
 
         if (endo) {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
             estadoDente.value = "misto";
         } else {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = false;
             estadoDente.required = true;
             estadoDente.disabled = !hasGrupo;
         }
@@ -281,10 +281,10 @@ function setupCadastroFrasco() {
         enableSection(estadoFrascoSection);
         estadoDente.disabled = false;
         if (isEndo()) {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
         } else {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = false;
             estadoDente.required = true;
         }
         atualizarVisibilidadeCamposAtributos();
