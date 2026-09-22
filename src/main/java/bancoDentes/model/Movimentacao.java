@@ -31,9 +31,6 @@ public class Movimentacao {
     @Column(name = "TIPO_MOVIMENTACAO", nullable = false)
     private TipoMovimentacao tipoMovimentacao;
 
-    @Column(name = "QUANTIDADE", nullable = false)
-    private Long quantidade;
-
     @Column(name = "DATMOVIMENTACAO", nullable = false)
     private LocalDateTime datMovimentacao;
 

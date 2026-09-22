@@ -65,7 +65,8 @@
 
             <input type="hidden" th:field="*{codigo}"/>
             <input type="hidden" th:field="*{version}"/>
-            <input type="hidden" th:field="*{frasco}" id="frascoSelecionadoInput" />
+            <input type="hidden" th:field="*{codFrasco}" id="frascoSelecionadoInput" />
+            <input type="hidden" name="datManutencao" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" />
 
             <section class="form-section">
                 <div class="form-group">

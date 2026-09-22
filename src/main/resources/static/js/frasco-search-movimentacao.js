@@ -1008,12 +1008,16 @@ function setupFrascoSearchModal() {
                 if (!frasco) return;
 
                 const jaEraSelecionado = selecionados.has(frasco.id);
+                const frascoHiddenInput = document.getElementById("frascoSelecionadoInput");
 
                 // Só cabe um — escolher um novo descarta o anterior (se
                 // houver) antes de valer a nova seleção.
                 selecionados.clear();
                 if (!jaEraSelecionado) {
                     selecionados.set(frasco.id, { frasco, quantidade: 0 });
+                    if (frascoHiddenInput) frascoHiddenInput.value = frasco.codigo;
+                } else {
+                    if (frascoHiddenInput) frascoHiddenInput.value = "";
                 }
 
                 renderSelecionados();
@@ -1160,6 +1164,48 @@ function setupFrascoSearchModal() {
     // renderSelecionados() já chama atualizarOrigemDentes() no final (ver
     // acima) — não precisa de uma chamada separada aqui.
     renderSelecionados();
+
+    const formMovimentacao = document.getElementById("cadastroMovimentacaoForm");
+
+    if (formMovimentacao) {
+        formMovimentacao.addEventListener("submit", function (event) {
+
+            document.querySelectorAll(".item-dinamico").forEach(el => el.remove());
+
+            const ehEntrada = isEntrada();
+            const origem = document.getElementById("origemDentes")?.value;
+
+            if (ehEntrada && origem === "frascos") {
+
+                if (origemFrascosSelecionados.size === 0) {
+                    event.preventDefault();
+                    if (window.Swal) Swal.fire('Atenção', 'Selecione pelo menos um frasco de origem.', 'warning');
+                    return;
+                }
+
+                let index = 0;
+                    origemFrascosSelecionados.forEach((frasco) => {
+                    const inputFrasco = document.createElement("input");
+                    inputFrasco.type = "hidden";
+
+                    inputFrasco.name = `itens[${index}].codFrasco`;
+                    inputFrasco.value = frasco.codigo;
+                    inputFrasco.className = "item-dinamico";
+                    formMovimentacao.appendChild(inputFrasco);
+
+                    const inputQtd = document.createElement("input");
+                    inputQtd.type = "hidden";
+
+                    inputQtd.name = `itens[${index}].quantidade`;
+                    inputQtd.value = frasco.disponivel;
+                    inputQtd.className = "item-dinamico";
+                    formMovimentacao.appendChild(inputQtd);
+
+                    index++;
+                });
+            }
+        });
+    }
 }
 
 setupFrascoSearchModal();

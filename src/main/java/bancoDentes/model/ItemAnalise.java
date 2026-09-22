@@ -20,7 +20,7 @@ public class ItemAnalise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CODITEM")
+    @Column(name = "CODITEMANALISE")
     private Long codigo;
 
     @ManyToOne

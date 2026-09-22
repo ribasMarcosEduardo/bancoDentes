@@ -894,8 +894,6 @@ function setupCadastroMovimentacaoSubmit() {
     const localSelect = document.querySelector("#localMovimentacao");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
     const observacoesField = document.querySelector("#observacoesMovimentacao");
-    // id, não a classe — #origemFrascosList (abaixo) também é uma
-    // ".selected-flasks" (ver frasco-search-movimentacao.js).
     const selectedFlasksList = document.querySelector("#selectedFlasksList");
     const origemDentesSelect = document.querySelector("#origemDentes");
     const quantidadeDoacaoInput = document.querySelector("#quantidadeDoacao");
@@ -910,12 +908,6 @@ function setupCadastroMovimentacaoSubmit() {
         return select.selectedOptions[0]?.textContent.trim() || "Não Informado";
     }
 
-    // Cada linha de ".selected-flasks .request-row" já traz identificador
-    // e quantidade prontos (ver criarLinhaSelecionada) — lê do DOM em vez
-    // de importar o Map privado do outro módulo. Em Entrada não existe um
-    // segundo <span> ali (sem quantidade nesse passo — ver
-    // frasco-search-movimentacao.js): null, não "0", pra distinguir "essa
-    // linha não tem quantidade nesse fluxo" de "quantidade zerada".
     function frascosSelecionados() {
         return Array.from(selectedFlasksList?.querySelectorAll(".request-row") || []).map((row) => {
             const spans = row.querySelectorAll(".selected-flask > span");
@@ -926,9 +918,6 @@ function setupCadastroMovimentacaoSubmit() {
         });
     }
 
-    // Cada linha de "#origemFrascosList .request-row" traz frasco +
-    // quantidade transferida prontos (ver criarLinhaOrigemFrasco) — soma
-    // direto do DOM, mesmo esquema de frascosSelecionados() acima.
     function totalDentesOrigemFrascos() {
         return Array.from(origemFrascosList?.querySelectorAll(".request-row") || []).reduce((soma, row) => {
             const quantidade = Number(row.querySelectorAll(".selected-flask > span")[1]?.textContent) || 0;
@@ -942,9 +931,6 @@ function setupCadastroMovimentacaoSubmit() {
             ["Tipo", textoSelecionado(tipoSelect)],
         ];
 
-        // Origem dos Dentes só existe pra Entrada (ver
-        // cadastro_movimentacao.html) — é ali, não no frasco de destino
-        // escolhido acima, que a quantidade de verdade é decidida.
         if (tipoSelect?.value === "entrada") {
             linhas.push(["Origem dos Dentes", textoSelecionado(origemDentesSelect)]);
 
@@ -994,10 +980,6 @@ function setupCadastroMovimentacaoSubmit() {
 
         const frascos = frascosSelecionados();
 
-        // Passa no checkValidity() mesmo sem frasco algum: Observações só
-        // vira required "de verdade" quando a seção libera (ver
-        // sincronizarObservacoes em frasco-search-movimentacao.js) — até lá
-        // ela está disabled, e o navegador ignora campo required+disabled.
         if (frascos.length === 0) {
             Swal.fire({
                 icon: "warning",
@@ -1012,10 +994,6 @@ function setupCadastroMovimentacaoSubmit() {
             return;
         }
 
-        // Mesmo caso do "frascos.length === 0" acima: "Selecionar Frascos"
-        // não é um <input> nativo, checkValidity() sozinho não pega
-        // "Origem = Outro(s) frasco(s) mas nenhum frasco de origem
-        // escolhido ainda".
         if (tipoSelect?.value === "entrada" && origemDentesSelect?.value === "frascos" && !origemFrascosList?.querySelector(".request-row")) {
             Swal.fire({
                 icon: "warning",
@@ -1030,10 +1008,7 @@ function setupCadastroMovimentacaoSubmit() {
             return;
         }
 
-        // event.submitter é o botão que de fato disparou o submit — como
-        // os dois (Continuar/Sair) são type="submit" pro mesmo form, é
-        // assim que sabe qual dos dois fluxos seguir depois da confirmação.
-        const continuar = event.submitter?.id === "salvarContinuarBtn";
+        const isSalvarEContinuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
             icon: "question",
@@ -1054,33 +1029,16 @@ function setupCadastroMovimentacaoSubmit() {
                 return;
             }
 
-            const mensagem = "Movimentação cadastrada com sucesso.";
-
-            if (continuar) {
-                // form.reset() não desfaz o que o JS mudou via .disabled nem
-                // limpa a lista "Frascos selecionados" (elementos montados à
-                // mão, fora do form) — dispara "change" em vez de reimplementar
-                // essa limpeza aqui: o listener de tipo (setupCadastroMovimentacao,
-                // acima) re-trava/renomeia "Escolher Frasco(s)"; o de local em
-                // frasco-search-movimentacao.js dá selecionados.clear() + re-render
-                // (o que também recolhe "Origem dos Dentes"/"Frascos de Origem",
-                // ver renderSelecionados/atualizarOrigemDentes lá).
-                form.reset();
-                tipoSelect?.dispatchEvent(new Event("change"));
-                localSelect?.dispatchEvent(new Event("change"));
-                // form.reset() não dispara "input" sozinho — sem isso o
-                // contador (setupObservacoesCounter) ficava com a contagem
-                // antiga até o usuário digitar de novo.
-                observacoesField?.dispatchEvent(new Event("input"));
-                showToast(mensagem);
-            } else {
-                // A notificação precisa sobreviver ao redirect — fica
-                // guardada até movimentacoes.html ler e descartar em
-                // setupFlashToast() (ver includes.js), que roda em toda
-                // carga de página.
-                sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
-                window.location.href = "movimentacoes.html";
+            let inputCadastrarOutro = form.querySelector("input[name='cadastrarOutro']");
+            if (!inputCadastrarOutro) {
+                inputCadastrarOutro = document.createElement("input");
+                inputCadastrarOutro.type = "hidden";
+                inputCadastrarOutro.name = "cadastrarOutro";
+                form.appendChild(inputCadastrarOutro);
             }
+            inputCadastrarOutro.value = isSalvarEContinuar;
+
+            HTMLFormElement.prototype.submit.call(form);
         });
     });
 }
