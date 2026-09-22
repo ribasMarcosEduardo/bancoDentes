@@ -61,31 +61,6 @@ public class MovimentacaoFormController extends BaseController{
     }
 
     /**
-     * Aloca um frasco selecionado ao processo de análise.
-     *
-     * @param dto
-     */
-    @PostMapping("/selecionaFrasco")
-    public ResponseEntity<Void> selecionaFrasco(@ModelAttribute ItemMovimentacaoDTO dto, @RequestParam("codMovimentacao") Long codMovimentacao, RedirectAttributes redirectAttributes) {
-        try {
-            ItemMovimentacao itemSalvo = itemMovimentacaoService.save(dto);
-            this.saveMessage(this.getText("msg.sucesso.frasco.alocado"));
-
-            HttpHeaders headers = new HttpHeaders();
-            if (itemSalvo != null && itemSalvo.getCodigo() != null) {
-                headers.add("Codigo_Item_Movimentacao", itemSalvo.getCodigo().toString());
-            }
-
-            return ResponseEntity.ok().headers(headers).build();
-        } catch (AnaliseException e) {
-            this.saveError(e.getMessage());
-        } catch (Exception e) {
-            this.saveError(this.getText("error.frasco.alocado", e.getMessage()));
-        }
-        return ResponseEntity.badRequest().build();
-    }
-
-    /**
      * Salva uma edição ou adição de uma movimentação
      *
      * @param movimentacaoDTO

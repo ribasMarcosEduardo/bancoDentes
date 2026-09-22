@@ -162,7 +162,7 @@
             <div class="list-panel">
                 <div class="pagination">
                     <div class="low-opacity">
-                        <!-- Texto de paginação dinâmico -->
+
                         <strong th:text="${#lists.size(movimentacao)} + ' Movimentações Encontradas - Mais Recentes'">0 Movimentações Encontradas</strong>
                     </div>
 
@@ -180,7 +180,6 @@
 
                 <section class="results results--list" id="resultsView">
 
-                    <!-- Mensagem caso a lista venha vazia do banco -->
                     <div th:if="${#lists.isEmpty(movimentacao)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
                         <i data-lucide="info" class="me-2"></i> Não há nenhuma movimentação registrada.
                     </div>
@@ -196,23 +195,22 @@
                             <span></span>
                         </div>
 
-                        <!-- Iteração Thymeleaf puxando do model atributo "movimentacao" -->
                         <article th:each="mov : ${movimentacao}"
                                  class="request-row"
                                  th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
                                  th:data-tipo="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}"
-                                 th:data-grupo="${mov.frasco.tipoDente}">
+                                 th:data-grupo="${mov.frasco != null ? mov.frasco.tipoDente : ''}">
 
                             <div class="result-list">
                                 <span class="result-list__code" th:text="'MOV-' + ${#numbers.formatInteger(mov.codigo, 3)}">MOV-000</span>
-                                <span th:text="${mov.frasco.identificacao != null ? mov.frasco.identificacao : 'FR-' + mov.frasco.codigo}">FR-000</span>
-                                <span th:text="${mov.frasco.tipoDente}">Grupo</span>
+                                <span th:text="${mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : (mov.frasco != null ? 'FR-' + mov.frasco.codigo : '-')}">FR-000</span>
+                                <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '-'}">Grupo</span>
 
                                 <span class="status-pill"
                                       th:classappend="'status-pill--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
                                       th:text="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}">Tipo</span>
 
-                                <span th:text="${mov.quantidade}">0</span>
+                                <span th:text="${#lists.isEmpty(mov.itens) ? 0 : #aggregates.sum(mov.itens.![quantidade])}">0</span>
                                 <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yy')}">00/00/00</span>
 
                                 <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir movimentação">
@@ -233,8 +231,8 @@
                                                 </div>
 
                                                 <div class="request-detail">
-                                                    <span class="request-details__label">Quantidade</span>
-                                                    <span th:text="${mov.quantidade}">-</span>
+                                                    <span class="request-details__label">Quantidade Total</span>
+                                                    <span th:text="${#lists.isEmpty(mov.itens) ? 0 : #aggregates.sum(mov.itens.![quantidade])}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
@@ -255,32 +253,32 @@
                                             <div class="request-details__grid">
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Grupo dentário</span>
-                                                    <span th:text="${mov.frasco.tipoDente}">-</span>
+                                                    <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '-'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Estado</span>
-                                                    <span th:text="${mov.frasco.estado != null ? mov.frasco.estado : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.estado != null ? mov.frasco.estado : '-'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Arcada</span>
-                                                    <span th:text="${mov.frasco.arcada != null ? mov.frasco.arcada : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.arcada != null ? mov.frasco.arcada : '-'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Posição</span>
-                                                    <span th:text="${mov.frasco.posicao != null ? mov.frasco.posicao : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.posicao != null ? mov.frasco.posicao : '-'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Data de cadastro (Frasco)</span>
-                                                    <span th:text="${mov.frasco.datCad != null ? #temporals.format(mov.frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.datCad != null ? #temporals.format(mov.frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Qtd. atual do Frasco</span>
-                                                    <span th:text="${mov.frasco.quantidade}">-</span>
+                                                    <span th:text="${mov.frasco != null ? mov.frasco.quantidade : '-'}">-</span>
                                                 </div>
                                             </div>
                                         </section>

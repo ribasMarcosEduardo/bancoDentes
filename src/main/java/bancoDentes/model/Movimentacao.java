@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -44,6 +46,9 @@ public class Movimentacao {
 
     @Column(name = "OBSERVACAO", nullable = false)
     private String observacao;
+
+    @OneToMany(mappedBy = "movimentacao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemMovimentacao> itens = new ArrayList<>();
 
 
 }

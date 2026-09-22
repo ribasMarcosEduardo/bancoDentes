@@ -5,8 +5,9 @@ import bancoDentes.exception.AnaliseException;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.exception.ItemAnaliseException;
 import bancoDentes.exception.ItemNaoEncontradoException;
-import bancoDentes.model.ItemAnalise;
+import bancoDentes.model.Frasco;
 import bancoDentes.model.ItemMovimentacao;
+import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ItemMovimentacaoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,16 +25,26 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ItemMovimentacaoService extends BaseService {
 
-    final private ItemMovimentacaoRepository itemMovimentacaoRepository;
+    private final ItemMovimentacaoRepository itemMovimentacaoRepository;
+    private final FrascoRepository frascoRepository;
 
     /**
      * Vincula um novo frasco a uma análise de solicitação.
      *
-     * @param dto
+     * @param dto DTO com os dados do item
      */
     @Transactional
     public ItemMovimentacao save(ItemMovimentacaoDTO dto) throws AnaliseException, FrascoException, ItemAnaliseException {
-        ItemMovimentacao itemMovimentacao = dto.mapearItemMovimentacao();
+        if (dto == null || dto.codFrasco() == null) {
+            throw new FrascoException(this.getText("error.frasco.nao.encontrado"));
+        }
+
+        // 1. Procura o Frasco associado ao codFrasco do DTO
+        Frasco frasco = frascoRepository.findById(dto.codFrasco())
+                .orElseThrow(() -> new FrascoException(this.getText("error.frasco.nao.encontrado")));
+
+        // 2. Mapeia a entidade associando o frasco recuperado
+        ItemMovimentacao itemMovimentacao = dto.mapearItemMovimentacao(frasco);
 
         Optional<ItemMovimentacao> itemExistente =
                 itemMovimentacaoRepository.findByMovimentacaoAndFrasco(
@@ -43,6 +54,7 @@ public class ItemMovimentacaoService extends BaseService {
 
         if (itemExistente.isPresent() && (itemMovimentacao.getQuantidade() == null || itemMovimentacao.getQuantidade() <= 0)) {
             this.removerItem(itemExistente.get().getCodigo());
+            return null;
         }
 
         ItemMovimentacao itemFinal = itemExistente.orElse(itemMovimentacao);
@@ -54,7 +66,7 @@ public class ItemMovimentacaoService extends BaseService {
     /**
      * Desassocia um frasco do processo de análise.
      *
-     * @param codItem
+     * @param codItem ID do item a remover
      */
     @Transactional
     public void removerItem(Long codItem) throws ItemNaoEncontradoException {
@@ -63,5 +75,4 @@ public class ItemMovimentacaoService extends BaseService {
 
         itemMovimentacaoRepository.delete(item);
     }
-
 }

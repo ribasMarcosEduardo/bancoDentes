@@ -1,5 +1,6 @@
 package bancoDentes.dto;
 
+import bancoDentes.model.Frasco;
 import bancoDentes.model.Movimentacao;
 import bancoDentes.model.enumModels.Local;
 import bancoDentes.model.enumModels.TipoMovimentacao;
@@ -27,7 +28,7 @@ public record MovimentacaoDTO(
         return new MovimentacaoDTO(null, null, null, null, null, null, null, null, new ArrayList<>());
     }
 
-    public Movimentacao mapearMovimentacao() {
+    public Movimentacao mapearMovimentacao(Frasco frascoPrincipal) {
         Movimentacao movimentacao = new Movimentacao();
         movimentacao.setCodigo(this.codigo);
         movimentacao.setVersion(this.version);
@@ -35,8 +36,8 @@ public record MovimentacaoDTO(
         movimentacao.setDatMovimentacao(this.datManutencao != null ? this.datManutencao.atStartOfDay() : LocalDateTime.now());
         movimentacao.setLocal(this.local);
         movimentacao.setObservacao(this.observacao);
+        movimentacao.setFrasco(frascoPrincipal);
 
         return movimentacao;
     }
-
 }

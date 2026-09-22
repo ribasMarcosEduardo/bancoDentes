@@ -1,18 +1,20 @@
 package bancoDentes.service;
 
-import bancoDentes.dto.ItemMovimentacaoDTO;
 import bancoDentes.dto.MovimentacaoDTO;
+import bancoDentes.exception.MovimentacaoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.ItemMovimentacao;
 import bancoDentes.model.Movimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ItemMovimentacaoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service responsável por gerenciar as regras de negócio referente
@@ -22,7 +24,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class MovimentacaoService extends BaseService{
+public class MovimentacaoService extends BaseService {
 
     private final MovimentacaoRepository movimentacaoRepository;
     private final ItemMovimentacaoRepository itemMovimentacaoRepository;
@@ -36,43 +38,27 @@ public class MovimentacaoService extends BaseService{
     }
 
     @Transactional
-    public Movimentacao save(MovimentacaoDTO dto) {
-        Movimentacao movimentacao = dto.mapearMovimentacao();
+    public Movimentacao save(MovimentacaoDTO dto) throws MovimentacaoException {
 
-        // Associa o Frasco central (destino) usando o ID recebido
-        if (dto.codFrasco() != null) {
-            movimentacao.setFrasco(frascoRepository.getReferenceById(dto.codFrasco()));
-        }
+        Frasco frasco = frascoRepository.findById(dto.codFrasco())
+                .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
 
-        Movimentacao movimentacaoSalva = movimentacaoRepository.save(movimentacao);
+        Movimentacao movimentacao = dto.mapearMovimentacao(frasco);
 
-        // Salva os itens de origem (Outros frascos)
+        // 3. Mapeia e vincula a lista de itens caso existam
         if (dto.itens() != null && !dto.itens().isEmpty()) {
-            for (ItemMovimentacaoDTO itemDto : dto.itens()) {
-                ItemMovimentacao item = itemDto.mapearItemMovimentacao();
-                item.setMovimentacao(movimentacaoSalva);
+            List<ItemMovimentacao> itensEntidade = dto.itens().stream()
+                    .filter(itemDto -> itemDto != null && itemDto.codFrasco() != null)
+                    .map(itemDto -> {
+                        Frasco frascoItem = frascoRepository.findById(itemDto.codFrasco())
+                                .orElseThrow(() -> new EntityNotFoundException("Frasco do item não encontrado com o ID: " + itemDto.codFrasco()));
+                        return itemDto.mapearItemMovimentacao(frascoItem, movimentacao);
+                    })
+                    .collect(Collectors.toList());
 
-                if (itemDto.codFrasco() != null) {
-                    item.setFrasco(frascoRepository.getReferenceById(itemDto.codFrasco()));
-                }
-
-                itemMovimentacaoRepository.save(item);
-            }
-        }
-        // Fluxo de Doação/Outros (usa o frasco central como destino do item)
-        else if (dto.quantidade() != null && dto.quantidade() > 0) {
-            ItemMovimentacao itemDoacao = new ItemMovimentacao();
-            itemDoacao.setMovimentacao(movimentacaoSalva);
-            itemDoacao.setQuantidade(dto.quantidade());
-
-            if (dto.codFrasco() != null) {
-                itemDoacao.setFrasco(frascoRepository.getReferenceById(dto.codFrasco()));
-            }
-
-            itemMovimentacaoRepository.save(itemDoacao);
+            movimentacao.setItens(itensEntidade);
         }
 
-        return movimentacaoSalva;
+        return movimentacaoRepository.save(movimentacao);
     }
-
 }
