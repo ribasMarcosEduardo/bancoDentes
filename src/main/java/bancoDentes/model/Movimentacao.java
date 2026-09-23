@@ -47,6 +47,9 @@ public class Movimentacao {
     @Column(name = "OBSERVACAO", nullable = false)
     private String observacao;
 
+    @Column(name = "QUANTIDADE", nullable = false)
+    private Long quantidade;
+
     @OneToMany(mappedBy = "movimentacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemMovimentacao> itens = new ArrayList<>();
 

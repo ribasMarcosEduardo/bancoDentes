@@ -147,29 +147,16 @@ function setupFrascoSearchModal() {
     const refsOutrosFrascos = obterRefsModalBusca("OutrosFrascos");
 
     // Página sem o botão de gatilho ou sem nenhum dos modais incluídos
-    // (data-include ainda não carregou, ou a tela nem usa esse recurso) —
-    // não faz nada.
     if (!trigger || (!refsSaida && !refsEntrada && !refsOutrosFrascos)) return;
 
-    // Campos do formulário por trás dos modais — local decide o recorte
-    // por setor (BDH/Biobanco), tipo decide qual modal abre embaixo de
-    // "Escolher Frasco(s)" e entra no cálculo de "Qtd. após a
-    // movimentação" de cada linha selecionada. Tudo defensivo (?.) caso a
-    // página não tenha.
     const localSelect = document.querySelector("#localMovimentacao");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
-    // id, não só a classe — desde que #origemFrascosList (abaixo) passou a
-    // ter sua própria ".selected-flasks", ".selected-flasks" sozinho virou
-    // ambíguo (pegaria a primeira que aparecesse no DOM).
     const selectedFlasksList = document.querySelector("#selectedFlasksList");
     const selectedFlasksHead = document.querySelector("#selectedFlasksHead");
     const selectedFlasksEmpty = document.querySelector("#selectedFlasksEmpty");
     const observacoesWrapper = document.querySelector("#observacoesWrapper");
     const observacoesField = document.querySelector("#observacoesMovimentacao");
 
-    // Bloco "Origem dos Dentes" — só existe pra Entrada (ver
-    // cadastro_movimentacao.html). Ausente em qualquer outra tela que
-    // reaproveite este arquivo, então tudo abaixo que o usa é defensivo.
     const origemDentesSection = document.querySelector("#origemDentesSection");
     const origemDentesSelect = document.querySelector("#origemDentes");
     const selecionarFrascosOrigemGroup = document.querySelector("#selecionarFrascosOrigemGroup");
@@ -177,51 +164,28 @@ function setupFrascoSearchModal() {
     const quantidadeDoacaoGroup = document.querySelector("#quantidadeDoacaoGroup");
     const quantidadeDoacaoInput = document.querySelector("#quantidadeDoacao");
 
-    // "Frascos de Origem" — só existe quando Origem dos Dentes = "Outro(s)
-    // frasco(s)" (ver atualizarOrigemDentes, mais abaixo).
     const frascosOrigemSection = document.querySelector("#frascosOrigemSection");
     const origemFrascosList = document.querySelector("#origemFrascosList");
     const origemFrascosHead = document.querySelector("#origemFrascosHead");
     const origemFrascosEmpty = document.querySelector("#origemFrascosEmpty");
     const origemFrascosTotalValor = document.querySelector("#origemFrascosTotalValor");
 
-    // Estado compartilhado entre os três modais (só um está "ativo" por
-    // vez) e a lista "Frascos selecionados" da página — id do frasco ->
-    // { frasco, quantidade }. Saída guarda uma quantidade de verdade por
-    // frasco (vários frascos, cada um com sua própria rolagem); Entrada
-    // nunca tem mais de uma entrada aqui (seleção única, sem quantidade
-    // nesse passo — quem decide "quantos dentes" ali é a Origem dos
-    // Dentes, não o frasco de destino).
     const selecionados = new Map();
-
-    // Frascos de origem escolhidos no modal "Selecionar Frascos" (Origem
-    // dos Dentes = "Outro(s) frasco(s)") — id do frasco -> frasco. Cada um
-    // entra INTEIRO no destino (toda a quantidade disponível dele, sem
-    // seleção parcial), então basta guardar o frasco — não precisa de uma
-    // quantidade à parte como o Map acima.
     const origemFrascosSelecionados = new Map();
 
-    // Só faz sentido durante Entrada com Origem = "Outro(s) frasco(s)" —
-    // nesse contexto, "selecionados" (acima) nunca tem mais de 1 item: o
-    // próprio frasco de destino escolhido em "Escolher Frasco".
     function frascoDestinoAtual() {
         const [entry] = selecionados.values();
         return entry ? entry.frasco : null;
     }
 
     function isEntrada() {
-        // Agora aceita ENTRADA (case-insensitive) por causa do Enum
         return tipoSelect?.value?.toUpperCase() === "ENTRADA";
     }
 
     function setorAtual() {
-        // Agora aceita BIOBANCO/BDH (case-insensitive) por causa do Enum
         return localSelect?.value?.toUpperCase() === "BIOBANCO" ? "biobanco" : "bdh";
     }
 
-    // Por simplificação do protótipo, o mesmo saldo também tampa a
-    // quantidade em Saída (cada frasco é um recipiente físico
-    // independente, seu limite nunca muda por causa de outro).
     function maxPermitido(frasco) {
         return frasco.disponivel;
     }
@@ -232,11 +196,6 @@ function setupFrascoSearchModal() {
             : Math.max(frasco.disponivel - quantidade, 0);
     }
 
-    // Observações só faz sentido preencher depois que existe pelo menos
-    // um frasco selecionado. .textarea-veil-wrapper--locked (ver
-    // forms.css) borra só o textarea e mostra o aviso por cima, em vez do
-    // .form-section--disabled genérico (que esmaeceria a seção toda,
-    // aviso incluso).
     function sincronizarObservacoes() {
         if (!observacoesField) return;
 
@@ -285,8 +244,6 @@ function setupFrascoSearchModal() {
         return row;
     }
 
-    // Soma "quanto o destino vai receber" — cada frasco de origem entra
-    // inteiro (toda a quantidade disponível dele).
     function totalDentesOrigemFrascos() {
         let total = 0;
         origemFrascosSelecionados.forEach((frasco) => {
@@ -326,9 +283,6 @@ function setupFrascoSearchModal() {
         return row;
     }
 
-    // Reflete origemFrascosSelecionados na seção "Frascos de Origem" —
-    // mesmo esquema de renderSelecionados, só que numa lista/Map à parte
-    // (ver comentário em origemFrascosSelecionados, mais acima).
     function renderOrigemFrascos() {
         if (origemFrascosList) {
             const abertos = new Set();
@@ -368,11 +322,6 @@ function setupFrascoSearchModal() {
         renderOrigemFrascos();
     }
 
-    // Remover e expandir/recolher pela lista "Frascos de Origem" da
-    // página — mesmo padrão do listener de #selectedFlasksList, mais
-    // abaixo, só que sincronizando de volta com o modal "Selecionar
-    // Frascos" (modalOutrosFrascos, montado adiante) em vez dos outros
-    // dois.
     origemFrascosList?.addEventListener("click", (event) => {
         const removeBtn = event.target.closest(".selected-flask__remove");
 
@@ -398,16 +347,8 @@ function setupFrascoSearchModal() {
         }
     });
 
-    // Reflete o Map inteiro na lista "Frascos selecionados" da tela de
-    // cadastro. No projeto completo isso vira só estado local até
-    // "Salvar" (cada frasco + quantidade vira um registro de movimentação
-    // distinto, ver comentário no HTML); aqui só atualiza a UI.
     function renderSelecionados() {
         if (selectedFlasksList) {
-            // Entrada não escolhe quantidade nesse passo (ver
-            // criarLinhaSelecionada) — sem essa coluna, a lista colapsa
-            // pra 2 colunas (Frasco + Ações) em vez das 3 padrão (ver
-            // .selected-flasks--sem-quantidade em analysis.css).
             selectedFlasksList.classList.toggle("selected-flasks--sem-quantidade", isEntrada());
 
             const abertos = new Set();
@@ -415,8 +356,6 @@ function setupFrascoSearchModal() {
                 if (row.dataset.frascoId) abertos.add(row.dataset.frascoId);
             });
 
-            // Remove tudo que não for o cabeçalho ou o aviso de "nenhum
-            // frasco selecionado".
             Array.from(selectedFlasksList.children).forEach((child) => {
                 if (child !== selectedFlasksHead && child !== selectedFlasksEmpty) {
                     child.remove();
@@ -440,26 +379,10 @@ function setupFrascoSearchModal() {
 
         sincronizarObservacoes();
 
-        // O frasco de destino é quem decide o filtro implícito do modal
-        // "Selecionar Frascos" (mesmos atributos dele — ver
-        // setupModalOutrosFrascos) — toda vez que ele muda (troca, é
-        // adicionado ou removido), uma seleção de origem feita sob o
-        // destino anterior deixa de fazer sentido. atualizarOrigemDentes()
-        // também recalcula o travamento de "Origem dos Dentes" (só libera
-        // depois que existe um destino).
         limparOrigemFrascos();
         atualizarOrigemDentes();
     }
 
-    // Referência pro modal "ativo" no momento (o que corresponde ao Tipo
-    // escolhido) — usada só pra saber qual dos dois precisa re-renderizar
-    // a própria lista de resultados quando algo muda por fora dele (ex.:
-    // remover um frasco direto pela lista "Frascos selecionados" da
-    // página, não pelo modal). modalOutrosFrascos não entra em
-    // modalAtivo() — é sempre referenciado direto (só existe no contexto
-    // de Entrada + Origem "Outro(s) frasco(s)", nunca some pro Saída
-    // reclamar). Todos setados mais abaixo, depois que os modais terminam
-    // de montar.
     let modalSaida = null;
     let modalEntrada = null;
     let modalOutrosFrascos = null;
@@ -468,10 +391,6 @@ function setupFrascoSearchModal() {
         return isEntrada() ? modalEntrada : modalSaida;
     }
 
-    // Remover e expandir/recolher pela lista "Frascos selecionados" da
-    // página — remover sincroniza de volta com o modal correspondente
-    // (renderResultados) pra a linha voltar a mostrar "não selecionado"
-    // caso o usuário reabra a busca.
     selectedFlasksList?.addEventListener("click", (event) => {
         const removeBtn = event.target.closest(".selected-flask__remove");
 
@@ -497,26 +416,15 @@ function setupFrascoSearchModal() {
         }
     });
 
-    // ---- Origem dos Dentes (só existe pro fluxo de Entrada) ----
-
     function atualizarOrigemDentes() {
         if (!origemDentesSection) return;
 
         const entrada = isEntrada();
         const temDestino = selecionados.size > 0;
 
-        // Some por inteiro pra Saída (não é só uma etapa travada, a seção
-        // não existe nesse fluxo) — sem "form-section--disabled" junto:
-        // assim que aparece pra Entrada já nasce interativa, sem um
-        // esmaecimento a mais pra tirar em seguida.
         origemDentesSection.hidden = !entrada;
 
         if (origemDentesSelect) {
-            // Só libera depois que existe um frasco de destino escolhido
-            // em "Escolher Frasco" — decidir de onde os dentes vêm não faz
-            // sentido antes de saber pra onde eles vão, e "Outro(s)
-            // frasco(s)" depende justamente dos atributos desse destino
-            // pra filtrar candidatos (ver setupModalOutrosFrascos).
             origemDentesSelect.disabled = !entrada || !temDestino;
             origemDentesSelect.required = entrada;
         }
@@ -533,9 +441,6 @@ function setupFrascoSearchModal() {
             quantidadeDoacaoInput.required = mostrarDoacao;
         }
 
-        // "Frascos de Origem" (lista + total) segue o mesmo "mostrarFrascos"
-        // de "Selecionar Frascos" acima — só existe enquanto essa origem
-        // estiver escolhida.
         if (frascosOrigemSection) frascosOrigemSection.hidden = !mostrarFrascos;
     }
 
@@ -547,13 +452,6 @@ function setupFrascoSearchModal() {
 
     origemDentesSelect?.addEventListener("change", atualizarOrigemDentes);
 
-    // ---- Troca de Tipo/Local ----
-
-    // Troca de Tipo muda o modal por trás de "Escolher Frasco(s)" — a
-    // seleção feita sob um fluxo não faz sentido no outro (Saída junta
-    // vários frascos com quantidade própria; Entrada é um só, sem
-    // quantidade nesse passo), então reinicia tudo. O rótulo do botão
-    // também é ajustado aqui (plural em Saída, singular em Entrada).
     tipoSelect?.addEventListener("change", () => {
         selecionados.clear();
         renderSelecionados();
@@ -564,10 +462,6 @@ function setupFrascoSearchModal() {
         }
     });
 
-    // Troca de Local muda o setor (BDH/Biobanco) que a busca considera —
-    // esvazia a seleção feita sob o setor anterior (esses frascos não
-    // pertencem mais ao contexto atual do formulário) e recomeça a
-    // paginação dos três modais.
     localSelect?.addEventListener("change", () => {
         selecionados.clear();
         renderSelecionados();
@@ -580,14 +474,6 @@ function setupFrascoSearchModal() {
         modalOutrosFrascos?.renderResultados();
     });
 
-    // ---- Miolo comum aos três modais (busca/filtros/paginação/abrir-fechar) ----
-    //
-    // O que muda de um pro outro é só o que cada linha de resultado
-    // oferece (rolagem de quantidade em Saída, botão de seleção única em
-    // Entrada, botão de seleção múltipla em Outros Frascos) e, pro
-    // terceiro, um catálogo já pré-filtrado (obterCatalogo) em vez do
-    // catálogo inteiro — por isso tudo isso fica de fora daqui, injetado
-    // por quem chama.
     function criarBuscaFrascoModal(refs, {
         criarLinhaResultado,
         ligarInteracaoResultados,
@@ -606,10 +492,6 @@ function setupFrascoSearchModal() {
 
         const searchWrapper = searchInput ? searchInput.closest(".search-wrapper") : null;
 
-        // Mock também pagina (mesmo com poucos frascos) pra exercitar os
-        // botões/texto de verdade — no projeto completo o tamanho de
-        // página provavelmente viria de um controle "Exibir" como o de
-        // frascos.html, aqui é só um valor fixo.
         const PAGE_SIZE = 4;
         let paginaAtual = 1;
 
@@ -617,8 +499,6 @@ function setupFrascoSearchModal() {
             overlay.classList.add("is-open");
             document.body.classList.add("modal-open");
 
-            // Sempre reabre na primeira página — mais previsível do que
-            // lembrar onde o usuário tinha parado da última vez.
             paginaAtual = 1;
             renderResultados();
 
@@ -628,16 +508,6 @@ function setupFrascoSearchModal() {
         function close() {
             overlay.classList.remove("is-open");
             document.body.classList.remove("modal-open");
-        }
-
-        // Sempre "true": o modal lista todos os frascos do setor atual
-        // (BDH/Biobanco, ver bateSetor em getFiltrados) assim que abre —
-        // termo digitado e filtros só refinam essa lista, não são mais
-        // pré-requisito pra ela aparecer. semGatilho (modal "Selecionar
-        // Frascos") continua sem efeito prático aqui, já que o resultado
-        // final é o mesmo (sempre gatilho).
-        function temGatilhoDeBusca() {
-            return true;
         }
 
         function getFiltrados() {
@@ -656,11 +526,6 @@ function setupFrascoSearchModal() {
                 const bateEstado = !estado || normalizarTexto(frasco.estado) === normalizarTexto(estado);
                 const bateDenticao = !denticao || normalizarTexto(frasco.denticao) === normalizarTexto(denticao);
 
-                // "Já Escolhidos" é o único valor com filtro de verdade
-                // aplicado aqui. "Em Manutenção" ainda não filtra nada —
-                // no projeto final ela vai depender de uma tag do banco
-                // de dados que ainda não existe no mock; por ora se
-                // comporta como "Todos" pra não quebrar a lista.
                 const bateStatus = status !== "escolhidos" || estaSelecionado(frasco);
 
                 return bateSetor && bateTermo && bateGrupo && bateEstado && bateDenticao && bateStatus;
@@ -719,15 +584,8 @@ function setupFrascoSearchModal() {
                 lucide.createIcons();
             }
 
-            // Linhas novas trazem seus próprios botões +/- de quantidade
-            // (Saída) — setupNumberInputs (forms.js) varre TODOS os
-            // .number-input da página de novo, então religa tanto os
-            // antigos quanto os recém criados sem duplicar listener (cada
-            // chamada busca os elementos atuais no DOM, não guarda
-            // referência de chamadas anteriores). Sem custo real pra
-            // Entrada, que não tem nenhum .number-input nas linhas.
             if (typeof setupNumberInputs === "function") {
-                setupNumberInputs();
+                setupNumberInputs(resultsContainer);
             }
         }
 
@@ -749,7 +607,7 @@ function setupFrascoSearchModal() {
             renderResultados();
         });
 
-        overlay.addEventListener("click", (event) => {
+        overlay?.addEventListener("click", (event) => {
             if (event.target === overlay) close();
         });
 
@@ -786,8 +644,6 @@ function setupFrascoSearchModal() {
         return { open, close, renderResultados, resetPagina };
     }
 
-    // ---- Saída: seleção múltipla, cada frasco com sua própria rolagem
-    //      de quantidade (0 zera a seleção, sem botão "Adicionar"). ----
     if (refsSaida) {
         function criarLinhaResultadoSaida(frasco) {
             const linha = document.createElement("article");
@@ -798,18 +654,9 @@ function setupFrascoSearchModal() {
             const jaAdicionado = quantidade > 0;
             const limite = maxPermitido(frasco);
 
-            // Distinção visual leve (borda verde) pro que já está
-            // selecionado.
             linha.className = jaAdicionado ? "modal-result modal-result--added" : "modal-result";
             linha.dataset.added = jaAdicionado ? "true" : "false";
 
-            // Sem botão "Adicionar" — a própria rolagem de quantidade
-            // (min=0) é quem adiciona: sair de 0 já conta como
-            // selecionado. O X vermelho é só um atalho pra zerar direto,
-            // sem precisar segurar o "-" ou apagar o campo manualmente —
-            // reserva o espaço mesmo escondido (visibility, não
-            // display/hidden) pra não empurrar a rolagem de lugar quando
-            // aparece/some.
             linha.innerHTML = `
                 <div class="modal-result__info">
                     <span class="modal-result__code">${frasco.id}</span>
@@ -849,10 +696,6 @@ function setupFrascoSearchModal() {
             return linha;
         }
 
-        // Troca só o visual de uma linha entre "adicionado"/"não
-        // adicionado" (borda verde + visibilidade do X vermelho), sem
-        // precisar re-renderizar o modal inteiro — evita perder o
-        // foco/scroll enquanto o usuário está mexendo em outras linhas.
         function marcarLinhaComoAdicionada(linha, adicionado) {
             linha.dataset.added = adicionado ? "true" : "false";
             linha.classList.toggle("modal-result--added", adicionado);
@@ -864,9 +707,6 @@ function setupFrascoSearchModal() {
         }
 
         function ligarInteracaoSaida(resultsContainer, { renderResultados }) {
-            // X vermelho — zera a quantidade direto (mesmo efeito de
-            // apagar o campo ou segurar o "-" até 0, só que num clique
-            // só).
             resultsContainer.addEventListener("click", (event) => {
                 const resetBtn = event.target.closest(".modal-result__reset");
                 if (!resetBtn) return;
@@ -883,19 +723,11 @@ function setupFrascoSearchModal() {
                 marcarLinhaComoAdicionada(linha, false);
                 renderSelecionados();
 
-                // Com o filtro "Já Escolhidos" ativo, esse frasco acabou
-                // de sair da lista que deveria aparecer — precisa de uma
-                // re-renderização de verdade, não só o visual da própria
-                // linha.
                 if (refsSaida.filtroStatus && refsSaida.filtroStatus.value !== "todos") {
                     renderResultados();
                 }
             });
 
-            // A própria rolagem de quantidade (digitando ou pelos botões
-            // +/-, que disparam "input" via forms.js) é quem
-            // adiciona/remove agora — sair de 0 já conta como
-            // selecionado, voltar a 0 tira da seleção.
             resultsContainer.addEventListener("input", (event) => {
                 const quantidadeInput = event.target.closest(".number-input__field");
                 if (!quantidadeInput) return;
@@ -925,10 +757,6 @@ function setupFrascoSearchModal() {
 
                 renderSelecionados();
 
-                // Só precisa de uma re-renderização de verdade (não só o
-                // visual da própria linha) quando o status de seleção
-                // mudou E o filtro por status está ativo — é isso que faz
-                // o frasco sumir/aparecer da lista "Já Escolhidos".
                 if (eraAdicionado !== agoraAdicionado && refsSaida.filtroStatus && refsSaida.filtroStatus.value !== "todos") {
                     renderResultados();
                 }
@@ -959,10 +787,6 @@ function setupFrascoSearchModal() {
         });
     }
 
-    // ---- Entrada: seleção única (o frasco de destino) e sem quantidade
-    //      nesse passo — um botão por linha alterna entre
-    //      "Selecionar"/"Selecionado"; escolher outro troca o que já
-    //      estava selecionado, já que só cabe um. ----
     if (refsEntrada) {
         function criarLinhaResultadoEntrada(frasco) {
             const linha = document.createElement("article");
@@ -1010,12 +834,10 @@ function setupFrascoSearchModal() {
                 const jaEraSelecionado = selecionados.has(frasco.id);
                 const frascoHiddenInput = document.getElementById("frascoSelecionadoInput");
 
-                // Só cabe um — escolher um novo descarta o anterior (se
-                // houver) antes de valer a nova seleção.
                 selecionados.clear();
                 if (!jaEraSelecionado) {
                     selecionados.set(frasco.id, { frasco, quantidade: 0 });
-                    if (frascoHiddenInput) frascoHiddenInput.value = frasco.codigo;
+                    if (frascoHiddenInput) frascoHiddenInput.value = frasco.codigo || frasco.id;
                 } else {
                     if (frascoHiddenInput) frascoHiddenInput.value = "";
                 }
@@ -1049,22 +871,11 @@ function setupFrascoSearchModal() {
         });
     }
 
-    // ---- Outros Frascos: seleção múltipla de frascos DE ORIGEM (Origem
-    //      dos Dentes = "Outro(s) frasco(s)") — mesmo botão de
-    //      "Selecionar"/"Selecionado" de Entrada, mas sem substituir a
-    //      seleção anterior (cada clique só alterna o próprio frasco).
-    //      Catálogo já pré-filtrado pelos atributos do destino
-    //      (obterCatalogo/semGatilho) — sem Grupo/Estado/Dentição pro
-    //      usuário escolher, essa busca não fica esperando gatilho. ----
     if (refsOutrosFrascos) {
         function candidatosOutrosFrascos() {
             const destino = frascoDestinoAtual();
             if (!destino) return [];
 
-            // Mesmos atributos dentários do destino — não faz sentido
-            // transportar, por exemplo, Molares pra dentro de um frasco de
-            // Incisivos. O próprio destino nunca aparece como opção de
-            // origem dele mesmo.
             return (window.catalogoFrascosCache || []).filter((frasco) =>
                 frasco.id !== destino.id &&
                 frasco.grupo === destino.grupo &&
@@ -1083,10 +894,6 @@ function setupFrascoSearchModal() {
             linha.className = selecionado ? "modal-result modal-result--added" : "modal-result";
             linha.dataset.added = selecionado ? "true" : "false";
 
-            // "N dentes disponíveis" junto do resto do meta — quem decide
-            // aqui precisa ver de cara quanto vai entrar no destino, já
-            // que a seleção transporta o frasco inteiro, sem quantidade
-            // parcial.
             linha.innerHTML = `
                 <div class="modal-result__info">
                     <span class="modal-result__code">${frasco.id}</span>
@@ -1121,9 +928,6 @@ function setupFrascoSearchModal() {
                 const frasco = (window.catalogoFrascosCache || []).find((item) => item.id === linha.dataset.frascoId);
                 if (!frasco) return;
 
-                // Seleção múltipla de verdade — diferente de Entrada, um
-                // clique aqui só alterna o próprio frasco, sem mexer nos
-                // outros já escolhidos.
                 if (origemFrascosSelecionados.has(frasco.id)) {
                     origemFrascosSelecionados.delete(frasco.id);
                 } else {
@@ -1144,7 +948,7 @@ function setupFrascoSearchModal() {
         });
 
         if (selecionarFrascosOrigemBtn) {
-             selecionarFrascosOrigemBtn.addEventListener("click", async () => {
+            selecionarFrascosOrigemBtn.addEventListener("click", async () => {
                 const originalHtml = selecionarFrascosOrigemBtn.innerHTML;
                 selecionarFrascosOrigemBtn.innerHTML = '<i class="icon" data-lucide="loader"></i> Carregando...';
                 selecionarFrascosOrigemBtn.disabled = true;
@@ -1157,52 +961,93 @@ function setupFrascoSearchModal() {
                 if (window.lucide) lucide.createIcons();
 
                 modalOutrosFrascos?.open();
-             });
+            });
         }
     }
 
-    // renderSelecionados() já chama atualizarOrigemDentes() no final (ver
-    // acima) — não precisa de uma chamada separada aqui.
     renderSelecionados();
 
     const formMovimentacao = document.getElementById("cadastroMovimentacaoForm");
 
     if (formMovimentacao) {
         formMovimentacao.addEventListener("submit", function (event) {
-
-            document.querySelectorAll(".item-dinamico").forEach(el => el.remove());
+            document.querySelectorAll(".item-dinamico").forEach((el) => el.remove());
 
             const ehEntrada = isEntrada();
             const origem = document.getElementById("origemDentes")?.value;
 
-            if (ehEntrada && origem === "frascos") {
+            if (selecionados.size === 0) {
+                event.preventDefault();
+                if (window.Swal) Swal.fire("Atenção", "Selecione pelo menos um frasco.", "warning");
+                return;
+            }
 
-                if (origemFrascosSelecionados.size === 0) {
-                    event.preventDefault();
-                    if (window.Swal) Swal.fire('Atenção', 'Selecione pelo menos um frasco de origem.', 'warning');
-                    return;
+            if (ehEntrada) {
+                const destino = frascoDestinoAtual();
+                if (destino) {
+                    const inputDestino = document.createElement("input");
+                    inputDestino.type = "hidden";
+                    inputDestino.name = "codFrasco";
+                    inputDestino.value = destino.codigo || destino.id;
+                    inputDestino.className = "item-dinamico";
+                    formMovimentacao.appendChild(inputDestino);
                 }
 
-                let index = 0;
+                if (origem === "frascos") {
+                    if (origemFrascosSelecionados.size === 0) {
+                        event.preventDefault();
+                        if (window.Swal) Swal.fire("Atenção", "Selecione pelo menos um frasco de origem.", "warning");
+                        return;
+                    }
+
+                    let index = 0;
                     origemFrascosSelecionados.forEach((frasco) => {
+                        const inputFrasco = document.createElement("input");
+                        inputFrasco.type = "hidden";
+                        inputFrasco.name = `itens[${index}].codFrasco`;
+                        inputFrasco.value = frasco.codigo || frasco.id;
+                        inputFrasco.className = "item-dinamico";
+                        formMovimentacao.appendChild(inputFrasco);
+
+                        const inputQtd = document.createElement("input");
+                        inputQtd.type = "hidden";
+                        inputQtd.name = `itens[${index}].quantidade`;
+                        inputQtd.value = frasco.disponivel;
+                        inputQtd.className = "item-dinamico";
+                        formMovimentacao.appendChild(inputQtd);
+
+                        index++;
+                    });
+                }
+            } else {
+                let index = 0;
+                selecionados.forEach((entry) => {
                     const inputFrasco = document.createElement("input");
                     inputFrasco.type = "hidden";
-
                     inputFrasco.name = `itens[${index}].codFrasco`;
-                    inputFrasco.value = frasco.codigo;
+                    inputFrasco.value = entry.frasco.codigo || entry.frasco.id;
                     inputFrasco.className = "item-dinamico";
                     formMovimentacao.appendChild(inputFrasco);
 
                     const inputQtd = document.createElement("input");
                     inputQtd.type = "hidden";
-
                     inputQtd.name = `itens[${index}].quantidade`;
-                    inputQtd.value = frasco.disponivel;
+                    inputQtd.value = entry.quantidade;
                     inputQtd.className = "item-dinamico";
                     formMovimentacao.appendChild(inputQtd);
 
                     index++;
                 });
+
+                const primeiroFrasco = Array.from(selecionados.values())[0]?.frasco;
+                if (primeiroFrasco) {
+                    const inputCod = document.createElement("input");
+                    inputCod.type = "hidden";
+                    inputCod.name = "codFrasco";
+                    inputCod.value = primeiroFrasco.codigo || primeiroFrasco.id;
+                    inputCod.className = "item-dinamico";
+                    formMovimentacao.appendChild(inputCod);
+                }
             }
         });
     }

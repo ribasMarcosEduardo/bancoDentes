@@ -210,7 +210,7 @@
                                       th:classappend="'status-pill--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
                                       th:text="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}">Tipo</span>
 
-                                <span th:text="${#lists.isEmpty(mov.itens) ? 0 : #aggregates.sum(mov.itens.![quantidade])}">0</span>
+                                <span th:text="${mov.quantidade != null ? mov.quantidade : 0}">0</span>
                                 <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yy')}">00/00/00</span>
 
                                 <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir movimentação">
@@ -232,7 +232,7 @@
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Quantidade Total</span>
-                                                    <span th:text="${#lists.isEmpty(mov.itens) ? 0 : #aggregates.sum(mov.itens.![quantidade])}">-</span>
+                                                    <span th:text="${mov.quantidade != null ? mov.quantidade : 0}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
