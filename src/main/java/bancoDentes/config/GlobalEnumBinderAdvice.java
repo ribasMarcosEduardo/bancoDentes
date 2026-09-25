@@ -1,7 +1,7 @@
 package bancoDentes.config;
 
 import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
+import bancoDentes.model.enumModels.Arcada;
 import bancoDentes.model.enumModels.TipoDente;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,13 +37,13 @@ public class GlobalEnumBinderAdvice {
             }
         });
 
-        binder.registerCustomEditor(Maxilar.class, new PropertyEditorSupport() {
+        binder.registerCustomEditor(Arcada.class, new PropertyEditorSupport() {
             @Override
             public void setAsText(String text) throws IllegalArgumentException {
                 if (text == null || text.trim().isEmpty()) {
                     setValue(null);
                 } else {
-                    setValue(Maxilar.valueOf(text.toUpperCase()));
+                    setValue(Arcada.valueOf(text.toUpperCase()));
                 }
             }
         });

@@ -1,17 +1,4 @@
 const NUMERACAO_POR_GRUPO_E_DENTICAO = {
-    premolar: {
-        permanente: [
-            { value: "14", label: "1º Pré-molar Superior Direito" },
-            { value: "15", label: "2º Pré-molar Superior Direito" },
-            { value: "24", label: "1º Pré-molar Superior Esquerdo" },
-            { value: "25", label: "2º Pré-molar Superior Esquerdo" },
-            { value: "34", label: "1º Pré-molar Inferior Esquerdo" },
-            { value: "35", label: "2º Pré-molar Inferior Esquerdo" },
-            { value: "44", label: "1º Pré-molar Inferior Direito" },
-            { value: "45", label: "2º Pré-molar Inferior Direito" },
-        ],
-        decidua: [],
-    },
     molar: {
         permanente: [
             { value: "16", label: "1º Molar Superior Direito" },
@@ -38,41 +25,53 @@ const NUMERACAO_POR_GRUPO_E_DENTICAO = {
             { value: "85", label: "2º Molar Decíduo Inferior Direito" },
         ],
     },
+    premolar: {
+        permanente: [
+            { value: "14", label: "1º Pré-molar Superior Direito" },
+            { value: "15", label: "2º Pré-molar Superior Direito" },
+            { value: "24", label: "1º Pré-molar Superior Esquerdo" },
+            { value: "25", label: "2º Pré-molar Superior Esquerdo" },
+            { value: "34", label: "1º Pré-molar Inferior Esquerdo" },
+            { value: "35", label: "2º Pré-molar Inferior Esquerdo" },
+            { value: "44", label: "1º Pré-molar Inferior Direito" },
+            { value: "45", label: "2º Pré-molar Inferior Direito" },
+        ],
+        decidua: [],
+    },
 };
 
 function setupCadastroFrasco() {
-    const grupoDentario = document.querySelector("#grupoDentario");
+    const tipoDente = document.querySelector("#tipoDente");
     const estadoFrascoSection = document.querySelector("#estadoFrascoSection");
+    const estadoDenteGroup = document.querySelector("#estadoDenteGroup");
     const estadoDente = document.querySelector("#estadoDente");
     const quantidadeGroup = document.querySelector("#quantidadeGroup");
     const quantidadeInput = document.querySelector("#quantidade");
     const quantidadeControls = document.querySelectorAll(".quantidade-control");
     const atributosFrascoSection = document.querySelector("#atributosFrascoSection");
     const denticaoGroup = document.querySelector("#denticaoGroup");
-    const denticaoSelect = document.querySelector("#denticaoSelect");
     const arcadaGroup = document.querySelector("#arcadaGroup");
+    const denticaoSelect = document.querySelector("#denticao");
+    const arcadaSelect = document.querySelector("#arcada");
     const numeracaoGroup = document.querySelector("#numeracaoGroup");
     const numeracaoSelect = document.querySelector("#numeracaoSelect");
     const numeracaoHint = document.querySelector("#numeracaoHint");
 
-    // #localFrasco só existe em cadastro_frasco.html — cadastro_solicitacao.html
-    // reaproveitava os mesmos 5 ids básicos (Grupo/Estado/Quantidade/
-    // Atributos) e rodava essa mesma cascata, mas o fluxo de lá agora é
-    // outro (Estado pré-preenchido em "Qualquer", Atributos atrás de um
-    // checkbox — ver setupCadastroSolicitacao, mais abaixo). Sem essa
-    // checagem, as duas funções brigariam pelos mesmos elementos lá.
-    if (
-        !grupoDentario ||
-        !estadoFrascoSection ||
-        !estadoDente ||
-        !quantidadeInput ||
-        !atributosFrascoSection ||
-        !document.querySelector("#localFrasco")
-    ) {
+    const codigoInput = document.querySelector("input[name='codigo']");
+    const isEdicao = codigoInput && codigoInput.value !== "" && codigoInput.value !== "null";
+    const valorInicialNumeracao = numeracaoSelect ? numeracaoSelect.value : "";
+
+    if (!tipoDente || !estadoFrascoSection || !estadoDente || !quantidadeInput || !atributosFrascoSection) {
         return;
     }
 
     const atributosControls = atributosFrascoSection.querySelectorAll(".atributos-control");
+
+    const originalDenticaoOptions = Array.from(denticaoSelect ? denticaoSelect.options : []).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        selected: opt.selected
+    }));
 
     function enableSection(section) {
         section.classList.remove("form-section--disabled");
@@ -88,28 +87,70 @@ function setupCadastroFrasco() {
         });
     }
 
-    function usaNumeracao() {
-        return grupoDentario.value === "molar" || grupoDentario.value === "premolar";
+    function getGrupo() {
+        return tipoDente.value ? tipoDente.value.toLowerCase() : "";
     }
 
     function isEndo() {
-        return grupoDentario.value === "endo";
+        return getGrupo() === "endo";
+    }
+
+    function usaNumeracao() {
+        const grupo = getGrupo();
+        return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
+    }
+
+    function usaArcada() {
+        const grupo = getGrupo();
+        return grupo === "canino" || grupo === "incisivo";
+    }
+
+    function isPreMolar() {
+        const grupo = getGrupo();
+        return grupo === "premolar" || grupo === "pre_molar";
     }
 
     function atualizarVisibilidadeCamposAtributos() {
         const endo = isEndo();
         const mostrarNumeracao = usaNumeracao();
+        const mostrarArcada = usaArcada();
 
         if (denticaoGroup) denticaoGroup.hidden = endo;
-        if (arcadaGroup) arcadaGroup.hidden = endo || mostrarNumeracao;
-        if (numeracaoGroup) numeracaoGroup.hidden = endo || !mostrarNumeracao;
+        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
+        if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
+
+        if (denticaoSelect) {
+            const currentVal = denticaoSelect.value;
+            denticaoSelect.innerHTML = "";
+            originalDenticaoOptions.forEach(optData => {
+                if (isPreMolar() && optData.value.toLowerCase() === "decidua") {
+                    return;
+                }
+                const opt = document.createElement("option");
+                opt.value = optData.value;
+                opt.textContent = optData.text;
+                if (optData.value === currentVal) {
+                    opt.selected = true;
+                }
+                denticaoSelect.appendChild(opt);
+            });
+            if (isPreMolar() && currentVal.toLowerCase() === "decidua") {
+                denticaoSelect.value = "NAO_INFORMADA";
+            }
+        }
     }
 
     function popularOpcoesNumeracao() {
-        if (!denticaoSelect || !numeracaoSelect) return;
+        if (!numeracaoSelect) return;
 
-        const denticao = denticaoSelect.value;
-        const opcoes = (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoDentario.value] || {})[denticao] || [];
+        let grupoKey = tipoDente.value.toLowerCase().replace("-", "").replace("_", "");
+        if (grupoKey === "premolar") grupoKey = "premolar";
+        if (grupoKey === "molar") grupoKey = "molar";
+
+        const denticao = denticaoSelect ? denticaoSelect.value.toLowerCase() : "";
+        const opcoes = (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoKey] || {})[denticao] || [];
+
+        const valorAlvo = numeracaoSelect.value || valorInicialNumeracao;
 
         numeracaoSelect.innerHTML = "";
 
@@ -117,15 +158,17 @@ function setupCadastroFrasco() {
         placeholder.value = "";
         placeholder.selected = true;
 
-        if (!denticao) {
+        if (!denticao || denticao === "nao_informada") {
             placeholder.textContent = "- Selecione a Dentição -";
             numeracaoSelect.appendChild(placeholder);
+            sincronizarDisabledNumeracao();
             return;
         }
 
         if (opcoes.length === 0) {
             placeholder.textContent = "Não disponível";
             numeracaoSelect.appendChild(placeholder);
+            sincronizarDisabledNumeracao();
             return;
         }
 
@@ -133,20 +176,34 @@ function setupCadastroFrasco() {
         placeholder.textContent = "- Selecione a Numeração -";
         numeracaoSelect.appendChild(placeholder);
 
+        let encontrou = false;
         opcoes.forEach(({ value, label }) => {
             const option = document.createElement("option");
             option.value = value;
             option.textContent = value;
             option.dataset.label = label;
+
+            if (value === String(valorAlvo)) {
+                option.selected = true;
+                encontrou = true;
+            }
+
             numeracaoSelect.appendChild(option);
         });
+
+        if (encontrou) {
+            placeholder.selected = false;
+        }
+
+        sincronizarDisabledNumeracao();
+        atualizarDicaNumeracao();
     }
 
     function sincronizarDisabledNumeracao() {
         if (!denticaoSelect || !numeracaoSelect) return;
 
         const atributosLiberados = !atributosFrascoSection.classList.contains("form-section--disabled");
-        const temDenticao = denticaoSelect.value !== "";
+        const temDenticao = denticaoSelect.value !== "" && denticaoSelect.value !== "NAO_INFORMADA";
         const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
 
         numeracaoSelect.disabled = !(atributosLiberados && temDenticao && temOpcoes);
@@ -161,9 +218,9 @@ function setupCadastroFrasco() {
     }
 
     function aplicarEstadoSelecionado() {
-        const hasEstado = estadoDente.value !== "";
+        const hasGrupo = tipoDente.value !== "";
 
-        if (hasEstado) {
+        if (hasGrupo) {
             quantidadeGroup.classList.remove("form-group--disabled");
             quantidadeInput.disabled = false;
             setDisabled(quantidadeControls, false);
@@ -180,8 +237,8 @@ function setupCadastroFrasco() {
         sincronizarDisabledNumeracao();
     }
 
-    grupoDentario.addEventListener("change", () => {
-        const hasGrupo = grupoDentario.value !== "";
+    tipoDente.addEventListener("change", () => {
+        const hasGrupo = tipoDente.value !== "";
         const endo = isEndo();
 
         if (hasGrupo) {
@@ -191,19 +248,26 @@ function setupCadastroFrasco() {
         }
 
         if (endo) {
-            estadoDente.disabled = true;
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            estadoDente.required = false;
             estadoDente.value = "misto";
         } else {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            estadoDente.required = true;
             estadoDente.disabled = !hasGrupo;
-            estadoDente.value = "";
         }
 
-        if (denticaoSelect) denticaoSelect.value = "";
+        if (!isEdicao) {
+            if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
+            if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
+            if (!endo) {
+                estadoDente.value = "NAO_INFORMADO";
+            }
+        }
 
         atualizarVisibilidadeCamposAtributos();
         popularOpcoesNumeracao();
         atualizarDicaNumeracao();
-
         aplicarEstadoSelecionado();
     });
 
@@ -219,17 +283,28 @@ function setupCadastroFrasco() {
         atualizarDicaNumeracao();
     });
 
-    atualizarVisibilidadeCamposAtributos();
-    popularOpcoesNumeracao();
+    if (isEdicao && tipoDente.value !== "") {
+        enableSection(estadoFrascoSection);
+        estadoDente.disabled = false;
+        if (isEndo()) {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            estadoDente.required = false;
+        } else {
+            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            estadoDente.required = true;
+        }
+        atualizarVisibilidadeCamposAtributos();
+        popularOpcoesNumeracao();
+        atualizarDicaNumeracao();
+        aplicarEstadoSelecionado();
+    } else {
+        atualizarVisibilidadeCamposAtributos();
+        popularOpcoesNumeracao();
+    }
 }
 
 setupCadastroFrasco();
 
-// cadastro_solicitacao.html: só Grupo dentário é obrigatório. Ele libera
-// Quantidade (ao lado, mesma seção) e a opção de "Campos avançados" —
-// Estado do dente/Dentição/Arcada/Numeração, todos opcionais e escondidos
-// atrás de um checkbox em vez de liberados automaticamente, já que nenhum
-// deles é obrigatório pra fazer a solicitação.
 function setupCadastroSolicitacao() {
     const grupoDentario = document.querySelector("#grupoDentario");
     const grupoEndoHint = document.querySelector("#grupoEndoHint");
@@ -241,79 +316,90 @@ function setupCadastroSolicitacao() {
     const avancadosToggle = document.querySelector("#avancadosToggle");
     const advancedFields = document.querySelector("#advancedFields");
     const estadoDente = document.querySelector("#estadoDente");
-    const denticaoSelect = document.querySelector("#denticaoSelect");
+    const denticaoGroup = document.querySelector("#denticaoGroup");
     const arcadaGroup = document.querySelector("#arcadaGroup");
-    const arcadaSelect = document.querySelector("#arcadaSelect");
+    const denticaoSelect = document.querySelector("#denticao");
+    const arcadaSelect = document.querySelector("#arcada");
     const numeracaoGroup = document.querySelector("#numeracaoGroup");
     const numeracaoSelect = document.querySelector("#numeracaoSelect");
     const numeracaoHint = document.querySelector("#numeracaoHint");
     const observacoesSection = document.querySelector("#observacoesSection");
     const observacoesField = document.querySelector("#observacoesSolicitacao");
 
-    if (
-        !grupoDentario ||
-        !quantidadeInput ||
-        !avancadosSection ||
-        !avancadosToggle ||
-        !advancedFields
-    ) {
+    if (!grupoDentario || !quantidadeInput || !avancadosSection || !avancadosToggle || !advancedFields) {
         return;
     }
 
     const atributosControls = advancedFields.querySelectorAll(".atributos-control");
 
-    // Saldo disponível do topo (toolbar__badge) — só a referência pra
-    // mostrar "1/42" em Quantidade (mesmo componente .number-input--fraction
-    // dos modais de separação, ver analise_solicitacao.html/
-    // frasco-search-solicitacao.js). Mock: no projeto completo já viria
-    // pronto do backend, sem precisar ler o texto da badge.
     const saldoDisponivel = Number(document.querySelector(".toolbar__badge")?.textContent.trim()) || 0;
     quantidadeInput.max = saldoDisponivel || "";
     if (quantidadeMax) quantidadeMax.textContent = `/${saldoDisponivel}`;
 
+    const originalDenticaoOptions = Array.from(denticaoSelect ? denticaoSelect.options : []).map(opt => ({
+        value: opt.value,
+        text: opt.textContent,
+        selected: opt.selected
+    }));
+
+    function setDisabled(elements, disabled) {
+        elements.forEach((el) => {
+            el.disabled = disabled;
+        });
+    }
+
     function usaNumeracao() {
-        return grupoDentario.value === "molar" || grupoDentario.value === "premolar";
+        const grupo = grupoDentario.value.toLowerCase();
+        return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
     }
 
     function isEndo() {
-        return grupoDentario.value === "endo";
+        return grupoDentario.value.toLowerCase() === "endo";
+    }
+
+    function isPreMolar() {
+        const grupo = grupoDentario.value.toLowerCase();
+        return grupo === "premolar" || grupo === "pre_molar";
     }
 
     function atualizarVisibilidadeCamposAtributos() {
+        const endo = isEndo();
         const mostrarNumeracao = usaNumeracao();
+        const grupo = grupoDentario.value.toLowerCase();
+        const mostrarArcada = grupo === "canino" || grupo === "incisivo";
 
-        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao;
+        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
         if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
+
+        if (denticaoSelect) {
+            const currentVal = denticaoSelect.value;
+            denticaoSelect.innerHTML = "";
+            originalDenticaoOptions.forEach(optData => {
+                if (isPreMolar() && optData.value.toLowerCase() === "decidua") {
+                    return;
+                }
+                const opt = document.createElement("option");
+                opt.value = optData.value;
+                opt.textContent = optData.text;
+                if (optData.value === currentVal) {
+                    opt.selected = true;
+                }
+                denticaoSelect.appendChild(opt);
+            });
+            if (isPreMolar() && currentVal.toLowerCase() === "decidua") {
+                denticaoSelect.value = "NAO_INFORMADA";
+            }
+        }
     }
 
-    // Mesmo bloqueio de setupCadastroFrasco(): Numeração some travada (com
-    // o próprio placeholder avisando o motivo) enquanto a Dentição não tem
-    // uma escolha específica — "Não especificado" conta como "sem escolha"
-    // aqui, igual ao "" de lá, porque não há como saber que números sugerir
-    // sem saber se é permanente ou decídua.
-    function sincronizarDisabledNumeracao() {
-        if (!denticaoSelect || !numeracaoSelect) return;
-
-        const avancadosAbertos = advancedFields.classList.contains("is-open");
-        const temDenticaoEspecifica = denticaoSelect.value !== "" && denticaoSelect.value !== "nao_especificado";
-        const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
-
-        numeracaoSelect.disabled = !(avancadosAbertos && temDenticaoEspecifica && temOpcoes);
-    }
-
-    // Mesma tabela de números de dente e o mesmo texto de placeholder de
-    // setupCadastroFrasco() (NUMERACAO_POR_GRUPO_E_DENTICAO, topo do
-    // arquivo) — só troca o "" de lá (Dentição sem escolha) por
-    // "nao_especificado" aqui, já que esse é o valor que a Dentição nasce
-    // preenchida nesta página.
     function popularOpcoesNumeracao() {
-        if (!denticaoSelect || !numeracaoSelect) return;
+        if (!numeracaoSelect) return;
 
-        const denticao = denticaoSelect.value;
-        const semDenticaoEspecifica = denticao === "" || denticao === "nao_especificado";
-        const opcoes = semDenticaoEspecifica
-            ? []
-            : (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoDentario.value] || {})[denticao] || [];
+        let grupoKey = grupoDentario.value.toLowerCase().replace("-", "").replace("_", "");
+        const denticao = denticaoSelect ? denticaoSelect.value.toLowerCase() : "";
+        const opcoes = (NUMERACAO_POR_GRUPO_E_DENTICAO[grupoKey] || {})[denticao] || [];
+
+        const valorAlvo = numeracaoSelect.value;
 
         numeracaoSelect.innerHTML = "";
 
@@ -321,7 +407,7 @@ function setupCadastroSolicitacao() {
         placeholder.value = "";
         placeholder.selected = true;
 
-        if (semDenticaoEspecifica) {
+        if (!denticao || denticao === "nao_informada") {
             placeholder.textContent = "- Selecione a Dentição -";
             numeracaoSelect.appendChild(placeholder);
             sincronizarDisabledNumeracao();
@@ -344,10 +430,26 @@ function setupCadastroSolicitacao() {
             option.value = value;
             option.textContent = value;
             option.dataset.label = label;
+
+            if (value === String(valorAlvo)) {
+                option.selected = true;
+            }
+
             numeracaoSelect.appendChild(option);
         });
 
         sincronizarDisabledNumeracao();
+        atualizarDicaNumeracao();
+    }
+
+    function sincronizarDisabledNumeracao() {
+        if (!denticaoSelect || !numeracaoSelect) return;
+
+        const avancadosAbertos = advancedFields.classList.contains("is-open");
+        const temDenticaoEspecifica = denticaoSelect.value !== "" && denticaoSelect.value !== "NAO_INFORMADA";
+        const temOpcoes = numeracaoSelect.querySelectorAll("option[value]:not([value=''])").length > 0;
+
+        numeracaoSelect.disabled = !(avancadosAbertos && temDenticaoEspecifica && temOpcoes);
     }
 
     function atualizarDicaNumeracao() {
@@ -356,12 +458,6 @@ function setupCadastroSolicitacao() {
         const opcaoSelecionada = numeracaoSelect.selectedOptions[0];
         const label = opcaoSelecionada ? opcaoSelecionada.dataset.label : undefined;
         numeracaoHint.textContent = label ? `(${label})` : "";
-    }
-
-    function setDisabled(elements, disabled) {
-        elements.forEach((el) => {
-            el.disabled = disabled;
-        });
     }
 
     function fecharAvancados() {
@@ -374,11 +470,6 @@ function setupCadastroSolicitacao() {
         advancedFields.classList.add("is-open");
         setDisabled(atributosControls, false);
         atualizarVisibilidadeCamposAtributos();
-
-        // setDisabled acima acabou de reabilitar TODOS os .atributos-control
-        // de uma vez, Numeração incluso — sincronizarDisabledNumeracao()
-        // corrige isso na sequência, retravando se a Dentição ainda não
-        // tiver uma escolha específica.
         sincronizarDisabledNumeracao();
     }
 
@@ -386,9 +477,6 @@ function setupCadastroSolicitacao() {
         const hasGrupo = grupoDentario.value !== "";
         const endo = isEndo();
 
-        // Contexto de Endodontia — mesmo padrão de #tipoMovimentacaoHint em
-        // cadastro_movimentacao.html (hint que só aparece pra um valor
-        // específico do select, ver setupCadastroMovimentacao abaixo).
         if (grupoEndoHint) grupoEndoHint.hidden = !endo;
 
         if (quantidadeGroup) quantidadeGroup.classList.toggle("form-group--disabled", !hasGrupo);
@@ -398,11 +486,6 @@ function setupCadastroSolicitacao() {
         if (observacoesSection) observacoesSection.classList.toggle("form-section--disabled", !hasGrupo);
         if (observacoesField) observacoesField.disabled = !hasGrupo;
 
-        // Endo não tem Dentição/Arcada/Numeração pra ajustar, e some com
-        // Estado do dente junto (não vale manter só ele) — some com o
-        // toggle inteiro em vez de deixar uma seção "avançada" pela metade.
-        // "is-collapsed" (não o atributo hidden) pra essa troca ficar
-        // suave — ver #avancadosSection em cadastro_frasco.css.
         avancadosSection.classList.toggle("is-collapsed", endo);
         avancadosSection.classList.toggle("form-section--disabled", !hasGrupo);
         avancadosToggle.disabled = !hasGrupo || endo;
@@ -411,9 +494,9 @@ function setupCadastroSolicitacao() {
             fecharAvancados();
         }
 
-        if (estadoDente) estadoDente.value = "nao_especificado";
-        if (denticaoSelect) denticaoSelect.value = "nao_especificado";
-        if (arcadaSelect) arcadaSelect.value = "nao_especificado";
+        if (estadoDente) estadoDente.value = "NAO_INFORMADO";
+        if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
+        if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
 
         atualizarVisibilidadeCamposAtributos();
         popularOpcoesNumeracao();
@@ -430,6 +513,7 @@ function setupCadastroSolicitacao() {
 
     denticaoSelect?.addEventListener("change", () => {
         popularOpcoesNumeracao();
+        sincronizarDisabledNumeracao();
         atualizarDicaNumeracao();
     });
 
@@ -441,20 +525,14 @@ function setupCadastroSolicitacao() {
 
 setupCadastroSolicitacao();
 
-// "Salvar e Continuar"/"Salvar e Sair" ficam na toolbar, fora do <form>
-// (ver form="cadastroSolicitacaoForm" em cadastro_solicitacao.html) —
-// mesmo esquema de setupCadastroFrascoSubmit (abaixo). Só Grupo dentário
-// é required de verdade aqui (ver setupCadastroSolicitacao) — os demais
-// campos passam no checkValidity() estejam preenchidos ou não, então o
-// resumo abaixo mostra "Não especificado" pros que ficaram no padrão.
 function setupCadastroSolicitacaoSubmit() {
     const form = document.querySelector("#cadastroSolicitacaoForm");
     const grupoDentario = document.querySelector("#grupoDentario");
     const quantidade = document.querySelector("#quantidade");
     const avancadosToggle = document.querySelector("#avancadosToggle");
     const estadoDente = document.querySelector("#estadoDente");
-    const denticaoSelect = document.querySelector("#denticaoSelect");
-    const arcadaSelect = document.querySelector("#arcadaSelect");
+    const denticaoSelect = document.querySelector("#denticao");
+    const arcadaSelect = document.querySelector("#arcada");
     const numeracaoGroup = document.querySelector("#numeracaoGroup");
     const numeracaoSelect = document.querySelector("#numeracaoSelect");
     const observacoesField = document.querySelector("#observacoesSolicitacao");
@@ -463,20 +541,13 @@ function setupCadastroSolicitacaoSubmit() {
         return;
     }
 
-    // "" cobre o estado travado de Numeração (ver popularOpcoesNumeracao em
-    // setupCadastroSolicitacao) e "nao_especificado" cobre o padrão dos
-    // demais selects — um só helper serve pros dois casos porque nenhum
-    // select tem as duas opções ao mesmo tempo.
     function textoSelecionado(select) {
-        if (!select || select.value === "" || select.value === "nao_especificado") {
+        if (!select || select.value === "" || select.value === "NAO_INFORMADA") {
             return "Não especificado";
         }
         return select.selectedOptions[0]?.textContent.trim() || "Não especificado";
     }
 
-    // Saldo Disponível/Saldo após o pedido pedidos na revisão — lê a
-    // mesma badge que Quantidade usa pra "1/42" (ver setupCadastroSolicitacao).
-    // Mock: no projeto completo os dois já viriam prontos do backend.
     function montarResumoCadastro() {
         const saldoAtual = Number(document.querySelector(".toolbar__badge")?.textContent.trim()) || 0;
         const qtdSolicitada = Number(quantidade?.value) || 0;
@@ -489,16 +560,10 @@ function setupCadastroSolicitacaoSubmit() {
             ["Quantidade solicitada", `${qtdSolicitada} dentes`],
         ];
 
-        // Campos avançados só entram na revisão se o checkbox foi
-        // marcado — do contrário ficaram travados no padrão "Não
-        // especificado" o tempo todo, e listar isso só faz o resumo
-        // parecer mais preenchido do que realmente foi.
         if (avancadosToggle?.checked) {
             linhas.push(["Estado do dente", textoSelecionado(estadoDente)]);
             linhas.push(["Dentição", textoSelecionado(denticaoSelect)]);
 
-            // Só um dos dois é relevante por vez, igual à própria seção
-            // (ver atualizarVisibilidadeCamposAtributos em setupCadastroSolicitacao).
             if (numeracaoGroup && !numeracaoGroup.hidden) {
                 linhas.push(["Numeração", textoSelecionado(numeracaoSelect)]);
             } else {
@@ -507,10 +572,7 @@ function setupCadastroSolicitacaoSubmit() {
         }
 
         const linhasHtml = linhas
-            .map(
-                ([label, valor]) =>
-                    `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`
-            )
+            .map(([label, valor]) => `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`)
             .join("");
 
         const obsTexto = (observacoesField?.value || "").trim() || "Não especificado";
@@ -538,10 +600,7 @@ function setupCadastroSolicitacaoSubmit() {
             return;
         }
 
-        // event.submitter é o botão que de fato disparou o submit — como
-        // os dois (Continuar/Sair) são type="submit" pro mesmo form, é
-        // assim que sabe qual dos dois fluxos seguir depois da confirmação.
-        const continuar = event.submitter?.id === "salvarContinuarBtn";
+        const isSalvarEContinuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
             icon: "question",
@@ -562,43 +621,22 @@ function setupCadastroSolicitacaoSubmit() {
                 return;
             }
 
-            // No projeto final (Thymeleaf): entra aqui o POST de verdade pro
-            // backend, e o código abaixo passa a vir da resposta (th:text/
-            // replace no template) em vez desse valor fixo — mesmo esquema
-            // do identificador em setupCadastroFrascoSubmit.
-            const codigo = "SOL-0043";
-            const mensagem = `Solicitação <strong>${codigo}</strong> cadastrada com sucesso.`;
-
-            if (continuar) {
-                // form.reset() não desfaz o que o JS mudou via .disabled/
-                // classList (só volta value/selected/checked ao estado
-                // inicial do HTML) — o "change" reaproveita a mesma cascata
-                // de setupCadastroSolicitacao() (grupoDentario -> Quantidade/
-                // avançados/Observações) pra travar tudo de novo, sem
-                // duplicar essa lógica aqui.
-                form.reset();
-                grupoDentario?.dispatchEvent(new Event("change"));
-                // form.reset() não dispara "input" sozinho — sem isso o
-                // contador de Observações (setupObservacoesCounter) ficava
-                // com a contagem antiga até o usuário digitar de novo.
-                observacoesField?.dispatchEvent(new Event("input"));
-                showToast(mensagem);
-            } else {
-                // A notificação precisa sobreviver ao redirect — fica
-                // guardada até historico_solicitacoes.html ler e descartar
-                // em setupFlashToast() (ver includes.js), que roda em toda
-                // carga de página.
-                sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
-                window.location.href = "historico_solicitacoes.html";
+            let inputCadastrarOutro = form.querySelector("input[name='cadastrarOutro']");
+            if (!inputCadastrarOutro) {
+                inputCadastrarOutro = document.createElement("input");
+                inputCadastrarOutro.type = "hidden";
+                inputCadastrarOutro.name = "cadastrarOutro";
+                form.appendChild(inputCadastrarOutro);
             }
+            inputCadastrarOutro.value = isSalvarEContinuar;
+
+            HTMLFormElement.prototype.submit.call(form);
         });
     });
 }
 
 setupCadastroSolicitacaoSubmit();
 
-// "Cancelar" (link pro histórico de solicitações) — mesma confirmação de
-// setupCadastroFrascoCancel, só que ancorada em #cadastroSolicitacaoForm.
 function setupCadastroSolicitacaoCancel() {
     const form = document.querySelector("#cadastroSolicitacaoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
@@ -634,37 +672,25 @@ function setupCadastroSolicitacaoCancel() {
 
 setupCadastroSolicitacaoCancel();
 
-// "Salvar e Continuar"/"Salvar e Sair" ficam na toolbar, fora do <form>
-// (ver form="cadastroFrascoForm" em cadastro_frasco.html) — só assim os
-// dois type="submit" conseguem disparar o submit do form de verdade.
-// Preenchimento incompleto usa a validação nativa do HTML (os campos
-// obrigatórios já têm o atributo required; disabled é ignorado sozinho
-// pela constraint validation, sem precisar reescrever essa lógica aqui)
-// só que com SWAL no lugar do balãozinho padrão do navegador.
 function setupCadastroFrascoSubmit() {
     const form = document.querySelector("#cadastroFrascoForm");
-    const grupoDentario = document.querySelector("#grupoDentario");
+    const grupoDentario = document.querySelector("#tipoDente");
     const localFrasco = document.querySelector("#localFrasco");
     const estadoDente = document.querySelector("#estadoDente");
     const quantidade = document.querySelector("#quantidade");
     const denticaoGroup = document.querySelector("#denticaoGroup");
-    const denticaoSelect = document.querySelector("#denticaoSelect");
     const arcadaGroup = document.querySelector("#arcadaGroup");
-    const arcadaSelect = document.querySelector("#arcadaSelect");
+    const denticaoSelect = document.querySelector("#denticao");
+    const arcadaSelect = document.querySelector("#arcada");
     const numeracaoGroup = document.querySelector("#numeracaoGroup");
     const numeracaoSelect = document.querySelector("#numeracaoSelect");
-    const dataCadastro = document.querySelector("#dataCadastro");
-    const dataManutencao = document.querySelector("#dataManutencao");
+    const dataCadastro = document.querySelector("#datCad");
+    const dataManutencao = document.querySelector("#datManutencao");
 
     if (!form || typeof Swal === "undefined") {
         return;
     }
 
-    // Checa select.value (não o texto da option) porque os placeholders
-    // variam por campo — "- Selecione a Numeração -", "Não disponível" etc.
-    // (ver popularOpcoesNumeracao) — todos com value="", igual ao "Não
-    // Informado" já usado como placeholder de Dentição/Arcada. Padroniza
-    // pra o mesmo texto no resumo, em vez de vazar o placeholder de cada um.
     function textoSelecionado(select) {
         if (!select || select.value === "") return "Não Informado";
         return select.selectedOptions[0]?.textContent.trim() || "Não Informado";
@@ -672,14 +698,16 @@ function setupCadastroFrascoSubmit() {
 
     function formatarData(input) {
         if (!input?.value) return "Não Informado";
+        const partes = input.value.split("-");
+        if (partes.length < 3) return "Não Informado";
 
-        const [ano, mes, dia] = input.value.split("-");
+        const ano = partes[0];
+        const mes = partes[1];
+        const dia = partes[2].includes("T") ? partes[2].split("T")[0] : partes[2];
+
         return `${dia}/${mes}/${ano}`;
     }
 
-    // Só entram na revisão os campos de atributos que estão visíveis pro
-    // grupo escolhido (ver atualizarVisibilidadeCamposAtributos em
-    // setupCadastroFrasco) — Endo, por exemplo, esconde Dentição/Arcada.
     function montarResumoCadastro() {
         const linhas = [
             ["Grupo dentário", textoSelecionado(grupoDentario)],
@@ -704,10 +732,7 @@ function setupCadastroFrascoSubmit() {
         linhas.push(["Data de manutenção", formatarData(dataManutencao)]);
 
         const linhasHtml = linhas
-            .map(
-                ([label, valor]) =>
-                    `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`
-            )
+            .map(([label, valor]) => `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`)
             .join("");
 
         return `<p>Revise os dados antes de confirmar:</p><div class="swal-resumo">${linhasHtml}</div>`;
@@ -732,10 +757,7 @@ function setupCadastroFrascoSubmit() {
             return;
         }
 
-        // event.submitter é o botão que de fato disparou o submit — como
-        // os dois (Continuar/Sair) são type="submit" pro mesmo form, é
-        // assim que sabe qual dos dois fluxos seguir depois da confirmação.
-        const continuar = event.submitter?.id === "salvarContinuarBtn";
+        const isSalvarEContinuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
             icon: "question",
@@ -756,41 +778,23 @@ function setupCadastroFrascoSubmit() {
                 return;
             }
 
-            // No projeto final (Thymeleaf): entra aqui o POST de verdade pro
-            // backend, e o identificador abaixo passa a vir da resposta
-            // (th:text/replace no template) em vez desse valor fixo.
-            const identificador = "PMbd-a0001";
-            const mensagem = `Frasco <strong>${identificador}</strong> cadastrado com sucesso.`;
-
-            if (continuar) {
-                // form.reset() não desfaz o que o JS mudou via .disabled
-                // (só volta value/selected ao estado inicial do HTML) — o
-                // "change" reaproveita a mesma cascata de setupCadastroFrasco()
-                // (grupoDentario -> estadoFrascoSection -> atributosFrascoSection)
-                // pra recolher/desabilitar tudo de novo, sem duplicar a lógica.
-                form.reset();
-                grupoDentario?.dispatchEvent(new Event("change"));
-                showToast(mensagem);
-            } else {
-                // A notificação precisa sobreviver ao redirect — fica
-                // guardada até frascos.html ler e descartar em
-                // setupFlashToast() (ver includes.js), que roda em toda
-                // carga de página.
-                sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
-                window.location.href = "frascos.html";
+            let inputCadastrarOutro = form.querySelector("input[name='cadastrarOutro']");
+            if (!inputCadastrarOutro) {
+                inputCadastrarOutro = document.createElement("input");
+                inputCadastrarOutro.type = "hidden";
+                inputCadastrarOutro.name = "cadastrarOutro";
+                form.appendChild(inputCadastrarOutro);
             }
+            inputCadastrarOutro.value = isSalvarEContinuar;
+
+            HTMLFormElement.prototype.submit.call(form);
         });
     });
 }
 
-// "Cancelar" (link pro painel de frascos) intercepta o clique pra confirmar
-// antes — sem isso, um clique perdido no meio do preenchimento jogava fora
-// tudo sem aviso.
+setupCadastroFrascoSubmit();
+
 function setupCadastroFrascoCancel() {
-    // form pode ser null em páginas sem #cadastroFrascoForm (cadastro de
-    // movimentação/solicitação, que reaproveitam este forms.js) — sem o
-    // "?." aqui, .closest() num null derruba o script inteiro no meio,
-    // e todo setup* declarado depois deste ponto no arquivo para de rodar.
     const form = document.querySelector("#cadastroFrascoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
 
@@ -823,59 +827,28 @@ function setupCadastroFrascoCancel() {
     });
 }
 
-setupCadastroFrascoSubmit();
 setupCadastroFrascoCancel();
 
-// cadastro_movimentacao.html: Local -> Tipo (+ "Escolher Frascos") -> Observações,
-// cada etapa só libera depois que a anterior está preenchida. A liberação de
-// Observações a partir da seleção de frascos entra junto com o modal de busca
-// (ainda não implementado), então por enquanto ela fica travada.
-
 function setupCadastroMovimentacao() {
-    const localSelect = document.querySelector("#localMovimentacao");
-    const tipoSection = document.querySelector("#tipoMovimentacaoSection");
-    const tipoGroup = document.querySelector("#tipoMovimentacaoGroup");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
-    const tipoHint = document.querySelector("#tipoMovimentacaoHint");
     const escolherFrascosBtn = document.querySelector("#escolherFrascosBtn");
+    const escolherFrascosLabel = escolherFrascosBtn?.querySelector(".btn__label");
 
-    if (!localSelect || !tipoSection || !tipoGroup || !tipoSelect || !escolherFrascosBtn) {
+    if (!tipoSelect || !escolherFrascosBtn) {
         return;
     }
 
-    // Independe de tipoSelect.disabled: o Biobanco trava o select (disabled)
-    // já com "saida" preenchido, e o botão precisa liberar mesmo assim —
-    // só o valor importa aqui.
-    function aplicarTipoSelecionado() {
+    tipoSelect.addEventListener("change", () => {
         escolherFrascosBtn.disabled = tipoSelect.value === "";
-    }
 
-    function aplicarLocalSelecionado() {
-        const local = localSelect.value;
-        const hasLocal = local !== "";
-        const isBiobanco = local === "biobanco";
-
-        tipoSection.classList.toggle("form-section--disabled", !hasLocal);
-
-        // Zera antes de reaplicar — troca de Local sempre parte de um Tipo
-        // em branco, tanto pra sair do Biobanco (que trava em "Saída") quanto
-        // pra evitar um valor antigo sobrando ao alternar entre locais.
-        tipoSelect.value = "";
-        tipoSelect.disabled = !hasLocal;
-
-        if (isBiobanco) {
-            tipoSelect.value = "saida";
-            tipoSelect.disabled = true;
+        // Singular só em Entrada (o modal de lá só deixa escolher um
+        // frasco de destino — ver modal_busca_frasco_movimentacao_entrada.html/
+        // setupFrascoSearchModal em frasco-search-movimentacao.js); Saída
+        // mantém o plural de sempre.
+        if (escolherFrascosLabel) {
+            escolherFrascosLabel.textContent = tipoSelect.value === "entrada" ? "Escolher Frasco" : "Escolher Frascos";
         }
-
-        tipoGroup.classList.toggle("form-group--disabled", isBiobanco);
-        if (tipoHint) tipoHint.hidden = !isBiobanco;
-
-        aplicarTipoSelecionado();
-    }
-
-    localSelect.addEventListener("change", aplicarLocalSelecionado);
-    tipoSelect.addEventListener("change", aplicarTipoSelecionado);
+    });
 }
 
 setupCadastroMovimentacao();
@@ -921,7 +894,10 @@ function setupCadastroMovimentacaoSubmit() {
     const localSelect = document.querySelector("#localMovimentacao");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
     const observacoesField = document.querySelector("#observacoesMovimentacao");
-    const selectedFlasksList = document.querySelector(".selected-flasks");
+    const selectedFlasksList = document.querySelector("#selectedFlasksList");
+    const origemDentesSelect = document.querySelector("#origemDentes");
+    const quantidadeDoacaoInput = document.querySelector("#quantidadeDoacao");
+    const origemFrascosList = document.querySelector("#origemFrascosList");
 
     if (!form || typeof Swal === "undefined") {
         return;
@@ -932,29 +908,49 @@ function setupCadastroMovimentacaoSubmit() {
         return select.selectedOptions[0]?.textContent.trim() || "Não Informado";
     }
 
-    // Cada linha de ".selected-flasks .request-row" já traz identificador
-    // e quantidade prontos (ver criarLinhaSelecionada) — lê do DOM em vez
-    // de importar o Map privado do outro módulo.
     function frascosSelecionados() {
         return Array.from(selectedFlasksList?.querySelectorAll(".request-row") || []).map((row) => {
             const spans = row.querySelectorAll(".selected-flask > span");
             return {
                 id: row.dataset.frascoId || spans[0]?.textContent.trim() || "—",
-                quantidade: spans[1]?.textContent.trim() || "0",
+                quantidade: spans[1] ? spans[1].textContent.trim() : null,
             };
         });
     }
 
+    function totalDentesOrigemFrascos() {
+        return Array.from(origemFrascosList?.querySelectorAll(".request-row") || []).reduce((soma, row) => {
+            const quantidade = Number(row.querySelectorAll(".selected-flask > span")[1]?.textContent) || 0;
+            return soma + quantidade;
+        }, 0);
+    }
+
     function montarResumoMovimentacao(frascos) {
-        const linhasHtml = [
+        const linhas = [
             ["Local", textoSelecionado(localSelect)],
             ["Tipo", textoSelecionado(tipoSelect)],
-        ]
+        ];
+
+        if (tipoSelect?.value === "entrada") {
+            linhas.push(["Origem dos Dentes", textoSelecionado(origemDentesSelect)]);
+
+            if (origemDentesSelect?.value === "doacao") {
+                linhas.push(["Quantidade de dentes", `${quantidadeDoacaoInput?.value || "1"} dentes`]);
+            } else if (origemDentesSelect?.value === "frascos") {
+                linhas.push(["Quantidade total recebida", `${totalDentesOrigemFrascos()} dentes`]);
+            }
+        }
+
+        const linhasHtml = linhas
             .map(([label, valor]) => `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`)
             .join("");
 
         const frascosHtml = frascos
-            .map(({ id, quantidade }) => `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`)
+            .map(({ id, quantidade }) =>
+                quantidade === null
+                    ? `<div class="swal-resumo__row"><span>${id}</span></div>`
+                    : `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`
+            )
             .join("");
 
         const obsTexto = (observacoesField?.value || "").trim() || "Não Informado";
@@ -984,10 +980,6 @@ function setupCadastroMovimentacaoSubmit() {
 
         const frascos = frascosSelecionados();
 
-        // Passa no checkValidity() mesmo sem frasco algum: Observações só
-        // vira required "de verdade" quando a seção libera (ver
-        // sincronizarObservacoes em frasco-search-movimentacao.js) — até lá
-        // ela está disabled, e o navegador ignora campo required+disabled.
         if (frascos.length === 0) {
             Swal.fire({
                 icon: "warning",
@@ -1002,10 +994,21 @@ function setupCadastroMovimentacaoSubmit() {
             return;
         }
 
-        // event.submitter é o botão que de fato disparou o submit — como
-        // os dois (Continuar/Sair) são type="submit" pro mesmo form, é
-        // assim que sabe qual dos dois fluxos seguir depois da confirmação.
-        const continuar = event.submitter?.id === "salvarContinuarBtn";
+        if (tipoSelect?.value === "entrada" && origemDentesSelect?.value === "frascos" && !origemFrascosList?.querySelector(".request-row")) {
+            Swal.fire({
+                icon: "warning",
+                title: "Preenchimento incompleto",
+                text: "Selecione ao menos um frasco de origem antes de salvar.",
+                confirmButtonText: "Entendi",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                },
+            });
+            return;
+        }
+
+        const isSalvarEContinuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
             icon: "question",
@@ -1026,30 +1029,16 @@ function setupCadastroMovimentacaoSubmit() {
                 return;
             }
 
-            const mensagem = "Movimentação cadastrada com sucesso.";
-
-            if (continuar) {
-                // form.reset() não desfaz o que o JS mudou via .disabled nem
-                // limpa a lista "Frascos selecionados" (elementos montados à
-                // mão, fora do form) — dispara "change" em vez de reimplementar
-                // essa limpeza aqui: tanto aplicarLocalSelecionado() (acima)
-                // quanto o listener de local em frasco-search-movimentacao.js
-                // (que dá selecionados.clear() + re-render) já reagem a ele.
-                form.reset();
-                localSelect?.dispatchEvent(new Event("change"));
-                // form.reset() não dispara "input" sozinho — sem isso o
-                // contador (setupObservacoesCounter) ficava com a contagem
-                // antiga até o usuário digitar de novo.
-                observacoesField?.dispatchEvent(new Event("input"));
-                showToast(mensagem);
-            } else {
-                // A notificação precisa sobreviver ao redirect — fica
-                // guardada até movimentacoes.html ler e descartar em
-                // setupFlashToast() (ver includes.js), que roda em toda
-                // carga de página.
-                sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
-                window.location.href = "movimentacoes.html";
+            let inputCadastrarOutro = form.querySelector("input[name='cadastrarOutro']");
+            if (!inputCadastrarOutro) {
+                inputCadastrarOutro = document.createElement("input");
+                inputCadastrarOutro.type = "hidden";
+                inputCadastrarOutro.name = "cadastrarOutro";
+                form.appendChild(inputCadastrarOutro);
             }
+            inputCadastrarOutro.value = isSalvarEContinuar;
+
+            HTMLFormElement.prototype.submit.call(form);
         });
     });
 }
@@ -1099,6 +1088,20 @@ function setupNumberInputs() {
     const numberInputs = document.querySelectorAll(".number-input");
 
     numberInputs.forEach((numberInput) => {
+        // Chamada de novo toda vez que um modal de busca re-renderiza
+        // (abrir, digitar na busca, trocar filtro/página — ver
+        // renderResultados em frasco-search-movimentacao.js/
+        // frasco-search-solicitacao.js), pra religar as linhas novas que
+        // acabaram de entrar no DOM. Sem essa trava, um .number-input que
+        // sobrevive entre re-renders (ex.: #quantidadeDoacao em
+        // cadastro_movimentacao.html, fora do modal) ganhava mais um par
+        // de listeners pointerdown a cada chamada — depois de algumas
+        // buscas, um clique só em +/- disparava changeQuantity() várias
+        // vezes de uma vez (o valor pulava de mais de 1 em 1).
+        if (numberInput.dataset.numberWired === "true") {
+            return;
+        }
+
         const input = numberInput.querySelector(".number-input__field");
         const decreaseBtn = numberInput.querySelector("[data-number-action='down']");
         const increaseBtn = numberInput.querySelector("[data-number-action='up']");
@@ -1106,6 +1109,8 @@ function setupNumberInputs() {
         if (!input || !decreaseBtn || !increaseBtn) {
             return;
         }
+
+        numberInput.dataset.numberWired = "true";
 
         let repeatTimeout;
         let repeatInterval;
@@ -1228,3 +1233,23 @@ function setupDateIcons() {
 
 setupDateIcons();
 
+function setupSincronizacaoDatas() {
+    const datCad = document.querySelector("#datCad");
+    const datManutencao = document.querySelector("#datManutencao");
+
+    if (!datCad || !datManutencao) {
+        return;
+    }
+
+    datCad.addEventListener("change", () => {
+        if (datCad.value) {
+            const [ano, mes, dia] = datCad.value.split("-");
+            const anoQueVem = parseInt(ano) + 1;
+            datManutencao.value = `${anoQueVem}-${mes}-${dia}`;
+        } else {
+            datManutencao.value = "";
+        }
+    });
+}
+
+setupSincronizacaoDatas();

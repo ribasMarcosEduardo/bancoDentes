@@ -1,5 +1,6 @@
-package bancoDentes.controller;
+package bancoDentes.controller.form;
 
+import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.SolicitacaoDTO;
 import bancoDentes.exception.EstudanteException;
 import bancoDentes.exception.SolicitacaoException;
@@ -23,7 +24,7 @@ import java.util.List;
 @Controller
 @RequestMapping("solicitacao")
 @RequiredArgsConstructor
-public class SolicitacaoFormController extends BaseController{
+public class SolicitacaoFormController extends BaseController {
 
     private final SolicitacaoService solicitacaoService;
     private final EstudanteService estudanteService;
@@ -33,7 +34,7 @@ public class SolicitacaoFormController extends BaseController{
      *
      * @param model
      */
-    @GetMapping
+    @GetMapping("/cadastrarSolicitacao")
     public String cadastrarSolicitacao(Model model) {
         try {
             Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
@@ -46,7 +47,7 @@ public class SolicitacaoFormController extends BaseController{
             this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.processamento"));
+            this.saveError(this.getText("error.carregamento"));
             return "redirect:/solicitacao/painel";
         }
     }
@@ -57,17 +58,23 @@ public class SolicitacaoFormController extends BaseController{
      * @param dto
      */
     @PostMapping("/save")
-    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto) {
+    public String saveSolicitacao(@ModelAttribute("solicitacaoDTO") SolicitacaoDTO dto,
+                                  @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
         try {
             solicitacaoService.save(dto);
             this.saveMessage(this.getText("msg.sucesso.solicitacao.enviada"));
+
+            if (cadastrarOutro) {
+                return "redirect:/solicitacao/cadastrarSolicitacao";
+            }
+
             return "redirect:/solicitacao/painel";
 
         } catch (SolicitacaoException e) {
             this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.salvar", e.getMessage()));
+            this.saveError(this.getText("error.solicitacao.salvar"));
             return "redirect:/solicitacao/painel";
         }
     }
@@ -92,27 +99,4 @@ public class SolicitacaoFormController extends BaseController{
         return "redirect:/solicitacao/painel";
     }
 
-    /**
-     * Exibe o painel do estudante listando todas as suas solicitações.
-     *
-     * @param model
-     */
-    @GetMapping("/painel")
-    public String exibePainelSolicitacoes(Model model) {
-        try {
-            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
-            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorEstudante(usuarioLogado.getCodEstudante());
-
-            model.addAttribute("solicitacoes", solicitacoes);
-            model.addAttribute("pendentes", solicitacaoService.getPendentes(solicitacoes));
-            model.addAttribute("concluidas", solicitacaoService.getConcluidas(solicitacoes));
-            model.addAttribute("usuarioLogado", usuarioLogado);
-
-            return "painelSolicitacao/solicitacaoList";
-
-        } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.processamento"));
-            return "redirect:/";
-        }
-    }
 }

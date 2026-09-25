@@ -20,16 +20,10 @@ function setupViewSwitch() {
     }
 
     const savedView = localStorage.getItem("frascosViewMode") || "grid";
-
     setView(savedView);
 
-    gridBtn.addEventListener("click", () => {
-        setView("grid");
-    });
-
-    listBtn.addEventListener("click", () => {
-        setView("list");
-    });
+    gridBtn.addEventListener("click", () => setView("grid"));
+    listBtn.addEventListener("click", () => setView("list"));
 }
 
 function setupSectorSwitch() {
@@ -74,15 +68,16 @@ function setupSectorSwitch() {
         moveIndicator(activeButton);
 
         items.forEach((item) => {
-            const matches = setor === "todos" || item.dataset.setor === setor;
+            const setorItem = (item.dataset.setor || "").toLowerCase();
+            const matches = setor === "todos" || setorItem === setor || setorItem.includes(setor);
             item.style.display = matches ? "" : "none";
         });
 
         localStorage.setItem("frascosSectorFilter", setor);
     }
 
-    const savedSector = localStorage.getItem("frascosSectorFilter") || "todos";
 
+    const savedSector = localStorage.getItem("frascosSectorFilter") || "todos";
     setSector(savedSector);
 
     buttons.forEach((button) => {
@@ -92,14 +87,55 @@ function setupSectorSwitch() {
         });
     });
 
-    /*
-        offsetWidth/offsetLeft do botão ficam gravados no indicador só
-        no momento do setSector/clique — sem isso, redimensionar a
-        janela (os botões mudam de tamanho/posição) deixa o indicador
-        preso nos valores antigos, desalinhado do botão selecionado.
-    */
     new ResizeObserver(() => moveIndicator(activeButton)).observe(switcher);
+}
+
+function setupSortOrder() {
+    const btnSortOrder = document.getElementById("btnSortOrder");
+    if (!btnSortOrder) return;
+
+    let ascending = true;
+
+    btnSortOrder.addEventListener("click", function() {
+        ascending = !ascending;
+
+        const tableResults = document.querySelector('.result-table');
+        const gridResults = document.querySelector('.results-grid');
+
+        if (!tableResults || !gridResults) return;
+
+        const rows = Array.from(tableResults.querySelectorAll('.request-row'));
+        const cards = Array.from(gridResults.querySelectorAll('.card'));
+
+        let items = rows.map((row, index) => {
+            return {
+                row: row,
+                card: cards[index],
+                sortValue: row.querySelector('.result-list__code').textContent.trim()
+            };
+        });
+
+        items.sort((a, b) => {
+            if (ascending) {
+                return a.sortValue.localeCompare(b.sortValue, 'pt-BR', { numeric: true });
+            } else {
+                return b.sortValue.localeCompare(a.sortValue, 'pt-BR', { numeric: true });
+            }
+        });
+
+        items.forEach(item => {
+            tableResults.appendChild(item.row);
+            gridResults.appendChild(item.card);
+        });
+
+        const icon = btnSortOrder.querySelector('.orderBy-icon');
+        if (icon && typeof lucide !== 'undefined') {
+            icon.setAttribute('data-lucide', ascending ? 'arrow-up-down' : 'arrow-down-up');
+            lucide.createIcons();
+        }
+    });
 }
 
 setupViewSwitch();
 setupSectorSwitch();
+setupSortOrder();

@@ -3,17 +3,17 @@ function setupFilters() {
     const sections = document.querySelectorAll(".filter-section");
     const checkboxes = document.querySelectorAll(".checkbox-filter input");
     const activeFilters = document.querySelector("#activeFilters");
-    const activeFiltersBar = document.querySelector(".active-filters-bar"); 
+    const activeFiltersBar = document.querySelector(".active-filters-bar");
     const clearButton = document.querySelector(".filters-clear");
-    const tableContainer = document.querySelector(".result-table"); 
+    const tableContainer = document.querySelector(".result-table");
     const btnSortOrder = document.getElementById("btnSortOrder");
-    const sortSelect = document.getElementById("sort-requests"); 
+    const sortSelect = document.getElementById("sort-requests");
     const pageSizeSelect = document.getElementById("pageSize");
     const btnPrevPage = document.getElementById("btnPrevPage");
     const btnNextPage = document.getElementById("btnNextPage");
     const paginationInfo = document.getElementById("paginationInfo");
 
-    let sortAscending = false; 
+    let sortAscending = false;
     let currentPage = 1;
     let rowsPerPage = parseInt(pageSizeSelect ? pageSizeSelect.value : 10);
 
@@ -34,7 +34,7 @@ function setupFilters() {
 
     // Ordena as linhas da tabela com base no código da solicitação
     function sortTable() {
-        const currentRows = Array.from(document.querySelectorAll(".request-row"));
+        const currentRows = Array.from(document.querySelectorAll(".request-row, .card"));
 
         currentRows.sort((a, b) => {
             const codeA = parseInt(a.getAttribute("data-codigo")) || 0;
@@ -61,9 +61,9 @@ function setupFilters() {
                 const newIcon = document.createElement("i");
                 newIcon.className = "orderBy-icon";
                 newIcon.setAttribute("data-lucide", sortAscending ? "arrow-up" : "arrow-down");
-                
-                icon.replaceWith(newIcon); 
-                
+
+                icon.replaceWith(newIcon);
+
                 if (window.lucide) {
                     lucide.createIcons();
                 }
@@ -85,7 +85,7 @@ function setupFilters() {
 
     // Filtra as linhas da tabela ocultando as que não correspondem aos itens selecionados
     function applyFilters() {
-        const rows = document.querySelectorAll(".request-row");
+        const rows = document.querySelectorAll(".request-row, .card");
         const selectedFilters = {};
 
         checkboxes.forEach(cb => {
@@ -136,7 +136,7 @@ function setupFilters() {
 
     // Controla a exibição das linhas por página e atualiza os botões de navegação
     function applyPagination() {
-        const currentRows = document.querySelectorAll(".request-row");
+        const currentRows = document.querySelectorAll(".request-row, .card");
         const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
@@ -243,16 +243,16 @@ function setupFilters() {
     }
 
     if (btnNextPage) {
-        btnNextPage.addEventListener("click", () => {
-            const currentRows = document.querySelectorAll(".request-row");
-            const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
-            const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
+            btnNextPage.addEventListener("click", () => {
+                const currentRows = document.querySelectorAll(".request-row, .card");
+                const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
+                const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 
-            if (currentPage < totalPages) {
-                currentPage++;
-                applyPagination();
-            }
-        });
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    applyPagination();
+                }
+            });
     }
 
     // Escuta as marcações nos checkboxes para atualizar a UI e a tabela

@@ -12,6 +12,7 @@
     })();
   </script>
 
+  <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
   <link rel="stylesheet" th:href="@{/css/pages/frascos.css(v=${#dates.createNow().getTime()})}">
@@ -76,7 +77,7 @@
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
           <div class="filter-section__content">
-            <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Maxilar).values()}">
+            <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}">
               <input type="checkbox" th:value="${m}" data-filter-group="Arcada">
               <span th:text="${m}">Superior</span>
             </label>
@@ -143,7 +144,7 @@
               <span class="btn__label">Ordenar</span>
               <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
             </button>
-            <a th:href="@{/frasco}" class="btn btn-primary">
+            <a th:href="@{/frasco/cadastraFrasco}" class="btn btn-primary">
               <i class="orderBy-icon" data-lucide="plus"></i> Novo frasco
             </a>
           </div>
@@ -206,17 +207,20 @@
 
             <article th:each="frasco : ${frascos}"
                      class="request-row"
-                     data-setor="bdh"
+                     th:data-setor="${frasco.local}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
-                     th:data-arcada="${frasco.maxilar != null ? frasco.maxilar : ''}"
+                     th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <div class="result-list">
                 <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
                 <span th:text="${frasco.tipoDente}">Grupo</span>
                 <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
-                <span>Bdh</span> <span th:text="${frasco.quantidade}">0</span>
+
+                <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">Local</span>
+                <span th:text="${frasco.quantidade}">0</span>
+
                 <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">00/00/00</span>
                 <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
 
@@ -224,6 +228,13 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+
+                  <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                      <i class="icon" data-lucide="archive-x"></i>
+                    </button>
+                  </form>
+
                   <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir">
                     <i class="icon" data-lucide="chevron-down"></i>
                   </button>
@@ -246,7 +257,7 @@
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Arcada</span>
-                          <span th:text="${frasco.maxilar != null ? frasco.maxilar : '-'}">-</span>
+                          <span th:text="${frasco.arcada != null ? frasco.arcada : '-'}">-</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Dentição</span>
@@ -265,10 +276,12 @@
                     <section class="request-panel">
                       <h4 class="request-panel__title">Local e Datas</h4>
                       <div class="request-details__grid request-details__grid--single">
+
                         <div class="request-detail">
                           <span class="request-details__label">Local</span>
-                          <span>Banco de Dentes Humanos</span>
+                          <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">-</span>
                         </div>
+
                         <div class="request-detail">
                           <span class="request-details__label">Data de cadastro</span>
                           <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
@@ -288,16 +301,18 @@
           <div class="results-grid">
             <article th:each="frasco : ${frascos}"
                      class="card"
-                     data-setor="bdh"
+                     th:data-setor="${frasco.local}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
-                     th:data-arcada="${frasco.maxilar != null ? frasco.maxilar : ''}"
+                     th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <header class="card__header">
                 <div>
                   <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
-                  <div class="card__meta" th:text="'Bdh | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+
+                  <div class="card__meta" th:text="${frasco.local != null ? frasco.local.nome : '-'} + ' | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+
                 </div>
                 <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
               </header>
@@ -313,7 +328,7 @@
                 </div>
                 <div class="card__row">
                   <span class="card__label">Arcada:</span>
-                  <span class="card__value" th:text="${frasco.maxilar != null ? frasco.maxilar : '-'}">-</span>
+                  <span class="card__value" th:text="${frasco.arcada != null ? frasco.arcada : '-'}">-</span>
                 </div>
               </div>
 
@@ -327,9 +342,11 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
-                  <button type="button" class="card__action card__action--red" data-tooltip="Apagar">
-                    <i class="icon" data-lucide="archive-x"></i>
-                  </button>
+                  <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                      <i class="icon" data-lucide="archive-x"></i>
+                    </button>
+                  </form>
                 </div>
               </footer>
             </article>
@@ -342,8 +359,8 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
 <script th:src="@{/js/includes.js}"></script>
 <script th:src="@{/js/filters.js}"></script>
 <script th:src="@{/js/results.js}"></script>
@@ -351,4 +368,31 @@
 <script th:src="@{/js/requests.js}"></script>
 <script th:src="@{/js/page-size.js}"></script>
 
+<script>
+
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".delete-form").forEach(form => {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "Deseja realmente excluir este frasco?",
+                text: "Esta ação não poderá ser desfeita.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sim, excluir",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+
+</script>
+
 </body>
+</html>

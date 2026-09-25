@@ -1,51 +1,49 @@
 package bancoDentes.dto;
 
 import bancoDentes.model.Frasco;
-import bancoDentes.model.enumModels.Denticao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.TipoDente;
+import bancoDentes.model.enumModels.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public record FrascoDTO(
         Long codigo,
         Long version,
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate datCad,
-        LocalDateTime datManutencao,
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        LocalDate datManutencao,
         EstadoDente estadoDente,
         Long quantidade,
         TipoDente tipoDente,
         Long posicao,
-        Maxilar maxilar,
+        Arcada arcada,
         Denticao denticao,
-        String identificacao
+        String identificacao,
+        Local local
 ) {
 
     public static FrascoDTO empty() {
-        return new FrascoDTO(null,null,null, null, null, null, null, null, null,null,null);
+        return new FrascoDTO(null,null,null,null, null, null, null, null, null, null,null,null);
     }
 
     public Frasco mapearFrasco(){
         Frasco frasco = new Frasco();
         frasco.setCodigo(this.codigo);
         frasco.setVersion(this.version);
-
         if (this.datCad != null) {
             frasco.setDatCad(this.datCad.atStartOfDay());
-
         }
-
-        frasco.setDatManutencao(this.datManutencao);
+        if (this.datManutencao != null) {
+            frasco.setDatManutencao(this.datManutencao.atStartOfDay());
+        }
         frasco.setEstado(this.estadoDente);
         frasco.setQuantidade(this.quantidade);
         frasco.setTipoDente(this.tipoDente);
         frasco.setPosicao(this.posicao);
-        frasco.setMaxilar(this.maxilar);
+        frasco.setArcada(this.arcada);
         frasco.setDenticao(this.denticao);
+        frasco.setLocal(this.local);
         return frasco;
     }
 
@@ -54,14 +52,14 @@ public record FrascoDTO(
                 frasco.getCodigo(),
                 frasco.getVersion(),
                 frasco.getDatCad() != null ? frasco.getDatCad().toLocalDate() : null,
-                frasco.getDatManutencao(),
-                frasco.getEstado(),
+                frasco.getDatManutencao() != null ? frasco.getDatManutencao().toLocalDate() : null,frasco.getEstado(),
                 frasco.getQuantidade(),
                 frasco.getTipoDente(),
                 frasco.getPosicao(),
-                frasco.getMaxilar(),
+                frasco.getArcada(),
                 frasco.getDenticao(),
-                frasco.getIdentificacao()
+                frasco.getIdentificacao(),
+                frasco.getLocal()
         );
     }
 }

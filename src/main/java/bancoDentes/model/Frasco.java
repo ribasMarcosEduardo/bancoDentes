@@ -1,10 +1,7 @@
 package bancoDentes.model;
 
 import bancoDentes.exception.FrascoException;
-import bancoDentes.model.enumModels.Denticao;
-import bancoDentes.model.enumModels.EstadoDente;
-import bancoDentes.model.enumModels.Maxilar;
-import bancoDentes.model.enumModels.TipoDente;
+import bancoDentes.model.enumModels.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,8 +38,8 @@ public class Frasco {
     private Long posicao;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "MAXILAR")
-    private Maxilar maxilar;
+    @Column(name = "ARCADA")
+    private Arcada arcada;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO", nullable = true)
@@ -58,21 +55,49 @@ public class Frasco {
     @Column(name = "IDENTIFICACAO", nullable = true)
     private  String identificacao;
 
-    // Método que gera a identificação do frasco
+    @Enumerated(EnumType.STRING)
+    @Column(name = "LOCAL", nullable = true)
+    private Local local;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUSFRASCO")
+    private StatusFrasco statusFrasco;
+
+    @PrePersist
+    public void onPrePersist() {
+        this.statusFrasco = StatusFrasco.DISPONIVEL;
+        limparCamposSeEndo();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        limparCamposSeEndo();
+    }
+
+    private void limparCamposSeEndo() {
+        if (this.tipoDente == TipoDente.ENDO) {
+            this.posicao = null;
+            this.arcada = null;
+            this.estado = null;
+            this.denticao = null;
+        }
+    }
+
     public void gerarIdentificacao() {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-            String siglaMaxilar = (maxilar != null) ? maxilar.getSigla() : "";
             String siglaTipo = (tipoDente != null) ? tipoDente.getSigla() : "";
-            String siglaEstado = (estado != null) ? estado.getSigla() : "";
-            String siglaDenticao = (denticao != null) ? denticao.getSigla() : "";
+            String siglaLocal = (local != null) ? local.getSigla() : "";
 
-            this.identificacao = String.format("%s%s%s%s-%s",
+            this.identificacao = String.format("%s%s-%s",
                     siglaTipo,
-                    siglaMaxilar,
-                    siglaEstado,
-                    siglaDenticao,
+                    siglaLocal,
                     codigo);
     }
+
+    public void emManutencao(){
+        this.statusFrasco = StatusFrasco.EM_MANUTENCA;
+    }
+
 }

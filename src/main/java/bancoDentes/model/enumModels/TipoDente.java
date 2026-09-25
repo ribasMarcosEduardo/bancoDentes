@@ -2,10 +2,10 @@ package bancoDentes.model.enumModels;
 
 public enum TipoDente {
 
-    CANINO("Canino", "C"),
-    INCISIVO("Incisivo", "I"),
-    MISTO("Misto", "MISTO"),
-    MOLAR("Molar", "M"),
+    CANINO("Canino", "CN"),
+    ENDO("Endo", "EN"),
+    INCISIVO("Incisivo", "IN"),
+    MOLAR("Molar", "MP"),
     PRE_MOLAR("Pré-Molar", "PM");
 
     private final String nome;
@@ -33,7 +33,5 @@ public enum TipoDente {
         if (tipoDente == null) return null;
         return tipoDente.getSigla();
     }
-
-
 
 }

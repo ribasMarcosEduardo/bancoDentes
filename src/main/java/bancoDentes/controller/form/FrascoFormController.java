@@ -1,15 +1,15 @@
-package bancoDentes.controller;
+package bancoDentes.controller.form;
 
+import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.FrascoDTO;
+import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.service.FrascoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller para requisições de frascos
@@ -19,28 +19,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("frasco")
 @RequiredArgsConstructor
-public class FrascoFormController {
+public class FrascoFormController extends BaseController {
 
     private final FrascoService frascoService;
-
-    /**
-     * Exibe o painel principal com a listagem de todos os frascos cadastrados.
-     *
-     * @param model
-     */
-    @GetMapping("/painel")
-    public String exibePainelFrascos(Model model) {
-        model.addAttribute("frascos", frascoService.getFrascos());
-        return "painelFrascos/frascosList";
-    }
 
     /**
      * Renderiza o formulário de cadastro em branco para um novo frasco.
      *
      * @param model
      */
-    @GetMapping
-    public String cadastrarFrasco(Model model) {
+    @GetMapping("/cadastraFrasco")
+    public String cadastraFrasco(Model model) {
         model.addAttribute("frascoDTO", FrascoDTO.empty());
         return "form/frascoForm";
     }
@@ -66,18 +55,25 @@ public class FrascoFormController {
      * Salva um uma edição ou adição de um frasco
      *
      * @param frascoDTO
-     * @param redirectAttributes
      */
     @PostMapping("/save")
     public String saveFrasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
-                             RedirectAttributes redirectAttributes) {
-
+                             @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
         try {
-            frascoService.save(frascoDTO);
-            redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco salvo com sucesso!");
+            Frasco frasco = frascoService.save(frascoDTO);
+            this.saveMessage(this.getText("msg.sucesso.frasco.cadastrado", frasco.getIdentificacao()));
+
+            if (cadastrarOutro) {
+                return "redirect:/frasco/cadastraFrasco";
+            }
+
+            return "redirect:/frasco/painel";
+
+        } catch (FrascoException e) {
+            this.saveError(e.getMessage());
             return "redirect:/frasco/painel";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar: " + e.getMessage());
+            this.saveError("Erro ao processar: " + e.getMessage());
             return "redirect:/frasco/painel";
         }
     }
@@ -86,16 +82,17 @@ public class FrascoFormController {
      * Processa exclusão de um frasco.
      *
      * @param codigo
-     * @param redirectAttributes
      */
     @PostMapping("/excluirFrasco/{codigo}")
-    public String excluirFrasco(@PathVariable("codigo") Long codigo,
-                                RedirectAttributes redirectAttributes) {
+    public String excluirFrasco(@PathVariable("codigo") Long codigo) {
         try {
             frascoService.excluirFrasco(codigo);
-            redirectAttributes.addFlashAttribute("mensagemSucesso", "Frasco excluído com sucesso!");
+            this.saveMessage(this.getText("msg.sucesso.exclucao"));
+        } catch (FrascoException e) {
+            this.saveError(e.getMessage());
+            return "redirect:/frasco/painel";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao excluir: " + e.getMessage());
+            this.saveError(this.getText("error.exclucao.frasco"));
         }
 
         return "redirect:/frasco/painel";

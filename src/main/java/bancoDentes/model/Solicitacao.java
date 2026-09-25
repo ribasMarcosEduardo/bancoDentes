@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -44,8 +42,8 @@ public class Solicitacao {
     private EstadoDente estado;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "MAXILAR",nullable = true)
-    private Maxilar maxilar;
+    @Column(name = "ARCADA",nullable = true)
+    private Arcada arcada;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "DENTICAO", nullable = true)
@@ -70,11 +68,21 @@ public class Solicitacao {
     private AnaliseSolicitacao analiseSolicitacao;
 
     @PrePersist
-    protected void onCreate() {
-        this.datSolicitacao = LocalDateTime.now();
-        this.statusSolicitacao = StatusSolicitacao.PENDENTE;
+    @PreUpdate
+    public void prePersistOrUpdate() {
+        if (this.tipoDente == TipoDente.ENDO) {
+            this.posicao = null;
+            this.arcada = null;
+            this.estado = null;
+            this.denticao = null;
+        }
+        if (this.datSolicitacao == null) {
+            this.datSolicitacao = LocalDateTime.now();
+        }
+        if (this.statusSolicitacao == null) {
+            this.statusSolicitacao = StatusSolicitacao.PENDENTE;
+        }
     }
-
     public void iniciarAnalise(){
         this.statusSolicitacao = StatusSolicitacao.EM_ANALISE;
     }

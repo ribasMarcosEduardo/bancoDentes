@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class FrascoService {
+public class FrascoService extends BaseService{
 
     private final FrascoRepository frascoRepository;
 
@@ -58,7 +58,7 @@ public class FrascoService {
      */
     public Frasco buscarPorId(Long codFrasco) {
         return frascoRepository.findById(codFrasco)
-                .orElseThrow(() -> new FrascoException("Frasco não encontrado com o ID: " + codFrasco));
+                .orElseThrow(() -> new FrascoException(this.getText("error.frasco.naoEncontrado")));
     }
 
     /**
@@ -74,7 +74,7 @@ public class FrascoService {
         return frascoRepository.getFrascosFiltrados(
                 solicitacao.getTipoDente(),
                 solicitacao.getDenticao(),
-                solicitacao.getMaxilar(),
+                solicitacao.getArcada(),
                 solicitacao.getEstado()
         );
     }

@@ -65,7 +65,7 @@ function atualizarCampos(limpar = false) {
     const estadoGroup = document.getElementById('estadoGroup');
 
     const denticao = document.getElementById('denticao');
-    const maxilar = document.getElementById('maxilar');
+    const arcada = document.getElementById('arcada');
     const estado = document.getElementById('estadoDente');
     const quantidade = document.getElementById('quantidade');
 
@@ -91,7 +91,7 @@ function atualizarCampos(limpar = false) {
     if (isMisto) {
         atributosSection.classList.add('form-section--disabled');
         denticao.disabled = true; denticao.required = false;
-        maxilar.disabled = true; maxilar.required = false;
+        arcada.disabled = true; arcada.required = false;
 
         estadoGroup.classList.add('form-group--disabled');
         estado.disabled = true; estado.required = false;
@@ -100,7 +100,7 @@ function atualizarCampos(limpar = false) {
     } else if (hasValue) {
         atributosSection.classList.remove('form-section--disabled');
         denticao.disabled = false; denticao.required = true;
-        maxilar.disabled = false; maxilar.required = true;
+        arcada.disabled = false; arcada.required = true;
 
         estadoGroup.classList.remove('form-group--disabled');
         estado.disabled = false; estado.required = true;
@@ -111,7 +111,7 @@ function atualizarCampos(limpar = false) {
     } else {
         atributosSection.classList.add('form-section--disabled');
         denticao.disabled = true; denticao.required = false;
-        maxilar.disabled = true; maxilar.required = false;
+        arcada.disabled = true; arcada.required = false;
 
         estadoGroup.classList.add('form-group--disabled');
         estado.disabled = true; estado.required = false;
@@ -121,7 +121,7 @@ function atualizarCampos(limpar = false) {
     if (limpar) {
         if (isMisto) {
             denticao.value = '';
-            maxilar.value = '';
+            arcada.value = '';
             estado.value = '';
         }
         checkboxes.forEach(cb => cb.checked = false);

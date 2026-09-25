@@ -13,14 +13,14 @@ public record SolicitacaoDTO(
         LocalDateTime datSolicitacao,
         Long quantidade,
         Long posicao,
-        Maxilar maxilar,
+        Arcada arcada,
         TipoDente tipoDente,
         EstadoDente estadoDente,
         Denticao denticao,
         String justificativa
 ) {
 
-        public static Object empty() {
+        public static SolicitacaoDTO empty() {
                 return new SolicitacaoDTO(null,null,null,null,null,null,null,null,null,null, null);
         }
 
@@ -32,7 +32,7 @@ public record SolicitacaoDTO(
                 sol.setDatSolicitacao(this.datSolicitacao);
                 sol.setQuantidade(this.quantidade);
                 sol.setPosicao(this.posicao);
-                sol.setMaxilar(this.maxilar);
+                sol.setArcada(this.arcada);
                 sol.setTipoDente(this.tipoDente);
                 sol.setEstado(this.estadoDente);
                 sol.setDenticao(this.denticao);
@@ -48,7 +48,7 @@ public record SolicitacaoDTO(
                         solicitacao.getDatSolicitacao(),
                         solicitacao.getQuantidade(),
                         solicitacao.getPosicao(),
-                        solicitacao.getMaxilar(),
+                        solicitacao.getArcada(),
                         solicitacao.getTipoDente(),
                         solicitacao.getEstado(),
                         solicitacao.getDenticao(),

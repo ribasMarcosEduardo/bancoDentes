@@ -161,3 +161,32 @@ body:has(.swal2-toast.glass-success) .swal2-container {
 .swal2-toast.glass-success .swal2-success-line-long {
     background-color: var(--glass-success-icon);
 }
+
+.swal2-container.swal2-top-end,
+.swal2-container.swal2-top {
+    top: 85px !important;
+}
+
+body:has(.swal2-toast.glass-error) .swal2-container {
+    width: min(94vw, 34rem);
+    padding-inline: 2rem;
+}
+
+.swal2-toast.glass-error {
+    min-width: 20rem;
+    max-width: min(90vw, 26rem);
+}
+
+@media (min-width: 768px) {
+    .swal2-toast.glass-error {
+        min-width: 24rem;
+    }
+}
+
+.swal2-toast.glass-error .swal2-error-ring {
+    border-color: #dc3545;
+}
+
+.swal2-toast.glass-error .swal2-x-mark {
+    color: #dc3545;
+}
