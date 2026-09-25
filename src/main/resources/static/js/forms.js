@@ -100,11 +100,6 @@ function setupCadastroFrasco() {
         return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
     }
 
-    function usaArcada() {
-        const grupo = getGrupo();
-        return grupo === "canino" || grupo === "incisivo";
-    }
-
     function isPreMolar() {
         const grupo = getGrupo();
         return grupo === "premolar" || grupo === "pre_molar";
@@ -113,10 +108,9 @@ function setupCadastroFrasco() {
     function atualizarVisibilidadeCamposAtributos() {
         const endo = isEndo();
         const mostrarNumeracao = usaNumeracao();
-        const mostrarArcada = usaArcada();
 
         if (denticaoGroup) denticaoGroup.hidden = endo;
-        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
+        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao || endo;
         if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
 
         if (denticaoSelect) {
@@ -248,11 +242,11 @@ function setupCadastroFrasco() {
         }
 
         if (endo) {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
             estadoDente.value = "misto";
         } else {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = false;
             estadoDente.required = true;
             estadoDente.disabled = !hasGrupo;
         }
@@ -261,7 +255,7 @@ function setupCadastroFrasco() {
             if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
             if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
             if (!endo) {
-                estadoDente.value = "NAO_INFORMADO";
+                estadoDente.value = "NAO_INFORMADA";
             }
         }
 
@@ -287,10 +281,10 @@ function setupCadastroFrasco() {
         enableSection(estadoFrascoSection);
         estadoDente.disabled = false;
         if (isEndo()) {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
         } else {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = false;
             estadoDente.required = true;
         }
         atualizarVisibilidadeCamposAtributos();
@@ -494,7 +488,7 @@ function setupCadastroSolicitacao() {
             fecharAvancados();
         }
 
-        if (estadoDente) estadoDente.value = "NAO_INFORMADO";
+        if (estadoDente) estadoDente.value = "NAO_INFORMADA";
         if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
         if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
 

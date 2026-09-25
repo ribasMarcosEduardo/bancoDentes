@@ -4,23 +4,22 @@ function setupFilters() {
     const checkboxes = document.querySelectorAll(".checkbox-filter input");
     const activeFilters = document.querySelector("#activeFilters");
     const activeFiltersBar = document.querySelector(".active-filters-bar");
-    const clearButton = document.querySelector(".filters-clear");
+    const clearButtons = document.querySelectorAll(".filters-clear");
     const tableContainer = document.querySelector(".result-table");
+    const gridContainer = document.querySelector(".results-grid");
+    const emptyStateFiltro = document.getElementById("emptyStateFiltro");
     const btnSortOrder = document.getElementById("btnSortOrder");
     const sortSelect = document.getElementById("sort-requests");
     const pageSizeSelect = document.getElementById("pageSize");
     const btnPrevPage = document.getElementById("btnPrevPage");
     const btnNextPage = document.getElementById("btnNextPage");
+    const paginationRange = document.getElementById("paginationRange");
     const paginationInfo = document.getElementById("paginationInfo");
+    const paginationLabel = paginationInfo ? (paginationInfo.getAttribute("data-label") || "Resultados Encontrados") : "";
 
     let sortAscending = false;
     let currentPage = 1;
     let rowsPerPage = parseInt(pageSizeSelect ? pageSizeSelect.value : 10);
-
-    // Esconde a barra de filtros ativos no carregamento da página
-    if (activeFiltersBar) {
-        activeFiltersBar.style.display = 'none';
-    }
 
     // Configura o comportamento de abrir/fechar as seções do menu lateral de filtros
     sections.forEach((section) => {
@@ -42,9 +41,10 @@ function setupFilters() {
             return sortAscending ? (codeA - codeB) : (codeB - codeA);
         });
 
-        if (tableContainer) {
-            currentRows.forEach(row => tableContainer.appendChild(row));
-        }
+        currentRows.forEach(row => {
+            const container = row.classList.contains("card") ? gridContainer : tableContainer;
+            if (container) container.appendChild(row);
+        });
 
         currentPage = 1;
         applyPagination();
@@ -60,12 +60,26 @@ function setupFilters() {
             if (icon) {
                 const newIcon = document.createElement("i");
                 newIcon.className = "orderBy-icon";
-                newIcon.setAttribute("data-lucide", sortAscending ? "arrow-up" : "arrow-down");
+                newIcon.setAttribute("data-lucide", sortAscending ? "arrow-down-up" : "arrow-up-down");
 
                 icon.replaceWith(newIcon);
 
                 if (window.lucide) {
                     lucide.createIcons();
+                }
+
+                // lucide.createIcons() troca o <i data-lucide> por um <svg> novo
+                // (mesma classe, nó diferente) — precisa reconsultar depois de
+                // rodar, senão a animação tenta grudar num elemento que já não
+                // está mais no DOM.
+                const spinIcon = btnSortOrder.querySelector(".orderBy-icon");
+                if (spinIcon) {
+                    spinIcon.classList.add("orderBy-icon--spin");
+                    spinIcon.addEventListener(
+                        "animationend",
+                        () => spinIcon.classList.remove("orderBy-icon--spin"),
+                        { once: true }
+                    );
                 }
             }
         });
@@ -136,8 +150,16 @@ function setupFilters() {
 
     // Controla a exibição das linhas por página e atualiza os botões de navegação
     function applyPagination() {
-        const currentRows = document.querySelectorAll(".request-row, .card");
-        const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
+        const currentRows = Array.from(document.querySelectorAll(".request-row"));
+        const cardByCodigo = new Map();
+        document.querySelectorAll(".card").forEach(card => {
+            cardByCodigo.set(card.getAttribute("data-codigo"), card);
+        });
+
+        const visibleRows = currentRows.filter(row =>
+            !row.classList.contains('is-hidden-by-filter') &&
+            !row.classList.contains('is-hidden-by-sector')
+        );
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
 
@@ -146,19 +168,53 @@ function setupFilters() {
         const startIndex = (currentPage - 1) * rowsPerPage;
         const endIndex = startIndex + rowsPerPage;
 
-        currentRows.forEach(row => row.style.display = 'none');
+        function setVisibility(row, visible) {
+            row.style.display = visible ? '' : 'none';
+            const card = cardByCodigo.get(row.getAttribute("data-codigo"));
+            if (card) card.style.display = visible ? '' : 'none';
+        }
 
-        visibleRows.slice(startIndex, endIndex).forEach(row => {
-            row.style.display = '';
-        });
+        currentRows.forEach(row => setVisibility(row, false));
+        visibleRows.slice(startIndex, endIndex).forEach(row => setVisibility(row, true));
 
         if (paginationInfo) {
-            paginationInfo.innerHTML = `${totalRows} Solicitações Encontradas <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
+            if (paginationRange) {
+                const ordenacao = sortAscending ? "Mais Antigos" : "Mais Recentes";
+                paginationInfo.textContent = `${totalRows} ${paginationLabel} - ${ordenacao}`;
+            } else {
+                paginationInfo.innerHTML = `${totalRows} ${paginationLabel} <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
+            }
+        }
+
+        if (paginationRange) {
+            paginationRange.textContent = totalRows === 0 ? "0-0" : `${startIndex + 1}-${Math.min(endIndex, totalRows)}`;
         }
 
         if (btnPrevPage) btnPrevPage.disabled = (currentPage === 1);
         if (btnNextPage) btnNextPage.disabled = (currentPage === totalPages);
+
+        // Estado vazio por filtro/busca — o elemento só existe no DOM
+        // quando a página já tem pelo menos 1 item vindo do banco (ele
+        // é renderizado dentro de <section th:if="!isEmpty(...)">); o
+        // banco vazio de verdade já tem seu próprio aviso, fora dessa
+        // section, então não passa por aqui. tableContainer/gridContainer
+        // (não a .results inteira) porque o próprio emptyStateFiltro
+        // mora dentro de .results, como irmão dos dois.
+        if (emptyStateFiltro) {
+            const semResultado = totalRows === 0;
+            emptyStateFiltro.hidden = !semResultado;
+            if (tableContainer) tableContainer.style.display = semResultado ? "none" : "";
+            if (gridContainer) gridContainer.style.display = semResultado ? "none" : "";
+        }
     }
+
+    // Exposto global pro setSector (results.js) recalcular contagem/
+    // paginação/estado vazio ao trocar Todos/BDH/Biobanco — setSector
+    // só marca a classe is-hidden-by-sector em cada item, quem decide
+    // o que fica visível de fato é sempre esta função. results.js roda
+    // depois de filters.js (ver ordem dos <script> nas páginas que têm
+    // #sectorSwitch), então já encontra isto definido.
+    window.applyPagination = applyPagination;
 
     // Gerencia a criação, remoção e exibição dos chips visuais de filtros ativos
     const chipsByCheckbox = new Map();
@@ -218,9 +274,7 @@ function setupFilters() {
         });
 
         if (activeFiltersBar) {
-            const hasActive = chipsByCheckbox.size > 0;
-            activeFiltersBar.style.display = hasActive ? '' : 'none';
-            activeFiltersBar.classList.toggle("has-active", hasActive);
+            activeFiltersBar.classList.toggle("has-active", chipsByCheckbox.size > 0);
         }
     }
 
@@ -244,8 +298,11 @@ function setupFilters() {
 
     if (btnNextPage) {
             btnNextPage.addEventListener("click", () => {
-                const currentRows = document.querySelectorAll(".request-row, .card");
-                const visibleRows = Array.from(currentRows).filter(row => !row.classList.contains('is-hidden-by-filter'));
+                const currentRows = document.querySelectorAll(".request-row");
+                const visibleRows = Array.from(currentRows).filter(row =>
+                    !row.classList.contains('is-hidden-by-filter') &&
+                    !row.classList.contains('is-hidden-by-sector')
+                );
                 const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 
                 if (currentPage < totalPages) {
@@ -264,7 +321,10 @@ function setupFilters() {
     });
 
     // Limpa todos os filtros selecionados e redefine a tabela ao clicar em resetar
-    if (clearButton) {
+    // (querySelectorAll, não só o da barra de filtros ativos — o botão
+    // "Resetar Filtros" do estado vazio, ver partials/empty_state.html,
+    // usa a mesma classe e precisa disparar a mesma limpeza)
+    clearButtons.forEach((clearButton) => {
         clearButton.addEventListener("click", () => {
             checkboxes.forEach((checkbox) => {
                 checkbox.checked = false;
@@ -272,9 +332,13 @@ function setupFilters() {
             renderActiveFilters();
             applyFilters();
         });
-    }
+    });
 
-    applyPagination();
+    if (paginationRange) {
+        sortTable();
+    } else {
+        applyPagination();
+    }
 }
 
 // Inicializa o script garantindo que o DOM já foi completamente carregado
