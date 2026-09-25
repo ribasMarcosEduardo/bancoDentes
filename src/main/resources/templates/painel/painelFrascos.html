@@ -118,9 +118,9 @@
               <label for="pageSize">Exibir</label>
               <div class="select-wrapper page-size-control__select">
                 <select class="form-control" id="pageSize">
-                  <option value="10" selected>10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
+                  <option value="12" selected>12</option>
+                  <option value="24">24</option>
+                  <option value="36">36</option>
                 </select>
                 <i class="select-icon icon" data-lucide="chevron-down"></i>
               </div>
@@ -166,7 +166,7 @@
       <div class="list-panel">
         <div class="pagination">
           <div class="low-opacity">
-            <strong id="paginationInfo" th:text="${#lists.size(frascos)} + ' Resultados Encontrados'">0 Resultados Encontrados</strong>
+            <strong id="paginationInfo" data-label="Frascos Encontrados" th:text="${#lists.size(frascos)} + ' Frascos Encontrados'">0 Frascos Encontrados</strong>
           </div>
           <div class="pagination__actions">
             <div class="sector-switch" id="sectorSwitch">
@@ -177,6 +177,8 @@
             </div>
 
             <div class="pagination__nav">
+              <span class="pagination__range" id="paginationRange">1-1</span>
+
               <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior">
                 <i data-lucide="chevron-left"></i>
               </button>
@@ -187,11 +189,16 @@
           </div>
         </div>
 
-        <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
-          <i data-lucide="info" class="me-2"></i> Não há nenhum frasco cadastrado no banco de dados.
-        </div>
+        <th:block th:if="${#lists.isEmpty(frascos)}">
+          <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhum frasco cadastrado', 'Ainda não há frascos registrados no banco de dados. Cadastre o primeiro frasco para começar.', false)}">
+          </div>
+        </th:block>
 
         <section th:if="${!#lists.isEmpty(frascos)}" class="results results--grid" id="resultsView">
+
+          <div id="emptyStateFiltro" hidden
+               th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhum frasco encontrado', 'Nenhum frasco corresponde aos filtros aplicados. Tente ajustar ou resetar os filtros.', true)}">
+          </div>
 
           <div class="result-table result-table--frascos">
             <div class="result-table__head">
@@ -207,7 +214,8 @@
 
             <article th:each="frasco : ${frascos}"
                      class="request-row"
-                     th:data-setor="${frasco.local}"
+                     th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
+                     th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
@@ -264,7 +272,7 @@
                           <span th:text="${frasco.denticao != null ? frasco.denticao.nome : '-'}">-</span>
                         </div>
                         <div class="request-detail">
-                          <span class="request-details__label">Posição</span>
+                          <span class="request-details__label">Numeração</span>
                           <span th:text="${frasco.posicao != null ? frasco.posicao : '-'}">-</span>
                         </div>
                         <div class="request-detail">
@@ -292,6 +300,21 @@
                         </div>
                       </div>
                     </section>
+
+                    <section class="request-panel request-panel--frascos-actions">
+                      <h4 class="request-panel__title">Ações</h4>
+                      <div class="request-panel__actions">
+                        <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                          <i class="icon" data-lucide="pen-line"></i>
+                        </a>
+
+                        <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                            <i class="icon" data-lucide="archive-x"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </section>
                   </div>
                 </div>
               </div>
@@ -301,7 +324,8 @@
           <div class="results-grid">
             <article th:each="frasco : ${frascos}"
                      class="card"
-                     th:data-setor="${frasco.local}"
+                     th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
+                     th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
@@ -376,13 +400,19 @@
             e.preventDefault();
 
             Swal.fire({
+                icon: "warning",
                 title: "Deseja realmente excluir este frasco?",
                 text: "Esta ação não poderá ser desfeita.",
-                icon: "warning",
                 showCancelButton: true,
+                reverseButtons: true,
+                focusCancel: true,
                 confirmButtonText: "Sim, excluir",
                 cancelButtonText: "Cancelar",
-                reverseButtons: true
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-outline btn-outline-danger",
+                    cancelButton: "btn btn-secondary",
+                },
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();

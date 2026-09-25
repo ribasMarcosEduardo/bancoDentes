@@ -1,0 +1,13 @@
+<div th:fragment="empty_state(icon, title, description, showReset)" class="empty-state">
+    <div class="empty-state__icon">
+        <i class="icon" th:attr="data-lucide=${icon}"></i>
+    </div>
+
+    <h3 class="empty-state__title" th:text="${title}">Título</h3>
+    <p class="empty-state__description" th:text="${description}">Descrição.</p>
+
+    <button th:if="${showReset}" type="button" class="btn btn-secondary filters-clear empty-state__action">
+        <i class="icon" data-lucide="rotate-ccw"></i>
+        Resetar Filtros
+    </button>
+</div>
