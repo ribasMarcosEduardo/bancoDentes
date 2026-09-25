@@ -75,7 +75,7 @@
                         <select class="form-control" th:field="*{local}" id="localMovimentacao" required>
                             <option value="">- Selecione o local -</option>
                             <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
-                                    th:value="${l.name()}" th:text="${l}"></option>
+                                    th:value="${l.name()}" th:text="${l.nome}"></option>
                         </select>
                         <i class="select-icon icon" data-lucide="chevron-down"></i>
                     </div>

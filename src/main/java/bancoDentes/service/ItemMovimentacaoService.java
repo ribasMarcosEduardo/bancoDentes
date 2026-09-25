@@ -31,19 +31,13 @@ public class ItemMovimentacaoService extends BaseService {
     /**
      * Vincula um novo frasco a uma análise de solicitação.
      *
-     * @param dto DTO com os dados do item
+     * @param dto
      */
     @Transactional
     public ItemMovimentacao save(ItemMovimentacaoDTO dto) throws AnaliseException, FrascoException, ItemAnaliseException {
-        if (dto == null || dto.codFrasco() == null) {
-            throw new FrascoException(this.getText("error.frasco.nao.encontrado"));
-        }
-
-        // 1. Procura o Frasco associado ao codFrasco do DTO
         Frasco frasco = frascoRepository.findById(dto.codFrasco())
                 .orElseThrow(() -> new FrascoException(this.getText("error.frasco.nao.encontrado")));
 
-        // 2. Mapeia a entidade associando o frasco recuperado
         ItemMovimentacao itemMovimentacao = dto.mapearItemMovimentacao(frasco);
 
         Optional<ItemMovimentacao> itemExistente =
@@ -65,8 +59,7 @@ public class ItemMovimentacaoService extends BaseService {
 
     /**
      * Desassocia um frasco do processo de análise.
-     *
-     * @param codItem ID do item a remover
+     * @param codItem
      */
     @Transactional
     public void removerItem(Long codItem) throws ItemNaoEncontradoException {

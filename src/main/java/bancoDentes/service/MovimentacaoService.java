@@ -10,7 +10,6 @@ import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ItemMovimentacaoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service responsável por gerenciar as regras de negócio referente
@@ -52,7 +50,8 @@ public class MovimentacaoService extends BaseService {
     }
 
     /**
-     * Regra para ENTRADA: Cria uma única movimentação vinculada ao frasco destino.
+     * Cria uma única movimentação vinculada ao frasco destino.
+     * @param dto
      */
     private Movimentacao salvarMovimentacaoEntrada(MovimentacaoDTO dto) throws MovimentacaoException {
 
@@ -63,11 +62,16 @@ public class MovimentacaoService extends BaseService {
         long quantidadeTotal = processarItensEQuantidadeEntrada(dto, movimentacao);
         movimentacao.setQuantidade(quantidadeTotal);
 
+        frascoDestino.emManutencao();
+        frascoRepository.save(frascoDestino);
+
         return movimentacaoRepository.save(movimentacao);
     }
 
     /**
-     * Processa os frascos de origem para movimentações de ENTRADA.
+     * Processa os frascos de origem para movimentações de Entrada.
+     * @param dto
+     * @param movimentacao
      */
     private long processarItensEQuantidadeEntrada(MovimentacaoDTO dto, Movimentacao movimentacao) throws MovimentacaoException {
         if (dto.itens() != null && !dto.itens().isEmpty()) {
@@ -85,6 +89,9 @@ public class MovimentacaoService extends BaseService {
                     ItemMovimentacao item = itemDto.mapearItemMovimentacao(frascoOrigem, movimentacao);
                     item.setQuantidade(qtdTransferida);
                     itensEntidade.add(item);
+
+                    frascoOrigem.emManutencao();
+                    frascoRepository.save(frascoOrigem);
                 }
             }
 
@@ -96,29 +103,40 @@ public class MovimentacaoService extends BaseService {
     }
 
     /**
-     * Regra para SAÍDA: Gera um registro de Movimentação para CADA frasco selecionado.
+     * Processa os frascos de origem para movimentações de Saída.
+     * @param dto
      */
     private List<Movimentacao> salvarMovimentacaoSaida(MovimentacaoDTO dto) throws MovimentacaoException {
         List<Movimentacao> movimentacoesSalvas = new ArrayList<>();
 
-        if (dto.itens() != null && !dto.itens().isEmpty()) {
-            for (ItemMovimentacaoDTO itemDto : dto.itens()) {
-                if (itemDto != null && itemDto.codFrasco() != null) {
-                    Frasco frasco = frascoRepository.findById(itemDto.codFrasco())
-                            .orElseThrow(() -> new EntityNotFoundException("Frasco não encontrado com o ID: " + itemDto.codFrasco()));
+        for (ItemMovimentacaoDTO itemDto : dto.itens()) {
+            if (itemDto != null && itemDto.codFrasco() != null) {
 
-                    Movimentacao movSaida = new Movimentacao();
-                    movSaida.setTipoMovimentacao(TipoMovimentacao.SAIDA);
-                    movSaida.setDatMovimentacao(dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now());
-                    movSaida.setLocal(dto.local());
-                    movSaida.setObservacao(dto.observacao());
-                    movSaida.setFrasco(frasco);
-                    movSaida.setQuantidade(itemDto.quantidade() != null ? itemDto.quantidade() : 0L);
+                Frasco frascoOrigem = frascoRepository.findById(itemDto.codFrasco())
+                        .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
 
-                    movimentacoesSalvas.add(movimentacaoRepository.save(movSaida));
+                long qtdSaida = (itemDto.quantidade() != null) ? itemDto.quantidade() : 0L;
+
+                if (qtdSaida > 0L) {
+                    Movimentacao movimentacao = new Movimentacao();
+
+                    movimentacao.setTipoMovimentacao(TipoMovimentacao.SAIDA);
+                    movimentacao.setDatMovimentacao(dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now());
+                    movimentacao.setLocal(dto.local());
+                    movimentacao.setObservacao(dto.observacao());
+
+                    movimentacao.setFrasco(frascoOrigem);
+                    movimentacao.setQuantidade(qtdSaida);
+                    movimentacao.setItens(new ArrayList<>());
+
+                    frascoOrigem.emManutencao();
+                    frascoRepository.save(frascoOrigem);
+
+                    movimentacoesSalvas.add(movimentacaoRepository.save(movimentacao));
                 }
             }
         }
+
         return movimentacoesSalvas;
     }
 }

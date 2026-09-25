@@ -59,9 +59,22 @@ public class Frasco {
     @Column(name = "LOCAL", nullable = true)
     private Local local;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUSFRASCO")
+    private StatusFrasco statusFrasco;
+
     @PrePersist
+    public void onPrePersist() {
+        this.statusFrasco = StatusFrasco.DISPONIVEL;
+        limparCamposSeEndo();
+    }
+
     @PreUpdate
-    public void endoPersist() {
+    public void onPreUpdate() {
+        limparCamposSeEndo();
+    }
+
+    private void limparCamposSeEndo() {
         if (this.tipoDente == TipoDente.ENDO) {
             this.posicao = null;
             this.arcada = null;
@@ -81,6 +94,10 @@ public class Frasco {
                     siglaTipo,
                     siglaLocal,
                     codigo);
+    }
+
+    public void emManutencao(){
+        this.statusFrasco = StatusFrasco.EM_MANUTENCA;
     }
 
 }

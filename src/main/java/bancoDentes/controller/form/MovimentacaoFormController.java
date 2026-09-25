@@ -1,24 +1,14 @@
 package bancoDentes.controller.form;
 
 import bancoDentes.controller.auxiliares.BaseController;
-import bancoDentes.dto.ItemAnaliseDTO;
-import bancoDentes.dto.ItemMovimentacaoDTO;
 import bancoDentes.dto.MovimentacaoDTO;
-import bancoDentes.exception.AnaliseException;
 import bancoDentes.model.Frasco;
-import bancoDentes.model.ItemAnalise;
-import bancoDentes.model.ItemMovimentacao;
-import bancoDentes.model.Movimentacao;
 import bancoDentes.service.FrascoService;
-import bancoDentes.service.ItemMovimentacaoService;
 import bancoDentes.service.MovimentacaoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -31,10 +21,9 @@ import java.util.List;
 @Controller
 @RequestMapping("movimentacao")
 @RequiredArgsConstructor
-public class MovimentacaoFormController extends BaseController{
+public class MovimentacaoFormController extends BaseController {
 
     final private FrascoService frascoService;
-    final private ItemMovimentacaoService itemMovimentacaoService;
     final private MovimentacaoService movimentacaoService;
 
     /**
@@ -54,6 +43,9 @@ public class MovimentacaoFormController extends BaseController{
         }
     }
 
+    /**
+     * Captura os frascos para o carregamento do modal
+     */
     @GetMapping("/frascosMovimentacao")
     @ResponseBody
     public List<Frasco> getFrascosCatalogo() {
@@ -67,8 +59,7 @@ public class MovimentacaoFormController extends BaseController{
      * @param cadastrarOutro
      */
     @PostMapping("/save")
-    public String save(@ModelAttribute("movimentacaoDTO") MovimentacaoDTO movimentacaoDTO,
-                       @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
+    public String save(@ModelAttribute("movimentacaoDTO") MovimentacaoDTO movimentacaoDTO, @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
         try {
             movimentacaoService.save(movimentacaoDTO);
             this.saveMessage("Movimentação cadastrada com sucesso!");
