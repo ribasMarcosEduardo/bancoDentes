@@ -4,6 +4,7 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Solicitacao;
+import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.repository.FrascoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

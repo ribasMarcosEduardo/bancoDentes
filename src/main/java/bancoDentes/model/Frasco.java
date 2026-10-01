@@ -78,7 +78,7 @@ public class Frasco {
         if (this.tipoDente == TipoDente.ENDO) {
             this.posicao = null;
             this.arcada = null;
-            this.estado = null;
+            this.estado = EstadoDente.MISTO;
             this.denticao = null;
         }
     }

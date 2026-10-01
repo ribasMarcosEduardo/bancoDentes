@@ -90,6 +90,7 @@
                             <select class="form-control" th:field="*{tipoMovimentacao}" id="tipoMovimentacao" required>
                                 <option value="">- Selecione o tipo -</option>
                                 <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
+                                        th:if="${tipo.name() != 'TRANSFERENCIA'}"
                                         th:value="${tipo.name()}" th:text="${tipo}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
