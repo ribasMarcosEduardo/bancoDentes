@@ -3,10 +3,12 @@ package bancoDentes.controller.painel;
 import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.service.ManutencaoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 /**
@@ -28,7 +30,15 @@ public class ManutencaoPainelController extends BaseController {
      */
     @GetMapping("/painel")
     public String exibePainelManutencoes(Model model) {
-       model.addAttribute("manutencao", manutencaoService.getManutencao());
+       model.addAttribute("manutencoes", manutencaoService.getManutencao());
         return "painel/painelManutencoes";
+    }
+
+    @PostMapping("/concluir/{id}")
+    @ResponseBody
+    public ResponseEntity<Void> concluirManutencao(@PathVariable Long codManutancao, @RequestBody Map<String, Long> payload) {
+        Long novaQuantidade = payload.get("novaQuantidade");
+        //manutencaoService.concluirManutencao(codManutancao, novaQuantidade);
+        return ResponseEntity.ok().build();
     }
 }

@@ -308,11 +308,6 @@
                                                     <span class="request-details__label">Local atual</span>
                                                     <span th:text="${m.frasco != null && m.frasco.local != null ? m.frasco.local : '-'}">-</span>
                                                 </div>
-
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Motivo/Observações</span>
-                                                    <span th:text="${#strings.isEmpty(m.observacao) ? '---' : m.observacao}">---</span>
-                                                </div>
                                             </div>
                                         </section>
 
@@ -343,7 +338,7 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
-<div th:replace="~{partials/modal_concluir_manutencao :: modal_concluir_manutencao}"></div>
+<th:block th:insert="~{partials/modal_concluir_manutencao}"></th:block>
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script th:src="@{/js/vendor/sweetalert2.min.js}"></script>

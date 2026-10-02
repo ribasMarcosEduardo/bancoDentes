@@ -91,7 +91,7 @@
                                 <option value="">- Selecione o tipo -</option>
                                 <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
                                         th:if="${tipo.name() != 'TRANSFERENCIA'}"
-                                        th:value="${tipo.name()}" th:text="${tipo}"></option>
+                                        th:value="${tipo.name()}" th:text="${tipo.nome}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>

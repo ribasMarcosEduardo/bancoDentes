@@ -53,6 +53,13 @@ public class FrascoService extends BaseService{
     }
 
     /**
+     * Recupera todos os frascos disponíveis no sistema.
+     */
+    public List<Frasco> getFrascosPorStatusFrasco(StatusFrasco statusFrasco) {
+        return frascoRepository.findByStatusFrasco(statusFrasco);
+    }
+
+    /**
      * Busca um frasco específico no banco de dados a partir do seu código
      *
      * @param codFrasco

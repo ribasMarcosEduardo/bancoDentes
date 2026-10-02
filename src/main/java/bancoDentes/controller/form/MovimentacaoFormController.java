@@ -3,6 +3,7 @@ package bancoDentes.controller.form;
 import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.MovimentacaoDTO;
 import bancoDentes.model.Frasco;
+import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.service.FrascoService;
 import bancoDentes.service.MovimentacaoService;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class MovimentacaoFormController extends BaseController {
     @GetMapping("/frascosMovimentacao")
     @ResponseBody
     public List<Frasco> getFrascosCatalogo() {
-        return frascoService.getFrascos();
+        return frascoService.getFrascosPorStatusFrasco(StatusFrasco.DISPONIVEL);
     }
 
     /**

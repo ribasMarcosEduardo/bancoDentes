@@ -33,11 +33,11 @@ public class Manutencao {
     @Column(name = "DATCADASTRO", nullable = false)
     private LocalDateTime datCadastro;
 
+    @Column(name = "QUANTIDADE", nullable = false)
+    private Long quantidade;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "ORIGEM", nullable = true)
     private OrigemManutencao origem;
-
-    @Column(name = "OBSERVACAO", nullable = false)
-    private String observacao;
 
 }
