@@ -183,13 +183,19 @@ public class MovimentacaoService extends BaseService {
      */
     private void registrarManutencaoSaida(Frasco frascoOrigem, long saldoAtual, long qtdSaida) throws ManutencaoException {
         long novaQuantidadeCalculada = Math.max(0, saldoAtual - qtdSaida);
-        manutencaoService.registrarManutencao(new ManutencaoDTO(
-                frascoOrigem.getCodigo(),
-                novaQuantidadeCalculada,
-                OrigemManutencao.MANUTENCAO
-        ));
+        frascoOrigem.setQuantidade(novaQuantidadeCalculada);
 
-        frascoOrigem.emManutencao();
+        if (novaQuantidadeCalculada == 0L) {
+            frascoOrigem.inativo();
+        } else {
+            manutencaoService.registrarManutencao(new ManutencaoDTO(
+                    frascoOrigem.getCodigo(),
+                    novaQuantidadeCalculada,
+                    OrigemManutencao.MANUTENCAO
+            ));
+            frascoOrigem.emManutencao();
+        }
+
         frascoRepository.save(frascoOrigem);
     }
 }
