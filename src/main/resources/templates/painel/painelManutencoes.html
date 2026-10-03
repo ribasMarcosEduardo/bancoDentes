@@ -229,16 +229,17 @@
                                  th:data-grupo="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : ''}"
                                  th:data-estado="${m.frasco != null && m.frasco.estado != null ? m.frasco.estado : ''}"
                                  th:data-origem="${m.origem != null ? m.origem : ''}"
-                                 th:data-qtd="${m.frasco != null ? m.frasco.quantidade : 0}">
+                                 th:data-qtd="${m.quantidade != null ? m.quantidade : 0}">
 
                             <div class="result-list">
                                 <span class="result-list__code" th:text="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : (m.frasco != null ? 'FR-' + m.frasco.codigo : '-')}">FR-000</span>
                                 <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '-'}">Grupo</span>
-                                <span th:text="${m.frasco != null ? m.frasco.quantidade : 0}">0</span>
+                                <span th:text="${m.frasco != null ? m.quantidade : 0}">0</span>
 
                                 <div class="result-list__actions">
                                     <button type="button"
                                             class="result-list__action result-list__action--green js-concluir-manutencao"
+                                            th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}"
                                             th:data-id="${m.codigo}"
                                             data-tooltip="Concluir manutenção"
                                             aria-label="Concluir manutenção">
@@ -317,6 +318,7 @@
                                             <div class="request-panel__actions">
                                                 <button type="button"
                                                         class="result-list__action result-list__action--green js-concluir-manutencao"
+                                                        th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}"
                                                         th:data-id="${m.codigo}"
                                                         data-tooltip="Concluir manutenção"
                                                         aria-label="Concluir manutenção">

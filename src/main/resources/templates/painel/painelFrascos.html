@@ -237,6 +237,10 @@
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
 
+                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                    <i class="icon" data-lucide="toolbox"></i>
+                  </button>
+
                   <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                       <i class="icon" data-lucide="archive-x"></i>
@@ -308,6 +312,10 @@
                           <i class="icon" data-lucide="pen-line"></i>
                         </a>
 
+                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                          <i class="icon" data-lucide="toolbox"></i>
+                        </button>
+
                         <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                           <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                             <i class="icon" data-lucide="archive-x"></i>
@@ -335,7 +343,7 @@
                 <div>
                   <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
 
-                  <div class="card__meta" th:text="${frasco.local != null ? frasco.local.nome : '-'} + ' | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+                  <div class="card__meta" th:text="${frasco.local != null ? frasco.local.nome : '-'} + ' | qtd. ' + ${frasco.quantidade} +${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
 
                 </div>
                 <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
@@ -366,6 +374,11 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+
+                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                    <i class="icon" data-lucide="toolbox"></i>
+                  </button>
+
                   <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                       <i class="icon" data-lucide="archive-x"></i>
@@ -393,7 +406,6 @@
 <script th:src="@{/js/page-size.js}"></script>
 
 <script>
-
   document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".delete-form").forEach(form => {
         form.addEventListener("submit", function(e) {
@@ -420,8 +432,48 @@
             });
         });
     });
-});
 
+    document.addEventListener("click", async function(e) {
+        const btn = e.target.closest(".js-criar-manutencao");
+        if (!btn) return;
+
+        const codFrasco = btn.dataset.id;
+        if (!codFrasco) return;
+
+        const result = await Swal.fire({
+            icon: "question",
+            title: "Enviar para Manutenção?",
+            text: "Deseja registrar uma manutenção para este frasco utilizando a quantidade atual?",
+            showCancelButton: true,
+            confirmButtonText: "Sim, enviar",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/manutencao/criar/${codFrasco}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            if (!response.ok) throw new Error("Erro ao registrar manutenção.");
+
+            await Swal.fire({
+                icon: "success",
+                title: "Sucesso!",
+                text: "Frasco enviado para manutenção com sucesso.",
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            location.reload();
+        } catch (error) {
+            console.error(error);
+            Swal.fire("Erro", "Não foi possível registrar a manutenção.", "error");
+        }
+    });
+});
 </script>
 
 </body>

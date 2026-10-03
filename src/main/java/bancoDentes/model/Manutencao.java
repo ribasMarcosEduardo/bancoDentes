@@ -40,4 +40,8 @@ public class Manutencao {
     @Column(name = "ORIGEM", nullable = true)
     private OrigemManutencao origem;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS_MANUTENCAO", nullable = false)
+    private bancoDentes.model.enumModels.StatusManutencao statusManutencao;
+
 }

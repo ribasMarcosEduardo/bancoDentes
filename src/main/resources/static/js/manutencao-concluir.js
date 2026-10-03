@@ -1,4 +1,3 @@
-```javascript
 function setupManutencaoConcluirModal() {
     const overlay = document.querySelector("#modalConcluirManutencao");
     const resultsView = document.querySelector("#resultsView");
@@ -116,23 +115,6 @@ function setupManutencaoConcluirModal() {
     qtdInput.addEventListener("input", clampQtdInput);
     qtdInput.addEventListener("blur", clampQtdInput);
 
-    function ajustarContagemResultados(delta) {
-        const strong = document.querySelector(".low-opacity strong");
-        const range = document.querySelector(".pagination__range");
-
-        if (!strong) return;
-
-        const match = strong.textContent.match(/\d+/);
-        if (!match) return;
-
-        const novoTotal = Math.max(0, Number(match[0]) + delta);
-        strong.textContent = strong.textContent.replace(/\d+/, String(novoTotal));
-
-        if (range) {
-            range.textContent = novoTotal > 0 ? `1-${novoTotal}` : "0-0";
-        }
-    }
-
     confirmBtn?.addEventListener("click", async () => {
         if (!linhaAtual) return;
 
@@ -143,7 +125,6 @@ function setupManutencaoConcluirModal() {
 
         const codigo = linhaAtual.dataset.codigo || "---";
         const novaQuantidade = Number(qtdInput.value);
-        const row = linhaAtual;
 
         if (!codManutencao) {
             if (window.Swal) Swal.fire('Erro', 'Código da manutenção não identificado.', 'error');
@@ -156,37 +137,26 @@ function setupManutencaoConcluirModal() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ novaQuantidade: novaQuantidade })
+                body: JSON.stringify({ quantidadeCalculada: novaQuantidade })
             });
 
             if (!response.ok) throw new Error("Erro ao concluir manutenção no servidor.");
 
             close();
 
-            row.style.transition = "opacity 0.25s ease, transform 0.25s ease";
-            row.style.opacity = "0";
-            row.style.transform = "translateY(-6px)";
-
-            row.addEventListener(
-                "transitionend",
-                () => {
-                    row.remove();
-                    ajustarContagemResultados(-1);
-                },
-                { once: true }
-            );
-
             if (window.Swal) {
-                Swal.fire({
+                await Swal.fire({
                     icon: 'success',
                     title: 'Manutenção Concluída!',
                     html: `Frasco <strong>${codigo}</strong> atualizado com sucesso para <strong>${novaQuantidade}</strong> dentes.`,
-                    timer: 2000,
+                    timer: 1500,
                     showConfirmButton: false
                 });
             } else if (typeof showToast === "function") {
                 showToast(`Manutenção do frasco <strong>${codigo}</strong> concluída — quantidade atualizada para <strong>${novaQuantidade}</strong>.`);
             }
+
+            location.reload();
 
         } catch (error) {
             console.error(error);
@@ -194,4 +164,5 @@ function setupManutencaoConcluirModal() {
         }
     });
 }
-```
+
+document.addEventListener("DOMContentLoaded", setupManutencaoConcluirModal);

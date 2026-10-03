@@ -1,6 +1,7 @@
 package bancoDentes.controller.painel;
 
 import bancoDentes.controller.auxiliares.BaseController;
+import bancoDentes.dto.ManutencaoDTO;
 import bancoDentes.service.ManutencaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +35,22 @@ public class ManutencaoPainelController extends BaseController {
         return "painel/painelManutencoes";
     }
 
-    @PostMapping("/concluir/{id}")
+    @PostMapping("/concluir/{codManutencao}")
     @ResponseBody
-    public ResponseEntity<Void> concluirManutencao(@PathVariable Long codManutancao, @RequestBody Map<String, Long> payload) {
-        Long novaQuantidade = payload.get("novaQuantidade");
-        //manutencaoService.concluirManutencao(codManutancao, novaQuantidade);
+    public ResponseEntity<Void> concluirManutencao(
+            @PathVariable("codManutencao") Long codManutencao,
+            @RequestBody ManutencaoDTO dto) throws Exception {
+
+        manutencaoService.concluirManutencao(codManutencao, dto.quantidadeCalculada());
+
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/criar/{codFrasco}")
+    @ResponseBody
+    public void criarManutencaoDireta(
+            @PathVariable("codFrasco") Long codFrasco) throws Exception {
+
+        manutencaoService.registrarManutencaoDireta(codFrasco);
     }
 }

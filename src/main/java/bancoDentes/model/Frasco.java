@@ -100,4 +100,12 @@ public class Frasco {
         this.statusFrasco = StatusFrasco.EM_MANUTENCA;
     }
 
+    public void inativo(){
+        this.statusFrasco = StatusFrasco.INATIVO;
+    }
+
+    public void disponivel(){
+        this.statusFrasco = StatusFrasco.DISPONIVEL;
+    }
+
 }

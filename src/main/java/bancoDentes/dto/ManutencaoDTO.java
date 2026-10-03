@@ -18,6 +18,7 @@ public record ManutencaoDTO(
         manutencao.setDatCadastro(LocalDateTime.now());
         manutencao.setQuantidade(this.quantidadeCalculada);
         manutencao.setOrigem(this.origem);
+        manutencao.setStatusManutencao(bancoDentes.model.enumModels.StatusManutencao.EM_ABERTO);
 
         return manutencao;
     }
