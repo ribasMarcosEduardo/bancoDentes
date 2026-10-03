@@ -36,8 +36,9 @@ public record MovimentacaoDTO(
         movimentacao.setDatMovimentacao(this.datManutencao != null ? this.datManutencao.atStartOfDay() : LocalDateTime.now());
         movimentacao.setLocal(this.local);
         movimentacao.setObservacao(this.observacao);
-        movimentacao.setQuantidade(this.quantidade);
+        movimentacao.setQuantidade(this.quantidade != null ? this.quantidade : 0L);
         movimentacao.setFrasco(frascoPrincipal);
+        movimentacao.setSaldoAnterior(frascoPrincipal.getQuantidade() != null ? frascoPrincipal.getQuantidade() : 0L);
 
         return movimentacao;
     }

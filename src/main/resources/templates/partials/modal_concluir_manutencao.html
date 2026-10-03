@@ -1,0 +1,93 @@
+<div class="modal-overlay" id="modalConcluirManutencao" xmlns:th="http://www.thymeleaf.org">
+    <div class="modal modal--compact glass-frost" role="dialog" aria-modal="true" aria-labelledby="modalConcluirManutencaoTitle">
+
+        <input type="hidden" id="modalConcluirManutencaoId">
+
+        <header class="modal__header">
+            <h2 id="modalConcluirManutencaoTitle">
+                <i class="icon" data-lucide="check-circle"></i>
+                Concluir Manutenção
+            </h2>
+
+            <button type="button" class="modal__close" id="modalConcluirManutencaoClose" aria-label="Fechar">
+                <i class="icon" data-lucide="x"></i>
+            </button>
+        </header>
+
+        <div class="modal__body">
+
+            <section class="request-panel">
+                <h4 class="request-panel__title">Informações do Frasco</h4>
+
+                <div class="request-details__grid">
+                    <div class="request-detail">
+                        <span class="request-details__label">Identificador</span>
+                        <span id="modalConcluirManutencaoCodigo">---</span>
+                    </div>
+
+                    <div class="request-detail">
+                        <span class="request-details__label">Grupo dentário</span>
+                        <span id="modalConcluirManutencaoGrupo">---</span>
+                    </div>
+
+                    <div class="request-detail">
+                        <span class="request-details__label">Estado</span>
+                        <span id="modalConcluirManutencaoEstado">---</span>
+                    </div>
+
+                    <div class="request-detail">
+                        <span class="request-details__label">Local</span>
+                        <span id="modalConcluirManutencaoLocal">---</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="request-panel">
+                <h4 class="request-panel__title">Quantidade atual</h4>
+
+                <p class="modal-qty-highlight">
+                    <strong id="modalConcluirManutencaoQtdAtual">0</strong> dentes
+                </p>
+            </section>
+
+            <section class="request-panel">
+                <h4 class="request-panel__title">Quantidade após a manutenção</h4>
+
+                <div class="form-group">
+                    <label for="modalConcluirManutencaoQtdNova">Nova quantidade</label>
+
+                    <div class="number-input number-input--compact">
+                        <input
+                                class="form-control number-input__field"
+                                type="number"
+                                min="0"
+                                value="0"
+                                id="modalConcluirManutencaoQtdNova"
+                        >
+
+                        <div class="number-input__actions">
+                            <button type="button" class="number-input__btn" data-number-action="down" aria-label="Diminuir quantidade">
+                                <i class="icon" data-lucide="minus"></i>
+                            </button>
+
+                            <button type="button" class="number-input__btn" data-number-action="up" aria-label="Aumentar quantidade">
+                                <i class="icon" data-lucide="plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="modal-field-hint">Ajuste caso dentes tenham sido retirados ou descartados durante a manutenção.</p>
+                </div>
+            </section>
+        </div>
+
+        <footer class="modal__footer modal__footer--end">
+            <button type="button" class="btn btn-secondary" id="modalConcluirManutencaoCancelar">Cancelar</button>
+
+            <button type="button" class="btn btn-primary" id="modalConcluirManutencaoConfirmar">
+                <i class="orderBy-icon" data-lucide="check"></i>
+                Concluir
+            </button>
+        </footer>
+    </div>
+</div>

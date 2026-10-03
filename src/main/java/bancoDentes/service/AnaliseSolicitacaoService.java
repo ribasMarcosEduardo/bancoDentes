@@ -1,18 +1,22 @@
 package bancoDentes.service;
 
 import bancoDentes.dto.AnaliseSolicitacaoDTO;
+import bancoDentes.dto.ManutencaoDTO;
 import bancoDentes.exception.AnaliseException;
 import bancoDentes.exception.AnaliseNaoEncontradaException;
 import bancoDentes.exception.SolicitacaoException;
-import bancoDentes.model.AnaliseSolicitacao;
-import bancoDentes.model.Estudante;
-import bancoDentes.model.Solicitacao;
+import bancoDentes.model.*;
+import bancoDentes.model.enumModels.OrigemManutencao;
 import bancoDentes.repository.AnaliseSolicitacaoRepository;
+import bancoDentes.repository.FrascoRepository;
+import bancoDentes.repository.ItemAnaliseRepository;
+import bancoDentes.service.validator.ItemAnaliseValidator;
 import bancoDentes.service.validator.SolicitacaoValidator;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,8 +31,12 @@ public class AnaliseSolicitacaoService extends BaseService {
 
     private final SolicitacaoService solicitacaoService;
     private final CreditoService creditoService;
-    private final AnaliseSolicitacaoRepository analiseSolicitacaoRepository;
+    private final ManutencaoService manutencaoService;
     private final SolicitacaoValidator solicitacaoValidator;
+    private final ItemAnaliseValidator itemAnaliseValidator;
+    private final AnaliseSolicitacaoRepository analiseSolicitacaoRepository;
+    private final FrascoRepository frascoRepository;
+    private final ItemAnaliseRepository itemAnaliseRepository;
 
     /**
      * Busca uma análise existente vinculada à solicitação ou inicia uma nova análise
@@ -104,16 +112,44 @@ public class AnaliseSolicitacaoService extends BaseService {
     }
 
     /**
-     * Altera o status da solicitação para aguardando retirada.
+     * Altera o status da solicitação para aguardando retirada e gera as manutenções
+     * para os frascos cujos dentes foram separados nesta análise.
      *
      * @param codSolicitacao
      */
-    @Transactional
-    public AnaliseSolicitacao aguardandoRetirada(final Long codSolicitacao) throws AnaliseException, SolicitacaoException {
+    @Transactional(rollbackFor = Exception.class)
+    public AnaliseSolicitacao aguardandoRetirada(final Long codSolicitacao) throws Exception {
         AnaliseSolicitacao analise = this.save(codSolicitacao);
 
         Solicitacao solicitacao = analise.getSolicitacao();
         solicitacao.aguardandoRetirada();
+
+        List<ItemAnalise> itensSeparados = itemAnaliseRepository.findByAnaliseSolicitacaoCodigo(analise.getCodigo());
+
+        itemAnaliseValidator.validaItensSelecao(itensSeparados);
+
+        for (ItemAnalise item : itensSeparados) {
+            Frasco frasco = item.getFrasco();
+
+            long novaQuantidade = frasco.getQuantidade() - item.getQuantidade();
+            novaQuantidade = Math.max(0L, novaQuantidade);
+
+            frasco.setQuantidade(novaQuantidade);
+
+            manutencaoService.registrarManutencao(new ManutencaoDTO(
+                    frasco.getCodigo(),
+                    novaQuantidade,
+                    OrigemManutencao.SOLICITACAO
+            ));
+
+            if (novaQuantidade == 0L) {
+                frasco.inativo();
+            } else {
+                frasco.emManutencao();
+            }
+
+            frascoRepository.save(frasco);
+        }
 
         return analiseSolicitacaoRepository.save(analise);
     }

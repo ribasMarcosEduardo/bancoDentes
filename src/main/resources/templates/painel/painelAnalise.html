@@ -440,45 +440,6 @@
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
-
-        var msgSucesso = [[${mensagemSucesso != null ? mensagemSucesso : session.mensagemSucesso != null ? session.mensagemSucesso : ''}]];
-        var msgErro = [[${mensagemErro != null ? mensagemErro : session.mensagemErro != null ? session.mensagemErro : ''}]];
-
-        var isReloadOrBack = false;
-        var perfEntries = performance.getEntriesByType("navigation");
-        if (perfEntries.length > 0) {
-            var p = perfEntries[0].type;
-            if (p === 'reload' || p === 'back_forward') {
-                isReloadOrBack = true;
-            }
-        } else if (window.performance && window.performance.navigation) {
-            var t = window.performance.navigation.type;
-            if (t === 1 || t === 2) {
-                isReloadOrBack = true;
-            }
-        }
-
-        if (!isReloadOrBack) {
-            if (msgSucesso && msgSucesso.trim() !== "") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso!',
-                    text: msgSucesso,
-                    showConfirmButton: false,
-                    timer: 5000
-                });
-            }
-
-            if (msgErro && msgErro.trim() !== "") {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Ops...',
-                    text: msgErro,
-                    showConfirmButton: true,
-                    confirmButtonColor: '#d33'
-                });
-            }
-        }
     });
 
     function abrirModalNegar(codigo) {

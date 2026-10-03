@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -30,7 +28,7 @@ public class Movimentacao {
     private Long codigo;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TIPO_MOVIMENTACAO", nullable = false)
+    @Column(name = "TIPO_MOVIMENTACAO", nullable = false, length = 20)
     private TipoMovimentacao tipoMovimentacao;
 
     @Column(name = "DATMOVIMENTACAO", nullable = false)
@@ -50,8 +48,25 @@ public class Movimentacao {
     @Column(name = "QUANTIDADE", nullable = false)
     private Long quantidade;
 
-    @OneToMany(mappedBy = "movimentacao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemMovimentacao> itens = new ArrayList<>();
+    @Column(name = "SALDO_ANTERIOR", nullable = false)
+    private Long saldoAnterior;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CODMOVIMENTACAO_VINCULADA")
+    private Movimentacao movimentacaoVinculada;
 
+    public void transferencia(){
+        this.tipoMovimentacao = TipoMovimentacao.TRANSFERENCIA;
+    }
+
+    public Movimentacao(TipoMovimentacao tipoMovimentacao, LocalDateTime datMovimentacao, Local local, String observacao, Frasco frasco, Long quantidade, Long saldoAnterior, Movimentacao movimentacaoVinculada) {
+        this.tipoMovimentacao = tipoMovimentacao;
+        this.datMovimentacao = datMovimentacao != null ? datMovimentacao : LocalDateTime.now();
+        this.local = local;
+        this.observacao = observacao;
+        this.frasco = frasco;
+        this.quantidade = quantidade;
+        this.saldoAnterior = saldoAnterior;
+        this.movimentacaoVinculada = movimentacaoVinculada;
+    }
 }

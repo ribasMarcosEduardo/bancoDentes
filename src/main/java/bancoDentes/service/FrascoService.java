@@ -4,6 +4,7 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Solicitacao;
+import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.repository.FrascoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,13 @@ public class FrascoService extends BaseService{
      */
     public List<Frasco> getFrascos() {
         return frascoRepository.findAll();
+    }
+
+    /**
+     * Recupera todos os frascos disponíveis no sistema.
+     */
+    public List<Frasco> getFrascosPorStatusFrasco(StatusFrasco statusFrasco) {
+        return frascoRepository.findByStatusFrasco(statusFrasco);
     }
 
     /**

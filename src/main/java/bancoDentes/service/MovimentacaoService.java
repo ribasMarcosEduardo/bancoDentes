@@ -1,14 +1,15 @@
 package bancoDentes.service;
 
 import bancoDentes.dto.ItemMovimentacaoDTO;
+import bancoDentes.dto.ManutencaoDTO;
 import bancoDentes.dto.MovimentacaoDTO;
+import bancoDentes.exception.ManutencaoException;
 import bancoDentes.exception.MovimentacaoException;
 import bancoDentes.model.Frasco;
-import bancoDentes.model.ItemMovimentacao;
 import bancoDentes.model.Movimentacao;
+import bancoDentes.model.enumModels.OrigemManutencao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
-import bancoDentes.repository.ItemMovimentacaoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,55 +30,81 @@ import java.util.List;
 public class MovimentacaoService extends BaseService {
 
     private final MovimentacaoRepository movimentacaoRepository;
-    private final ItemMovimentacaoRepository itemMovimentacaoRepository;
     private final FrascoRepository frascoRepository;
+    private final ManutencaoService manutencaoService;
 
     /**
-     * Recupera todos os frascos cadastrados no sistema.
+     * Recupera todas as movimentações cadastradas no sistema.
      */
     public List<Movimentacao> getMovimentacoes() {
         return movimentacaoRepository.findAll();
     }
 
     @Transactional
-    public List<Movimentacao> save(MovimentacaoDTO dto) throws MovimentacaoException {
+    public List<Movimentacao> save(MovimentacaoDTO dto) throws Exception {
 
         if (TipoMovimentacao.SAIDA.equals(dto.tipoMovimentacao())) {
             return salvarMovimentacaoSaida(dto);
         }
 
-        return List.of(salvarMovimentacaoEntrada(dto));
+        return salvarMovimentacaoEntrada(dto);
     }
 
     /**
-     * Cria uma única movimentação vinculada ao frasco destino.
-     * @param dto
+     * Cria a movimentação principal de Entrada e as movimentações de Transferência
+     * para os frascos de origem (se houverem).
      */
-    private Movimentacao salvarMovimentacaoEntrada(MovimentacaoDTO dto) throws MovimentacaoException {
+    private List<Movimentacao> salvarMovimentacaoEntrada(MovimentacaoDTO dto) throws Exception {
+        List<Movimentacao> movimentacoesSalvas = new ArrayList<>();
 
         Frasco frascoDestino = frascoRepository.findById(dto.codFrasco())
-                .orElseThrow(() ->  new MovimentacaoException(getText("error.frasco.naoEncontrado")));
+                .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
 
-        Movimentacao movimentacao = dto.mapearMovimentacao(frascoDestino);
-        long quantidadeTotal = processarItensEQuantidadeEntrada(dto, movimentacao);
-        movimentacao.setQuantidade(quantidadeTotal);
+        Movimentacao movimentacaoEntrada = dto.mapearMovimentacao(frascoDestino);
+        long saldoAtual = frascoDestino.getQuantidade() != null ? frascoDestino.getQuantidade() : 0L;
+        movimentacaoEntrada.setSaldoAnterior(saldoAtual);
+
+        movimentacaoEntrada = movimentacaoRepository.save(movimentacaoEntrada);
+
+        long quantidadeTotalTransferencias = processarItensEQuantidadeEntrada(dto, movimentacaoEntrada, movimentacoesSalvas);
+
+        long qtdEntradaInformada = dto.quantidade() != null ? dto.quantidade() : 0L;
+
+        boolean temItensOrigem = dto.itens() != null && !dto.itens().isEmpty();
+
+        long novaQuantidadeDestino;
+        if (temItensOrigem) {
+            novaQuantidadeDestino = saldoAtual + quantidadeTotalTransferencias;
+        } else {
+            novaQuantidadeDestino = saldoAtual + qtdEntradaInformada;
+        }
+
+        frascoDestino.setQuantidade(novaQuantidadeDestino);
+
+        long qtdFinal = quantidadeTotalTransferencias > 0 ? quantidadeTotalTransferencias : qtdEntradaInformada;
+        movimentacaoEntrada.setQuantidade(qtdFinal);
+
+        manutencaoService.registrarManutencao(new ManutencaoDTO(
+                frascoDestino.getCodigo(),
+                novaQuantidadeDestino,
+                OrigemManutencao.MANUTENCAO
+        ));
 
         frascoDestino.emManutencao();
         frascoRepository.save(frascoDestino);
 
-        return movimentacaoRepository.save(movimentacao);
+        movimentacoesSalvas.add(0, movimentacaoRepository.save(movimentacaoEntrada));
+
+        return movimentacoesSalvas;
     }
 
     /**
-     * Processa os frascos de origem para movimentações de Entrada.
-     * @param dto
-     * @param movimentacao
+     * Processa os frascos de origem para movimentações de Entrada e gera Transferências.
      */
-    private long processarItensEQuantidadeEntrada(MovimentacaoDTO dto, Movimentacao movimentacao) throws MovimentacaoException {
-        if (dto.itens() != null && !dto.itens().isEmpty()) {
-            List<ItemMovimentacao> itensEntidade = new ArrayList<>();
-            long quantidadeTotal = 0L;
+    private long processarItensEQuantidadeEntrada(MovimentacaoDTO dto, Movimentacao movimentacaoEntrada, List<Movimentacao> movimentacoesSalvas) throws MovimentacaoException {
+        long quantidadeTotal = 0L;
 
+        if (dto.itens() != null && !dto.itens().isEmpty()) {
             for (ItemMovimentacaoDTO itemDto : dto.itens()) {
                 if (itemDto != null && itemDto.codFrasco() != null) {
                     Frasco frascoOrigem = frascoRepository.findById(itemDto.codFrasco())
@@ -86,57 +113,83 @@ public class MovimentacaoService extends BaseService {
                     long qtdTransferida = (itemDto.quantidade() != null) ? itemDto.quantidade() : 0L;
                     quantidadeTotal += qtdTransferida;
 
-                    ItemMovimentacao item = itemDto.mapearItemMovimentacao(frascoOrigem, movimentacao);
-                    item.setQuantidade(qtdTransferida);
-                    itensEntidade.add(item);
+                    long saldoAnteriorOrigem = frascoOrigem.getQuantidade() != null ? frascoOrigem.getQuantidade() : 0L;
 
-                    frascoOrigem.emManutencao();
+                    frascoOrigem.setQuantidade(0L);
+                    frascoOrigem.setStatusFrasco(bancoDentes.model.enumModels.StatusFrasco.INATIVO);
                     frascoRepository.save(frascoOrigem);
+
+                    if (qtdTransferida > 0L) {
+                        Movimentacao transferencia = new Movimentacao(
+                                TipoMovimentacao.TRANSFERENCIA,
+                                dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now(),
+                                dto.local(),
+                                dto.observacao(),
+                                frascoOrigem,
+                                qtdTransferida,
+                                saldoAnteriorOrigem,
+                                movimentacaoEntrada
+                        );
+
+                        movimentacoesSalvas.add(movimentacaoRepository.save(transferencia));
+                    }
                 }
             }
-
-            movimentacao.setItens(itensEntidade);
-            return quantidadeTotal;
         }
-
-        return (dto.quantidade() != null) ? dto.quantidade() : 0L;
+        return quantidadeTotal;
     }
 
     /**
      * Processa os frascos de origem para movimentações de Saída.
-     * @param dto
      */
-    private List<Movimentacao> salvarMovimentacaoSaida(MovimentacaoDTO dto) throws MovimentacaoException {
+    private List<Movimentacao> salvarMovimentacaoSaida(MovimentacaoDTO dto) throws Exception {
         List<Movimentacao> movimentacoesSalvas = new ArrayList<>();
 
-        for (ItemMovimentacaoDTO itemDto : dto.itens()) {
-            if (itemDto != null && itemDto.codFrasco() != null) {
+        if (dto.itens() != null && !dto.itens().isEmpty()) {
+            for (ItemMovimentacaoDTO itemDto : dto.itens()) {
+                if (itemDto != null && itemDto.codFrasco() != null) {
 
-                Frasco frascoOrigem = frascoRepository.findById(itemDto.codFrasco())
-                        .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
+                    Frasco frascoOrigem = frascoRepository.findById(itemDto.codFrasco())
+                            .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
 
-                long qtdSaida = (itemDto.quantidade() != null) ? itemDto.quantidade() : 0L;
+                    long qtdSaida = (itemDto.quantidade() != null) ? itemDto.quantidade() : 0L;
+                    long saldoAtual = frascoOrigem.getQuantidade() != null ? frascoOrigem.getQuantidade() : 0L;
 
-                if (qtdSaida > 0L) {
-                    Movimentacao movimentacao = new Movimentacao();
+                    if (qtdSaida > 0L) {
+                        registrarManutencaoSaida(frascoOrigem, saldoAtual, qtdSaida);
 
-                    movimentacao.setTipoMovimentacao(TipoMovimentacao.SAIDA);
-                    movimentacao.setDatMovimentacao(dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now());
-                    movimentacao.setLocal(dto.local());
-                    movimentacao.setObservacao(dto.observacao());
+                        Movimentacao movimentacao = new Movimentacao(
+                                TipoMovimentacao.SAIDA,
+                                dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now(),
+                                dto.local(),
+                                dto.observacao(),
+                                frascoOrigem,
+                                qtdSaida,
+                                saldoAtual,
+                                null
+                        );
 
-                    movimentacao.setFrasco(frascoOrigem);
-                    movimentacao.setQuantidade(qtdSaida);
-                    movimentacao.setItens(new ArrayList<>());
-
-                    frascoOrigem.emManutencao();
-                    frascoRepository.save(frascoOrigem);
-
-                    movimentacoesSalvas.add(movimentacaoRepository.save(movimentacao));
+                        movimentacoesSalvas.add(movimentacaoRepository.save(movimentacao));
+                    }
                 }
             }
         }
 
         return movimentacoesSalvas;
+    }
+
+    /**
+     * Registra a manutenção para um frasco em uma operação de Saída.
+     */
+    private void registrarManutencaoSaida(Frasco frascoOrigem, long saldoAtual, long qtdSaida) throws ManutencaoException {
+        long novaQuantidadeCalculada = Math.max(0, saldoAtual - qtdSaida);
+        manutencaoService.registrarManutencao(new ManutencaoDTO(
+                frascoOrigem.getCodigo(),
+                novaQuantidadeCalculada,
+                OrigemManutencao.MANUTENCAO
+        ));
+
+        frascoOrigem.emManutencao();
+        frascoRepository.save(frascoOrigem);
     }
 }

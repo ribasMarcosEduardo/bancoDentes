@@ -3,7 +3,8 @@ package bancoDentes.model.enumModels;
 public enum TipoMovimentacao {
 
     ENTRADA("Entrada"),
-    SAIDA("Saída");
+    SAIDA("Saída"),
+    TRANSFERENCIA("Transferência");
 
     private final String nome;
 

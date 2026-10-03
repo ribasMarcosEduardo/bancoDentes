@@ -10,9 +10,11 @@ import bancoDentes.model.Solicitacao;
 import bancoDentes.repository.AnaliseSolicitacaoRepository;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ItemAnaliseRepository;
+import bancoDentes.service.BaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,7 +25,7 @@ import java.util.Optional;
  */
 @Component
 @RequiredArgsConstructor
-public class ItemAnaliseValidator {
+public class ItemAnaliseValidator extends BaseService {
 
     private final AnaliseSolicitacaoRepository analiseSolicitacaoRepository;
     private final FrascoRepository frascoRepository;
@@ -32,14 +34,21 @@ public class ItemAnaliseValidator {
         if (itemAnalise.getQuantidade() != null && itemAnalise.getQuantidade() > 0) {
             AnaliseSolicitacao analise = analiseSolicitacaoRepository
                     .findById(itemAnalise.getAnaliseSolicitacao().getCodigo())
-                    .orElseThrow(() -> new AnaliseException("error.analise.nao.encontrada"));
+                    .orElseThrow(() -> new AnaliseException(getText("error.analise.nao.encontrada")));
 
             Frasco frasco = frascoRepository
                     .findById(itemAnalise.getFrasco().getCodigo())
-                    .orElseThrow(() -> new FrascoException("error.frasco.nao.encontrado"));
+                    .orElseThrow(() -> new FrascoException(getText("error.frasco.nao.encontrado")));
 
             itemAnalise.setAnaliseSolicitacao(analise);
             itemAnalise.setFrasco(frasco);
         }
     }
+
+    public void validaItensSelecao(List<ItemAnalise> itensSeparados) throws AnaliseException {
+        if (itensSeparados.isEmpty()) {
+            throw new AnaliseException(getText("error.item.naoInformado"));
+        }
+    }
+
 }

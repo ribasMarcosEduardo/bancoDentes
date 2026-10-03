@@ -62,6 +62,11 @@
                             <input type="checkbox" value="Saída" data-filter-group="Tipo">
                             <span>Saída</span>
                         </label>
+
+                        <label class="checkbox-filter">
+                            <input type="checkbox" value="Transferência" data-filter-group="Tipo">
+                            <span>Transferência</span>
+                        </label>
                     </div>
                 </div>
 
@@ -198,7 +203,7 @@
                         <article th:each="mov : ${movimentacao}"
                                  class="request-row"
                                  th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
-                                 th:data-tipo="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}"
+                                 th:data-tipo="${mov.tipoMovimentacao.nome}"
                                  th:data-grupo="${mov.frasco != null ? mov.frasco.tipoDente : ''}">
 
                             <div class="result-list">
@@ -208,7 +213,7 @@
 
                                 <span class="status-pill"
                                       th:classappend="'status-pill--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
-                                      th:text="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}">Tipo</span>
+                                      th:text="${mov.tipoMovimentacao.nome}">Tipo</span>
 
                                 <span th:text="${mov.quantidade != null ? mov.quantidade : 0}">0</span>
                                 <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yy')}">00/00/00</span>
@@ -227,17 +232,22 @@
                                             <div class="request-details__grid">
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Tipo</span>
-                                                    <span th:text="${mov.tipoMovimentacao.name() == 'ENTRADA' ? 'Entrada' : 'Saída'}">-</span>
+                                                    <span th:text="${mov.tipoMovimentacao.nome}">-</span>
+                                                </div>
+
+                                                <div class="request-detail" th:if="${mov.movimentacaoVinculada != null}">
+                                                    <span class="request-details__label">Mov. Referência</span>
+                                                    <span th:text="'MOV-' + ${#numbers.formatInteger(mov.movimentacaoVinculada.codigo, 3)}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
-                                                    <span class="request-details__label">Quantidade Total</span>
+                                                    <span class="request-details__label">Quantidade Movimentada</span>
                                                     <span th:text="${mov.quantidade != null ? mov.quantidade : 0}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Local da Movimentação</span>
-                                                    <span>Banco de Dentes Humanos</span>
+                                                    <span th:text="${mov.local != null ? mov.local.nome : 'Banco de Dentes Humanos'}">Banco de Dentes Humanos</span>
                                                 </div>
 
                                                 <div class="request-detail">
@@ -277,9 +287,10 @@
                                                 </div>
 
                                                 <div class="request-detail">
-                                                    <span class="request-details__label">Qtd. atual do Frasco</span>
-                                                    <span th:text="${mov.frasco != null ? mov.frasco.quantidade : '-'}">-</span>
+                                                    <span class="request-details__label">Qtd. no momento da mov.</span>
+                                                    <span th:text="${mov.saldoAnterior != null ? mov.saldoAnterior : '-'}">-</span>
                                                 </div>
+
                                             </div>
                                         </section>
                                     </div>

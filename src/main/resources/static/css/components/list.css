@@ -345,6 +345,10 @@
     background: #ef4444;
 }
 
+.request-row--transferencia .request-details::before {
+    background: #f59e0b;
+}
+
 .request-details__content {
     min-height: 0;
 
@@ -480,6 +484,11 @@
 .status-pill--saida {
     background: rgba(239,68,68,0.16);
     color: #ef4444;
+}
+
+.status-pill--transferencia {
+    background: rgba(245,158,11,0.16);
+    color: #f59e0b;
 }
 
 .status-pill--pendente {
