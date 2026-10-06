@@ -36,8 +36,8 @@ function setupFilters() {
         const currentRows = Array.from(document.querySelectorAll(".request-row, .card"));
 
         currentRows.sort((a, b) => {
-            const codeA = parseInt(a.getAttribute("data-codigo")) || 0;
-            const codeB = parseInt(b.getAttribute("data-codigo")) || 0;
+            const codeA = parseInt(a.dataset.sort ?? a.dataset.codigo) || 0;
+            const codeB = parseInt(b.dataset.sort ?? b.dataset.codigo) || 0;
             return sortAscending ? (codeA - codeB) : (codeB - codeA);
         });
 
@@ -128,6 +128,7 @@ function setupFilters() {
                 else if (group === "Estado") rowValue = row.getAttribute("data-estado");
                 else if (group === "Arcada") rowValue = row.getAttribute("data-arcada");
                 else if (group === "Dentição") rowValue = row.getAttribute("data-denticao");
+                else if (group === "Origem") rowValue = row.getAttribute("data-origem");
 
                 rowValue = (rowValue || "").toLowerCase().trim();
 
