@@ -206,15 +206,16 @@
                         </div>
 
                         <div class="pagination__actions">
-                            <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior"
-                                    aria-label="Página Anterior">
-                                <i data-lucide="chevron-left"></i>
-                            </button>
+                            <div class="pagination__nav">
+                                <span class="pagination__range" id="paginationRange">1-1</span>
 
-                            <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página"
-                                    aria-label="Próxima Página">
-                                <i data-lucide="chevron-right"></i>
-                            </button>
+                                <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                                    <i data-lucide="chevron-left"></i>
+                                </button>
+                                <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -355,12 +356,7 @@
 
     <div th:replace="~{partials/footer :: footer}"></div>
 
-    <script  th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script th:src="@{/js/includes.js}"></script>
-    <script th:src="@{/js/filters.js}"></script>
-    <script th:src="@{/js/requests.js}"></script>
-    <script th:src="@{/js/page-size.js}"></script>
+    <script th:src="@{/js/bundles/painel.js}"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {

@@ -247,7 +247,7 @@
             <div class="list-panel">
                 <div class="pagination">
                     <div class="low-opacity">
-                        <strong id="paginationInfo" data-label="Solicitações Encontradas" th:text="${#lists.size(solicitacoes)} + ' Solicitações Encontradas - Mais Recentes'">0 Solicitações Encontradas</strong>
+                        <strong id="paginationInfo" data-label="Solicitações Encontradas" th:text="${#lists.size(solicitacoes)} + ' Solicitações Encontradas'">0 Solicitações Encontradas</strong>
                     </div>
 
                     <div class="pagination__actions">
@@ -259,11 +259,11 @@
                         </div>
 
                         <div class="pagination__nav">
+                            <span class="pagination__range" id="paginationRange">1-1</span>
 
                             <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                                 <i data-lucide="chevron-left"></i>
                             </button>
-
                             <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                                 <i data-lucide="chevron-right"></i>
                             </button>
@@ -428,14 +428,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/filters.js}"></script>
-<script th:src="@{/js/results.js}"></script>
-<script th:src="@{/js/requests.js}"></script>
-<script th:src="@{/js/search.js}"></script>
-<script th:src="@{/js/page-size.js}"></script>
+<script th:src="@{/js/bundles/painel.js}"></script>
 
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {

@@ -137,7 +137,7 @@
                             <i class="icon" data-lucide="filter"></i>
                         </button>
 
-                        <button class="btn btn-secondary">
+                        <button class="btn btn-secondary" id="btnSortOrder">
                             <span class="btn__label">Ordenar</span>
                             <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                         </button>
@@ -167,16 +167,17 @@
             <div class="list-panel">
                 <div class="pagination">
                     <div class="low-opacity">
-
-                        <strong th:text="${#lists.size(movimentacao)} + ' Movimentações Encontradas - Mais Recentes'">0 Movimentações Encontradas</strong>
+                        <strong id="paginationInfo" data-label="Movimentações Encontradas" th:text="${#lists.size(movimentacao)} + ' Movimentações Encontradas'">0 Movimentações Encontradas</strong>
                     </div>
 
                     <div class="pagination__actions">
                         <div class="pagination__nav">
-                            <button class="btn btn-pagination" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                            <span class="pagination__range" id="paginationRange">1-1</span>
+
+                            <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                                 <i data-lucide="chevron-left"></i>
                             </button>
-                            <button class="btn btn-pagination" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                            <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                                 <i data-lucide="chevron-right"></i>
                             </button>
                         </div>
@@ -203,6 +204,7 @@
                         <article th:each="mov : ${movimentacao}"
                                  class="request-row"
                                  th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
+                                 th:data-codigo="${mov.codigo}"
                                  th:data-tipo="${mov.tipoMovimentacao.nome}"
                                  th:data-grupo="${mov.frasco != null ? mov.frasco.tipoDente : ''}">
 
@@ -308,14 +310,7 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/filters.js}"></script>
-<script th:src="@{/js/results.js}"></script>
-<script th:src="@{/js/requests.js}"></script>
-<script th:src="@{/js/search.js}"></script>
-<script th:src="@{/js/page-size.js}"></script>
+<script th:src="@{/js/bundles/painel.js}"></script>
 
 </body>
 </html>

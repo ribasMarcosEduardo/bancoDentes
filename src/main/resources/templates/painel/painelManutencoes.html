@@ -107,17 +107,9 @@
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Solicitação" data-filter-group="Origem">
-                            <span>Solicitação</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Movimentação" data-filter-group="Origem">
-                            <span>Movimentação</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Direto pelo painel" data-filter-group="Origem">
-                            <span>Direto pelo painel</span>
+                        <label class="checkbox-filter" th:each="o : ${T(bancoDentes.model.enumModels.OrigemManutencao).values()}">
+                            <input type="checkbox" th:value="${o}" data-filter-group="Origem">
+                            <span th:text="${o}">Solicitação</span>
                         </label>
                     </div>
                 </div>
@@ -161,7 +153,7 @@
                             <i class="icon" data-lucide="filter"></i>
                         </button>
 
-                        <button class="btn btn-secondary">
+                        <button class="btn btn-secondary" id="btnSortOrder">
                             <span class="btn__label">Ordenar</span>
                             <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                         </button>
@@ -187,7 +179,7 @@
             <div class="list-panel">
                 <div class="pagination">
                     <div class="low-opacity">
-                        <strong th:text="${#lists.size(manutencoes)} + ' Resultados Encontrados - Mais Recentes'">0 Resultados Encontrados</strong>
+                        <strong id="paginationInfo" data-label="Manutenções Encontradas" th:text="${#lists.size(manutencoes)} + ' Manutenções Encontradas'">0 Manutenções Encontradas</strong>
                     </div>
                     <div class="pagination__actions">
                         <div class="sector-switch" id="sectorSwitch">
@@ -198,10 +190,12 @@
                         </div>
 
                         <div class="pagination__nav">
-                            <button class="btn btn-pagination" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                            <span class="pagination__range" id="paginationRange">1-1</span>
+
+                            <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                                 <i data-lucide="chevron-left"></i>
                             </button>
-                            <button class="btn btn-pagination" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                            <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                                 <i data-lucide="chevron-right"></i>
                             </button>
                         </div>
@@ -224,6 +218,7 @@
 
                         <article th:each="m : ${manutencoes}"
                                  class="request-row"
+                                 th:data-sort="${m.codigo}"
                                  th:data-setor="${m.frasco != null && m.frasco.local != null ? #strings.toLowerCase(m.frasco.local.name()) : ''}"
                                  th:data-codigo="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : ''}"
                                  th:data-grupo="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : ''}"
@@ -342,15 +337,8 @@
 <div th:replace="~{partials/footer :: footer}"></div>
 <th:block th:insert="~{partials/modal_concluir_manutencao}"></th:block>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+<script th:src="@{/js/bundles/painel.js}"></script>
 
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/filters.js}"></script>
-<script th:src="@{/js/results.js}"></script>
-<script th:src="@{/js/search.js}"></script>
-<script th:src="@{/js/requests.js}"></script>
-<script th:src="@{/js/page-size.js}"></script>
 <script th:src="@{/js/manutencao-concluir.js}"></script>
 
 </body>
