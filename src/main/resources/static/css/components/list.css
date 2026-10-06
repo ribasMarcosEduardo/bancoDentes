@@ -324,7 +324,11 @@
     background: #3b82f6;
 }
 
-.request-row--retirada .request-details::before {
+.request-row--em_separacao .request-details::before {
+    background: #6366f1;
+}
+
+.request-row--aguardando_retirada .request-details::before {
     background: #a855f7;
 }
 
@@ -501,7 +505,12 @@
     color: #3b82f6;
 }
 
-.status-pill--retirada {
+.status-pill--em_separacao {
+    background: rgba(99,102,241,0.16);
+    color: #6366f1;
+}
+
+.status-pill--aguardando_retirada {
     background: rgba(168,85,247,0.16);
     color: #a855f7;
 }
