@@ -202,6 +202,21 @@
     justify-self: center;
 }
 
+/* Entrada (cadastro_movimentacao.html): "Escolher Frasco" ali é seleção
+   única sem quantidade nesse passo (ver modal_busca_frasco_movimentacao_entrada.html/
+   criarLinhaSelecionada em frasco-search-movimentacao.js, que nem chega a
+   montar o <span> do meio pra esse caso) — sem quantidade, a coluna do
+   meio não faz sentido. Essa variante (classe aplicada via JS, só nesse
+   fluxo) colapsa pra 2 colunas (Frasco + Ações) em vez das 3 padrão. */
+.selected-flasks--sem-quantidade .selected-flasks__head,
+.selected-flasks--sem-quantidade .selected-flask {
+    grid-template-columns: 1fr 5.5rem;
+}
+
+.selected-flasks--sem-quantidade .selected-flasks__head span:nth-child(2) {
+    display: none;
+}
+
 /* .selected-flasks__head e .selected-flasks__empty (abaixo) definem seu
    próprio "display" — sem isso, o atributo hidden (que só assume
    "display: none" na folha de estilo do próprio navegador, de

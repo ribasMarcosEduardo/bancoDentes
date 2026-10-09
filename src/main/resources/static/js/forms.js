@@ -100,11 +100,6 @@ function setupCadastroFrasco() {
         return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
     }
 
-    function usaArcada() {
-        const grupo = getGrupo();
-        return grupo === "canino" || grupo === "incisivo";
-    }
-
     function isPreMolar() {
         const grupo = getGrupo();
         return grupo === "premolar" || grupo === "pre_molar";
@@ -113,10 +108,9 @@ function setupCadastroFrasco() {
     function atualizarVisibilidadeCamposAtributos() {
         const endo = isEndo();
         const mostrarNumeracao = usaNumeracao();
-        const mostrarArcada = usaArcada();
 
         if (denticaoGroup) denticaoGroup.hidden = endo;
-        if (arcadaGroup) arcadaGroup.hidden = !mostrarArcada;
+        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao || endo;
         if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
 
         if (denticaoSelect) {
@@ -248,11 +242,11 @@ function setupCadastroFrasco() {
         }
 
         if (endo) {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
             estadoDente.value = "misto";
         } else {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = false;
             estadoDente.required = true;
             estadoDente.disabled = !hasGrupo;
         }
@@ -261,7 +255,7 @@ function setupCadastroFrasco() {
             if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
             if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
             if (!endo) {
-                estadoDente.value = "NAO_INFORMADO";
+                estadoDente.value = "NAO_INFORMADA";
             }
         }
 
@@ -287,10 +281,10 @@ function setupCadastroFrasco() {
         enableSection(estadoFrascoSection);
         estadoDente.disabled = false;
         if (isEndo()) {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "none";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
         } else {
-            if (estadoDenteGroup) estadoDenteGroup.style.display = "block";
+            if (estadoDenteGroup) estadoDenteGroup.hidden = false;
             estadoDente.required = true;
         }
         atualizarVisibilidadeCamposAtributos();
@@ -494,7 +488,7 @@ function setupCadastroSolicitacao() {
             fecharAvancados();
         }
 
-        if (estadoDente) estadoDente.value = "NAO_INFORMADO";
+        if (estadoDente) estadoDente.value = "NAO_INFORMADA";
         if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
         if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
 
@@ -830,48 +824,35 @@ function setupCadastroFrascoCancel() {
 setupCadastroFrascoCancel();
 
 function setupCadastroMovimentacao() {
-    const localSelect = document.querySelector("#localMovimentacao");
-    const tipoSection = document.querySelector("#tipoMovimentacaoSection");
-    const tipoGroup = document.querySelector("#tipoMovimentacaoGroup");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
-    const tipoHint = document.querySelector("#tipoMovimentacaoHint");
     const escolherFrascosBtn = document.querySelector("#escolherFrascosBtn");
+    const escolherFrascosLabel = escolherFrascosBtn?.querySelector(".btn__label");
 
-    if (!localSelect || !tipoSection || !tipoGroup || !tipoSelect || !escolherFrascosBtn) {
+    if (!tipoSelect || !escolherFrascosBtn) {
         return;
     }
 
-    function aplicarTipoSelecionado() {
+    tipoSelect.addEventListener("change", () => {
         escolherFrascosBtn.disabled = tipoSelect.value === "";
-    }
 
-    function aplicarLocalSelecionado() {
-        const local = localSelect.value;
-        const hasLocal = local !== "";
-        const isBiobanco = local === "biobanco";
-
-        tipoSection.classList.toggle("form-section--disabled", !hasLocal);
-
-        tipoSelect.value = "";
-        tipoSelect.disabled = !hasLocal;
-
-        if (isBiobanco) {
-            tipoSelect.value = "saida";
-            tipoSelect.disabled = true;
+        // Singular só em Entrada (o modal de lá só deixa escolher um
+        // frasco de destino — ver modal_busca_frasco_movimentacao_entrada.html/
+        // setupFrascoSearchModal em frasco-search-movimentacao.js); Saída
+        // mantém o plural de sempre.
+        if (escolherFrascosLabel) {
+            escolherFrascosLabel.textContent = tipoSelect.value === "entrada" ? "Escolher Frasco" : "Escolher Frascos";
         }
-
-        tipoGroup.classList.toggle("form-group--disabled", isBiobanco);
-        if (tipoHint) tipoHint.hidden = !isBiobanco;
-
-        aplicarTipoSelecionado();
-    }
-
-    localSelect.addEventListener("change", aplicarLocalSelecionado);
-    tipoSelect.addEventListener("change", aplicarTipoSelecionado);
+    });
 }
 
 setupCadastroMovimentacao();
 
+// Contador "0/250" no canto do
+// textarea de Observações — reflete o próprio maxlength do HTML, só exibe
+// o que o navegador já reforça. Varre todo ".textarea-counter" da página
+// (não ids fixos) porque mais de uma página tem seu próprio campo de
+// Observações — cada contador liga no ".textarea-control" logo antes dele
+// no HTML (ver marcação em cadastro_movimentacao.html/cadastro_solicitacao.html).
 function setupObservacoesCounter() {
     const counters = document.querySelectorAll(".textarea-counter");
 
@@ -893,12 +874,24 @@ function setupObservacoesCounter() {
 
 setupObservacoesCounter();
 
+// "Salvar e Continuar"/"Salvar e Sair" ficam na toolbar, fora do <form>
+// (ver form="cadastroMovimentacaoForm" em cadastro_movimentacao.html) —
+// mesmo esquema de setupCadastroFrascoSubmit acima. A seleção de frascos
+// não é um <input> nativo (vive num Map dentro de setupFrascoSearchModal,
+// em frasco-search-movimentacao.js), então checkValidity() sozinho não
+// pega "nenhum frasco escolhido" — por isso o frascosSelecionados() abaixo
+// checa à parte, lendo direto da lista "Frascos selecionados" já
+// renderizada no DOM (ver renderSelecionados/criarLinhaSelecionada
+// naquele arquivo).
 function setupCadastroMovimentacaoSubmit() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
     const localSelect = document.querySelector("#localMovimentacao");
     const tipoSelect = document.querySelector("#tipoMovimentacao");
     const observacoesField = document.querySelector("#observacoesMovimentacao");
-    const selectedFlasksList = document.querySelector(".selected-flasks");
+    const selectedFlasksList = document.querySelector("#selectedFlasksList");
+    const origemDentesSelect = document.querySelector("#origemDentes");
+    const quantidadeDoacaoInput = document.querySelector("#quantidadeDoacao");
+    const origemFrascosList = document.querySelector("#origemFrascosList");
 
     if (!form || typeof Swal === "undefined") {
         return;
@@ -914,21 +907,44 @@ function setupCadastroMovimentacaoSubmit() {
             const spans = row.querySelectorAll(".selected-flask > span");
             return {
                 id: row.dataset.frascoId || spans[0]?.textContent.trim() || "—",
-                quantidade: spans[1]?.textContent.trim() || "0",
+                quantidade: spans[1] ? spans[1].textContent.trim() : null,
             };
         });
     }
 
+    function totalDentesOrigemFrascos() {
+        return Array.from(origemFrascosList?.querySelectorAll(".request-row") || []).reduce((soma, row) => {
+            const quantidade = Number(row.querySelectorAll(".selected-flask > span")[1]?.textContent) || 0;
+            return soma + quantidade;
+        }, 0);
+    }
+
     function montarResumoMovimentacao(frascos) {
-        const linhasHtml = [
+        const linhas = [
             ["Local", textoSelecionado(localSelect)],
             ["Tipo", textoSelecionado(tipoSelect)],
-        ]
+        ];
+
+        if (tipoSelect?.value === "entrada") {
+            linhas.push(["Origem dos Dentes", textoSelecionado(origemDentesSelect)]);
+
+            if (origemDentesSelect?.value === "doacao") {
+                linhas.push(["Quantidade de dentes", `${quantidadeDoacaoInput?.value || "1"} dentes`]);
+            } else if (origemDentesSelect?.value === "frascos") {
+                linhas.push(["Quantidade total recebida", `${totalDentesOrigemFrascos()} dentes`]);
+            }
+        }
+
+        const linhasHtml = linhas
             .map(([label, valor]) => `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`)
             .join("");
 
         const frascosHtml = frascos
-            .map(({ id, quantidade }) => `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`)
+            .map(({ id, quantidade }) =>
+                quantidade === null
+                    ? `<div class="swal-resumo__row"><span>${id}</span></div>`
+                    : `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`
+            )
             .join("");
 
         const obsTexto = (observacoesField?.value || "").trim() || "Não Informado";
@@ -972,7 +988,21 @@ function setupCadastroMovimentacaoSubmit() {
             return;
         }
 
-        const continuar = event.submitter?.id === "salvarContinuarBtn";
+        if (tipoSelect?.value === "entrada" && origemDentesSelect?.value === "frascos" && !origemFrascosList?.querySelector(".request-row")) {
+            Swal.fire({
+                icon: "warning",
+                title: "Preenchimento incompleto",
+                text: "Selecione ao menos um frasco de origem antes de salvar.",
+                confirmButtonText: "Entendi",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                },
+            });
+            return;
+        }
+
+        const isSalvarEContinuar = event.submitter?.id === "salvarContinuarBtn";
 
         Swal.fire({
             icon: "question",
@@ -993,23 +1023,24 @@ function setupCadastroMovimentacaoSubmit() {
                 return;
             }
 
-            const mensagem = "Movimentação cadastrada com sucesso.";
-
-            if (continuar) {
-                form.reset();
-                localSelect?.dispatchEvent(new Event("change"));
-                observacoesField?.dispatchEvent(new Event("input"));
-                showToast(mensagem);
-            } else {
-                sessionStorage.setItem(FLASH_TOAST_KEY, mensagem);
-                window.location.href = "movimentacoes.html";
+            let inputCadastrarOutro = form.querySelector("input[name='cadastrarOutro']");
+            if (!inputCadastrarOutro) {
+                inputCadastrarOutro = document.createElement("input");
+                inputCadastrarOutro.type = "hidden";
+                inputCadastrarOutro.name = "cadastrarOutro";
+                form.appendChild(inputCadastrarOutro);
             }
+            inputCadastrarOutro.value = isSalvarEContinuar;
+
+            HTMLFormElement.prototype.submit.call(form);
         });
     });
 }
 
 setupCadastroMovimentacaoSubmit();
 
+// "Cancelar" (link pro painel de movimentações) — mesma confirmação de
+// setupCadastroFrascoCancel, só que ancorada em #cadastroMovimentacaoForm.
 function setupCadastroMovimentacaoCancel() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
     const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
@@ -1045,10 +1076,26 @@ function setupCadastroMovimentacaoCancel() {
 
 setupCadastroMovimentacaoCancel();
 
+// botoes +/- quantidade
+
 function setupNumberInputs() {
     const numberInputs = document.querySelectorAll(".number-input");
 
     numberInputs.forEach((numberInput) => {
+        // Chamada de novo toda vez que um modal de busca re-renderiza
+        // (abrir, digitar na busca, trocar filtro/página — ver
+        // renderResultados em frasco-search-movimentacao.js/
+        // frasco-search-solicitacao.js), pra religar as linhas novas que
+        // acabaram de entrar no DOM. Sem essa trava, um .number-input que
+        // sobrevive entre re-renders (ex.: #quantidadeDoacao em
+        // cadastro_movimentacao.html, fora do modal) ganhava mais um par
+        // de listeners pointerdown a cada chamada — depois de algumas
+        // buscas, um clique só em +/- disparava changeQuantity() várias
+        // vezes de uma vez (o valor pulava de mais de 1 em 1).
+        if (numberInput.dataset.numberWired === "true") {
+            return;
+        }
+
         const input = numberInput.querySelector(".number-input__field");
         const decreaseBtn = numberInput.querySelector("[data-number-action='down']");
         const increaseBtn = numberInput.querySelector("[data-number-action='up']");
@@ -1056,6 +1103,8 @@ function setupNumberInputs() {
         if (!input || !decreaseBtn || !increaseBtn) {
             return;
         }
+
+        numberInput.dataset.numberWired = "true";
 
         let repeatTimeout;
         let repeatInterval;
@@ -1117,6 +1166,9 @@ function setupNumberInputs() {
 
 setupNumberInputs();
 
+// seta dos selects do formulário gira ao abrir/fechar (mesmo padrão do
+// page-size-control, ver page-size.js)
+
 function setupFormSelectAnimations() {
     const wrappers = document.querySelectorAll(".form-card .select-wrapper");
 
@@ -1147,6 +1199,11 @@ function setupFormSelectAnimations() {
 }
 
 setupFormSelectAnimations();
+
+// clique no botão do ícone de calendário abre o seletor nativo — o botão
+// tampa o ::-webkit-calendar-picker-indicator (ver forms.css), então ele
+// precisa disparar a abertura sozinho. Enter/Espaço já funcionam de
+// graça por ser um <button> de verdade.
 
 function setupDateIcons() {
     const triggers = document.querySelectorAll(".form-card .date-icon-trigger");

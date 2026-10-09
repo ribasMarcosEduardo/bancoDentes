@@ -17,7 +17,7 @@ public record ItemAnaliseDTO(
 
 ) {
 
-    public static Object empty(){
+    public static ItemAnaliseDTO empty(){
         return new ItemAnaliseDTO(null, null, null, null, null);
     }
 

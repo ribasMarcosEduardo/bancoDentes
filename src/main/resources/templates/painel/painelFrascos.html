@@ -118,9 +118,9 @@
               <label for="pageSize">Exibir</label>
               <div class="select-wrapper page-size-control__select">
                 <select class="form-control" id="pageSize">
-                  <option value="10" selected>10</option>
-                  <option value="20">20</option>
-                  <option value="30">30</option>
+                  <option value="12" selected>12</option>
+                  <option value="24">24</option>
+                  <option value="36">36</option>
                 </select>
                 <i class="select-icon icon" data-lucide="chevron-down"></i>
               </div>
@@ -166,7 +166,7 @@
       <div class="list-panel">
         <div class="pagination">
           <div class="low-opacity">
-            <strong id="paginationInfo" th:text="${#lists.size(frascos)} + ' Resultados Encontrados'">0 Resultados Encontrados</strong>
+            <strong id="paginationInfo" data-label="Frascos Encontrados" th:text="${#lists.size(frascos)} + ' Frascos Encontrados'">0 Frascos Encontrados</strong>
           </div>
           <div class="pagination__actions">
             <div class="sector-switch" id="sectorSwitch">
@@ -177,6 +177,8 @@
             </div>
 
             <div class="pagination__nav">
+              <span class="pagination__range" id="paginationRange">1-1</span>
+
               <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior">
                 <i data-lucide="chevron-left"></i>
               </button>
@@ -187,11 +189,16 @@
           </div>
         </div>
 
-        <div th:if="${#lists.isEmpty(frascos)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
-          <i data-lucide="info" class="me-2"></i> Não há nenhum frasco cadastrado no banco de dados.
-        </div>
+        <th:block th:if="${#lists.isEmpty(frascos)}">
+          <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhum frasco cadastrado', 'Ainda não há frascos registrados no banco de dados. Cadastre o primeiro frasco para começar.', false)}">
+          </div>
+        </th:block>
 
         <section th:if="${!#lists.isEmpty(frascos)}" class="results results--grid" id="resultsView">
+
+          <div id="emptyStateFiltro" hidden
+               th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhum frasco encontrado', 'Nenhum frasco corresponde aos filtros aplicados. Tente ajustar ou resetar os filtros.', true)}">
+          </div>
 
           <div class="result-table result-table--frascos">
             <div class="result-table__head">
@@ -207,7 +214,8 @@
 
             <article th:each="frasco : ${frascos}"
                      class="request-row"
-                     data-setor="bdh"
+                     th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
+                     th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
@@ -217,7 +225,10 @@
                 <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
                 <span th:text="${frasco.tipoDente}">Grupo</span>
                 <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
-                <span>Bdh</span> <span th:text="${frasco.quantidade}">0</span>
+
+                <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">Local</span>
+                <span th:text="${frasco.quantidade}">0</span>
+
                 <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">00/00/00</span>
                 <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
 
@@ -225,6 +236,10 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+
+                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                    <i class="icon" data-lucide="toolbox"></i>
+                  </button>
 
                   <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
@@ -261,7 +276,7 @@
                           <span th:text="${frasco.denticao != null ? frasco.denticao.nome : '-'}">-</span>
                         </div>
                         <div class="request-detail">
-                          <span class="request-details__label">Posição</span>
+                          <span class="request-details__label">Numeração</span>
                           <span th:text="${frasco.posicao != null ? frasco.posicao : '-'}">-</span>
                         </div>
                         <div class="request-detail">
@@ -273,10 +288,12 @@
                     <section class="request-panel">
                       <h4 class="request-panel__title">Local e Datas</h4>
                       <div class="request-details__grid request-details__grid--single">
+
                         <div class="request-detail">
                           <span class="request-details__label">Local</span>
-                          <span>Banco de Dentes Humanos</span>
+                          <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">-</span>
                         </div>
+
                         <div class="request-detail">
                           <span class="request-details__label">Data de cadastro</span>
                           <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
@@ -285,6 +302,25 @@
                           <span class="request-details__label">Data de manutenção</span>
                           <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
                         </div>
+                      </div>
+                    </section>
+
+                    <section class="request-panel request-panel--frascos-actions">
+                      <h4 class="request-panel__title">Ações</h4>
+                      <div class="request-panel__actions">
+                        <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                          <i class="icon" data-lucide="pen-line"></i>
+                        </a>
+
+                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                          <i class="icon" data-lucide="toolbox"></i>
+                        </button>
+
+                        <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                            <i class="icon" data-lucide="archive-x"></i>
+                          </button>
+                        </form>
                       </div>
                     </section>
                   </div>
@@ -296,7 +332,8 @@
           <div class="results-grid">
             <article th:each="frasco : ${frascos}"
                      class="card"
-                     data-setor="bdh"
+                     th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
+                     th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
@@ -305,7 +342,9 @@
               <header class="card__header">
                 <div>
                   <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
-                  <div class="card__meta" th:text="'Bdh | qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+
+                  <div class="card__meta" th:text="${frasco.local != null ? frasco.local.nome : '-'} + ' | qtd. ' + ${frasco.quantidade} +${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+
                 </div>
                 <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
               </header>
@@ -335,6 +374,11 @@
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+
+                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                    <i class="icon" data-lucide="toolbox"></i>
+                  </button>
+
                   <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                       <i class="icon" data-lucide="archive-x"></i>
@@ -362,20 +406,25 @@
 <script th:src="@{/js/page-size.js}"></script>
 
 <script>
-
   document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".delete-form").forEach(form => {
         form.addEventListener("submit", function(e) {
             e.preventDefault();
 
             Swal.fire({
+                icon: "warning",
                 title: "Deseja realmente excluir este frasco?",
                 text: "Esta ação não poderá ser desfeita.",
-                icon: "warning",
                 showCancelButton: true,
+                reverseButtons: true,
+                focusCancel: true,
                 confirmButtonText: "Sim, excluir",
                 cancelButtonText: "Cancelar",
-                reverseButtons: true
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-outline btn-outline-danger",
+                    cancelButton: "btn btn-secondary",
+                },
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
@@ -383,9 +432,49 @@
             });
         });
     });
-});
 
+    document.addEventListener("click", async function(e) {
+        const btn = e.target.closest(".js-criar-manutencao");
+        if (!btn) return;
+
+        const codFrasco = btn.dataset.id;
+        if (!codFrasco) return;
+
+        const result = await Swal.fire({
+            icon: "question",
+            title: "Enviar para Manutenção?",
+            text: "Deseja registrar uma manutenção para este frasco utilizando a quantidade atual?",
+            showCancelButton: true,
+            confirmButtonText: "Sim, enviar",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/manutencao/criar/${codFrasco}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            if (!response.ok) throw new Error("Erro ao registrar manutenção.");
+
+            await Swal.fire({
+                icon: "success",
+                title: "Sucesso!",
+                text: "Frasco enviado para manutenção com sucesso.",
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            location.reload();
+        } catch (error) {
+            console.error(error);
+            Swal.fire("Erro", "Não foi possível registrar a manutenção.", "error");
+        }
+    });
+});
 </script>
 
 </body>
-
+</html>

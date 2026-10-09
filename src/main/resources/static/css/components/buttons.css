@@ -41,6 +41,54 @@ button {
     transform: translateY(-1px);
 }
 
+/*
+    Pulsação ao clicar (setupButtonPulse em includes.js liga a classe
+    is-pulsing em qualquer .btn no clique). currentColor (cor do texto
+    de cada variante) em vez de uma cor fixa — assim o flash/anel já
+    nasce com contraste certo em botão claro (secondary/tonal) ou
+    escuro (primary), sem precisar de uma variável por variante.
+    background-image (não um ::after) porque já nasce recortado pelo
+    border-radius do próprio botão sem precisar de overflow:hidden —
+    isso cortaria o balão de [data-tooltip] (ver utilities.css), que
+    renderiza por fora da caixa do botão.
+*/
+.btn.is-pulsing {
+    animation: btn-pulse 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes btn-pulse {
+    0% {
+        transform: scale(1);
+        outline: 2px solid color-mix(in srgb, currentColor 55%, transparent);
+        outline-offset: 0;
+        background-image: radial-gradient(circle, color-mix(in srgb, currentColor 30%, transparent) 0%, transparent 1%);
+    }
+
+    35% {
+        transform: scale(0.985);
+    }
+
+    60% {
+        transform: scale(1.006);
+        outline-color: color-mix(in srgb, currentColor 15%, transparent);
+        outline-offset: 3px;
+        background-image: radial-gradient(circle, color-mix(in srgb, currentColor 18%, transparent) 0%, transparent 75%);
+    }
+
+    100% {
+        transform: scale(1);
+        outline: 2px solid transparent;
+        outline-offset: 5px;
+        background-image: radial-gradient(circle, transparent 0%, transparent 100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn.is-pulsing {
+        animation: none;
+    }
+}
+
 .btn-primary {
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);

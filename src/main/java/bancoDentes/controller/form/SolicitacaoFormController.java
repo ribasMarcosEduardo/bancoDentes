@@ -1,5 +1,6 @@
-package bancoDentes.controller;
+package bancoDentes.controller.form;
 
+import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.SolicitacaoDTO;
 import bancoDentes.exception.EstudanteException;
 import bancoDentes.exception.SolicitacaoException;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class SolicitacaoFormController extends BaseController {
             this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.processamento"));
+            this.saveError(this.getText("error.carregamento"));
             return "redirect:/solicitacao/painel";
         }
     }
@@ -99,27 +99,4 @@ public class SolicitacaoFormController extends BaseController {
         return "redirect:/solicitacao/painel";
     }
 
-    /**
-     * Exibe o painel do estudante listando todas as suas solicitações.
-     *
-     * @param model
-     */
-    @GetMapping("/painel")
-    public String exibePainelSolicitacoes(Model model) {
-        try {
-            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
-            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorEstudante(usuarioLogado.getCodEstudante());
-
-            model.addAttribute("solicitacoes", solicitacoes);
-            model.addAttribute("pendentes", solicitacaoService.getPendentes(solicitacoes));
-            model.addAttribute("concluidas", solicitacaoService.getConcluidas(solicitacoes));
-            model.addAttribute("usuarioLogado", usuarioLogado);
-
-            return "painelSolicitacao/solicitacaoList";
-
-        } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.processamento"));
-            return "redirect:/";
-        }
-    }
 }

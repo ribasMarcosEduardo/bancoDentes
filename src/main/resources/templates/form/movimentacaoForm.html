@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        (function () {
+            var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+            document.documentElement.classList.add(theme);
+        })();
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/cadastro_frasco.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Cadastro de Movimentação</title>
+</head>
+
+<body>
+
+<div class="background">
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--green"></div>
+</div>
+
+<div th:replace="~{partials/navbar :: navbar}"></div>
+
+<main class="page">
+    <section class="form-shell">
+
+        <header class="page-header">
+            <h1 th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
+            <p>Registre entradas e saídas de dentes vinculadas a um frasco.</p>
+        </header>
+
+        <div class="toolbar glass-frost">
+            <div class="toolbar__info">
+                <span class="toolbar__label">Data da Movimentação:</span>
+                <div class="toolbar__badge" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">
+                    01/06/2025
+                </div>
+            </div>
+
+            <div class="toolbar__actions">
+                <a th:href="@{/movimentacao/painel}" class="btn btn-secondary">
+                    <span class="btn__label">Cancelar</span>
+                    <i class="orderBy-icon" data-lucide="x"></i>
+                </a>
+
+                <button type="submit" class="btn btn-tonal" id="salvarContinuarBtn" form="cadastroMovimentacaoForm">
+                    Salvar e Continuar
+                </button>
+
+                <button type="submit" class="btn btn-primary" id="salvarSairBtn" form="cadastroMovimentacaoForm">
+                    Salvar e Sair
+                </button>
+            </div>
+        </div>
+
+        <form class="form-card" id="cadastroMovimentacaoForm" th:action="@{/movimentacao/save}" th:object="${movimentacaoDTO}" method="post">
+
+            <input type="hidden" th:field="*{codigo}"/>
+            <input type="hidden" th:field="*{version}"/>
+            <input type="hidden" th:field="*{codFrasco}" id="frascoSelecionadoInput" />
+            <input type="hidden" name="datManutencao" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" />
+
+            <section class="form-section">
+                <div class="form-group">
+                    <label>Local da Movimentação <span class="required-mark">*</span></label>
+                    <div class="select-wrapper">
+                        <select class="form-control" th:field="*{local}" id="localMovimentacao" required>
+                            <option value="">- Selecione o local -</option>
+                            <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
+                                    th:value="${l.name()}" th:text="${l.nome}"></option>
+                        </select>
+                        <i class="select-icon icon" data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" id="tipoMovimentacaoSection">
+                <div class="form-grid">
+                    <div class="form-group" id="tipoMovimentacaoGroup">
+                        <label>Tipo de movimentação <span class="required-mark">*</span></label>
+                        <div class="select-wrapper">
+                            <select class="form-control" th:field="*{tipoMovimentacao}" id="tipoMovimentacao" required>
+                                <option value="">- Selecione o tipo -</option>
+                                <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
+                                        th:if="${tipo.name() != 'TRANSFERENCIA'}"
+                                        th:value="${tipo.name()}" th:text="${tipo.nome}"></option>
+                            </select>
+                            <i class="select-icon icon" data-lucide="chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-group__label--invisible" aria-hidden="true">Escolher frascos</label>
+                        <button type="button" class="btn btn-tonal" id="escolherFrascosBtn" disabled>
+                            <i class="icon" data-lucide="plus"></i>
+                            <span class="btn__label">Escolher Frascos</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" id="frascosSelecionadosSection">
+                <div class="form-group">
+                    <div class="analysis-card">
+                        <div class="selected-flasks" id="selectedFlasksList">
+                            <div class="selected-flasks__head" id="selectedFlasksHead" hidden>
+                                <span>Frasco</span>
+                                <span>Quantidade movimentada</span>
+                                <span>Ações</span>
+                            </div>
+
+                            <div class="selected-flasks__empty" id="selectedFlasksEmpty">
+                                <i class="icon" data-lucide="package-search"></i>
+                                <p>Nenhum frasco selecionado ainda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" id="origemDentesSection" hidden>
+                <div class="form-grid">
+                    <div class="form-group" id="origemDentesGroup">
+                        <label for="origemDentes">Origem dos Dentes <span class="required-mark">*</span></label>
+                        <div class="select-wrapper">
+                            <select class="form-control" id="origemDentes" name="origemDentes">
+                                <option value="" disabled selected>- Selecione a origem -</option>
+                                <option value="frascos">Outro(s) frasco(s)</option>
+                                <option value="doacao">Doação/Outros</option>
+                            </select>
+                            <i class="select-icon icon" data-lucide="chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="selecionarFrascosOrigemGroup" hidden>
+                        <label class="form-group__label--invisible" aria-hidden="true">Selecionar frascos de origem</label>
+                        <button type="button" class="btn btn-tonal" id="selecionarFrascosOrigemBtn">
+                            <i class="icon" data-lucide="plus"></i>
+                            Selecionar Frascos
+                        </button>
+                    </div>
+
+                    <div class="form-group" id="quantidadeDoacaoGroup" hidden>
+                        <label for="quantidadeDoacao">Quantidade de dentes <span class="required-mark">*</span></label>
+                        <div class="number-input number-input--compact">
+                            <input
+                                    class="form-control number-input__field"
+                                    type="number"
+                                    min="1"
+                                    id="quantidadeDoacao"
+                                    th:field="*{quantidade}"
+                            >
+                            <div class="number-input__actions">
+                                <button type="button" class="number-input__btn" data-number-action="down">
+                                    <i class="icon" data-lucide="minus"></i>
+                                </button>
+                                <button type="button" class="number-input__btn" data-number-action="up">
+                                    <i class="icon" data-lucide="plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" id="frascosOrigemSection" hidden>
+                <div class="form-group">
+                    <div class="analysis-card">
+                        <div class="analysis-progress">
+                            <div class="analysis-progress__text">
+                                <strong id="origemFrascosTotalValor">0 dentes selecionados</strong>
+                            </div>
+                        </div>
+
+                        <div class="selected-flasks" id="origemFrascosList">
+                            <div class="selected-flasks__head" id="origemFrascosHead" hidden>
+                                <span>Frasco</span>
+                                <span>Qtd. transferida</span>
+                                <span>Ações</span>
+                            </div>
+
+                            <div class="selected-flasks__empty" id="origemFrascosEmpty">
+                                <i class="icon" data-lucide="package-search"></i>
+                                <p>Nenhum frasco de origem selecionado ainda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section" id="observacoesSection">
+                <div class="form-group">
+                    <label for="observacoesMovimentacao">Observações <span class="required-mark">*</span></label>
+
+                    <div class="textarea-veil-wrapper textarea-veil-wrapper--locked" id="observacoesWrapper">
+                        <textarea
+                                class="form-control textarea-control"
+                                id="observacoesMovimentacao"
+                                th:field="*{observacao}"
+                                rows="4"
+                                maxlength="250"
+                                placeholder="Adicione observações sobre esta movimentação..."
+                                required
+                                disabled
+                        ></textarea>
+
+                        <span class="textarea-counter" id="observacoesCounter">0/250</span>
+
+                        <div class="textarea-veil">
+                            <i class="icon" data-lucide="lock"></i>
+                            <span>Adicione um frasco para digitar</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <p class="form-legend">
+                <span class="required-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Obrigatório.</span>
+            </p>
+        </form>
+    </section>
+</main>
+
+<th:block th:insert="~{partials/modal_busca_frasco_movimentacao_saida}"></th:block>
+<th:block th:insert="~{partials/modal_busca_frasco_movimentacao_entrada}"></th:block>
+<th:block th:insert="~{partials/modal_busca_frasco_movimentacao_outros_frascos}"></th:block>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+<script th:src="@{/js/includes.js}"></script>
+<script th:src="@{/js/forms.js}"></script>
+<script th:src="@{/js/results.js}"></script>
+
+<script>
+    window.catalogoFrascosCache = null;
+
+    window.carregarCatalogoFrascos = async function() {
+        if (window.catalogoFrascosCache !== null) {
+            return window.catalogoFrascosCache;
+        }
+
+        try {
+            const response = await fetch('/movimentacao/frascosMovimentacao');
+            if (!response.ok) throw new Error("Erro ao buscar frascos");
+
+            const data = await response.json();
+
+            const formatarData = (dataBase) => {
+                if (!dataBase) return "—";
+                let d;
+
+                if (Array.isArray(dataBase)) {
+                    d = new Date(dataBase[0], dataBase[1] - 1, dataBase[2]);
+                } else {
+                    d = new Date(dataBase);
+                }
+                if (isNaN(d)) return "—";
+                return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            };
+
+            window.catalogoFrascosCache = data.map(item => ({
+                codigo: item.codigo,
+                id: item.identificacao || String(item.codigo),
+                grupo: item.tipoDente || "",
+                estado: item.estado || "",
+                arcada: item.arcada || "",
+                denticao: item.denticao || "",
+                setor: item.local ? item.local.toLowerCase() : "",
+                disponivel: item.quantidade || 0,
+                dataCadastro: formatarData(item.datCad),
+                dataManutencao: formatarData(item.datManutencao)
+            }));
+
+            return window.catalogoFrascosCache;
+
+        } catch (error) {
+            console.error(error);
+            if (window.Swal) Swal.fire('Erro', 'Falha ao carregar frascos.', 'error');
+            return [];
+        }
+    };
+</script>
+
+<script th:src="@{/js/frasco-search-movimentacao.js}"></script>
+
+</body>
+</html>

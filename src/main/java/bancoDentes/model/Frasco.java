@@ -59,33 +59,53 @@ public class Frasco {
     @Column(name = "LOCAL", nullable = true)
     private Local local;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUSFRASCO")
+    private StatusFrasco statusFrasco;
+
     @PrePersist
+    public void onPrePersist() {
+        this.statusFrasco = StatusFrasco.DISPONIVEL;
+        limparCamposSeEndo();
+    }
+
     @PreUpdate
-    public void endoPersist() {
+    public void onPreUpdate() {
+        limparCamposSeEndo();
+    }
+
+    private void limparCamposSeEndo() {
         if (this.tipoDente == TipoDente.ENDO) {
             this.posicao = null;
             this.arcada = null;
-            this.estado = null;
+            this.estado = EstadoDente.MISTO;
             this.denticao = null;
         }
     }
 
-    // Método que gera a identificação do frasco
     public void gerarIdentificacao() {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
         }
-            String siglaArcada = (arcada != null) ? arcada.getSigla() : "";
             String siglaTipo = (tipoDente != null) ? tipoDente.getSigla() : "";
-            String siglaEstado = (estado != null) ? estado.getSigla() : "";
-            String siglaDenticao = (denticao != null) ? denticao.getSigla() : "";
+            String siglaLocal = (local != null) ? local.getSigla() : "";
 
-            this.identificacao = String.format("%s%s%s%s-%s",
+            this.identificacao = String.format("%s%s-%s",
                     siglaTipo,
-                    siglaArcada,
-                    siglaEstado,
-                    siglaDenticao,
+                    siglaLocal,
                     codigo);
+    }
+
+    public void emManutencao(){
+        this.statusFrasco = StatusFrasco.EM_MANUTENCA;
+    }
+
+    public void inativo(){
+        this.statusFrasco = StatusFrasco.INATIVO;
+    }
+
+    public void disponivel(){
+        this.statusFrasco = StatusFrasco.DISPONIVEL;
     }
 
 }

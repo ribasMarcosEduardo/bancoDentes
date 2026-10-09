@@ -200,7 +200,7 @@
                 <div class="list-panel">
                     <div class="pagination">
                         <div class="low-opacity">
-                            <strong id="paginationInfo"
+                            <strong id="paginationInfo" data-label="Solicitações Encontradas"
                                     th:text="${#lists.size(solicitacoes)} + ' Solicitações Encontradas'">0 Solicitações
                                 Encontradas</strong>
                         </div>
@@ -218,14 +218,18 @@
                         </div>
                     </div>
 
-                    <section class="results results--list">
+                    <th:block th:if="${#lists.isEmpty(solicitacoes)}">
+                        <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhuma solicitação registrada', 'Você ainda não possui nenhuma solicitação. Crie uma nova solicitação para começar.', false)}">
+                        </div>
+                    </th:block>
 
-                        <div th:if="${#lists.isEmpty(solicitacoes)}" class="alert alert-info shadow-sm mt-4"
-                             role="alert">
-                            <i class="bi bi-info-circle me-2"></i> Você ainda não possui nenhuma solicitação registrada.
+                    <section th:if="${!#lists.isEmpty(solicitacoes)}" class="results results--list">
+
+                        <div id="emptyStateFiltro" hidden
+                             th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhuma solicitação encontrada', 'Nenhuma solicitação corresponde aos filtros aplicados. Tente ajustar ou resetar os filtros.', true)}">
                         </div>
 
-                        <div th:if="${!#lists.isEmpty(solicitacoes)}" class="result-table result-table--historico">
+                        <div class="result-table result-table--historico">
                             <div class="result-table__head">
                                 <span>Solicitação</span>
                                 <span>Grupo</span>

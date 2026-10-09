@@ -20,7 +20,7 @@ public record SolicitacaoDTO(
         String justificativa
 ) {
 
-        public static Object empty() {
+        public static SolicitacaoDTO empty() {
                 return new SolicitacaoDTO(null,null,null,null,null,null,null,null,null,null, null);
         }
 

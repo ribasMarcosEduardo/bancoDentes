@@ -4,6 +4,7 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Solicitacao;
+import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.repository.FrascoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class FrascoService {
+public class FrascoService extends BaseService{
 
     private final FrascoRepository frascoRepository;
 
@@ -52,13 +53,20 @@ public class FrascoService {
     }
 
     /**
+     * Recupera todos os frascos disponíveis no sistema.
+     */
+    public List<Frasco> getFrascosPorStatusFrasco(StatusFrasco statusFrasco) {
+        return frascoRepository.findByStatusFrasco(statusFrasco);
+    }
+
+    /**
      * Busca um frasco específico no banco de dados a partir do seu código
      *
      * @param codFrasco
      */
     public Frasco buscarPorId(Long codFrasco) {
         return frascoRepository.findById(codFrasco)
-                .orElseThrow(() -> new FrascoException("Frasco não encontrado com o ID: " + codFrasco));
+                .orElseThrow(() -> new FrascoException(this.getText("error.frasco.naoEncontrado")));
     }
 
     /**
