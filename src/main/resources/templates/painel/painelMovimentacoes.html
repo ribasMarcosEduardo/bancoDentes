@@ -47,56 +47,60 @@
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Tipo de movimentação
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Entrada" data-filter-group="Tipo">
-                            <span>Entrada</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Entrada" data-filter-group="Tipo">
+                              <span>Entrada</span>
+                          </label>
 
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Saída" data-filter-group="Tipo">
-                            <span>Saída</span>
-                        </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Saída" data-filter-group="Tipo">
+                              <span>Saída</span>
+                          </label>
 
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Transferência" data-filter-group="Tipo">
-                            <span>Transferência</span>
-                        </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Transferência" data-filter-group="Tipo">
+                              <span>Transferência</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Grupo dentário
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
-                            <span>Molar</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
-                            <span>Pré-Molar</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
-                            <span>Canino</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
-                            <span>Incisivo</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
-                            <span>Endo</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
+                              <span>Molar</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
+                              <span>Pré-Molar</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
+                              <span>Canino</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
+                              <span>Incisivo</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
+                              <span>Endo</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
             </aside>
@@ -137,7 +141,7 @@
                             <i class="icon" data-lucide="filter"></i>
                         </button>
 
-                        <button class="btn btn-secondary" id="btnSortOrder">
+                        <button type="button" class="btn btn-secondary" id="btnSortOrder">
                             <span class="btn__label">Ordenar</span>
                             <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                         </button>
@@ -157,7 +161,7 @@
 
                         <button class="filters-clear" type="button">
                             <i class="icon" data-lucide="rotate-ccw"></i>
-                            Resetar Filtros
+                            Limpar filtros
                         </button>
                     </div>
                     <div class="active-filters" id="activeFilters"></div>
@@ -174,10 +178,10 @@
                         <div class="pagination__nav">
                             <span class="pagination__range" id="paginationRange">1-1</span>
 
-                            <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                            <button type="button" class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                                 <i data-lucide="chevron-left"></i>
                             </button>
-                            <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                            <button type="button" class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                                 <i data-lucide="chevron-right"></i>
                             </button>
                         </div>
