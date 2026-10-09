@@ -6,6 +6,13 @@ function animateScrollToRow(row, duration) {
 
     const startTime = performance.now();
 
+    // Com movimento reduzido a expansão é instantânea (ver globals.css),
+    // então em vez de perseguir a linha suavemente rola direto pro lugar
+    // certo em poucos frames.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const followFactor = reduceMotion ? 1 : 0.22;
+    const followDuration = reduceMotion ? 60 : duration;
+
     // A área expandida ainda está crescendo (CSS grid-template-rows/padding
     // animando) enquanto isso roda, então em vez de calcular um alvo fixo,
     // cada frame remede a posição atual da linha e persegue esse alvo em
@@ -30,10 +37,10 @@ function animateScrollToRow(row, duration) {
         }
 
         if (Math.abs(delta) > 0.5) {
-            window.scrollBy(0, delta * 0.22);
+            window.scrollBy(0, delta * followFactor);
         }
 
-        if (now - startTime < duration) {
+        if (now - startTime < followDuration) {
             requestAnimationFrame(step);
         }
     }

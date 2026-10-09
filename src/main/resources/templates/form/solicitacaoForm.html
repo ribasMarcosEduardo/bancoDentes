@@ -38,14 +38,24 @@
     </header>
 
     <div class="toolbar glass-frost">
-      <div class="toolbar__info">
-        <span class="toolbar__label">Saldo Disponível:</span>
-        <div class="toolbar__badge" th:text="${usuarioLogado.credito}">0</div>
+      <!-- data-saldo é o número lido pelo JS (limite de Quantidade e resumo da
+           confirmação, ver js/forms.js); o texto é só exibição. -->
+      <div class="toolbar__identity">
+        <span class="toolbar__identity-icon" aria-hidden="true">
+          <i class="icon" data-lucide="wallet"></i>
+        </span>
+
+        <div class="toolbar__identity-text">
+          <span class="toolbar__identity-label">Saldo disponível</span>
+          <span class="toolbar__identity-value" id="saldoDisponivel"
+                th:data-saldo="${usuarioLogado.credito}"
+                th:text="${usuarioLogado.credito} + ' dentes'">0 dentes</span>
+        </div>
         <input type="hidden" id="creditoEstudante" th:value="${usuarioLogado.credito}">
       </div>
 
       <div class="toolbar__actions">
-        <a th:href="@{/solicitacao/painel}" class="btn btn-secondary">
+        <a th:href="@{/solicitacao/painel}" class="btn btn-ghost">
           <span class="btn__label">Cancelar</span>
           <i class="orderBy-icon" data-lucide="x"></i>
         </a>
@@ -66,12 +76,14 @@
       <input type="hidden" th:field="*{codigo}"/>
 
       <section class="form-section">
+        <h2 class="form-section__title"><i class="icon" data-lucide="clipboard-list" aria-hidden="true"></i>Informações da Solicitação</h2>
+
         <div class="form-grid-estado">
           <div class="form-group">
             <label>Grupo dentário <span class="required-mark">*</span></label>
             <div class="select-wrapper">
               <select class="form-control" th:field="*{tipoDente}" id="grupoDentario" required>
-                <option value="">- Selecione o grupo -</option>
+                <option value="">Selecione o grupo</option>
                 <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}" th:value="${nome.name()}" th:text="${nome}"></option>
               </select>
               <i class="select-icon icon" data-lucide="chevron-down"></i>
@@ -102,18 +114,26 @@
 
       <section class="form-section form-section--disabled" id="avancadosSection">
         <div class="form-section__collapse-inner">
-          <div class="form-group">
-            <label class="checkbox-filter">
-              <input type="checkbox" id="avancadosToggle" disabled>
-              <span>Adicionar campos avançados</span>
-            </label>
-            <p class="field-hint">Estado, dentição, arcada/numeração do dente. Marque só se realmente precisar dessa especificação; do contrário, qualquer opção disponível é aceita.</p>
-          </div>
+          <!-- Cabeçalho que abre/fecha os campos avançados: mesmo visual dos
+               .form-section__title, com um interruptor (.switch) à direita. O cabeçalho
+               inteiro é o <label>, então clicar em qualquer parte dele liga e desliga.
+               Por baixo continua o mesmo checkbox #avancadosToggle que
+               setupCadastroSolicitacao (js/forms.js) escuta. -->
+          <label class="form-section__title form-section__title--toggle" for="avancadosToggle">
+            <i class="icon" data-lucide="sliders-horizontal" aria-hidden="true"></i>
+
+            <span class="form-section__title-text">
+              <span>Campos avançados <span class="optional-mark">(opcional)</span></span>
+              <span class="form-section__title-hint">Especifique estado, dentição e arcada/numeração.</span>
+            </span>
+
+            <input type="checkbox" class="switch" id="avancadosToggle" disabled>
+          </label>
 
           <div class="advanced-fields" id="advancedFields">
             <div class="advanced-fields__inner">
               <div class="form-group" id="estadoGroup">
-                <label>Estado do dente <span class="optional-mark">*</span></label>
+                <label>Estado do dente <span class="optional-mark">(opcional)</span></label>
                 <div class="select-wrapper">
                   <select class="form-control atributos-control" th:field="*{estadoDente}" id="estadoDente" disabled>
                     <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
@@ -128,7 +148,7 @@
 
               <div class="form-grid" id="atributosFrascoSection">
                 <div class="form-group" id="denticaoGroup">
-                  <label>Dentição <span class="optional-mark">*</span></label>
+                  <label>Dentição <span class="optional-mark">(opcional)</span></label>
                   <div class="select-wrapper">
                     <select class="form-control atributos-control" th:field="*{denticao}" id="denticao" disabled>
                       <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
@@ -142,7 +162,7 @@
                 </div>
 
                 <div class="form-group" id="arcadaGroup">
-                  <label>Arcada <span class="optional-mark">*</span></label>
+                  <label>Arcada <span class="optional-mark">(opcional)</span></label>
                   <div class="select-wrapper">
                     <select class="form-control atributos-control" th:field="*{arcada}" id="arcada" disabled>
                       <option th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}"
@@ -156,7 +176,7 @@
                 </div>
 
                 <div class="form-group" id="numeracaoGroup" hidden>
-                  <label>Numeração <span class="optional-mark">*</span></label>
+                  <label>Numeração <span class="optional-mark">(opcional)</span></label>
                   <div class="select-wrapper">
                     <select class="form-control atributos-control" th:field="*{posicao}" id="numeracaoSelect" disabled>
                     </select>
@@ -180,9 +200,8 @@
         </div>
       </section>
 
-      <p class="form-legend">
-        <span class="required-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Obrigatório.</span>
-        <span class="optional-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Opcional.</span>
+      <p class="form-legend form-legend--simple">
+        <span class="required-mark">*</span> Campos obrigatórios
       </p>
     </form>
   </section>

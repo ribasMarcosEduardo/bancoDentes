@@ -38,15 +38,23 @@
         </header>
 
         <div class="toolbar glass-frost">
-            <div class="toolbar__info">
-                <span class="toolbar__label">Identificador do Frasco:</span>
-                <div class="toolbar__badge" th:text="${frascoDTO.codigo != null} ? '#' + ${frascoDTO.identificacao} : '---'">
-                    ---
+            <!-- Em cadastro o identificador só nasce depois do POST (variante --pending);
+                 em edição mostra o valor real. -->
+            <div class="toolbar__identity">
+                <span class="toolbar__identity-icon" aria-hidden="true">
+                    <i class="icon" data-lucide="flask-conical"></i>
+                </span>
+
+                <div class="toolbar__identity-text">
+                    <span class="toolbar__identity-label">Identificador</span>
+                    <span class="toolbar__identity-value"
+                          th:classappend="${frascoDTO.codigo == null} ? 'toolbar__identity-value--pending'"
+                          th:text="${frascoDTO.codigo != null} ? ${frascoDTO.identificacao} : 'Gerado ao salvar'">Gerado ao salvar</span>
                 </div>
             </div>
 
             <div class="toolbar__actions">
-                <a th:href="@{/frasco/painel}" class="btn btn-secondary">
+                <a th:href="@{/frasco/painel}" class="btn btn-ghost">
                     <span class="btn__label">Cancelar</span>
                     <i class="orderBy-icon" data-lucide="x"></i>
                 </a>
@@ -66,21 +74,25 @@
             <input type="hidden" th:field="*{version}"/>
 
             <section class="form-section">
+                <h2 class="form-section__title"><i class="icon" data-lucide="flask-conical" aria-hidden="true"></i>Informações do Frasco</h2>
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Grupo dentário <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control" th:field="*{tipoDente}" id="tipoDente" required>
-                                <option value="">- Selecione o grupo -</option>
+                            <select class="form-control" th:field="*{tipoDente}" id="tipoDente" required aria-describedby="grupoDentarioHint">
+                                <option value="">Selecione o grupo</option>
                                 <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
                                         th:value="${nome.name()}" th:text="${nome}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>
+
+                        <p class="field-hint field-hint--icon" id="grupoDentarioHint"><i class="icon" data-lucide="info" aria-hidden="true"></i>Escolha o grupo para liberar os demais campos.</p>
                     </div>
 
                     <div class="form-group">
-                        <label>Local <span class="optional-mark">*</span></label>
+                        <label>Local</label>
                         <div class="select-wrapper">
                             <select class="form-control" th:field="*{local}" id="localFrasco">
                                 <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
@@ -92,7 +104,7 @@
                 </div>
             </section>
 
-            <section class="form-section form-section--disabled" id="estadoFrascoSection">
+            <section class="form-section form-section--continued form-section--disabled" id="estadoFrascoSection">
                 <div class="form-grid-estado">
                     <div class="form-group" id="estadoDenteGroup">
                         <label>Estado do dente <span class="required-mark">*</span></label>
@@ -123,9 +135,11 @@
             </section>
 
             <section class="form-section form-section--disabled" id="atributosFrascoSection">
+                <h2 class="form-section__title"><i class="icon" data-lucide="calendar-days" aria-hidden="true"></i>Detalhes e datas</h2>
+
                 <div class="form-grid">
                     <div class="form-group" id="denticaoGroup">
-                        <label>Dentição <span class="optional-mark">*</span></label>
+                        <label>Dentição <span class="optional-mark">(opcional)</span></label>
                         <div class="select-wrapper">
                             <select class="form-control atributos-control" th:field="*{denticao}" id="denticao" disabled>
                                 <option th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}"
@@ -136,7 +150,7 @@
                     </div>
 
                     <div class="form-group" id="arcadaGroup">
-                        <label>Arcada <span class="optional-mark">*</span></label>
+                        <label>Arcada <span class="optional-mark">(opcional)</span></label>
                         <div class="select-wrapper">
                             <select class="form-control atributos-control" th:field="*{arcada}" id="arcada" disabled>
                                 <option th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}"
@@ -147,10 +161,10 @@
                     </div>
 
                     <div class="form-group" id="numeracaoGroup" hidden>
-                        <label>Numeração <span class="optional-mark">*</span></label>
+                        <label>Numeração <span class="optional-mark">(opcional)</span></label>
                         <div class="select-wrapper">
                             <select class="form-control atributos-control" th:field="*{posicao}" id="numeracaoSelect" th:data-valor-inicial="${frascoDTO.posicao}">
-                                <option value="">- Selecione a Dentição -</option>
+                                <option value="">Selecione a dentição</option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>
@@ -190,9 +204,8 @@
                 </div>
             </section>
 
-            <p class="form-legend">
-                <span class="required-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Obrigatório.</span>
-                <span class="optional-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Opcional.</span>
+            <p class="form-legend form-legend--simple">
+              <span class="required-mark">*</span> Campos obrigatórios
             </p>
         </form>
     </section>

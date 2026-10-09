@@ -25,8 +25,11 @@ function setupFilters() {
     sections.forEach((section) => {
         const toggle = section.querySelector(".filter-section__toggle");
         if(toggle) {
+            toggle.setAttribute("aria-expanded", String(!section.classList.contains("is-closed")));
+
             toggle.addEventListener("click", () => {
-                section.classList.toggle("is-closed");
+                const isClosed = section.classList.toggle("is-closed");
+                toggle.setAttribute("aria-expanded", String(!isClosed));
             });
         }
     });

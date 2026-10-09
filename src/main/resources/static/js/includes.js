@@ -100,31 +100,6 @@ function setupThemeToggle() {
     });
 }
 
-// Pulsação ao clicar em qualquer .btn (ver keyframes btn-pulse em
-// components/buttons.css). Delegado no document (não em cada botão)
-// pra cobrir também os que chegam depois via loadIncludes/JS
-// dinâmico (navbar, chips de filtro, linhas de resultado etc.) sem
-// precisar religar nada.
-function setupButtonPulse() {
-    document.addEventListener("click", (event) => {
-        const btn = event.target.closest(".btn");
-        if (!btn || btn.disabled) return;
-
-        // Reforça a troca de classe mesmo em cliques muito rápidos no
-        // mesmo botão — sem o reflow forçado (offsetWidth), remover e
-        // adicionar a classe no mesmo tick não reinicia a animation.
-        btn.classList.remove("is-pulsing");
-        void btn.offsetWidth;
-        btn.classList.add("is-pulsing");
-
-        btn.addEventListener(
-            "animationend",
-            () => btn.classList.remove("is-pulsing"),
-            { once: true }
-        );
-    });
-}
-
 async function loadIncludes() {
     const includes = document.querySelectorAll("[data-include]");
 
@@ -536,7 +511,6 @@ applyTheme(savedTheme);
 
 loadIncludes();
 setupFlashToast();
-setupButtonPulse();
 
 // Configuração global do Toast de Sucesso
 const Toast = Swal.mixin({
