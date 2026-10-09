@@ -4,9 +4,21 @@
     gap: 1.5rem;
 }
 
+/*
+    Coluna flex com o corpo crescendo (flex:1): quando o card fica mais
+    alto que o próprio conteúdo — min-height maior que a soma das partes,
+    ou a grade (.results-grid) esticando todos os cards da linha até a
+    altura do mais alto —, a sobra vai pra dentro do corpo e o rodapé
+    continua colado embaixo. Antes o card era bloco comum e a sobra
+    ficava abaixo do rodapé, aparecendo como uma faixa a mais com o
+    fundo do card (diferente do fundo do rodapé).
+*/
 .card {
     min-height: var(--card-min-height);
     overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
 
     background: var(--surface-soft);
     border: 1px solid var(--border);
@@ -16,7 +28,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 
-    transition: 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card:hover {
@@ -71,6 +83,7 @@
 }
 
 .card__body {
+    flex: 1;
     padding: var(--card-padding);
 }
 
@@ -118,6 +131,7 @@
 
 .card__date {
     margin: 0.18rem 0;
+    font-variant-numeric: tabular-nums;
 }
 
 .card__actions {

@@ -45,7 +45,7 @@
     -webkit-backdrop-filter: blur(24px) saturate(150%);
 
     border: 1px solid var(--glass-frost-border);
-    border-radius: 12px;
+    border-radius: var(--radius);
 
     box-shadow:
         var(--glass-frost-shadow),
@@ -84,7 +84,7 @@
     -webkit-backdrop-filter: blur(24px) saturate(150%);
 
     border: 1px solid var(--glass-frost-strong-border);
-    border-radius: 12px;
+    border-radius: var(--radius);
 
     box-shadow:
         var(--glass-frost-strong-shadow),
@@ -131,7 +131,7 @@
     -webkit-backdrop-filter: blur(36px) saturate(170%);
 
     border: 1px solid var(--glass-success-border);
-    border-radius: 12px;
+    border-radius: var(--radius);
 
     /* O highlight interno é o que dá o "rim" de luz do acrílico do
        Windows 11 — mais forte no topo, some pra baixo, por cima da borda

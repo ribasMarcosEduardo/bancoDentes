@@ -76,6 +76,24 @@ body.modal-open {
     transform: translateY(0) scale(1);
 }
 
+/*
+    Variante compacta — pra modais de confirmação simples (ex.: Concluir
+    Manutenção), sem busca/paginação. A altura FIXA da .modal base (ver
+    comentário acima) existe só pra evitar "pulo" de altura entre páginas
+    de resultado — sem lista paginada, isso não se aplica: aqui a altura
+    acompanha o conteúdo (com um teto, pra telas baixas) e .modal__body
+    volta a poder rolar se o conteúdo não couber.
+*/
+.modal--compact {
+    width: min(28rem, 100%);
+    height: auto;
+    max-height: 85vh;
+}
+
+.modal--compact .modal__body {
+    overflow-y: auto;
+}
+
 .modal__header {
     display: flex;
     align-items: center;
@@ -163,7 +181,7 @@ body.modal-open {
     flex: none;
 
     display: grid;
-    gap: 1.25rem;
+    gap: 0.75rem;
 }
 
 .modal-results-scroll {
@@ -200,10 +218,129 @@ body.modal-open {
     font-size: 0.85rem;
 }
 
+/* Sem hint à esquerda (ex.: modal de confirmação, sem paginação) — os
+   botões vão direto pra ponta direita em vez de esticar com
+   justify-content:space-between (regra base, pensada pro rodapé com
+   hint+paginação do modal de busca). */
+.modal__footer--end {
+    justify-content: flex-end;
+}
+
+/* Quantidade atual — modal de Concluir Manutenção */
+.modal-qty-highlight {
+    margin: 0;
+
+    color: var(--text-soft);
+    font-size: 0.95rem;
+}
+
+.modal-qty-highlight strong {
+    color: var(--text);
+    font-size: 1.4rem;
+}
+
+.modal-field-hint {
+    margin: 0;
+
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
 /* Busca + filtros */
 
 .modal-search {
     max-width: none;
+}
+
+/* Search um pouco menor que a padrão (42px/0.95rem) — mesma ideia dos
+   filtros compactos abaixo: sobra mais altura pra lista de resultados. */
+.modal-search input {
+    padding: 0.55rem 2.4rem 0.55rem 0.85rem;
+
+    border-radius: 0.65rem;
+
+    font-size: 0.88rem;
+}
+
+.modal-search .search-icon,
+.modal-search .search-clear {
+    right: 0.85rem;
+
+    width: 16px;
+    height: 16px;
+}
+
+/* Search + ícone de filtro lado a lado */
+.modal-search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.modal-search-row .modal-search {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Só o ícone: sem borda nem fundo, nem no hover — a cor é o único feedback */
+.modal-filter-toggle {
+    position: relative;
+
+    flex: none;
+
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+    padding: 0;
+
+    border: none;
+    background: none;
+
+    color: var(--icon-muted);
+
+    cursor: pointer;
+
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.modal-filter-toggle .icon {
+    width: 18px;
+    height: 18px;
+}
+
+.modal-filter-toggle:hover,
+.modal-filter-toggle[aria-expanded="true"] {
+    color: var(--icon-active);
+}
+
+.modal-filter-toggle:focus-visible {
+    outline: 2px solid var(--input-border-focus);
+    outline-offset: 2px;
+
+    border-radius: 0.5rem;
+}
+
+/* Ponto de "tem filtro ativo" — aparece mesmo com os filtros recolhidos */
+.modal-filter-toggle__dot {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: linear-gradient(135deg, #47a2ed, #42cc74);
+
+    box-shadow: 0 0 0 2px var(--surface);
+}
+
+.modal-filter-toggle__dot[hidden] {
+    display: none;
 }
 
 .modal-filters {
@@ -214,8 +351,107 @@ body.modal-open {
        Estado do dente/Dentição); com auto-fit essa regra serve pra
        2, 3 ou 4 filtros sem precisar editar o CSS de novo. */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+/* Filtros mais compactos que os campos de formulário (42px): em telas
+   baixas (notebook) busca + duas fileiras de filtros chegavam a comer
+   metade do modal e sobrava pouco pra lista de resultados. Só altura,
+   fonte e respiro interno mudam — o ícone da seta continua centralizado
+   por top:50%, então acompanha a nova altura sozinho. */
+.modal-filters .select-wrapper .form-control {
+    height: 34px;
+
+    padding: 0 2.25rem 0 0.75rem;
+
+    border-radius: 0.7rem;
+
+    font-size: 0.85rem;
+}
+
+.modal-filters .select-icon {
+    right: 0.7rem;
+
+    width: 16px;
+    height: 16px;
+}
+
+/*
+    Filtros específicos do frasco (Grupo/Estado/Dentição): mesma posição de
+    sempre, mas recolhidos até clicar no ícone de filtro ao lado da search.
+    Abre com grid-template-rows 0fr -> 1fr (mesma técnica de .advanced-fields,
+    cadastro_frasco.css) e os filtros entram em sequência, descendo um pouco e
+    aparecendo — mesma curva e ritmo das outras aberturas do sistema.
+    margin-top negativo cancela o gap do .modal__body-fixed enquanto fechado,
+    senão sobraria um vão duplo entre a search e a fileira de baixo.
+    visibility:hidden no estado fechado tira os selects da ordem do Tab.
+*/
+.modal-filters-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+
+    margin-top: -0.75rem;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease,
+        visibility 0s linear 0.4s;
+}
+
+.modal-filters-collapse.is-open {
+    grid-template-rows: 1fr;
+
+    margin-top: 0;
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease,
+        visibility 0s;
+}
+
+/* padding/margin de 4px: o overflow:hidden (necessário pro 0fr) cortaria o
+   anel de foco dos selects; o par se anula no cálculo da altura */
+.modal-filters-collapse__inner {
+    overflow: hidden;
+    min-height: 0;
+
+    margin: -4px;
+    padding: 4px;
+}
+
+.modal-filters-collapse .modal-filters > * {
+    opacity: 0;
+    transform: translateY(-8px);
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-filters-collapse.is-open .modal-filters > * {
+    opacity: 1;
+    transform: translateY(0);
+
+    transition:
+        opacity 0.35s ease 0.08s,
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+}
+
+.modal-filters-collapse.is-open .modal-filters > :nth-child(2) {
+    transition-delay: 0.16s;
+}
+
+.modal-filters-collapse.is-open .modal-filters > :nth-child(3) {
+    transition-delay: 0.24s;
 }
 
 /* Seleciona/desmarca de uma vez todos os resultados que batem com a

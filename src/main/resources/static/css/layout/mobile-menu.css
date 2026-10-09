@@ -42,7 +42,9 @@
         opacity: 0;
         visibility: hidden;
 
-        transition: 0.25s ease;
+        transition:
+            opacity 0.3s ease,
+            visibility 0.3s;
     }
 
     .mobile-menu-overlay.is-open {
@@ -65,7 +67,7 @@
         padding: 1.25rem;
 
         transform: translateX(100%);
-        transition: 0.25s ease;
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .mobile-menu.is-open {

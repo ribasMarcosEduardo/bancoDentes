@@ -19,6 +19,29 @@
     animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/*
+    .toolbar usa .glass-frost, que vem com overflow:hidden (ver
+    components/glass.css) pra clipar o ::before de ruído nos cantos
+    arredondados. Só que isso também corta o balão de um [data-tooltip]
+    (ver base/utilities.css) em cima de um botão daqui — ex.: "Imprimir
+    etiquetas" (frascos.html), que não tem 1rem de padding sobrando pro
+    balão aparecer sem ser cortado pela borda do toolbar.
+
+    Troca quem faz o clipping dos cantos: em vez do overflow:hidden do
+    pai (que corta QUALQUER descendente, inclusive um tooltip
+    absolutamente posicionado), o próprio ::before passa a se arredondar
+    sozinho (border-radius:inherit já dá conta, já que ele cobre a
+    caixa inteira via inset:0). Com isso dá pra liberar overflow:visible
+    aqui sem o ruído vazar por cima dos cantos arredondados.
+*/
+.toolbar.glass-frost {
+    overflow: visible;
+}
+
+.toolbar.glass-frost::before {
+    border-radius: inherit;
+}
+
 .toolbar input {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -183,4 +206,74 @@
 .toolbar-stat strong {
     color: var(--text);
     font-size: 0.95rem;
+}
+
+/*
+    Identificação do registro na toolbar dos formulários (ex.: cadastro de
+    frasco): ícone num quadrado + rótulo pequeno em cima do valor. Substitui
+    o .toolbar__info/.toolbar__badge (caixa tracejada com "---") onde é
+    usado — o valor é o destaque, não uma caixa vazia.
+*/
+.toolbar__identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    min-width: 0;
+}
+
+.toolbar__identity-icon {
+    flex-shrink: 0;
+
+    width: var(--btn-height);
+    height: var(--btn-height);
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 0.75rem;
+
+    background: var(--btn-tonal-bg);
+    color: var(--text-soft);
+}
+
+.toolbar__identity-icon .icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+.toolbar__identity-text {
+    display: grid;
+    gap: 0.15rem;
+
+    min-width: 0;
+}
+
+.toolbar__identity-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.toolbar__identity-value {
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ainda sem identificador (só existe depois de salvar) */
+.toolbar__identity-value--pending {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-style: italic;
 }

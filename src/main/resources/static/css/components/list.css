@@ -65,6 +65,26 @@
         40px;
 }
 
+/* Checkbox | Identificador | Grupo | Local | Cadastro | Manutenção — ver
+   selecao_frascos_etiqueta.html. Primeira coluna fixa e estreita (só a
+   checkbox), diferente das outras variantes acima (que reservam a
+   primeira coluna pro identificador/nome). */
+.result-table--etiqueta-selecao .result-table__head,
+.result-table--etiqueta-selecao .result-list {
+    grid-template-columns:
+        40px
+        1.1fr
+        0.9fr
+        0.8fr
+        0.9fr
+        0.9fr;
+}
+
+.result-table--etiqueta-selecao .result-table__head span:first-child,
+.result-table--etiqueta-selecao .result-list span:first-child {
+    justify-self: center;
+}
+
 /*
     Cada coluna flexível tem um piso próprio via minmax() — sem isso, a
     pill de Tipo (width fixa, 86px) "ganha" da coluna de Frasco na
@@ -123,6 +143,10 @@
 
 .result-list {
     border-top: 1px solid var(--border);
+
+    /* Datas, quantidades e códigos com dígitos de largura fixa — as
+       colunas não "dançam" de uma linha pra outra */
+    font-variant-numeric: tabular-nums;
 
     color: var(--text-soft);
     font-size: 0.88rem;
@@ -207,6 +231,10 @@
     border-color: rgba(239, 68, 68, 0.55);
 }
 
+.result-list__action--green {
+    border-color: rgba(34, 197, 94, 0.55);
+}
+
 .request-row {
     border-top: 1px solid var(--border);
 }
@@ -247,7 +275,7 @@
 }
 
 .request-toggle .icon {
-    transition: transform 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .request-row.is-open .request-toggle .icon {
@@ -419,16 +447,19 @@
     display: none;
 }
 
+/* Rótulo discreto, valor em destaque — o dado é o que importa ao bater
+   o olho, não o nome do campo */
 .request-details__label {
-    color: var(--text);
-    font-size: 0.78rem;
-    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
 }
 
 .request-detail span:last-child {
-    color: var(--text-soft);
+    color: var(--text);
     font-size: 0.9rem;
-    font-weight: 400;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
 .request-notes {
