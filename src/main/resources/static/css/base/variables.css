@@ -132,6 +132,10 @@ body.light{
 
     --step-line-bg: rgba(31,41,55,0.14);
     --step-line-active: #1f2937;
+
+    /* Texto/borda de erro em formulário — tom mais escuro que o #ef4444
+       dos status pra passar contraste AA em texto pequeno no fundo claro */
+    --danger-text: #dc2626;
 }
 
 :root.dark,
@@ -247,4 +251,6 @@ body.dark {
 
     --step-line-bg: rgba(255,255,255,0.12);
     --step-line-active: #22c55e;
+
+    --danger-text: #f87171;
 }

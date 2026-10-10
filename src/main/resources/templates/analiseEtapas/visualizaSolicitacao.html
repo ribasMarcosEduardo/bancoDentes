@@ -193,7 +193,7 @@
             <section class="analysis-card" style="margin-bottom: 24px;">
                 <header class="analysis-card__header">
                     <h2>Solicitação pronta para retirada</h2>
-                    <span class="status-pill status-pill--retirada">Aguardando Retirada</span>
+                    <span class="status-pill status-pill--aguardando_retirada">Aguardando Retirada</span>
                 </header>
                 <div class="analysis-message analysis-message--success">
                     <i class="icon" data-lucide="check-circle"></i>
@@ -205,7 +205,7 @@
                 <section class="analysis-card">
                     <header class="analysis-card__header">
                         <h2>Detalhes da Solicitação</h2>
-                        <span class="status-pill status-pill--retirada">Aguardando Retirada</span>
+                        <span class="status-pill status-pill--aguardando_retirada">Aguardando Retirada</span>
                     </header>
 
                     <div class="analysis-details">
@@ -366,10 +366,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/forms.js}"></script>
+<script th:src="@{/js/bundles/form.js}"></script>
 <script th:src="@{/js/analysis.js}"></script>
 <script th:src="@{/js/requests.js}"></script>
 

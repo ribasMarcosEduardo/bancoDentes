@@ -5,6 +5,7 @@ import bancoDentes.model.enumModels.*;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -65,7 +66,6 @@ public class Frasco {
 
     @PrePersist
     public void onPrePersist() {
-        this.statusFrasco = StatusFrasco.DISPONIVEL;
         limparCamposSeEndo();
     }
 
@@ -81,6 +81,26 @@ public class Frasco {
             this.estado = EstadoDente.MISTO;
             this.denticao = null;
         }
+    }
+
+    /**
+     * Situação da data de manutenção em relação a hoje (usada pelos painéis).
+     * Calculada na leitura, não é persistida. Sem data de manutenção retorna null.
+     */
+    @Transient
+    public PrazoManutencao getPrazoManutencao() {
+        if (datManutencao == null) {
+            return null;
+        }
+        LocalDate hoje = LocalDate.now();
+        LocalDate manutencao = datManutencao.toLocalDate();
+        if (manutencao.isBefore(hoje)) {
+            return PrazoManutencao.VENCIDA;
+        }
+        if (!manutencao.isAfter(hoje.plusDays(PrazoManutencao.DIAS_PROXIMA))) {
+            return PrazoManutencao.PROXIMA;
+        }
+        return PrazoManutencao.EM_DIA;
     }
 
     public void gerarIdentificacao() {

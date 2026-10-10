@@ -43,7 +43,7 @@
         height: 100vh;
 
         transform: translateX(100%);
-        transition: transform 0.25s ease;
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .filters-sidebar-desktop.is-open {
@@ -268,30 +268,44 @@
 .filter-section__toggle .icon {
     width: 17px;
     height: 17px;
-    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .filter-section.is-closed .filter-section__toggle .icon {
     transform: rotate(-90deg);
 }
 
+/*
+    Abre/fecha com grid-template-rows 0fr <-> 1fr (mesma técnica e mesmo
+    ritmo da área expandida das linhas em list.css e da
+    .active-filters-bar): anima exatamente até a altura real do
+    conteúdo, sem o teto fixo de max-height, que cortava seções maiores
+    e fazia as curtas "demorarem" a começar a fechar. O
+    .filter-section__inner é o item único do grid que encolhe até 0.
+*/
 .filter-section__content {
     display: grid;
-    gap: 0.65rem;
+    grid-template-rows: 1fr;
     margin-top: 0.9rem;
 
-    overflow: hidden;
-    max-height: 220px;
     opacity: 1;
 
     transition:
-        max-height 0.18s cubic-bezier(0.22, 1, 0.36, 1),
-        margin-top 0.18s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.15s ease;
+        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+}
+
+.filter-section__inner {
+    min-height: 0;
+    overflow: hidden;
+
+    display: grid;
+    gap: 0.65rem;
 }
 
 .filter-section.is-closed .filter-section__content {
-    max-height: 0;
+    grid-template-rows: 0fr;
     margin-top: 0;
     opacity: 0;
 }
@@ -366,13 +380,4 @@
 
 .checkbox-filter:hover {
     color: var(--text);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .active-filters-bar,
-    .filter-chip,
-    .filter-section__content,
-    .filter-section__toggle .icon {
-        transition: none;
-    }
 }

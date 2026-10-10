@@ -297,3 +297,130 @@
     width: fit-content;
     white-space: nowrap;
 }
+
+/*
+    Detalhes expandidos de um frasco nas listas .selected-flasks (ver
+    montarDetalhesFrasco em frasco-search-movimentacao.js) — mesmo desenho
+    dos detalhes do estudante em cadastro_doacao.css: ícone na coluna da
+    esquerda + barra vertical + informações. As duas linhas usam a mesma
+    grade de 4 colunas, então os campos ficam alinhados entre si (Grupo
+    em cima de Quantidade, Arcada em cima de Cadastro...).
+*/
+.frasco-details {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.85rem;
+}
+
+.frasco-details__icon {
+    display: grid;
+    place-items: center;
+
+    color: var(--icon-muted);
+}
+
+.frasco-details__icon .icon {
+    width: 22px;
+    height: 22px;
+}
+
+.frasco-details__body {
+    display: grid;
+    gap: 1.1rem;
+
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--border-strong);
+}
+
+.frasco-details__row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+}
+
+/* Linha 2 separada da 1 por uma linha fina — "o que é" em cima,
+   "quanto/quando" embaixo */
+.frasco-details__row + .frasco-details__row {
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+}
+
+.frasco-details__span-2 {
+    grid-column: span 2;
+}
+
+/* Bloco de texto livre embaixo das linhas (ex.: Motivo/Observações em
+   manutencoes.html), separado delas pela mesma linha fina */
+.frasco-details__note {
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+}
+
+.frasco-details__note p {
+    margin: 0;
+    max-width: 65ch;
+
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Escopo extra pra vencer .request-detail span:last-child (list.css),
+   que pinta o valor de cada detalhe com a cor de texto principal */
+.frasco-details .request-detail .frasco-details__empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* "30 → 25 após a saída" — o valor que vai ficar em destaque */
+.frasco-details__qtd {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.frasco-details__qtd .icon {
+    width: 14px;
+    height: 14px;
+
+    color: var(--icon-muted);
+}
+
+.frasco-details__qtd strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.frasco-details__qtd small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 860px) {
+
+    .frasco-details__row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+
+    /* Sem ícone/barra — o espaço vai pras informações */
+    .frasco-details {
+        grid-template-columns: 1fr;
+    }
+
+    .frasco-details__icon {
+        display: none;
+    }
+
+    .frasco-details__body {
+        padding-left: 0;
+        border-left: none;
+    }
+}

@@ -23,11 +23,22 @@
                  visíveis, não somem quando a lista de resultados precisa
                  rolar (ver .modal-results-scroll logo abaixo). -->
             <div class="modal__body-fixed">
-                <div class="search-wrapper modal-search">
-                    <input type="search" id="modalBuscaFrascoMovimentacaoInput" placeholder="Buscar por identificador...">
+                <div class="modal-search-row">
+                    <div class="search-wrapper modal-search">
+                        <input type="search" id="modalBuscaFrascoMovimentacaoInput" placeholder="Buscar por identificador...">
 
-                    <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
-                    <i class="search-icon" data-lucide="search"></i>
+                        <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
+                        <i class="search-icon" data-lucide="search"></i>
+                    </div>
+
+                    <!-- Só o ícone (sem borda/fundo): revela/recolhe os filtros específicos do
+                         frasco logo abaixo. Recolhido, os filtros continuam valendo; o ponto no ícone
+                         avisa que há algum ativo (ver frasco-search-movimentacao.js). -->
+                    <button type="button" class="modal-filter-toggle tooltip-below" aria-expanded="false"
+                            data-tooltip="Filtros do frasco" aria-label="Mostrar filtros do frasco">
+                        <i class="icon" data-lucide="filter"></i>
+                        <span class="modal-filter-toggle__dot" hidden></span>
+                    </button>
                 </div>
 
                 <!-- Grupo dentário é o filtro primário — junto com a busca
@@ -37,37 +48,41 @@
                      O recorte por Local (BDH/Biobanco) não aparece aqui:
                      já foi decidido lá em cima no formulário
                      (#localMovimentacao), então o JS aplica ele sozinho. -->
-                <div class="modal-filters">
-                    <div class="select-wrapper">
-                        <select class="form-control" id="modalFiltroGrupoMovimentacao">
-                            <option value="">Grupo dentário</option>
-                            <option value="Molar">Molar</option>
-                            <option value="Pré-Molar">Pré-Molar</option>
-                            <option value="Canino">Canino</option>
-                            <option value="Incisivo">Incisivo</option>
-                            <option value="Endo">Endo</option>
-                        </select>
-                        <i class="select-icon icon" data-lucide="chevron-down"></i>
-                    </div>
+                <div class="modal-filters-collapse">
+                    <div class="modal-filters-collapse__inner">
+                        <div class="modal-filters">
+                            <div class="select-wrapper">
+                                <select class="form-control" id="modalFiltroGrupoMovimentacao">
+                                    <option value="">Grupo dentário</option>
+                                    <option value="Molar">Molar</option>
+                                    <option value="Pré-Molar">Pré-Molar</option>
+                                    <option value="Canino">Canino</option>
+                                    <option value="Incisivo">Incisivo</option>
+                                    <option value="Endo">Endo</option>
+                                </select>
+                                <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            </div>
 
-                    <div class="select-wrapper">
-                        <select class="form-control" id="modalFiltroEstadoMovimentacao">
-                            <option value="">Estado do dente</option>
-                            <option value="Hígido">Hígido</option>
-                            <option value="Cariado">Cariado</option>
-                            <option value="Restaurado">Restaurado</option>
-                            <option value="Misto">Misto</option>
-                        </select>
-                        <i class="select-icon icon" data-lucide="chevron-down"></i>
-                    </div>
+                            <div class="select-wrapper">
+                                <select class="form-control" id="modalFiltroEstadoMovimentacao">
+                                    <option value="">Estado do dente</option>
+                                    <option value="Hígido">Hígido</option>
+                                    <option value="Cariado">Cariado</option>
+                                    <option value="Restaurado">Restaurado</option>
+                                    <option value="Misto">Misto</option>
+                                </select>
+                                <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            </div>
 
-                    <div class="select-wrapper">
-                        <select class="form-control" id="modalFiltroDenticaoMovimentacao">
-                            <option value="">Dentição</option>
-                            <option value="Permanente">Permanente</option>
-                            <option value="Decídua">Decídua</option>
-                        </select>
-                        <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            <div class="select-wrapper">
+                                <select class="form-control" id="modalFiltroDenticaoMovimentacao">
+                                    <option value="">Dentição</option>
+                                    <option value="Permanente">Permanente</option>
+                                    <option value="Decídua">Decídua</option>
+                                </select>
+                                <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

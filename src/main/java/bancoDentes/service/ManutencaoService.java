@@ -70,7 +70,7 @@ public class ManutencaoService extends BaseService{
         frasco.setDatCad(LocalDateTime.now());
         frasco.setDatManutencao(LocalDateTime.now().plusYears(1));
 
-        frasco.setStatusFrasco(novaQuantidade == 0 ? StatusFrasco.INATIVO : StatusFrasco.DISPONIVEL);
+        frasco.setStatusFrasco(novaQuantidade == 0 ? StatusFrasco.INATIVO : StatusFrasco.DIS_IMPRESSAO);
 
         frascoRepository.save(frasco);
 

@@ -277,6 +277,17 @@ function setupCadastroFrasco() {
         atualizarDicaNumeracao();
     });
 
+    // Dica "Escolha o grupo para liberar..." só faz sentido enquanto os
+    // campos seguintes ainda estão travados
+    const grupoHint = document.querySelector("#grupoDentarioHint");
+
+    function atualizarDicasLiberacao() {
+        if (grupoHint) grupoHint.hidden = tipoDente.value !== "";
+    }
+
+    tipoDente.addEventListener("change", atualizarDicasLiberacao);
+    atualizarDicasLiberacao();
+
     if (isEdicao && tipoDente.value !== "") {
         enableSection(estadoFrascoSection);
         estadoDente.disabled = false;
@@ -326,7 +337,7 @@ function setupCadastroSolicitacao() {
 
     const atributosControls = advancedFields.querySelectorAll(".atributos-control");
 
-    const saldoDisponivel = Number(document.querySelector(".toolbar__badge")?.textContent.trim()) || 0;
+    const saldoDisponivel = Number(document.querySelector("#saldoDisponivel")?.dataset.saldo) || 0;
     quantidadeInput.max = saldoDisponivel || "";
     if (quantidadeMax) quantidadeMax.textContent = `/${saldoDisponivel}`;
 
@@ -543,7 +554,7 @@ function setupCadastroSolicitacaoSubmit() {
     }
 
     function montarResumoCadastro() {
-        const saldoAtual = Number(document.querySelector(".toolbar__badge")?.textContent.trim()) || 0;
+        const saldoAtual = Number(document.querySelector("#saldoDisponivel")?.dataset.saldo) || 0;
         const qtdSolicitada = Number(quantidade?.value) || 0;
         const saldoDepois = Math.max(saldoAtual - qtdSolicitada, 0);
 
@@ -633,7 +644,7 @@ setupCadastroSolicitacaoSubmit();
 
 function setupCadastroSolicitacaoCancel() {
     const form = document.querySelector("#cadastroSolicitacaoForm");
-    const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
+    const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a[href]");
 
     if (!cancelarBtn || typeof Swal === "undefined") {
         return;
@@ -790,7 +801,7 @@ setupCadastroFrascoSubmit();
 
 function setupCadastroFrascoCancel() {
     const form = document.querySelector("#cadastroFrascoForm");
-    const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
+    const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a[href]");
 
     if (!cancelarBtn || typeof Swal === "undefined") {
         return;
@@ -827,22 +838,52 @@ function setupCadastroMovimentacao() {
     const tipoSelect = document.querySelector("#tipoMovimentacao");
     const escolherFrascosBtn = document.querySelector("#escolherFrascosBtn");
     const escolherFrascosLabel = escolherFrascosBtn?.querySelector(".btn__label");
+    const sectionTitle = document.querySelector("#frascosSectionTitle");
+    const frascosLabel = document.querySelector("#frascosLabel");
+    const emptyText = document.querySelector("#selectedFlasksEmptyText");
 
     if (!tipoSelect || !escolherFrascosBtn) {
         return;
     }
 
-    tipoSelect.addEventListener("change", () => {
-        escolherFrascosBtn.disabled = tipoSelect.value === "";
+    // Roda no "change" e também uma vez na carga: o Tipo já vem com um
+    // valor padrão (Saída), então o botão/título/estado vazio precisam
+    // refletir isso sem esperar o usuário mexer no select.
+    function aplicarTipo() {
+        const semTipo = tipoSelect.value === "";
+        const entrada = tipoSelect.value.toLowerCase() === "entrada";
+
+        escolherFrascosBtn.disabled = semTipo;
 
         // Singular só em Entrada (o modal de lá só deixa escolher um
         // frasco de destino — ver modal_busca_frasco_movimentacao_entrada.html/
         // setupFrascoSearchModal em frasco-search-movimentacao.js); Saída
-        // mantém o plural de sempre.
+        // mantém o plural de sempre. O título deixa claro que, em Entrada,
+        // esse frasco é o que vai RECEBER os dentes.
         if (escolherFrascosLabel) {
-            escolherFrascosLabel.textContent = tipoSelect.value === "entrada" ? "Escolher Frasco" : "Escolher Frascos";
+            escolherFrascosLabel.textContent = entrada ? "Escolher Frasco" : "Escolher Frascos";
         }
-    });
+
+        if (sectionTitle) {
+            sectionTitle.textContent = entrada ? "Frasco de Destino" : "Frascos Selecionados";
+        }
+
+        // Rótulo do cabeçalho do cartão: só o texto antes do asterisco
+        if (frascosLabel?.firstChild) {
+            frascosLabel.firstChild.textContent = entrada ? "Frasco " : "Frascos ";
+        }
+
+        if (emptyText) {
+            emptyText.textContent = semTipo
+                ? "Escolha o tipo de movimentação para começar."
+                : entrada
+                    ? "Nenhum frasco de destino selecionado ainda."
+                    : "Nenhum frasco selecionado ainda.";
+        }
+    }
+
+    tipoSelect.addEventListener("change", aplicarTipo);
+    aplicarTipo();
 }
 
 setupCadastroMovimentacao();
@@ -1043,7 +1084,7 @@ setupCadastroMovimentacaoSubmit();
 // setupCadastroFrascoCancel, só que ancorada em #cadastroMovimentacaoForm.
 function setupCadastroMovimentacaoCancel() {
     const form = document.querySelector("#cadastroMovimentacaoForm");
-    const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a.btn-secondary");
+    const cancelarBtn = form?.closest(".form-shell")?.querySelector(".toolbar__actions a[href]");
 
     if (!cancelarBtn || typeof Swal === "undefined") {
         return;

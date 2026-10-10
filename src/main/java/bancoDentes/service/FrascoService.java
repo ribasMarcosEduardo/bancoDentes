@@ -40,9 +40,10 @@ public class FrascoService extends BaseService{
             frasco = frascoDoBanco;
         }
 
-        frasco = frascoRepository.save(frasco);
+        frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
+        frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();
-        return frascoRepository.save(frasco);
+        return frasco;
     }
 
     /**
@@ -53,10 +54,16 @@ public class FrascoService extends BaseService{
     }
 
     /**
-     * Recupera todos os frascos disponíveis no sistema.
+     * Recupera todos os frascos com base no status do frasco.
      */
     public List<Frasco> getFrascosPorStatusFrasco(StatusFrasco statusFrasco) {
         return frascoRepository.findByStatusFrasco(statusFrasco);
+    }
+    /**
+     * Recupera todos os frascos disponíveis no sistema.
+     */
+    public List<Frasco> getFrascosDisponiveis() {
+        return frascoRepository.findFrascosDisponiveis();
     }
 
     /**

@@ -87,6 +87,13 @@
     color: var(--text-muted);
 }
 
+/* "(opcional)" escrito no rótulo — mais leve que o rótulo em si */
+.form-group label .optional-mark {
+    margin-left: 0.15rem;
+    font-size: 0.85em;
+    font-weight: 400;
+}
+
 /* Mantém o botão ao lado de um select alinhado com o campo (não com o
    label) — mesmo texto do label real, só invisível, ocupando a mesma
    altura (ver .form-group__label--invisible acima do "Escolher Frascos"
@@ -692,4 +699,344 @@ body.dark select.form-control {
 
 .form-card .select-wrapper.is-open .select-icon {
     transform: translateY(-50%) rotate(180deg);
+}
+
+/*
+    Título de cada .form-section: ícone + texto, com uma linha embaixo
+    ancorando o título aos campos que ele nomeia (antes ficava "solto",
+    com o mesmo peso visual de um rótulo de campo). A linha também passa
+    a ser a divisória da seção — por isso a seção com título perde a
+    border-top padrão de .form-section + .form-section, senão ficariam
+    duas linhas seguidas.
+*/
+.form-section__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    margin: 0;
+    padding-bottom: 0.85rem;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.form-section__title .icon {
+    flex-shrink: 0;
+
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+
+    color: var(--icon-muted);
+}
+
+.form-section + .form-section:has(> .form-section__title) {
+    padding-top: 1rem;
+    border-top: none;
+}
+
+/* Erro de validação embaixo do campo (ver mostrarErrosCampos em
+   js/forms.js) */
+.field-error {
+    margin: 0;
+
+    color: var(--danger-text);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.field-error[hidden] {
+    display: none;
+}
+
+.form-group.has-error .form-control {
+    border-color: var(--danger-text);
+}
+
+.form-group.has-error .form-control:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger-text) 18%, transparent);
+}
+
+.form-group.has-error label {
+    color: var(--danger-text);
+}
+
+/* Lista de frascos escolhidos (cadastro_movimentacao.html) não é um
+   <input> — o erro dela marca a borda do próprio cartão */
+.form-group.has-error .analysis-card {
+    border-color: var(--danger-text);
+}
+
+/* Legenda de uma linha só ("* Campos obrigatórios") — os opcionais
+   levam "(opcional)" no próprio rótulo, então não precisam de legenda */
+.form-legend--simple {
+    display: block;
+}
+
+.field-hint[hidden] {
+    display: none;
+}
+
+/* Seção que continua a anterior sem título nem divisória própria (ex.:
+   Estado/Quantidade em cadastro_frasco.html, ainda parte de "Frasco") —
+   continua sendo uma .form-section separada só por causa do bloqueio
+   em cascata (ver setupCadastroFrasco em js/forms.js). Sem divisória,
+   o espaço até a seção de cima fica só o gap de 2rem do .form-card —
+   um pouco maior que o 1.5rem entre linhas de campos, pra ainda dar
+   pra perceber os dois blocos. */
+.form-section + .form-section--continued {
+    padding-top: 0;
+    border-top: none;
+}
+
+/* Dica com ícone na frente (ex.: "info" em cadastro_frasco.html) */
+.field-hint--icon {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.field-hint--icon .icon {
+    flex-shrink: 0;
+
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+}
+
+/*
+    Variante de .form-section__title que abre/fecha a própria seção (ex.:
+    "Campos avançados" em cadastro_solicitacao.html): o título inteiro é
+    um <label> com um .switch à direita. A linha de baixo só aparece com
+    a seção aberta — fechada, ela ficaria "sobrando" logo acima da
+    divisória da seção seguinte.
+*/
+.form-section__title--toggle {
+    align-items: flex-start;
+
+    padding-bottom: 0;
+    border-bottom-color: transparent;
+
+    cursor: pointer;
+    user-select: none;
+
+    /* mesmo ritmo da abertura de .advanced-fields (cadastro_frasco.css) */
+    transition:
+        padding-bottom 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.3s ease;
+}
+
+.form-section:has(.advanced-fields.is-open) .form-section__title--toggle {
+    padding-bottom: 0.85rem;
+    border-bottom-color: var(--border);
+}
+
+/* Ícone alinhado com a primeira linha (o título), não com o bloco de
+   título + dica */
+.form-section__title--toggle > .icon {
+    margin-top: 0.05rem;
+}
+
+/* Interruptor centralizado na altura do bloco título + dica */
+.form-section__title--toggle > .switch {
+    align-self: center;
+}
+
+.form-section__title-text {
+    flex: 1;
+    min-width: 0;
+
+    display: grid;
+    gap: 0.25rem;
+}
+
+.form-section__title-text .optional-mark {
+    margin-left: 0.15rem;
+    font-size: 0.8em;
+    font-weight: 400;
+}
+
+.form-section__title-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+/* Interruptor liga/desliga — checkbox nativo estilizado (continua
+   focável, clicável e lido como checkbox por leitor de tela) */
+.switch {
+    appearance: none;
+    -webkit-appearance: none;
+
+    flex-shrink: 0;
+    position: relative;
+
+    width: 40px;
+    height: 22px;
+    margin: 0;
+
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+
+    background: var(--toggle-bg);
+
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.switch::before {
+    content: "";
+
+    position: absolute;
+    top: 2px;
+    left: 2px;
+
+    width: 16px;
+    height: 16px;
+
+    border-radius: 999px;
+
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.switch:checked {
+    border-color: transparent;
+    background: var(--checkbox-bg-active);
+}
+
+.switch:checked::before {
+    background: var(--checkbox-check);
+    transform: translateX(18px);
+}
+
+.switch:focus-visible {
+    outline: 2px solid var(--input-border-focus);
+    outline-offset: 2px;
+}
+
+/*
+    Cabeçalho de um cartão que É o campo (estudante doador em
+    cadastro_doacao.html, listas de frascos em cadastro_movimentacao.html):
+    rótulo do campo à esquerda, ação que preenche o cartão à direita — o
+    botão faz parte do campo em vez de ficar solto acima dele. Mesmo fundo
+    dos cabeçalhos de lista/card (--surface-muted).
+*/
+.field-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+
+    padding: 0.75rem 0.75rem 0.75rem 1.5rem;
+
+    background: var(--surface-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.field-card__head-label {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Lado direito: resumo opcional (ex.: total de dentes) + botão */
+.field-card__head-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+
+    margin-left: auto;
+}
+
+.field-card__head-meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.field-card__head .btn {
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.field-card__head .btn .icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Erro no campo-cartão: rótulo do cabeçalho em vermelho (a borda do
+   cartão é marcada pela regra do próprio cartão) */
+.form-group.has-error .field-card__head-label {
+    color: var(--danger-text);
+}
+
+@media (max-width: 500px) {
+    .field-card__head {
+        padding-left: 1rem;
+    }
+}
+
+
+/*
+    Campos/seções que aparecem conforme outra escolha do formulário (ex.:
+    "Origem dos Dentes" ao escolher Entrada, a quantidade ou a lista de
+    frascos de origem ao escolher a Origem — ver atualizarOrigemDentes em
+    frasco-search-movimentacao.js). Continuam sendo mostrados/escondidos
+    pelo atributo hidden; a animação roda sozinha toda vez que o elemento
+    volta a ser exibido (sair de display:none reinicia as animações).
+
+    Os filhos entram em sequência, descendo um pouco e aparecendo —
+    mesmo movimento do fade-slide-in (globals.css) e da abertura dos
+    campos avançados (cadastro_frasco.css): o título da seção chega
+    primeiro, depois os campos. Com movimento reduzido, globals.css
+    deixa tudo instantâneo.
+*/
+@keyframes form-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reveal-on-show > * {
+    animation: form-reveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-on-show > :nth-child(2) {
+    animation-delay: 0.07s;
+}
+
+.reveal-on-show > :nth-child(3) {
+    animation-delay: 0.14s;
+}
+
+/* Seção inteira: a divisória/espaço de cima aparece junto, sem ficar
+   "esperando" os filhos entrarem */
+.form-section.reveal-on-show:not([hidden]) {
+    animation: form-reveal-fade 0.3s ease both;
+}
+
+@keyframes form-reveal-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

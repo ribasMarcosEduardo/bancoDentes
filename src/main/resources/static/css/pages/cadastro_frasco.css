@@ -8,6 +8,12 @@
     align-items: flex-end;
 }
 
+/* Com o bloco de identificação (ícone + rótulo + valor), tudo já tem a
+   altura do botão — centraliza normal */
+.toolbar:has(.toolbar__identity) {
+    align-items: center;
+}
+
 @media (max-width: 1000px) {
 
     .navbar {
@@ -133,6 +139,10 @@
         padding: 0 0.75rem;
         font-size: 0.82rem;
     }
+
+    .toolbar__identity-icon {
+        display: none;
+    }
 }
 
 @media (max-width: 400px) {
@@ -191,12 +201,15 @@
     border-top-color: transparent;
 }
 
+/* Sem gap: com os campos avançados fechados (linha de 0 de altura), o
+   gap ficava sobrando como espaço vazio embaixo do cabeçalho. O respiro
+   entre cabeçalho e campos vem do padding-top de .advanced-fields__inner,
+   que some junto quando fecha. */
 #avancadosSection .form-section__collapse-inner {
     overflow: hidden;
     min-height: 0;
 
     display: grid;
-    gap: 1.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -216,8 +229,8 @@
     opacity: 0;
 
     transition:
-        grid-template-rows 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.25s ease;
+        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease;
 }
 
 .advanced-fields.is-open {
@@ -232,6 +245,52 @@
     display: grid;
     gap: 1.5rem;
     padding-top: 1.5rem;
+
+    transition:
+        padding 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        border-width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Fechado, o padding (e a borda, onde houver — ver .student-card em
+   cadastro_doacao.css) também vai a zero: grid-template-rows 0fr encolhe
+   o conteúdo, mas não o padding do próprio item, que ficava sobrando
+   como espaço vazio embaixo mesmo com a área fechada. */
+.advanced-fields:not(.is-open) .advanced-fields__inner {
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-width: 0;
+}
+
+/*
+    Os blocos de dentro entram em sequência (descendo um pouco e
+    aparecendo) enquanto a área abre — o olho acompanha de cima pra
+    baixo o que acabou de surgir. Ao fechar não tem atraso: tudo some
+    junto, rápido. Com movimento reduzido, globals.css zera tudo.
+*/
+.advanced-fields__inner > * {
+    opacity: 0;
+    transform: translateY(-8px);
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.advanced-fields.is-open .advanced-fields__inner > * {
+    opacity: 1;
+    transform: translateY(0);
+
+    transition:
+        opacity 0.35s ease 0.08s,
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+}
+
+.advanced-fields.is-open .advanced-fields__inner > :nth-child(2) {
+    transition-delay: 0.16s;
+}
+
+.advanced-fields.is-open .advanced-fields__inner > :nth-child(3) {
+    transition-delay: 0.24s;
 }
 
 /* Barra separando Estado do dente (sozinho, linha própria) do restante
@@ -246,5 +305,25 @@
 @media (prefers-reduced-motion: reduce) {
     .advanced-fields {
         transition: none;
+    }
+}
+
+/*
+    Solicitação: Grupo dentário não precisa ocupar metade do formulário —
+    fica com um teto de 22rem (um pouco menos que o dobro da caixa de
+    Quantidade ao lado, 180px), e Quantidade vem logo em seguida em vez de
+    ser empurrada pra metade direita. Escopado no form de solicitação:
+    o cadastro de frasco usa a mesma grade pra Estado + Quantidade.
+*/
+#cadastroSolicitacaoForm .form-grid-estado {
+    grid-template-columns: minmax(0, 22rem) minmax(180px, 1fr);
+}
+
+@media (max-width: 735px) {
+
+    /* Empilha igual às outras grades nessa largura (ver .form-grid-estado
+       no bloco de 735px acima) — o ID acima venceria aquela regra */
+    #cadastroSolicitacaoForm .form-grid-estado {
+        grid-template-columns: 1fr;
     }
 }

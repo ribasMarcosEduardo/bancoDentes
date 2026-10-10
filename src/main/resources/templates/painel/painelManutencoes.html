@@ -45,80 +45,78 @@
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Grupo dentário
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
-                            <span>Molar</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
-                            <span>Pré-Molar</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
-                            <span>Canino</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
-                            <span>Incisivo</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
-                            <span>Endo</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
+                              <span>Molar</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
+                              <span>Pré-Molar</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
+                              <span>Canino</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
+                              <span>Incisivo</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
+                              <span>Endo</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Estado do dente
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Cariado" data-filter-group="Estado">
-                            <span>Cariado</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Hígido" data-filter-group="Estado">
-                            <span>Hígido</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Restaurado" data-filter-group="Estado">
-                            <span>Restaurado</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Misto" data-filter-group="Estado">
-                            <span>Misto</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Cariado" data-filter-group="Estado">
+                              <span>Cariado</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Hígido" data-filter-group="Estado">
+                              <span>Hígido</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Restaurado" data-filter-group="Estado">
+                              <span>Restaurado</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Misto" data-filter-group="Estado">
+                              <span>Misto</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Origem do envio
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Solicitação" data-filter-group="Origem">
-                            <span>Solicitação</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Movimentação" data-filter-group="Origem">
-                            <span>Movimentação</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Direto pelo painel" data-filter-group="Origem">
-                            <span>Direto pelo painel</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter" th:each="o : ${T(bancoDentes.model.enumModels.OrigemManutencao).values()}">
+                              <input type="checkbox" th:value="${o}" data-filter-group="Origem">
+                              <span th:text="${o}">Solicitação</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
             </aside>
@@ -161,7 +159,7 @@
                             <i class="icon" data-lucide="filter"></i>
                         </button>
 
-                        <button class="btn btn-secondary">
+                        <button type="button" class="btn btn-secondary" id="btnSortOrder">
                             <span class="btn__label">Ordenar</span>
                             <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                         </button>
@@ -176,7 +174,7 @@
 
                         <button class="filters-clear" type="button">
                             <i class="icon" data-lucide="rotate-ccw"></i>
-                            Resetar Filtros
+                            Limpar filtros
                         </button>
                     </div>
 
@@ -187,21 +185,23 @@
             <div class="list-panel">
                 <div class="pagination">
                     <div class="low-opacity">
-                        <strong th:text="${#lists.size(manutencoes)} + ' Resultados Encontrados - Mais Recentes'">0 Resultados Encontrados</strong>
+                        <strong id="paginationInfo" data-label="Manutenções Encontradas" th:text="${#lists.size(manutencoes)} + ' Manutenções Encontradas'">0 Manutenções Encontradas</strong>
                     </div>
                     <div class="pagination__actions">
                         <div class="sector-switch" id="sectorSwitch">
                             <span class="sector-switch__indicator"></span>
-                            <button class="sector-switch__btn active" data-setor="todos">Todos</button>
-                            <button class="sector-switch__btn" data-setor="bdh">BDH</button>
-                            <button class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
+                            <button type="button" class="sector-switch__btn active" data-setor="todos">Todos</button>
+                            <button type="button" class="sector-switch__btn" data-setor="bdh">BDH</button>
+                            <button type="button" class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
                         </div>
 
                         <div class="pagination__nav">
-                            <button class="btn btn-pagination" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                            <span class="pagination__range" id="paginationRange">1-1</span>
+
+                            <button type="button" class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                                 <i data-lucide="chevron-left"></i>
                             </button>
-                            <button class="btn btn-pagination" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                            <button type="button" class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                                 <i data-lucide="chevron-right"></i>
                             </button>
                         </div>
@@ -210,8 +210,13 @@
 
                 <section class="results results--list" id="resultsView">
 
-                    <div th:if="${#lists.isEmpty(manutencoes)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
-                        <i data-lucide="info" class="me-2"></i> Não há nenhuma manutenção registrada no momento.
+                    <th:block th:if="${#lists.isEmpty(manutencoes)}">
+                        <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhuma manutenção registrada', 'Não há frascos em manutenção no momento.', false)}">
+                        </div>
+                    </th:block>
+
+                    <div th:if="${!#lists.isEmpty(manutencoes)}" id="emptyStateFiltro" hidden
+                         th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhuma manutenção encontrada', 'Nenhuma manutenção corresponde aos filtros aplicados. Tente ajustar ou limpar os filtros.', true)}">
                     </div>
 
                     <div th:if="${!#lists.isEmpty(manutencoes)}" class="result-table result-table--manutencoes">
@@ -224,10 +229,12 @@
 
                         <article th:each="m : ${manutencoes}"
                                  class="request-row"
+                                 th:data-sort="${m.codigo}"
                                  th:data-setor="${m.frasco != null && m.frasco.local != null ? #strings.toLowerCase(m.frasco.local.name()) : ''}"
                                  th:data-codigo="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : ''}"
                                  th:data-grupo="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : ''}"
                                  th:data-estado="${m.frasco != null && m.frasco.estado != null ? m.frasco.estado : ''}"
+                                 th:data-local="${m.frasco != null && m.frasco.local != null ? m.frasco.local.nome : ''}"
                                  th:data-origem="${m.origem != null ? m.origem : ''}"
                                  th:data-qtd="${m.quantidade != null ? m.quantidade : 0}">
 
@@ -254,78 +261,68 @@
 
                             <div class="request-details">
                                 <div class="request-details__content">
-                                    <div class="request-details__layout">
-                                        <section class="request-panel">
-                                            <h4 class="request-panel__title">Detalhes do Frasco</h4>
+                                    <!-- Mesmo desenho dos detalhes de frasco no cadastro de movimentação
+                                         (.frasco-details, analysis.css): frasco em cima, manutenção embaixo.
+                                         Campo vazio some em vez de aparecer como "---". -->
+                                    <div class="frasco-details">
+                                        <span class="frasco-details__icon" aria-hidden="true">
+                                            <i class="icon" data-lucide="toolbox"></i>
+                                        </span>
 
-                                            <div class="request-details__grid">
-                                                <div class="request-detail">
+                                        <div class="frasco-details__body">
+                                            <div class="frasco-details__row">
+                                                <div class="request-detail" th:if="${m.frasco != null && m.frasco.tipoDente != null}">
                                                     <span class="request-details__label">Grupo dentário</span>
-                                                    <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '-'}">-</span>
+                                                    <span th:text="${m.frasco.tipoDente}">Pré-Molar</span>
                                                 </div>
 
-                                                <div class="request-detail">
+                                                <div class="request-detail" th:if="${m.frasco != null && m.frasco.estado != null}">
                                                     <span class="request-details__label">Estado</span>
-                                                    <span th:text="${m.frasco != null && m.frasco.estado != null ? m.frasco.estado : '---'}">---</span>
+                                                    <span th:text="${m.frasco.estado}">Hígido</span>
                                                 </div>
 
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Arcada</span>
-                                                    <span th:text="${m.frasco != null && m.frasco.arcada != null ? m.frasco.arcada : '---'}">---</span>
-                                                </div>
-
-                                                <div class="request-detail">
+                                                <div class="request-detail" th:if="${m.frasco != null && m.frasco.denticao != null}">
                                                     <span class="request-details__label">Dentição</span>
-                                                    <span th:text="${m.frasco != null && m.frasco.denticao != null ? m.frasco.denticao : '---'}">---</span>
+                                                    <span th:text="${m.frasco.denticao.nome}">Permanente</span>
                                                 </div>
 
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Posição</span>
-                                                    <span th:text="${m.frasco != null && m.frasco.posicao != null ? m.frasco.posicao : '---'}">---</span>
+                                                <div class="request-detail" th:if="${m.frasco != null && (m.frasco.arcada != null || m.frasco.posicao != null)}">
+                                                    <span class="request-details__label">Arcada / Numeração</span>
+                                                    <span th:text="${(m.frasco.arcada != null ? m.frasco.arcada : '') + (m.frasco.arcada != null && m.frasco.posicao != null ? ', ' : '') + (m.frasco.posicao != null ? 'nº ' + m.frasco.posicao : '')}">Inferior, nº 21</span>
                                                 </div>
+                                            </div>
 
+                                            <div class="frasco-details__row">
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Qtd. atual</span>
-                                                    <span th:text="${m.frasco != null ? m.frasco.quantidade : 0}">0</span>
-                                                </div>
-                                            </div>
-                                        </section>
-
-                                        <section class="request-panel">
-                                            <h4 class="request-panel__title">Manutenção</h4>
-
-                                            <div class="request-details__grid request-details__grid--single">
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Origem do envio</span>
-                                                    <span th:text="${m.origem != null ? m.origem : '-'}">-</span>
+                                                    <span th:text="${(m.frasco != null ? m.frasco.quantidade : 0) + ' dentes'}">24 dentes</span>
                                                 </div>
 
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Data de envio</span>
-                                                    <span th:text="${m.datCadastro != null ? #temporals.format(m.datCadastro, 'dd/MM/yy') : '-'}">-</span>
-                                                </div>
-
-                                                <div class="request-detail">
+                                                <div class="request-detail" th:if="${m.frasco != null && m.frasco.local != null}">
                                                     <span class="request-details__label">Local atual</span>
-                                                    <span th:text="${m.frasco != null && m.frasco.local != null ? m.frasco.local : '-'}">-</span>
+                                                    <span th:text="${m.frasco.local.nome}">Banco de Dentes Humanos</span>
+                                                </div>
+
+                                                <div class="request-detail" th:if="${m.origem != null}">
+                                                    <span class="request-details__label">Origem do envio</span>
+                                                    <span th:text="${m.origem}">Solicitação</span>
+                                                </div>
+
+                                                <div class="request-detail" th:if="${m.datCadastro != null}">
+                                                    <span class="request-details__label">Data de envio</span>
+                                                    <span th:text="${#temporals.format(m.datCadastro, 'dd/MM/yy')}">21/06/26</span>
                                                 </div>
                                             </div>
-                                        </section>
+                                        </div>
+                                    </div>
 
-                                        <section class="request-panel request-panel--manutencoes-actions">
-                                            <h4 class="request-panel__title">Ações</h4>
-
-                                            <div class="request-panel__actions">
-                                                <button type="button"
-                                                        class="result-list__action result-list__action--green js-concluir-manutencao"
-                                                        th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}"
-                                                        th:data-id="${m.codigo}"
-                                                        data-tooltip="Concluir manutenção"
-                                                        aria-label="Concluir manutenção">
-                                                    <i class="icon" data-lucide="check-circle"></i>
-                                                </button>
-                                            </div>
-                                        </section>
+                                    <div class="request-details__actions"
+                                         th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}">
+                                        <button type="button" class="btn btn-outline btn-outline-success js-concluir-manutencao"
+                                                th:data-id="${m.codigo}">
+                                            <i class="icon" data-lucide="check-circle"></i>
+                                            Concluir manutenção
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -342,15 +339,8 @@
 <div th:replace="~{partials/footer :: footer}"></div>
 <th:block th:insert="~{partials/modal_concluir_manutencao}"></th:block>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
+<script th:src="@{/js/bundles/painel.js}"></script>
 
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/filters.js}"></script>
-<script th:src="@{/js/results.js}"></script>
-<script th:src="@{/js/search.js}"></script>
-<script th:src="@{/js/requests.js}"></script>
-<script th:src="@{/js/page-size.js}"></script>
 <script th:src="@{/js/manutencao-concluir.js}"></script>
 
 </body>

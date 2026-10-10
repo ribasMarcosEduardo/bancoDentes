@@ -47,56 +47,60 @@
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Tipo de movimentação
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Entrada" data-filter-group="Tipo">
-                            <span>Entrada</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Entrada" data-filter-group="Tipo">
+                              <span>Entrada</span>
+                          </label>
 
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Saída" data-filter-group="Tipo">
-                            <span>Saída</span>
-                        </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Saída" data-filter-group="Tipo">
+                              <span>Saída</span>
+                          </label>
 
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Transferência" data-filter-group="Tipo">
-                            <span>Transferência</span>
-                        </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Transferência" data-filter-group="Tipo">
+                              <span>Transferência</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
 
                 <div class="filter-section">
-                    <button class="filter-section__toggle">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Grupo dentário
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
 
                     <div class="filter-section__content">
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
-                            <span>Molar</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
-                            <span>Pré-Molar</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
-                            <span>Canino</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
-                            <span>Incisivo</span>
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
-                            <span>Endo</span>
-                        </label>
+                      <div class="filter-section__inner">
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Molar" data-filter-group="Grupo dentário">
+                              <span>Molar</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Pré-Molar" data-filter-group="Grupo dentário">
+                              <span>Pré-Molar</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Canino" data-filter-group="Grupo dentário">
+                              <span>Canino</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Incisivo" data-filter-group="Grupo dentário">
+                              <span>Incisivo</span>
+                          </label>
+                          <label class="checkbox-filter">
+                              <input type="checkbox" value="Endo" data-filter-group="Grupo dentário">
+                              <span>Endo</span>
+                          </label>
+                      </div>
                     </div>
                 </div>
             </aside>
@@ -137,7 +141,7 @@
                             <i class="icon" data-lucide="filter"></i>
                         </button>
 
-                        <button class="btn btn-secondary">
+                        <button type="button" class="btn btn-secondary" id="btnSortOrder">
                             <span class="btn__label">Ordenar</span>
                             <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                         </button>
@@ -157,7 +161,7 @@
 
                         <button class="filters-clear" type="button">
                             <i class="icon" data-lucide="rotate-ccw"></i>
-                            Resetar Filtros
+                            Limpar filtros
                         </button>
                     </div>
                     <div class="active-filters" id="activeFilters"></div>
@@ -167,16 +171,17 @@
             <div class="list-panel">
                 <div class="pagination">
                     <div class="low-opacity">
-
-                        <strong th:text="${#lists.size(movimentacao)} + ' Movimentações Encontradas - Mais Recentes'">0 Movimentações Encontradas</strong>
+                        <strong id="paginationInfo" data-label="Movimentações Encontradas" th:text="${#lists.size(movimentacao)} + ' Movimentações Encontradas'">0 Movimentações Encontradas</strong>
                     </div>
 
                     <div class="pagination__actions">
                         <div class="pagination__nav">
-                            <button class="btn btn-pagination" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                            <span class="pagination__range" id="paginationRange">1-1</span>
+
+                            <button type="button" class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                                 <i data-lucide="chevron-left"></i>
                             </button>
-                            <button class="btn btn-pagination" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                            <button type="button" class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                                 <i data-lucide="chevron-right"></i>
                             </button>
                         </div>
@@ -203,6 +208,7 @@
                         <article th:each="mov : ${movimentacao}"
                                  class="request-row"
                                  th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
+                                 th:data-codigo="${mov.codigo}"
                                  th:data-tipo="${mov.tipoMovimentacao.nome}"
                                  th:data-grupo="${mov.frasco != null ? mov.frasco.tipoDente : ''}">
 
@@ -308,14 +314,7 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/filters.js}"></script>
-<script th:src="@{/js/results.js}"></script>
-<script th:src="@{/js/requests.js}"></script>
-<script th:src="@{/js/search.js}"></script>
-<script th:src="@{/js/page-size.js}"></script>
+<script th:src="@{/js/bundles/painel.js}"></script>
 
 </body>
 </html>
