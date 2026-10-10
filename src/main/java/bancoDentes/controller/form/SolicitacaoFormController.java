@@ -30,29 +30,6 @@ public class SolicitacaoFormController extends BaseController {
     private final EstudanteService estudanteService;
 
     /**
-     * Renderiza o formulário em branco para a criação de uma nova solicitação de dentes.
-     *
-     * @param model
-     */
-    @GetMapping("/cadastrarSolicitacao")
-    public String cadastrarSolicitacao(Model model) {
-        try {
-            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
-            model.addAttribute("solicitacaoDTO", SolicitacaoDTO.empty());
-            model.addAttribute("usuarioLogado", usuarioLogado);
-
-            return "form/solicitacaoForm";
-
-        } catch (EstudanteException e) {
-            this.saveError(e.getMessage());
-            return "redirect:/solicitacao/painel";
-        } catch (Exception e) {
-            this.saveError(this.getText("error.carregamento"));
-            return "redirect:/solicitacao/painel";
-        }
-    }
-
-    /**
      * Processa a submissão do formulário para salvar (criar ou atualizar) uma solicitação.
      *
      * @param dto
@@ -77,26 +54,6 @@ public class SolicitacaoFormController extends BaseController {
             this.saveError(this.getText("error.solicitacao.salvar"));
             return "redirect:/solicitacao/painel";
         }
-    }
-
-    /**
-     * Processa a requisição para excluir logicamente ou fisicamente uma solicitação existente.
-     *
-     * @param codigo
-     */
-    @PostMapping("/excluir/{codigo}")
-    public String excluirSolicitacao(@PathVariable("codigo") Long codigo) {
-        try {
-            solicitacaoService.excluirSolicitacao(codigo);
-            this.saveMessage(this.getText("msg.sucesso.solicitacao.excluida"));
-
-        } catch (SolicitacaoException e) {
-            this.saveError(e.getMessage());
-        } catch (Exception e) {
-            this.saveError(this.getText("error.solicitacao.excluir", e.getMessage()));
-        }
-
-        return "redirect:/solicitacao/painel";
     }
 
 }

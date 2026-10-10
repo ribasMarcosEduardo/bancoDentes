@@ -24,34 +24,6 @@ public class FrascoFormController extends BaseController {
     private final FrascoService frascoService;
 
     /**
-     * Renderiza o formulário de cadastro em branco para um novo frasco.
-     *
-     * @param model
-     */
-    @GetMapping("/cadastraFrasco")
-    public String cadastraFrasco(Model model) {
-        model.addAttribute("frascoDTO", FrascoDTO.empty());
-        return "form/frascoForm";
-    }
-
-    /**
-     * Recupera os dados de um frasco existente no banco de dados e renderiza
-     * o formulário de cadastro já populado para edição.
-     *
-     * @param codigo
-     * @param model
-     */
-    @GetMapping("/edit/{codigo}")
-    public String editar(@PathVariable("codigo") Long codigo, Model model) {
-        Frasco frasco = frascoService.buscarPorId(codigo);
-
-        FrascoDTO dto = FrascoDTO.recuperaFrasco(frasco);
-        model.addAttribute("frascoDTO", dto);
-
-        return "form/frascoForm";
-    }
-
-    /**
      * Salva um uma edição ou adição de um frasco
      *
      * @param frascoDTO
@@ -76,26 +48,6 @@ public class FrascoFormController extends BaseController {
             this.saveError("Erro ao processar: " + e.getMessage());
             return "redirect:/frasco/painel";
         }
-    }
-
-    /**
-     * Processa exclusão de um frasco.
-     *
-     * @param codigo
-     */
-    @PostMapping("/excluirFrasco/{codigo}")
-    public String excluirFrasco(@PathVariable("codigo") Long codigo) {
-        try {
-            frascoService.excluirFrasco(codigo);
-            this.saveMessage(this.getText("msg.sucesso.exclucao"));
-        } catch (FrascoException e) {
-            this.saveError(e.getMessage());
-            return "redirect:/frasco/painel";
-        } catch (Exception e) {
-            this.saveError(this.getText("error.exclucao.frasco"));
-        }
-
-        return "redirect:/frasco/painel";
     }
 
 }

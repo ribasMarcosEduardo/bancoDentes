@@ -40,9 +40,10 @@ public class FrascoService extends BaseService{
             frasco = frascoDoBanco;
         }
 
-        frasco = frascoRepository.save(frasco);
+        frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
+        frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();
-        return frascoRepository.save(frasco);
+        return frasco;
     }
 
     /**
