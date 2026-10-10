@@ -3,7 +3,6 @@ package bancoDentes.controller.form;
 import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.MovimentacaoDTO;
 import bancoDentes.model.Frasco;
-import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.service.FrascoService;
 import bancoDentes.service.MovimentacaoService;
 import lombok.RequiredArgsConstructor;
@@ -26,23 +25,6 @@ public class MovimentacaoFormController extends BaseController {
 
     final private FrascoService frascoService;
     final private MovimentacaoService movimentacaoService;
-
-    /**
-     * Renderiza o formulário em branco para a criação de uma nova solicitação de dentes.
-     *
-     * @param model
-     */
-    @GetMapping("/cadastrarMovimentacao")
-    public String cadastrarMovimentacao(Model model) {
-        try {
-            model.addAttribute("movimentacaoDTO", MovimentacaoDTO.empty());
-            return "form/movimentacaoForm";
-
-        } catch (Exception e) {
-            this.saveError(this.getText("error.carregamento"));
-            return "redirect:/movimentacao/painel";
-        }
-    }
 
     /**
      * Captura os frascos para o carregamento do modal

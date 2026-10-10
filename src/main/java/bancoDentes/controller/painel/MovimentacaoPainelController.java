@@ -1,6 +1,7 @@
 package bancoDentes.controller.painel;
 
 import bancoDentes.controller.auxiliares.BaseController;
+import bancoDentes.dto.MovimentacaoDTO;
 import bancoDentes.service.MovimentacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,23 @@ public class MovimentacaoPainelController extends BaseController {
     public String exibePainelMovimentacoes(Model model) {
         model.addAttribute("movimentacao", movimentacaoService.getMovimentacoes());
         return "painel/painelMovimentacoes";
+    }
+
+    /**
+     * Renderiza o formulário em branco para a criação de uma nova solicitação de dentes.
+     *
+     * @param model
+     */
+    @GetMapping("/cadastrarMovimentacao")
+    public String cadastrarMovimentacao(Model model) {
+        try {
+            model.addAttribute("movimentacaoDTO", MovimentacaoDTO.empty());
+            return "form/movimentacaoForm";
+
+        } catch (Exception e) {
+            this.saveError(this.getText("error.carregamento"));
+            return "redirect:/movimentacao/painel";
+        }
     }
 
 }
