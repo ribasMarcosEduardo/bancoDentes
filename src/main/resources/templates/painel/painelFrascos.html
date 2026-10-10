@@ -46,54 +46,62 @@
         </div>
 
         <div class="filter-section">
-          <button class="filter-section__toggle">
+          <button type="button" class="filter-section__toggle" aria-expanded="true">
             Grupo dentário
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
           <div class="filter-section__content">
-            <label class="checkbox-filter" th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}">
-              <input type="checkbox" th:value="${nome}" data-filter-group="Grupo dentário">
-              <span th:text="${nome}">Molar</span>
-            </label>
+            <div class="filter-section__inner">
+              <label class="checkbox-filter" th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}">
+                <input type="checkbox" th:value="${nome}" data-filter-group="Grupo dentário">
+                <span th:text="${nome}">Molar</span>
+              </label>
+            </div>
           </div>
         </div>
 
         <div class="filter-section">
-          <button class="filter-section__toggle">
+          <button type="button" class="filter-section__toggle" aria-expanded="true">
             Estado do dente
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
           <div class="filter-section__content">
-            <label class="checkbox-filter" th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}">
-              <input type="checkbox" th:value="${e}" data-filter-group="Estado">
-              <span th:text="${e}">Cariado</span>
-            </label>
+            <div class="filter-section__inner">
+              <label class="checkbox-filter" th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}">
+                <input type="checkbox" th:value="${e}" data-filter-group="Estado">
+                <span th:text="${e}">Cariado</span>
+              </label>
+            </div>
           </div>
         </div>
 
         <div class="filter-section">
-          <button class="filter-section__toggle">
+          <button type="button" class="filter-section__toggle" aria-expanded="true">
             Arcada
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
           <div class="filter-section__content">
-            <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}">
-              <input type="checkbox" th:value="${m}" data-filter-group="Arcada">
-              <span th:text="${m}">Superior</span>
-            </label>
+            <div class="filter-section__inner">
+              <label class="checkbox-filter" th:each="m : ${T(bancoDentes.model.enumModels.Arcada).values()}">
+                <input type="checkbox" th:value="${m}" data-filter-group="Arcada">
+                <span th:text="${m}">Superior</span>
+              </label>
+            </div>
           </div>
         </div>
 
         <div class="filter-section">
-          <button class="filter-section__toggle">
+          <button type="button" class="filter-section__toggle" aria-expanded="true">
             Dentição
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
           <div class="filter-section__content">
-            <label class="checkbox-filter" th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}">
-              <input type="checkbox" th:value="${d.nome}" data-filter-group="Dentição">
-              <span th:text="${d.nome}">Permanente</span>
-            </label>
+            <div class="filter-section__inner">
+              <label class="checkbox-filter" th:each="d : ${T(bancoDentes.model.enumModels.Denticao).values()}">
+                <input type="checkbox" th:value="${d.nome}" data-filter-group="Dentição">
+                <span th:text="${d.nome}">Permanente</span>
+              </label>
+            </div>
           </div>
         </div>
       </aside>
@@ -127,10 +135,10 @@
             </div>
 
             <div class="view-switch">
-              <button class="btn view-switch__btn active" data-view="grid">
+              <button type="button" class="btn view-switch__btn active" data-view="grid" aria-label="Ver em grade">
                 <i class="icon" data-lucide="layout-grid"></i>
               </button>
-              <button class="btn view-switch__btn" data-view="list">
+              <button type="button" class="btn view-switch__btn" data-view="list" aria-label="Ver em lista">
                 <i class="icon" data-lucide="list"></i>
               </button>
             </div>
@@ -140,7 +148,7 @@
             <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
               <i class="icon" data-lucide="filter"></i>
             </button>
-            <button class="btn btn-secondary" id="btnSortOrder">
+            <button type="button" class="btn btn-secondary" id="btnSortOrder">
               <span class="btn__label">Ordenar</span>
               <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
             </button>
@@ -156,7 +164,7 @@
           <div class="active-filters-bar__header">
             <span class="active-filters-bar__label">Filtros ativos:</span>
             <button class="filters-clear" type="button">
-              <i class="icon" data-lucide="rotate-ccw"></i> Resetar Filtros
+              <i class="icon" data-lucide="rotate-ccw"></i> Limpar filtros
             </button>
           </div>
           <div class="active-filters" id="activeFilters"></div>
@@ -171,18 +179,18 @@
           <div class="pagination__actions">
             <div class="sector-switch" id="sectorSwitch">
               <span class="sector-switch__indicator"></span>
-              <button class="sector-switch__btn active" data-setor="todos">Todos</button>
-              <button class="sector-switch__btn" data-setor="bdh">BDH</button>
-              <button class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
+              <button type="button" class="sector-switch__btn active" data-setor="todos">Todos</button>
+              <button type="button" class="sector-switch__btn" data-setor="bdh">BDH</button>
+              <button type="button" class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
             </div>
 
             <div class="pagination__nav">
               <span class="pagination__range" id="paginationRange">1-1</span>
 
-              <button class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior">
+              <button type="button" class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
                 <i data-lucide="chevron-left"></i>
               </button>
-              <button class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página">
+              <button type="button" class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
                 <i data-lucide="chevron-right"></i>
               </button>
             </div>
@@ -226,11 +234,14 @@
                 <span th:text="${frasco.tipoDente}">Grupo</span>
                 <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
 
-                <span th:text="${frasco.local != null ? frasco.local.nome : '-'}">Local</span>
+                <span th:text="${frasco.local != null ? (frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : frasco.local.nome) : '-'}">Local</span>
                 <span th:text="${frasco.quantidade}">0</span>
 
-                <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">00/00/00</span>
-                <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
+                <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yy') : '-'}">00/00/00</span>
+                <span th:if="${frasco.datManutencao != null}" class="manutencao"
+                      th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
+                      th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
+                <span th:unless="${frasco.datManutencao != null}">-</span>
 
                 <div class="result-list__actions">
                   <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
@@ -296,11 +307,14 @@
 
                         <div class="request-detail">
                           <span class="request-details__label">Data de cadastro</span>
-                          <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
+                          <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yy') : '-'}">-</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Data de manutenção</span>
-                          <span th:text="${frasco.datManutencao != null ? #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : '-'}">-</span>
+                          <span th:if="${frasco.datManutencao != null}" class="manutencao"
+                                th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
+                                th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block><span class="manutencao__status" th:text="${frasco.prazoManutencao.rotulo}">Vencida</span></span>
+                          <span th:unless="${frasco.datManutencao != null}">-</span>
                         </div>
                       </div>
                     </section>
@@ -343,7 +357,7 @@
                 <div>
                   <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
 
-                  <div class="card__meta" th:text="${frasco.local != null ? frasco.local.nome : '-'} + ' | qtd. ' + ${frasco.quantidade} +${frasco.posicao != null ? ' | nº ' + frasco.posicao : ''}">Meta</div>
+                  <div class="card__meta" th:text="${frasco.local != null ? (frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : frasco.local.nome) : '-'} + ' | Qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | Nº ' + frasco.posicao : ''}">Meta</div>
 
                 </div>
                 <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
@@ -351,23 +365,29 @@
 
               <div class="card__body">
                 <div class="card__row">
-                  <span class="card__label">Estado:</span>
+                  <span class="card__label">Estado</span>
                   <span class="card__value" th:text="${frasco.estado != null ? frasco.estado : '-'}">-</span>
                 </div>
                 <div class="card__row">
-                  <span class="card__label">Dentição:</span>
+                  <span class="card__label">Dentição</span>
                   <span class="card__value" th:text="${frasco.denticao != null ? frasco.denticao.nome : '-'}">-</span>
                 </div>
                 <div class="card__row">
-                  <span class="card__label">Arcada:</span>
+                  <span class="card__label">Arcada</span>
                   <span class="card__value" th:text="${frasco.arcada != null ? frasco.arcada : '-'}">-</span>
                 </div>
               </div>
 
               <footer class="card__footer">
                 <div class="card__dates">
-                  <p class="card__date" th:text="${frasco.datCad != null ? 'Cadastrado em: ' + #temporals.format(frasco.datCad, 'dd/MM/yyyy') : 'Cadastro: -'}"></p>
-                  <p class="card__date" th:text="${frasco.datManutencao != null ? 'Manutenção: ' + #temporals.format(frasco.datManutencao, 'dd/MM/yyyy') : ''}"></p>
+                  <p class="card__date"><span>Cadastro</span>
+                    <span class="card__date-value" th:if="${frasco.datCad != null}"><i class="icon" data-lucide="calendar" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy')}">21/06/25</th:block></span>
+                    <span class="card__date-value" th:unless="${frasco.datCad != null}">-</span>
+                  </p>
+                  <p class="card__date" th:if="${frasco.datManutencao != null}"><span>Manutenção</span>
+                    <span class="manutencao" th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
+                          th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
+                  </p>
                 </div>
 
                 <div class="card__actions">
@@ -396,14 +416,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/filters.js}"></script>
-<script th:src="@{/js/results.js}"></script>
-<script th:src="@{/js/search.js}"></script>
-<script th:src="@{/js/requests.js}"></script>
-<script th:src="@{/js/page-size.js}"></script>
+<script th:src="@{/js/bundles/painel.js}"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {

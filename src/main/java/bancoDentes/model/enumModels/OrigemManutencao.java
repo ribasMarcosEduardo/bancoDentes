@@ -2,8 +2,8 @@ package bancoDentes.model.enumModels;
 
 public enum OrigemManutencao {
     MOVIMENTACAO("Movimentação"),
-    MANUTENCAO("Manutencao"),
-    SOLICITACAO("Solicitacao");
+    MANUTENCAO("Direto pelo painel"),
+    SOLICITACAO("Solicitação");
 
     private final String nome;
 

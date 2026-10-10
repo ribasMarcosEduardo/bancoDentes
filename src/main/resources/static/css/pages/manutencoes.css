@@ -1,0 +1,329 @@
+.result-table--manutencoes {
+    --list-first-col: 1.15fr;
+}
+
+.result-table--manutencoes .result-table__head,
+.result-table--manutencoes .result-list {
+    grid-template-columns:
+        var(--list-first-col)
+        repeat(2, 1fr)
+        80px;
+}
+
+/*
+    "Concluir manutenção" fica num lugar só por tamanho de tela:
+    - acima de 600px: ícone na própria linha (ação rápida, sem precisar
+      expandir) — o botão da área expandida some, ela fica só com
+      informação;
+    - até 600px: o ícone sai da linha (alvo pequeno pro dedo e espaço
+      apertado) e o botão da área expandida aparece em largura total.
+    600px é o mesmo ponto em que a lista de frascos passa pro modo
+    enxuto (ver frascos.css).
+*/
+.result-table--manutencoes .request-details__actions {
+    display: none;
+}
+
+@media (max-width: 600px) {
+
+    .result-table--manutencoes .result-list__actions .result-list__action {
+        display: none;
+    }
+
+    /* Coluna de ações só com a seta de expandir agora — 80px era pra dois botões */
+    .result-table--manutencoes .result-table__head,
+    .result-table--manutencoes .result-list {
+        grid-template-columns:
+            var(--list-first-col)
+            repeat(2, 1fr)
+            48px;
+    }
+
+    .result-table--manutencoes .request-details__actions {
+        display: flex;
+        margin-top: 1.25rem;
+    }
+
+    .result-table--manutencoes .request-details__actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 607px) {
+
+    /*
+        O filtro sai da 1ª linha e vai pra 2ª, ao lado de "Exibir",
+        alinhado à direita da toolbar. Aqui só existe "Ordenar" na
+        1ª linha (sem "Novo X" ao lado, diferente de frascos/
+        movimentações/usuários) — ele passa a ocupar a linha inteira
+        sozinho.
+
+        components/toolbar.css empilha .toolbar__row--buttons (Filtro +
+        Ordenar) em cima e .toolbar__row--controls (Exibir) embaixo —
+        mas como caixas inteiras, não dá pra tirar só o filtro de uma
+        delas via order (order só reordena entre irmãos do MESMO
+        container). display:contents em .toolbar__row--buttons resolve
+        isso: ela some como caixa mas continua existindo no DOM — Filtro
+        e Ordenar passam a ser itens soltos do grid, enquanto
+        .toolbar__row--controls continua como uma caixa real (só ela
+        precisava "receber" o filtro, feito posicionando o filtro por
+        cima da mesma célula, não movendo pra dentro dela).
+    */
+    .toolbar__actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .toolbar__row--buttons {
+        display: contents;
+    }
+
+    .toolbar__row--buttons .btn {
+        grid-row: 1;
+        grid-column: 1 / -1;
+    }
+
+    /*
+        .toolbar__row--controls (Exibir) ocupa a linha 2 inteira (as
+        duas colunas) — justify-self:end + width:fit-content colam ele
+        na ponta direita, sobrando espaço à esquerda pro filtro (mesma
+        célula, "start") sem colidir.
+    */
+    .toolbar__row--controls {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        width: fit-content;
+        justify-self: end;
+    }
+
+    .toolbar__filter-toggle {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
+@media (max-width: 440px) {
+
+    /* Abaixo de ~440px o texto de "Ordenar" já não sobra espaço —
+       fica só o ícone. */
+    .btn__label {
+        display: none;
+    }
+}
+
+@media (max-width: 1115px) {
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        justify-content: right;
+    }
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+}
+
+/*
+    Entre 607px e 1271px a busca fica sozinha na primeira linha da
+    toolbar; embaixo, Exibir grudado na esquerda e filtro + Ordenar na
+    direita, na mesma linha. Vem depois do bloco de 1115px acima de
+    propósito: pra faixa em que os dois se sobrepõem (607–1115px), o
+    justify-content:space-between daqui precisa vencer o
+    justify-content:right de lá.
+
+    O limite é 607px (e não 608px) de propósito, pra grudar exatamente
+    no @media (max-width:607px) de components/toolbar.css — ver o
+    comentário equivalente em pages/frascos.css pro detalhe de por que
+    um gap de 1px aqui causa um intervalo sem nenhum dos dois layouts
+    em larguras fracionárias (zoom/escala de tela fora de 100%).
+*/
+@media (min-width: 607px) and (max-width: 1271px) {
+
+    .toolbar {
+        flex-direction: column;
+    }
+
+    .search-wrapper {
+        max-width: none;
+        width: 100%;
+    }
+
+    .toolbar input {
+        max-width: none;
+    }
+
+    .toolbar__actions {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+}
+
+/*
+    min-width:720px de list.css (regra genérica pra tabelas com mais
+    colunas, pensada pra evitar que o texto sobreponha em telas
+    estreitas) não tem efeito nenhum útil aqui: a tabela de manutenções
+    só tem 4 colunas (Identificador, Grupo, Qtd. atual, ações) e cabe
+    bem menos que 720px sem precisar de scroll horizontal. Sem esse
+    reset, a tabela ficava forçada a 720px e estourava .main-panel em
+    larguras onde não precisava.
+*/
+@media (max-width: 860px) {
+
+    .result-table--manutencoes .result-table__head,
+    .result-table--manutencoes .result-list {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /*
+        Grupo já dá pra ver na área expandida da linha — sobra
+        Identificador, Qtd. atual e a seta de expandir na lista.
+        Ordem dos filhos: 1 Identificador, 2 Grupo, 3 Qtd. atual, 4 ações.
+    */
+    .result-table--manutencoes .result-table__head,
+    .result-table--manutencoes .result-list {
+        grid-template-columns: 1.3fr 0.8fr 48px;
+    }
+
+    .result-table--manutencoes .result-table__head span:nth-child(2),
+    .result-table--manutencoes .result-list > span:nth-child(2) {
+        display: none;
+    }
+}
+
+
+/*
+    Base do agrupamento intervalo + setas — precisa existir em qualquer
+    largura (não só dentro do media query de 350px), senão vira uma div
+    sem estilo (display:block) e os elementos empilham/quebram em vez
+    de ficar lado a lado.
+*/
+.pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+@media (max-width: 600px) {
+
+    .pagination:has(.sector-switch) .pagination__nav {
+        margin-left: auto;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 766px) {
+
+    /*
+        Nessa faixa a paginação inteira (sector-switch + intervalo +
+        setas) não cabe ao lado do texto de resultados e ficava tudo
+        amontoado à esquerda. Vira 2 linhas: sector-switch à esquerda e
+        setas à direita em cima, texto de resultados embaixo.
+    */
+    .pagination:has(.sector-switch) {
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 1.5rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .low-opacity {
+        order: 2;
+    }
+}
+
+@media (max-width: 450px) {
+
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination {
+        width: 38px;
+        height: 28px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__actions .btn-pagination svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+@media (max-width: 350px) {
+
+    /*
+        Linha 1: sector-switch maior. Linha 2: setas + intervalo
+        alinhados com a largura do switch. Mesmo padrão de
+        frascos.css/movimentacoes.css.
+    */
+    .pagination:has(.sector-switch) .pagination__actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: fit-content;
+        margin: 0 auto;
+        gap: 0.65rem;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch {
+        margin-right: 0;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn,
+    .pagination:has(.sector-switch) .sector-switch__indicator {
+        height: 38px;
+    }
+
+    .pagination:has(.sector-switch) .sector-switch__btn {
+        padding: 0 1rem;
+        font-size: 0.85rem;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav {
+        justify-content: space-between;
+        margin-left: 0;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination {
+        width: 48px;
+        height: 32px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .pagination:has(.sector-switch) .pagination__range {
+        order: 2;
+        margin-left: 0;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination:nth-child(2) {
+        order: 1;
+    }
+
+    .pagination:has(.sector-switch) .pagination__nav .btn-pagination:nth-child(3) {
+        order: 3;
+    }
+}

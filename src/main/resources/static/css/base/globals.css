@@ -57,8 +57,22 @@ input[type="number"] {
     }
 }
 
+/*
+    Movimento reduzido: tudo vira instantâneo. 0.001ms em vez de
+    none/0s de propósito — assim transitionend/animationend continuam
+    disparando (filters.js remove o chip no transitionend, includes.js
+    troca o ícone de tema no animationend etc.). iteration-count:1 é o
+    que para as animações infinitas (blobs do fundo): só encurtar a
+    duração deixava elas repetindo sem parar, piscando.
+*/
 @media (prefers-reduced-motion: reduce) {
-    * {
+    *,
+    *::before,
+    *::after {
         animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        transition-delay: 0s !important;
+        scroll-behavior: auto !important;
     }
 }

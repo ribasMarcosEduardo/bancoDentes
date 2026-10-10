@@ -31,47 +31,74 @@ function formatarMeta(frasco) {
 
 // Miolo do painel de detalhes (expandir/recolher) de uma linha "tipo
 // selected-flasks" — reaproveitado pelas duas listas da tela (Frascos
-// selecionados/Frascos de Origem), cada uma injetando só a(s) linha(s)
-// extra(s) que fazem sentido pra ela (Qtd. após a entrada/saída, ou nada)
-// no meio do miolo comum.
-function montarDetalhesFrasco(frasco, extrasHtml = "") {
+// selecionados/Frascos de Origem). Mesmo desenho dos detalhes do estudante
+// em cadastro_doacao.html: ícone na coluna da esquerda + barra vertical +
+// informações, aqui agrupadas em 2 linhas de 4 colunas alinhadas entre si:
+//   1) o que tem no frasco: Grupo, Estado, Arcada, Dentição
+//   2) Quantidade (ocupando 2 colunas) + Cadastro + Próxima manutenção
+// qtdApos (opcional, só Saída) vira "30 → 25" com o rótulo do que
+// acontece embaixo, em vez de uma célula solta "Qtd. após a saída".
+function montarDetalhesFrasco(frasco, { qtdApos = null, rotuloApos = "" } = {}) {
+    // Endo não tem arcada/dentição (mesma regra de cadastro_frasco.html) —
+    // "Não se aplica" diz isso melhor que um campo vazio
+    const vazio = frasco.grupo === "Endo" ? "Não se aplica" : "Não informado";
+    const valor = (v, padrao = vazio) =>
+        v ? v : `<span class="frasco-details__empty">${padrao}</span>`;
+
+    const quantidadeHtml = qtdApos === null
+        ? `<span>${frasco.disponivel} dentes</span>`
+        : `<span class="frasco-details__qtd">
+                ${frasco.disponivel}
+                <i class="icon" data-lucide="arrow-right" aria-hidden="true"></i>
+                <strong>${qtdApos}</strong>
+                <small>${rotuloApos}</small>
+           </span>`;
+
     return `
-        <div class="request-details__grid">
-            <div class="request-detail">
-                <span class="request-details__label">Grupo dentário</span>
-                <span>${frasco.grupo ?? "—"}</span>
-            </div>
+        <div class="frasco-details">
+            <span class="frasco-details__icon" aria-hidden="true">
+                <i class="icon" data-lucide="flask-conical"></i>
+            </span>
 
-            <div class="request-detail">
-                <span class="request-details__label">Estado</span>
-                <span>${frasco.estado ?? "—"}</span>
-            </div>
+            <div class="frasco-details__body">
+                <div class="frasco-details__row">
+                    <div class="request-detail">
+                        <span class="request-details__label">Grupo dentário</span>
+                        <span>${valor(frasco.grupo, "Não informado")}</span>
+                    </div>
 
-            <div class="request-detail">
-                <span class="request-details__label">Arcada</span>
-                <span>${frasco.arcada || "—"}</span>
-            </div>
+                    <div class="request-detail">
+                        <span class="request-details__label">Estado</span>
+                        <span>${valor(frasco.estado, "Não informado")}</span>
+                    </div>
 
-            <div class="request-detail">
-                <span class="request-details__label">Dentição</span>
-                <span>${frasco.denticao || "—"}</span>
-            </div>
+                    <div class="request-detail">
+                        <span class="request-details__label">Arcada</span>
+                        <span>${valor(frasco.arcada)}</span>
+                    </div>
 
-            <div class="request-detail">
-                <span class="request-details__label">Qtd. total do frasco</span>
-                <span>${frasco.disponivel}</span>
-            </div>
+                    <div class="request-detail">
+                        <span class="request-details__label">Dentição</span>
+                        <span>${valor(frasco.denticao)}</span>
+                    </div>
+                </div>
 
-            ${extrasHtml}
+                <div class="frasco-details__row">
+                    <div class="request-detail frasco-details__span-2">
+                        <span class="request-details__label">Quantidade no frasco</span>
+                        ${quantidadeHtml}
+                    </div>
 
-            <div class="request-detail">
-                <span class="request-details__label">Data de cadastro</span>
-                <span>${frasco.dataCadastro ?? "—"}</span>
-            </div>
+                    <div class="request-detail">
+                        <span class="request-details__label">Data de cadastro</span>
+                        <span>${valor(frasco.dataCadastro, "Não informado")}</span>
+                    </div>
 
-            <div class="request-detail">
-                <span class="request-details__label">Próxima manutenção</span>
-                <span>${frasco.dataManutencao ?? "—"}</span>
+                    <div class="request-detail">
+                        <span class="request-details__label">Próxima manutenção</span>
+                        <span>${valor(frasco.dataManutencao, "Não informado")}</span>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -159,7 +186,6 @@ function setupFrascoSearchModal() {
 
     const origemDentesSection = document.querySelector("#origemDentesSection");
     const origemDentesSelect = document.querySelector("#origemDentes");
-    const selecionarFrascosOrigemGroup = document.querySelector("#selecionarFrascosOrigemGroup");
     const selecionarFrascosOrigemBtn = document.querySelector("#selecionarFrascosOrigemBtn");
     const quantidadeDoacaoGroup = document.querySelector("#quantidadeDoacaoGroup");
     const quantidadeDoacaoInput = document.querySelector("#quantidadeDoacao");
@@ -208,7 +234,7 @@ function setupFrascoSearchModal() {
     function criarLinhaSelecionada(id, entry) {
         const { frasco, quantidade } = entry;
         const entrada = isEntrada();
-        const rotuloApos = entrada ? "Qtd. após a entrada" : "Qtd. após a saída";
+        const rotuloApos = entrada ? "após a entrada" : "após a saída";
 
         const row = document.createElement("article");
         row.className = "request-row";
@@ -232,11 +258,10 @@ function setupFrascoSearchModal() {
 
             <div class="request-details">
                 <div class="request-details__content">
-                    ${montarDetalhesFrasco(frasco, entrada ? "" : `
-                        <div class="request-detail">
-                            <span class="request-details__label">${rotuloApos}</span>
-                            <span>${qtdAposMovimentacao(frasco, quantidade)}</span>
-                        </div>`)}
+                    ${montarDetalhesFrasco(frasco, entrada ? {} : {
+                        qtdApos: qtdAposMovimentacao(frasco, quantidade),
+                        rotuloApos,
+                    })}
                 </div>
             </div>
         `;
@@ -433,8 +458,8 @@ function setupFrascoSearchModal() {
         const mostrarFrascos = origem === "frascos";
         const mostrarDoacao = origem === "doacao";
 
-        if (selecionarFrascosOrigemGroup) selecionarFrascosOrigemGroup.hidden = !mostrarFrascos;
-
+        // "Selecionar Frascos" mora no cabeçalho do cartão de
+        // #frascosOrigemSection — aparece/some junto com ele, abaixo.
         if (quantidadeDoacaoGroup) quantidadeDoacaoGroup.hidden = !mostrarDoacao;
         if (quantidadeDoacaoInput) {
             quantidadeDoacaoInput.disabled = !mostrarDoacao;
@@ -635,6 +660,33 @@ function setupFrascoSearchModal() {
                 renderResultados();
             });
         });
+
+        // Ícone de filtro ao lado da search: revela/recolhe Grupo/Estado/Dentição
+        // (só existem nos modais de Saída/Entrada). Recolhido, os filtros seguem
+        // valendo — o ponto no ícone avisa quando algum está ativo.
+        const filtrosToggle = overlay.querySelector(".modal-filter-toggle");
+        const filtrosCollapse = overlay.querySelector(".modal-filters-collapse");
+        const filtrosDot = filtrosToggle?.querySelector(".modal-filter-toggle__dot");
+
+        function atualizarPontoFiltros() {
+            if (!filtrosDot) return;
+            filtrosDot.hidden = ![filtroGrupo, filtroEstado, filtroDenticao].some((select) => select?.value);
+        }
+
+        if (filtrosToggle && filtrosCollapse) {
+            filtrosToggle.addEventListener("click", () => {
+                const aberto = filtrosCollapse.classList.toggle("is-open");
+
+                filtrosToggle.setAttribute("aria-expanded", String(aberto));
+                filtrosToggle.setAttribute("aria-label", aberto ? "Ocultar filtros do frasco" : "Mostrar filtros do frasco");
+            });
+
+            [filtroGrupo, filtroEstado, filtroDenticao].forEach((select) => {
+                select?.addEventListener("change", atualizarPontoFiltros);
+            });
+
+            atualizarPontoFiltros();
+        }
 
         travarPlaceholderDoFiltro(filtroGrupo, "Qualquer Grupo");
         travarPlaceholderDoFiltro(filtroEstado, "Qualquer Estado");

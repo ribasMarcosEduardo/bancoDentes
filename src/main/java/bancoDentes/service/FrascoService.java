@@ -53,10 +53,16 @@ public class FrascoService extends BaseService{
     }
 
     /**
-     * Recupera todos os frascos disponíveis no sistema.
+     * Recupera todos os frascos com base no status do frasco.
      */
     public List<Frasco> getFrascosPorStatusFrasco(StatusFrasco statusFrasco) {
         return frascoRepository.findByStatusFrasco(statusFrasco);
+    }
+    /**
+     * Recupera todos os frascos disponíveis no sistema.
+     */
+    public List<Frasco> getFrascosDisponiveis() {
+        return frascoRepository.findFrascosDisponiveis();
     }
 
     /**

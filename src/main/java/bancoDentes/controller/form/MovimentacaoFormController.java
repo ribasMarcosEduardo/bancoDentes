@@ -50,7 +50,7 @@ public class MovimentacaoFormController extends BaseController {
     @GetMapping("/frascosMovimentacao")
     @ResponseBody
     public List<Frasco> getFrascosCatalogo() {
-        return frascoService.getFrascosPorStatusFrasco(StatusFrasco.DISPONIVEL);
+        return frascoService.getFrascosDisponiveis();
     }
 
     /**

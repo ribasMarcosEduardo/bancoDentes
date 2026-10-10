@@ -38,15 +38,20 @@
         </header>
 
         <div class="toolbar glass-frost">
-            <div class="toolbar__info">
-                <span class="toolbar__label">Data da Movimentação:</span>
-                <div class="toolbar__badge" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">
-                    01/06/2025
+            <!-- Data de hoje -->
+            <div class="toolbar__identity">
+                <span class="toolbar__identity-icon" aria-hidden="true">
+                    <i class="icon" data-lucide="calendar-days"></i>
+                </span>
+
+                <div class="toolbar__identity-text">
+                    <span class="toolbar__identity-label">Data da movimentação</span>
+                    <span class="toolbar__identity-value" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/06/2025</span>
                 </div>
             </div>
 
             <div class="toolbar__actions">
-                <a th:href="@{/movimentacao/painel}" class="btn btn-secondary">
+                <a th:href="@{/movimentacao/painel}" class="btn btn-ghost">
                     <span class="btn__label">Cancelar</span>
                     <i class="orderBy-icon" data-lucide="x"></i>
                 </a>
@@ -68,48 +73,59 @@
             <input type="hidden" th:field="*{codFrasco}" id="frascoSelecionadoInput" />
             <input type="hidden" name="datManutencao" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" />
 
+            <!-- Local + Tipo numa linha só. Local vem em Banco de Dentes Humanos por padrão;
+                 trocar muda o setor da busca de frascos e esvazia a seleção feita
+                 (ver "change" de localSelect em frasco-search-movimentacao.js). -->
             <section class="form-section">
-                <div class="form-group">
-                    <label>Local da Movimentação <span class="required-mark">*</span></label>
-                    <div class="select-wrapper">
-                        <select class="form-control" th:field="*{local}" id="localMovimentacao" required>
-                            <option value="">- Selecione o local -</option>
-                            <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
-                                    th:value="${l.name()}" th:text="${l.nome}"></option>
-                        </select>
-                        <i class="select-icon icon" data-lucide="chevron-down"></i>
-                    </div>
-                </div>
-            </section>
+                <h2 class="form-section__title"><i class="icon" data-lucide="arrow-left-right" aria-hidden="true"></i>Informações da Movimentação</h2>
 
-            <section class="form-section" id="tipoMovimentacaoSection">
                 <div class="form-grid">
-                    <div class="form-group" id="tipoMovimentacaoGroup">
-                        <label>Tipo de movimentação <span class="required-mark">*</span></label>
+                    <div class="form-group">
+                        <label for="localMovimentacao">Local da movimentação <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control" th:field="*{tipoMovimentacao}" id="tipoMovimentacao" required>
-                                <option value="">- Selecione o tipo -</option>
-                                <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
-                                        th:if="${tipo.name() != 'TRANSFERENCIA'}"
-                                        th:value="${tipo.name()}" th:text="${tipo.nome}"></option>
+                            <select class="form-control" th:field="*{local}" id="localMovimentacao" required>
+                                <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
+                                        th:value="${l.name()}" th:text="${l.nome}"
+                                        th:selected="${movimentacaoDTO.local == l or (movimentacaoDTO.local == null and l.name() == 'BDH')}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-group__label--invisible" aria-hidden="true">Escolher frascos</label>
-                        <button type="button" class="btn btn-tonal" id="escolherFrascosBtn" disabled>
-                            <i class="icon" data-lucide="plus"></i>
-                            <span class="btn__label">Escolher Frascos</span>
-                        </button>
+                    <div class="form-group" id="tipoMovimentacaoGroup">
+                        <label for="tipoMovimentacao">Tipo de movimentação <span class="required-mark">*</span></label>
+                        <div class="select-wrapper">
+                            <!-- Saída vem como padrão — forms.js (setupCadastroMovimentacao) aplica o
+                                 estado inicial do botão/título/lista a partir dele -->
+                            <select class="form-control" th:field="*{tipoMovimentacao}" id="tipoMovimentacao" required>
+                                <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
+                                        th:if="${tipo.name() != 'TRANSFERENCIA'}"
+                                        th:value="${tipo.name()}" th:text="${tipo.nome}"
+                                        th:selected="${movimentacaoDTO.tipoMovimentacao == tipo or (movimentacaoDTO.tipoMovimentacao == null and tipo.name() == 'SAIDA')}"></option>
+                            </select>
+                            <i class="select-icon icon" data-lucide="chevron-down"></i>
+                        </div>
                     </div>
                 </div>
             </section>
 
+            <!-- Lista de frascos com o botão que a preenche no próprio cabeçalho (.field-card__head).
+                 Título, rótulo, botão e estado vazio mudam com o Tipo (ver setupCadastroMovimentacao
+                 em forms.js): em Entrada é um frasco só, o de destino. -->
             <section class="form-section" id="frascosSelecionadosSection">
+                <h2 class="form-section__title"><i class="icon" data-lucide="flask-conical" aria-hidden="true"></i><span id="frascosSectionTitle">Frascos Selecionados</span></h2>
+
                 <div class="form-group">
                     <div class="analysis-card">
+                        <div class="field-card__head">
+                            <span class="field-card__head-label" id="frascosLabel">Frascos <span class="required-mark">*</span></span>
+
+                            <button type="button" class="btn btn-tonal" id="escolherFrascosBtn" aria-describedby="frascosLabel">
+                                <i class="icon" data-lucide="plus"></i>
+                                <span class="btn__label">Escolher Frascos</span>
+                            </button>
+                        </div>
+
                         <div class="selected-flasks" id="selectedFlasksList">
                             <div class="selected-flasks__head" id="selectedFlasksHead" hidden>
                                 <span>Frasco</span>
@@ -119,20 +135,26 @@
 
                             <div class="selected-flasks__empty" id="selectedFlasksEmpty">
                                 <i class="icon" data-lucide="package-search"></i>
-                                <p>Nenhum frasco selecionado ainda.</p>
+                                <p id="selectedFlasksEmptyText">Nenhum frasco selecionado ainda.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section class="form-section" id="origemDentesSection" hidden>
+            <!-- Só existe pra Entrada (ver atualizarOrigemDentes em frasco-search-movimentacao.js).
+                 O frasco escolhido acima é o destino; aqui se decide de onde os dentes vêm: de
+                 outro(s) frasco(s) (lista logo abaixo, #frascosOrigemSection) ou de uma
+                 doação/origem externa (quantidade digitada ao lado do select). -->
+            <section class="form-section reveal-on-show" id="origemDentesSection" hidden>
+                <h2 class="form-section__title"><i class="icon" data-lucide="merge" aria-hidden="true"></i>Origem dos Dentes</h2>
+
                 <div class="form-grid">
                     <div class="form-group" id="origemDentesGroup">
-                        <label for="origemDentes">Origem dos Dentes <span class="required-mark">*</span></label>
+                        <label for="origemDentes">Origem <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
                             <select class="form-control" id="origemDentes" name="origemDentes">
-                                <option value="" disabled selected>- Selecione a origem -</option>
+                                <option value="" disabled selected>Selecione a origem</option>
                                 <option value="frascos">Outro(s) frasco(s)</option>
                                 <option value="doacao">Doação/Outros</option>
                             </select>
@@ -140,15 +162,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group" id="selecionarFrascosOrigemGroup" hidden>
-                        <label class="form-group__label--invisible" aria-hidden="true">Selecionar frascos de origem</label>
-                        <button type="button" class="btn btn-tonal" id="selecionarFrascosOrigemBtn">
-                            <i class="icon" data-lucide="plus"></i>
-                            Selecionar Frascos
-                        </button>
-                    </div>
-
-                    <div class="form-group" id="quantidadeDoacaoGroup" hidden>
+                    <div class="form-group reveal-on-show" id="quantidadeDoacaoGroup" hidden>
                         <label for="quantidadeDoacao">Quantidade de dentes <span class="required-mark">*</span></label>
                         <div class="number-input number-input--compact">
                             <input
@@ -171,12 +185,23 @@
                 </div>
             </section>
 
-            <section class="form-section" id="frascosOrigemSection" hidden>
+            <!-- Só existe quando Origem = "Outro(s) frasco(s)" — continua a seção de cima, sem
+                 título nem divisória própria. Cada frasco escolhido entra INTEIRO no destino, por
+                 isso "Qtd. transferida" só reflete o que o frasco já tinha. O total corrido fica
+                 no próprio cabeçalho (#origemFrascosTotalValor). -->
+            <section class="form-section form-section--continued reveal-on-show" id="frascosOrigemSection" hidden>
                 <div class="form-group">
                     <div class="analysis-card">
-                        <div class="analysis-progress">
-                            <div class="analysis-progress__text">
-                                <strong id="origemFrascosTotalValor">0 dentes selecionados</strong>
+                        <div class="field-card__head">
+                            <span class="field-card__head-label" id="origemFrascosLabel">Frascos de origem <span class="required-mark">*</span></span>
+
+                            <div class="field-card__head-actions">
+                                <span class="field-card__head-meta" id="origemFrascosTotalValor">0 dentes selecionados</span>
+
+                                <button type="button" class="btn btn-tonal" id="selecionarFrascosOrigemBtn" aria-describedby="origemFrascosLabel">
+                                    <i class="icon" data-lucide="plus"></i>
+                                    Selecionar Frascos
+                                </button>
                             </div>
                         </div>
 
@@ -222,8 +247,8 @@
                 </div>
             </section>
 
-            <p class="form-legend">
-                <span class="required-mark">*</span><span class="form-legend__label">Preenchimento</span><span class="form-legend__value">Obrigatório.</span>
+            <p class="form-legend form-legend--simple">
+              <span class="required-mark">*</span> Campos obrigatórios
             </p>
         </form>
     </section>
@@ -235,10 +260,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script th:src="@{/js/vendor/sweetalert2.min.js}"></script>
-<script th:src="@{/js/includes.js}"></script>
-<script th:src="@{/js/forms.js}"></script>
+<script th:src="@{/js/bundles/form.js}"></script>
 <script th:src="@{/js/results.js}"></script>
 
 <script>
