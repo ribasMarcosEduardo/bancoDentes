@@ -25,6 +25,10 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
     );
 
     List<Frasco> findByStatusFrasco(StatusFrasco statusFrasco);
+
+    @Query("SELECT f FROM Frasco f WHERE f.statusFrasco IN ('DISPONIVEL', 'DIS_IMPRESSAO')")
+    List<Frasco> findFrascosDisponiveis();
+
 }
 
 

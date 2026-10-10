@@ -66,7 +66,7 @@ public class Frasco {
 
     @PrePersist
     public void onPrePersist() {
-        this.statusFrasco = StatusFrasco.DISPONIVEL;
+        this.statusFrasco = StatusFrasco.DIS_IMPRESSAO;
         limparCamposSeEndo();
     }
 
