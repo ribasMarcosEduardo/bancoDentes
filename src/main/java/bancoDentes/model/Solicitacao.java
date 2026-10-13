@@ -25,8 +25,8 @@ public class Solicitacao {
     private Long codigo;
 
     @ManyToOne
-    @JoinColumn(name = "CODESTUDANTE")
-    private Estudante estudante;
+    @JoinColumn(name = "CODUSUARIO")
+    private Usuario usuario;
 
     @Column(name = "DATSOLICITACAO")
     private LocalDateTime datSolicitacao;

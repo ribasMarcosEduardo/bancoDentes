@@ -1,7 +1,7 @@
 package bancoDentes.dto;
 
 import bancoDentes.model.AnaliseSolicitacao;
-import bancoDentes.model.Estudante;
+import bancoDentes.model.Usuario;
 import bancoDentes.model.Solicitacao;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -14,7 +14,7 @@ public record AnaliseSolicitacaoDTO(
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate dataAlteracao,
         String justificativa,
-        Estudante analista
+        Usuario analista
 ) {
 
     public static AnaliseSolicitacaoDTO empty() {

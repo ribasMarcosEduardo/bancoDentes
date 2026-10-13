@@ -1,6 +1,6 @@
 package bancoDentes.dto;
 
-import bancoDentes.model.Estudante;
+import bancoDentes.model.Usuario;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.model.enumModels.*;
 
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public record SolicitacaoDTO(
         Long codigo,
         Long version,
-        Long estudante,
+        Long usuario,
         LocalDateTime datSolicitacao,
         Long quantidade,
         Long posicao,
@@ -24,11 +24,11 @@ public record SolicitacaoDTO(
                 return new SolicitacaoDTO(null,null,null,null,null,null,null,null,null,null, null);
         }
 
-        public Solicitacao mapearSolicitacao(Estudante estudante) {
+        public Solicitacao mapearSolicitacao(Usuario usuario) {
                 Solicitacao sol = new Solicitacao();
                 sol.setCodigo(this.codigo);
                 sol.setVersion(this.version);
-                sol.setEstudante(estudante);
+                sol.setUsuario(usuario);
                 sol.setDatSolicitacao(this.datSolicitacao);
                 sol.setQuantidade(this.quantidade);
                 sol.setPosicao(this.posicao);
@@ -44,7 +44,7 @@ public record SolicitacaoDTO(
                 return new SolicitacaoDTO(
                         solicitacao.getCodigo(),
                         solicitacao.getVersion(),
-                        solicitacao.getEstudante().getCodEstudante(),
+                        solicitacao.getUsuario().getCodUsuario(),
                         solicitacao.getDatSolicitacao(),
                         solicitacao.getQuantidade(),
                         solicitacao.getPosicao(),

@@ -81,7 +81,7 @@ public class AnaliseSolicitacaoService extends BaseService {
         Long codSolicitacao = analiseSolicitacaoDTO.solicitacao().getCodigo();
         AnaliseSolicitacao analise = this.save(codSolicitacao);
 
-        creditoService.manipulaCredito(analise.getSolicitacao().getEstudante(),
+        creditoService.manipulaCredito(analise.getSolicitacao().getUsuario(),
                 analise.getSolicitacao().getQuantidade(), 0L);
 
         analise.negar(analiseSolicitacaoDTO.justificativa());
@@ -101,7 +101,7 @@ public class AnaliseSolicitacaoService extends BaseService {
                 .orElseThrow(() -> new AnaliseNaoEncontradaException(this.getText("error.analise.nao.encontrada")));
 
         Solicitacao sol = analise.getSolicitacao();
-        Estudante est = sol.getEstudante();
+        Usuario est = sol.getUsuario();
 
         solicitacaoValidator.validaCreditos(est.getCredito(), sol.getQuantidade());
         creditoService.manipulaCredito(est, 0L, sol.getQuantidade());

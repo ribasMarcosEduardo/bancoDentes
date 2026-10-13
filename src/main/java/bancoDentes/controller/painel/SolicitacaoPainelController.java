@@ -2,11 +2,11 @@ package bancoDentes.controller.painel;
 
 import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.SolicitacaoDTO;
-import bancoDentes.exception.EstudanteException;
 import bancoDentes.exception.SolicitacaoException;
-import bancoDentes.model.Estudante;
+import bancoDentes.exception.UsuarioException;
+import bancoDentes.model.Usuario;
 import bancoDentes.model.Solicitacao;
-import bancoDentes.service.EstudanteService;
+import bancoDentes.service.UsuarioService;
 import bancoDentes.service.SolicitacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -29,7 +29,7 @@ import java.util.List;
 public class SolicitacaoPainelController extends BaseController{
 
     private final SolicitacaoService solicitacaoService;
-    private final EstudanteService estudanteService;
+    private final UsuarioService usuarioService;
 
     /**
      * Exibe o painel do estudante listando todas as suas solicitações.
@@ -39,8 +39,8 @@ public class SolicitacaoPainelController extends BaseController{
     @GetMapping("/painel")
     public String exibePainelSolicitacoes(Model model) {
         try {
-            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
-            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorEstudante(usuarioLogado.getCodEstudante());
+            Usuario usuarioLogado = this.usuarioService.getUsuarioLogado();
+            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorUsuario(usuarioLogado.getCodUsuario());
 
             model.addAttribute("solicitacoes", solicitacoes);
             model.addAttribute("pendentes", solicitacaoService.getPendentes(solicitacoes));
@@ -63,13 +63,13 @@ public class SolicitacaoPainelController extends BaseController{
     @GetMapping("/cadastrarSolicitacao")
     public String cadastrarSolicitacao(Model model) {
         try {
-            Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
+            Usuario usuarioLogado = this.usuarioService.getUsuarioPorCodigo(2L);
             model.addAttribute("solicitacaoDTO", SolicitacaoDTO.empty());
             model.addAttribute("usuarioLogado", usuarioLogado);
 
             return "form/solicitacaoForm";
 
-        } catch (EstudanteException e) {
+        } catch (UsuarioException e) {
             this.saveError(e.getMessage());
             return "redirect:/solicitacao/painel";
         } catch (Exception e) {
