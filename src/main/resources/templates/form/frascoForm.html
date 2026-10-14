@@ -38,8 +38,9 @@
         </header>
 
         <div class="toolbar glass-frost">
-            <!-- Em cadastro o identificador só nasce depois do POST (variante --pending);
-                 em edição mostra o valor real. -->
+            <!-- Em cadastro o identificador só nasce depois do POST (variante --pending),
+                 mas o prefixo (grupo + local) já é mostrado pelo forms.js; em edição
+                 mostra o valor real. -->
             <div class="toolbar__identity">
                 <span class="toolbar__identity-icon" aria-hidden="true">
                     <i class="icon" data-lucide="flask-conical"></i>
@@ -47,7 +48,7 @@
 
                 <div class="toolbar__identity-text">
                     <span class="toolbar__identity-label">Identificador</span>
-                    <span class="toolbar__identity-value"
+                    <span class="toolbar__identity-value" id="identificadorFrasco"
                           th:classappend="${frascoDTO.codigo == null} ? 'toolbar__identity-value--pending'"
                           th:text="${frascoDTO.codigo != null} ? ${frascoDTO.identificacao} : 'Gerado ao salvar'">Gerado ao salvar</span>
                 </div>
@@ -83,7 +84,7 @@
                             <select class="form-control" th:field="*{tipoDente}" id="tipoDente" required aria-describedby="grupoDentarioHint">
                                 <option value="">Selecione o grupo</option>
                                 <option th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}"
-                                        th:value="${nome.name()}" th:text="${nome}"></option>
+                                        th:value="${nome.name()}" th:data-sigla="${nome.sigla}" th:text="${nome}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>
@@ -96,7 +97,7 @@
                         <div class="select-wrapper">
                             <select class="form-control" th:field="*{local}" id="localFrasco">
                                 <option th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
-                                        th:value="${l.name()}" th:text="${l}"></option>
+                                        th:value="${l.name()}" th:data-sigla="${l.sigla}" th:text="${l}"></option>
                             </select>
                             <i class="select-icon icon" data-lucide="chevron-down"></i>
                         </div>

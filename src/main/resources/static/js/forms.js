@@ -310,6 +310,45 @@ function setupCadastroFrasco() {
 
 setupCadastroFrasco();
 
+// Prévia do identificador no cadastro: o formato é {sigla grupo}{sigla local}-{codigo}
+// (Frasco.gerarIdentificacao), mas o código é o ID do banco e só existe depois de
+// salvar — então mostra só o prefixo. As siglas vêm do data-sigla das <option>.
+function setupPreviaIdentificadorFrasco() {
+    const identificador = document.querySelector("#identificadorFrasco");
+    const tipoDente = document.querySelector("#tipoDente");
+    const localFrasco = document.querySelector("#localFrasco");
+    const codigoInput = document.querySelector("input[name='codigo']");
+    const isEdicao = codigoInput && codigoInput.value !== "" && codigoInput.value !== "null";
+
+    if (!identificador || !tipoDente || !localFrasco || isEdicao) {
+        return;
+    }
+
+    function siglaSelecionada(select) {
+        const option = select.options[select.selectedIndex];
+        return option && option.value ? (option.dataset.sigla || "") : "";
+    }
+
+    function atualizarPrevia() {
+        const siglaGrupo = siglaSelecionada(tipoDente);
+
+        if (!siglaGrupo) {
+            identificador.textContent = "Gerado ao salvar";
+            identificador.removeAttribute("title");
+            return;
+        }
+
+        identificador.textContent = `${siglaGrupo}${siglaSelecionada(localFrasco)}-…`;
+        identificador.title = "O número final é definido ao salvar";
+    }
+
+    tipoDente.addEventListener("change", atualizarPrevia);
+    localFrasco.addEventListener("change", atualizarPrevia);
+    atualizarPrevia();
+}
+
+setupPreviaIdentificadorFrasco();
+
 function setupCadastroSolicitacao() {
     const grupoDentario = document.querySelector("#grupoDentario");
     const grupoEndoHint = document.querySelector("#grupoEndoHint");

@@ -96,6 +96,19 @@ function setupSectorSwitch() {
         });
     });
 
+    // O "Limpar filtros" do estado vazio (partials/empty_state.html)
+    // também volta o setor pra "Todos" — o setor sozinho pode ser o
+    // motivo de não ter resultado. Os checkboxes ele já limpa pelo
+    // .filters-clear (filters.js); o da barra de filtros ativos não
+    // mexe no setor.
+    resultsView.querySelectorAll(".empty-state__action").forEach((button) => {
+        button.addEventListener("click", () => {
+            if (activeButton && activeButton.dataset.setor === "todos") return;
+            setSector("todos");
+            replayEntranceAnimation();
+        });
+    });
+
     new ResizeObserver(() => moveIndicator(activeButton)).observe(switcher);
 }
 
