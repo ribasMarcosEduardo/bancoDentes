@@ -1,6 +1,7 @@
 package bancoDentes.model;
 
 import bancoDentes.model.enumModels.Local;
+import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,15 @@ public class Movimentacao {
     @Enumerated(EnumType.STRING)
     @Column(name = "TIPO_MOVIMENTACAO", nullable = false, length = 20)
     private TipoMovimentacao tipoMovimentacao;
+
+    /**
+     * Fluxo que gerou a movimentação (cadastro, registro manual, manutenção...).
+     * Nullable no banco só pra coluna poder ser adicionada pelo ddl-auto; sempre
+     * preenchida pelo código.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ORIGEM", length = 20)
+    private OrigemMovimentacao origem;
 
     @Column(name = "DATMOVIMENTACAO", nullable = false)
     private LocalDateTime datMovimentacao;
@@ -84,8 +94,9 @@ public class Movimentacao {
         };
     }
 
-    public Movimentacao(TipoMovimentacao tipoMovimentacao, LocalDateTime datMovimentacao, Local local, String observacao, Frasco frasco, Long quantidade, Long saldoAnterior, Movimentacao movimentacaoVinculada) {
+    public Movimentacao(TipoMovimentacao tipoMovimentacao, OrigemMovimentacao origem, LocalDateTime datMovimentacao, Local local, String observacao, Frasco frasco, Long quantidade, Long saldoAnterior, Movimentacao movimentacaoVinculada) {
         this.tipoMovimentacao = tipoMovimentacao;
+        this.origem = origem;
         this.datMovimentacao = datMovimentacao != null ? datMovimentacao : LocalDateTime.now();
         this.local = local;
         this.observacao = observacao;

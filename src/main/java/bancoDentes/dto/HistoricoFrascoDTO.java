@@ -1,5 +1,6 @@
 package bancoDentes.dto;
 
+import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 
 /**
@@ -8,20 +9,23 @@ import bancoDentes.model.enumModels.TipoMovimentacao;
  * descartes na manutenção e transferências).
  *
  * @param entradas       dentes que entraram (cadastro, doações e transferências recebidas)
- * @param saidas         dentes que saíram por saída manual ou descarte na manutenção
+ * @param saidas         dentes que saíram por saída registrada (manual ou, no futuro, por solicitação)
+ * @param descartes      dentes descartados na conclusão de manutenções
  * @param transferencias dentes transferidos para outros frascos
  */
-public record HistoricoFrascoDTO(long entradas, long saidas, long transferencias) {
+public record HistoricoFrascoDTO(long entradas, long saidas, long descartes, long transferencias) {
 
     public static HistoricoFrascoDTO vazio() {
-        return new HistoricoFrascoDTO(0L, 0L, 0L);
+        return new HistoricoFrascoDTO(0L, 0L, 0L, 0L);
     }
 
-    public HistoricoFrascoDTO somar(TipoMovimentacao tipo, long quantidade) {
+    public HistoricoFrascoDTO somar(TipoMovimentacao tipo, OrigemMovimentacao origem, long quantidade) {
         return switch (tipo) {
-            case ENTRADA -> new HistoricoFrascoDTO(entradas + quantidade, saidas, transferencias);
-            case SAIDA -> new HistoricoFrascoDTO(entradas, saidas + quantidade, transferencias);
-            case TRANSFERENCIA -> new HistoricoFrascoDTO(entradas, saidas, transferencias + quantidade);
+            case ENTRADA -> new HistoricoFrascoDTO(entradas + quantidade, saidas, descartes, transferencias);
+            case SAIDA -> origem == OrigemMovimentacao.MANUTENCAO
+                    ? new HistoricoFrascoDTO(entradas, saidas, descartes + quantidade, transferencias)
+                    : new HistoricoFrascoDTO(entradas, saidas + quantidade, descartes, transferencias);
+            case TRANSFERENCIA -> new HistoricoFrascoDTO(entradas, saidas, descartes, transferencias + quantidade);
         };
     }
 }

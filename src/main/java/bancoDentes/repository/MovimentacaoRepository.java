@@ -14,10 +14,10 @@ public interface MovimentacaoRepository  extends JpaRepository<Movimentacao, Lon
     List<Movimentacao> findByFrascoCodigo(Long codigo);
 
     /**
-     * Soma das quantidades movimentadas por frasco e tipo de movimentação.
-     * Cada linha: [codFrasco (Long), tipo (TipoMovimentacao), soma (Long)].
+     * Soma das quantidades movimentadas por frasco, tipo e origem da movimentação.
+     * Cada linha: [codFrasco (Long), tipo (TipoMovimentacao), origem (OrigemMovimentacao), soma (Long)].
      */
-    @Query("SELECT m.frasco.codigo, m.tipoMovimentacao, SUM(m.quantidade) FROM Movimentacao m " +
-            "GROUP BY m.frasco.codigo, m.tipoMovimentacao")
-    List<Object[]> somarQuantidadesPorFrascoETipo();
+    @Query("SELECT m.frasco.codigo, m.tipoMovimentacao, m.origem, SUM(m.quantidade) FROM Movimentacao m " +
+            "GROUP BY m.frasco.codigo, m.tipoMovimentacao, m.origem")
+    List<Object[]> somarQuantidadesPorFrascoTipoEOrigem();
 }

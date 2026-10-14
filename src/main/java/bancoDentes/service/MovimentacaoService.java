@@ -6,6 +6,7 @@ import bancoDentes.exception.ManutencaoException;
 import bancoDentes.exception.MovimentacaoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Movimentacao;
+import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
@@ -189,6 +190,7 @@ public class MovimentacaoService extends BaseService {
                     if (qtdTransferida > 0L) {
                         Movimentacao transferencia = new Movimentacao(
                                 TipoMovimentacao.TRANSFERENCIA,
+                                OrigemMovimentacao.REGISTRO_MANUAL,
                                 dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now(),
                                 dto.local(),
                                 dto.observacao(),
@@ -234,6 +236,7 @@ public class MovimentacaoService extends BaseService {
 
                         Movimentacao movimentacao = new Movimentacao(
                                 TipoMovimentacao.SAIDA,
+                                OrigemMovimentacao.REGISTRO_MANUAL,
                                 dto.datManutencao() != null ? dto.datManutencao().atStartOfDay() : LocalDateTime.now(),
                                 dto.local(),
                                 dto.observacao(),

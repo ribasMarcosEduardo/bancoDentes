@@ -156,6 +156,7 @@ function setupFilters() {
                 else if (group === "Arcada") rowValue = row.getAttribute("data-arcada");
                 else if (group === "Dentição") rowValue = row.getAttribute("data-denticao");
                 else if (group === "Origem") rowValue = row.getAttribute("data-origem");
+                else if (group === "Tipo") rowValue = row.getAttribute("data-tipo");
 
                 rowValue = (rowValue || "").toLowerCase().trim();
 

@@ -388,8 +388,12 @@
                           <span th:text="${h != null ? h.entradas() : 0}">0</span>
                         </div>
                         <div class="request-detail">
-                          <span class="request-details__label">Saídas e descartes</span>
+                          <span class="request-details__label">Saídas</span>
                           <span th:text="${h != null ? h.saidas() : 0}">0</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Descartes na manutenção</span>
+                          <span th:text="${h != null ? h.descartes() : 0}">0</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Transferidos para outros frascos</span>

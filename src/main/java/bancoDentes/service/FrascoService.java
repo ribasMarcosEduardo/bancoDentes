@@ -7,6 +7,7 @@ import bancoDentes.model.Frasco;
 import bancoDentes.model.Movimentacao;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.model.enumModels.StatusFrasco;
+import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
@@ -97,6 +98,7 @@ public class FrascoService extends BaseService{
 
         movimentacaoRepository.save(new Movimentacao(
                 TipoMovimentacao.ENTRADA,
+                OrigemMovimentacao.CADASTRO,
                 frasco.getDatCad(),
                 frasco.getLocal(),
                 this.getText("msg.movimentacao.cadastroFrasco", frasco.getIdentificacao()),
@@ -223,13 +225,14 @@ public class FrascoService extends BaseService{
     public Map<Long, HistoricoFrascoDTO> getHistoricoFrascos() {
         Map<Long, HistoricoFrascoDTO> historicos = new HashMap<>();
 
-        for (Object[] linha : movimentacaoRepository.somarQuantidadesPorFrascoETipo()) {
+        for (Object[] linha : movimentacaoRepository.somarQuantidadesPorFrascoTipoEOrigem()) {
             Long codFrasco = (Long) linha[0];
             TipoMovimentacao tipo = (TipoMovimentacao) linha[1];
-            long soma = linha[2] != null ? ((Number) linha[2]).longValue() : 0L;
+            OrigemMovimentacao origem = (OrigemMovimentacao) linha[2];
+            long soma = linha[3] != null ? ((Number) linha[3]).longValue() : 0L;
 
-            historicos.merge(codFrasco, HistoricoFrascoDTO.vazio().somar(tipo, soma),
-                    (atual, novo) -> atual.somar(tipo, soma));
+            historicos.merge(codFrasco, HistoricoFrascoDTO.vazio().somar(tipo, origem, soma),
+                    (atual, novo) -> atual.somar(tipo, origem, soma));
         }
         return historicos;
     }

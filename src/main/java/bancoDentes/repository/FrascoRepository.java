@@ -41,17 +41,14 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
 
     /**
      * Condição de "frasco com histórico" (manutenção, item de análise ou movimentação),
-     * que impede a exclusão física. A entrada gerada no cadastro do frasco não conta:
-     * um frasco cuja única movimentação é uma Entrada sem vínculo (a do cadastro)
-     * ainda pode ser excluído. Qualquer outra entrada/saída gera manutenção ou uma
-     * segunda movimentação, então cai nas outras condições.
+     * que impede a exclusão física. A movimentação gerada pelo cadastro do frasco
+     * (origem CADASTRO) não conta: um frasco só com ela ainda pode ser excluído.
      */
     String CONDICAO_POSSUI_VINCULO =
             "(EXISTS (SELECT mt FROM Manutencao mt WHERE mt.frasco = f) " +
             "OR EXISTS (SELECT i FROM ItemAnalise i WHERE i.frasco = f) " +
             "OR EXISTS (SELECT m FROM Movimentacao m WHERE m.frasco = f " +
-            "AND (m.tipoMovimentacao <> 'ENTRADA' OR m.movimentacaoVinculada IS NOT NULL)) " +
-            "OR (SELECT COUNT(m2) FROM Movimentacao m2 WHERE m2.frasco = f) > 1)";
+            "AND (m.origem IS NULL OR m.origem <> 'CADASTRO')))";
 
     /**
      * Códigos dos frascos que possuem histórico e por isso não podem ser

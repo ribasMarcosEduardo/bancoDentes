@@ -8,6 +8,7 @@ import bancoDentes.model.Movimentacao;
 import bancoDentes.model.enumModels.OrigemManutencao;
 import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.model.enumModels.StatusManutencao;
+import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ManutencaoRepository;
@@ -164,6 +165,7 @@ public class ManutencaoService extends BaseService{
 
         movimentacaoRepository.save(new Movimentacao(
                 TipoMovimentacao.SAIDA,
+                OrigemMovimentacao.MANUTENCAO,
                 LocalDateTime.now(),
                 frasco.getLocal(),
                 getText("msg.movimentacao.descarteManutencao"),

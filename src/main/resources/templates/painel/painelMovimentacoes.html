@@ -74,6 +74,24 @@
 
                 <div class="filter-section">
                     <button type="button" class="filter-section__toggle" aria-expanded="true">
+                        Origem da movimentação
+                        <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="filter-section__content">
+                      <div class="filter-section__inner">
+                          <!-- Solicitação ainda não gera movimentação na v1: tirar o th:unless quando gerar -->
+                          <label class="checkbox-filter" th:each="o : ${T(bancoDentes.model.enumModels.OrigemMovimentacao).values()}"
+                                 th:unless="${o.name() == 'SOLICITACAO'}">
+                              <input type="checkbox" th:value="${o}" data-filter-group="Origem">
+                              <span th:text="${o}">Registro manual</span>
+                          </label>
+                      </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
                         Grupo dentário
                         <i class="icon" data-lucide="chevron-down"></i>
                     </button>
@@ -232,6 +250,7 @@
                                  th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
                                  th:data-codigo="${mov.codigo}"
                                  th:data-tipo="${mov.tipoMovimentacao.nome}"
+                                 th:data-origem="${mov.origem != null ? mov.origem : ''}"
                                  th:data-busca="${'MOV-' + #numbers.formatInteger(mov.codigo, 3) + ' ' + (mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : '') + ' ' + (mov.observacao != null ? mov.observacao : '')}"
                                  th:data-grupo="${mov.frasco != null ? mov.frasco.tipoDente : ''}">
 
@@ -264,8 +283,13 @@
                                                     <span th:text="${mov.tipoMovimentacao.nome}">-</span>
                                                 </div>
 
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Origem da movimentação</span>
+                                                    <span th:text="${mov.origem != null ? mov.origem : '---'}">Registro manual</span>
+                                                </div>
+
                                                 <div class="request-detail" th:if="${mov.tipoMovimentacao.name() == 'ENTRADA'}">
-                                                    <span class="request-details__label">Origem</span>
+                                                    <span class="request-details__label">Procedência dos dentes</span>
                                                     <span th:text="${#lists.isEmpty(mov.transferencias) ? 'Doação/Outros' : 'Transferência de frascos'}">Doação/Outros</span>
                                                 </div>
 
