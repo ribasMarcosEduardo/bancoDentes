@@ -36,11 +36,11 @@ public class FrascoService extends BaseService{
 
         if (frasco.getCodigo() != null) {
             Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
-            BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao");
+            BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao", "statusFrasco");
             frasco = frascoDoBanco;
+        } else {
+            frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
         }
-
-        frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
         frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();
         return frasco;
