@@ -3,9 +3,12 @@ package bancoDentes.service;
 import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
+import bancoDentes.model.Movimentacao;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.model.enumModels.StatusFrasco;
+import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
+import bancoDentes.repository.MovimentacaoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 public class FrascoService extends BaseService{
 
     private final FrascoRepository frascoRepository;
+    private final MovimentacaoRepository movimentacaoRepository;
 
     /**
      * Salva um novo frasco ou atualiza um frasco já existente no banco de dados.
@@ -39,8 +43,9 @@ public class FrascoService extends BaseService{
     @Transactional
     public Frasco save(FrascoDTO frascoDTO) {
         Frasco frasco = frascoDTO.mapearFrasco();
+        boolean novo = frasco.getCodigo() == null;
 
-        if (frasco.getCodigo() != null) {
+        if (!novo) {
             Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
             if (frascoDoBanco.isInativo()) {
                 throw new FrascoException(this.getText("error.frasco.inativo.editar"));
@@ -58,7 +63,36 @@ public class FrascoService extends BaseService{
         }
         frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();
+
+        if (novo) {
+            registrarEntradaCadastro(frasco);
+        }
         return frasco;
+    }
+
+    /**
+     * Registra a quantidade inicial do frasco como uma Entrada sem frascos de origem
+     * (equivalente a "Doação/Outros"), pra que o histórico de movimentações cubra
+     * todos os dentes que já passaram pelo frasco.
+     *
+     * @param frasco
+     */
+    private void registrarEntradaCadastro(Frasco frasco) {
+        long quantidade = frasco.getQuantidade() != null ? frasco.getQuantidade() : 0L;
+        if (quantidade <= 0L) {
+            return;
+        }
+
+        movimentacaoRepository.save(new Movimentacao(
+                TipoMovimentacao.ENTRADA,
+                frasco.getDatCad(),
+                frasco.getLocal(),
+                this.getText("msg.movimentacao.cadastroFrasco", frasco.getIdentificacao()),
+                frasco,
+                quantidade,
+                0L,
+                null
+        ));
     }
 
     /**
@@ -79,6 +113,13 @@ public class FrascoService extends BaseService{
      */
     public List<Frasco> getFrascosDisponiveis() {
         return frascoRepository.findFrascosDisponiveis();
+    }
+
+    /**
+     * Recupera os frascos que podem ser escolhidos numa movimentação (todos menos inativos).
+     */
+    public List<Frasco> getFrascosMovimentaveis() {
+        return frascoRepository.findFrascosMovimentaveis();
     }
 
     /**
@@ -184,6 +225,8 @@ public class FrascoService extends BaseService{
             throw new FrascoException(this.getText("error.frasco.excluir.possuiVinculo"));
         }
 
+        // Sem vínculo, a única movimentação possível é a entrada do cadastro
+        movimentacaoRepository.deleteByFrasco(frasco);
         frascoRepository.delete(frasco);
         return frasco;
     }

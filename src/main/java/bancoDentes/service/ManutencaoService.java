@@ -6,6 +6,7 @@ import bancoDentes.model.Frasco;
 import bancoDentes.model.Manutencao;
 import bancoDentes.model.enumModels.OrigemManutencao;
 import bancoDentes.model.enumModels.StatusFrasco;
+import bancoDentes.model.enumModels.StatusManutencao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ManutencaoRepository;
 import jakarta.transaction.Transactional;
@@ -48,6 +49,44 @@ public class ManutencaoService extends BaseService{
         Manutencao manutencao = dto.mapearManutencao(frasco);
 
         return manutencaoRepository.save(manutencao);
+    }
+
+    /**
+     * Mantém a manutenção do frasco alinhada à quantidade após uma movimentação.
+     * Se o frasco já tem manutenção em aberto, só atualiza a quantidade dela (a
+     * conclusão usa essa quantidade como base); senão, abre uma nova. Evita duas
+     * manutenções abertas pro mesmo frasco e dentes "voltando" na conclusão.
+     *
+     * @param frasco
+     * @param novaQuantidade
+     */
+    @Transactional
+    public void registrarOuAtualizarManutencao(Frasco frasco, Long novaQuantidade) throws ManutencaoException {
+        List<Manutencao> abertas = manutencaoRepository.findByFrascoAndStatusManutencao(frasco, StatusManutencao.EM_ABERTO);
+
+        if (abertas.isEmpty()) {
+            registrarManutencao(new ManutencaoDTO(frasco.getCodigo(), novaQuantidade, OrigemManutencao.MANUTENCAO));
+            return;
+        }
+
+        abertas.forEach(m -> m.setQuantidade(novaQuantidade));
+        manutencaoRepository.saveAll(abertas);
+    }
+
+    /**
+     * Finaliza as manutenções em aberto do frasco -> usado quando uma movimentação
+     * zera o frasco (ele é inativado), pra que a conclusão posterior não o reative.
+     *
+     * @param frasco
+     */
+    @Transactional
+    public void finalizarManutencoesAbertas(Frasco frasco) {
+        List<Manutencao> abertas = manutencaoRepository.findByFrascoAndStatusManutencao(frasco, StatusManutencao.EM_ABERTO);
+        abertas.forEach(m -> {
+            m.setQuantidade(0L);
+            m.setStatusManutencao(StatusManutencao.FINALIZADA);
+        });
+        manutencaoRepository.saveAll(abertas);
     }
 
     /**

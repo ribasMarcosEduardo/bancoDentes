@@ -417,6 +417,12 @@
     gap: 1.5rem;
 }
 
+/* Painel que ocupa a largura toda da área expandida, abaixo dos demais
+   (ex.: observações em painelMovimentacoes.html, texto que pode ser longo). */
+.request-panel--full {
+    grid-column: 1 / -1;
+}
+
 .request-panel__title {
     margin: 0 0 1rem;
     padding-bottom: 0.75rem;
@@ -442,6 +448,25 @@
 
 .request-details__grid--single {
     grid-template-columns: 1fr;
+}
+
+/*
+    Dois campos que precisam ficar sempre lado a lado (ex.: Saldo anterior
+    e Saldo após em painelMovimentacoes.html), numa linha própria do grid
+    — sem isso, campos condicionais antes deles mudam a paridade e o par
+    se separa. Com --dense no grid, o item seguinte ao par sobe pra
+    ocupar a célula que ficaria vazia antes dele.
+*/
+.request-details__grid--dense {
+    grid-auto-flow: dense;
+}
+
+.request-details__pair {
+    grid-column: 1 / -1;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1.25rem;
 }
 
 .request-detail {

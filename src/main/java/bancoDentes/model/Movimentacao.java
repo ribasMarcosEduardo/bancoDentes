@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -55,8 +57,31 @@ public class Movimentacao {
     @JoinColumn(name = "CODMOVIMENTACAO_VINCULADA")
     private Movimentacao movimentacaoVinculada;
 
+    /**
+     * Transferências dos frascos de origem que alimentaram esta Entrada.
+     * Vazia numa Entrada significa origem externa (Doação/Outros).
+     */
+    @OneToMany(mappedBy = "movimentacaoVinculada", fetch = FetchType.LAZY)
+    private List<Movimentacao> transferencias = new ArrayList<>();
+
     public void transferencia(){
         this.tipoMovimentacao = TipoMovimentacao.TRANSFERENCIA;
+    }
+
+    /**
+     * Quantidade do frasco logo após a movimentação, calculada a partir do saldo anterior.
+     * Transferência esvazia o frasco de origem (ver MovimentacaoService).
+     */
+    @Transient
+    public Long getSaldoPosterior() {
+        if (saldoAnterior == null || quantidade == null || tipoMovimentacao == null) {
+            return null;
+        }
+        return switch (tipoMovimentacao) {
+            case ENTRADA -> saldoAnterior + quantidade;
+            case SAIDA -> Math.max(0L, saldoAnterior - quantidade);
+            case TRANSFERENCIA -> 0L;
+        };
     }
 
     public Movimentacao(TipoMovimentacao tipoMovimentacao, LocalDateTime datMovimentacao, Local local, String observacao, Frasco frasco, Long quantidade, Long saldoAnterior, Movimentacao movimentacaoVinculada) {

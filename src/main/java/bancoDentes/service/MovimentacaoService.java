@@ -1,13 +1,11 @@
 package bancoDentes.service;
 
 import bancoDentes.dto.ItemMovimentacaoDTO;
-import bancoDentes.dto.ManutencaoDTO;
 import bancoDentes.dto.MovimentacaoDTO;
 import bancoDentes.exception.ManutencaoException;
 import bancoDentes.exception.MovimentacaoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Movimentacao;
-import bancoDentes.model.enumModels.OrigemManutencao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
@@ -42,12 +40,35 @@ public class MovimentacaoService extends BaseService {
 
     @Transactional
     public List<Movimentacao> save(MovimentacaoDTO dto) throws Exception {
+        validarFrascosMovimentaveis(dto);
 
         if (TipoMovimentacao.SAIDA.equals(dto.tipoMovimentacao())) {
             return salvarMovimentacaoSaida(dto);
         }
 
         return salvarMovimentacaoEntrada(dto);
+    }
+
+    /**
+     * Garante, antes de qualquer gravação, que nenhum frasco envolvido está inativo.
+     * Feito no início porque MovimentacaoException é checada e não desfaz a transação.
+     */
+    private void validarFrascosMovimentaveis(MovimentacaoDTO dto) throws MovimentacaoException {
+        List<Long> codigos = new ArrayList<>();
+        if (dto.codFrasco() != null) {
+            codigos.add(dto.codFrasco());
+        }
+        if (dto.itens() != null) {
+            dto.itens().stream()
+                    .filter(item -> item != null && item.codFrasco() != null)
+                    .forEach(item -> codigos.add(item.codFrasco()));
+        }
+
+        for (Frasco frasco : frascoRepository.findAllById(codigos)) {
+            if (frasco.isInativo()) {
+                throw new MovimentacaoException(getText("error.movimentacao.frascoInativo", frasco.getIdentificacao()));
+            }
+        }
     }
 
     /**
@@ -84,11 +105,8 @@ public class MovimentacaoService extends BaseService {
         long qtdFinal = quantidadeTotalTransferencias > 0 ? quantidadeTotalTransferencias : qtdEntradaInformada;
         movimentacaoEntrada.setQuantidade(qtdFinal);
 
-        manutencaoService.registrarManutencao(new ManutencaoDTO(
-                frascoDestino.getCodigo(),
-                novaQuantidadeDestino,
-                OrigemManutencao.MANUTENCAO
-        ));
+        // Destino já em manutenção: atualiza a manutenção aberta em vez de abrir outra
+        manutencaoService.registrarOuAtualizarManutencao(frascoDestino, novaQuantidadeDestino);
 
         frascoDestino.emManutencao();
         frascoRepository.save(frascoDestino);
@@ -117,6 +135,8 @@ public class MovimentacaoService extends BaseService {
 
                     frascoOrigem.setQuantidade(0L);
                     frascoOrigem.setStatusFrasco(bancoDentes.model.enumModels.StatusFrasco.INATIVO);
+                    // Origem em manutenção: encerra a manutenção aberta junto com a inativação
+                    manutencaoService.finalizarManutencoesAbertas(frascoOrigem);
                     frascoRepository.save(frascoOrigem);
 
                     if (qtdTransferida > 0L) {
@@ -180,19 +200,18 @@ public class MovimentacaoService extends BaseService {
 
     /**
      * Registra a manutenção para um frasco em uma operação de Saída.
+     * Se o frasco já estiver em manutenção, a manutenção aberta é atualizada
+     * (ou finalizada, se a saída zerar o frasco) em vez de abrir outra.
      */
     private void registrarManutencaoSaida(Frasco frascoOrigem, long saldoAtual, long qtdSaida) throws ManutencaoException {
         long novaQuantidadeCalculada = Math.max(0, saldoAtual - qtdSaida);
         frascoOrigem.setQuantidade(novaQuantidadeCalculada);
 
         if (novaQuantidadeCalculada == 0L) {
+            manutencaoService.finalizarManutencoesAbertas(frascoOrigem);
             frascoOrigem.inativo();
         } else {
-            manutencaoService.registrarManutencao(new ManutencaoDTO(
-                    frascoOrigem.getCodigo(),
-                    novaQuantidadeCalculada,
-                    OrigemManutencao.MANUTENCAO
-            ));
+            manutencaoService.registrarOuAtualizarManutencao(frascoOrigem, novaQuantidadeCalculada);
             frascoOrigem.emManutencao();
         }
 

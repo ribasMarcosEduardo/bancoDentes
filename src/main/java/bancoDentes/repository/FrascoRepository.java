@@ -32,20 +32,36 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
     List<Frasco> findFrascosDisponiveis();
 
     /**
-     * Códigos dos frascos que possuem histórico (movimentação, manutenção ou item de análise)
-     * e por isso não podem ser excluídos fisicamente, apenas inativados.
+     * Frascos que podem ser escolhidos numa movimentação (entrada ou saída):
+     * todos menos os inativos. Frascos em manutenção entram — a movimentação
+     * atualiza a manutenção aberta (ver ManutencaoService.registrarOuAtualizarManutencao).
      */
-    @Query("SELECT f.codigo FROM Frasco f " +
-            "WHERE EXISTS (SELECT m FROM Movimentacao m WHERE m.frasco = f) " +
-            "OR EXISTS (SELECT mt FROM Manutencao mt WHERE mt.frasco = f) " +
-            "OR EXISTS (SELECT i FROM ItemAnalise i WHERE i.frasco = f)")
+    @Query("SELECT f FROM Frasco f WHERE f.statusFrasco IN ('DISPONIVEL', 'DIS_IMPRESSAO', 'EM_MANUTENCA')")
+    List<Frasco> findFrascosMovimentaveis();
+
+    /**
+     * Condição de "frasco com histórico" (manutenção, item de análise ou movimentação),
+     * que impede a exclusão física. A entrada gerada no cadastro do frasco não conta:
+     * um frasco cuja única movimentação é uma Entrada sem vínculo (a do cadastro)
+     * ainda pode ser excluído. Qualquer outra entrada/saída gera manutenção ou uma
+     * segunda movimentação, então cai nas outras condições.
+     */
+    String CONDICAO_POSSUI_VINCULO =
+            "(EXISTS (SELECT mt FROM Manutencao mt WHERE mt.frasco = f) " +
+            "OR EXISTS (SELECT i FROM ItemAnalise i WHERE i.frasco = f) " +
+            "OR EXISTS (SELECT m FROM Movimentacao m WHERE m.frasco = f " +
+            "AND (m.tipoMovimentacao <> 'ENTRADA' OR m.movimentacaoVinculada IS NOT NULL)) " +
+            "OR (SELECT COUNT(m2) FROM Movimentacao m2 WHERE m2.frasco = f) > 1)";
+
+    /**
+     * Códigos dos frascos que possuem histórico e por isso não podem ser
+     * excluídos fisicamente, apenas inativados.
+     */
+    @Query("SELECT f.codigo FROM Frasco f WHERE " + CONDICAO_POSSUI_VINCULO)
     Set<Long> findCodigosComVinculo();
 
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Frasco f " +
-            "WHERE f.codigo = :codigo " +
-            "AND (EXISTS (SELECT m FROM Movimentacao m WHERE m.frasco = f) " +
-            "OR EXISTS (SELECT mt FROM Manutencao mt WHERE mt.frasco = f) " +
-            "OR EXISTS (SELECT i FROM ItemAnalise i WHERE i.frasco = f))")
+            "WHERE f.codigo = :codigo AND " + CONDICAO_POSSUI_VINCULO)
     boolean possuiVinculo(@Param("codigo") Long codigo);
 
 }
