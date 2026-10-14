@@ -219,8 +219,8 @@
 
                             <div class="result-list">
                                 <span class="result-list__code" th:text="'MOV-' + ${#numbers.formatInteger(mov.codigo, 3)}">MOV-000</span>
-                                <span th:text="${mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : (mov.frasco != null ? 'FR-' + mov.frasco.codigo : '-')}">FR-000</span>
-                                <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '-'}">Grupo</span>
+                                <span th:text="${mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : (mov.frasco != null ? 'FR-' + mov.frasco.codigo : '---')}">FR-000</span>
+                                <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '---'}">Grupo</span>
 
                                 <span class="status-pill"
                                       th:classappend="'status-pill--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
@@ -274,32 +274,32 @@
                                             <div class="request-details__grid">
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Grupo dentário</span>
-                                                    <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '---'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Estado</span>
-                                                    <span th:text="${mov.frasco != null && mov.frasco.estado != null ? mov.frasco.estado : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.estado != null ? mov.frasco.estado : '---'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Arcada</span>
-                                                    <span th:text="${mov.frasco != null && mov.frasco.arcada != null ? mov.frasco.arcada : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.arcada != null ? mov.frasco.arcada : '---'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Posição</span>
-                                                    <span th:text="${mov.frasco != null && mov.frasco.posicao != null ? mov.frasco.posicao : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.posicao != null ? mov.frasco.posicao : '---'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Data de cadastro (Frasco)</span>
-                                                    <span th:text="${mov.frasco != null && mov.frasco.datCad != null ? #temporals.format(mov.frasco.datCad, 'dd/MM/yyyy') : '-'}">-</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.datCad != null ? #temporals.format(mov.frasco.datCad, 'dd/MM/yyyy') : '---'}">-</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Qtd. no momento da mov.</span>
-                                                    <span th:text="${mov.saldoAnterior != null ? mov.saldoAnterior : '-'}">-</span>
+                                                    <span th:text="${mov.saldoAnterior != null ? mov.saldoAnterior : '---'}">-</span>
                                                 </div>
 
                                             </div>

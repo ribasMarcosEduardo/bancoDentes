@@ -239,8 +239,8 @@
                                  th:data-qtd="${m.quantidade != null ? m.quantidade : 0}">
 
                             <div class="result-list">
-                                <span class="result-list__code" th:text="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : (m.frasco != null ? 'FR-' + m.frasco.codigo : '-')}">FR-000</span>
-                                <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '-'}">Grupo</span>
+                                <span class="result-list__code" th:text="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : (m.frasco != null ? 'FR-' + m.frasco.codigo : '---')}">FR-000</span>
+                                <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '---'}">Grupo</span>
                                 <span th:text="${m.frasco != null ? m.quantidade : 0}">0</span>
 
                                 <div class="result-list__actions">

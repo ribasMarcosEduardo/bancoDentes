@@ -986,7 +986,7 @@ function setupCadastroMovimentacaoSubmit() {
         return Array.from(selectedFlasksList?.querySelectorAll(".request-row") || []).map((row) => {
             const spans = row.querySelectorAll(".selected-flask > span");
             return {
-                id: row.dataset.frascoId || spans[0]?.textContent.trim() || "—",
+                id: row.dataset.frascoId || spans[0]?.textContent.trim() || "---",
                 quantidade: spans[1] ? spans[1].textContent.trim() : null,
             };
         });
