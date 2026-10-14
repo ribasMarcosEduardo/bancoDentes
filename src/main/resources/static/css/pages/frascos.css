@@ -315,6 +315,49 @@
     }
 }
 /*
+    Rodapé do card de frasco empilhado: datas em cima e as ações numa
+    linha própria embaixo. Com 5 ações (editar, manutenção/concluir,
+    imprimir, ver movimentações, apagar/inativar) elas não cabem mais ao
+    lado das datas na largura mínima do card. Os botões indisponíveis
+    continuam no lugar (desabilitados, com tooltip do motivo) pra manter
+    a mesma posição em todos os cards.
+*/
+.card__footer--acoes-em-linha {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+}
+
+.card__footer--acoes-em-linha .card__actions {
+    justify-content: space-between;
+
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+/*
+    Com space-between o último botão (Apagar/Inativar, dentro do próprio
+    form) encosta na borda direita do card e o balão centralizado era
+    cortado ("Inativar", "Em manutenção"). Ancora o balão dele pela
+    direita — mesma ideia de fila_etiquetas.css; o primeiro botão já é
+    ancorado pela esquerda em base/utilities.css. A seta (::before)
+    continua centralizada no botão.
+*/
+.card__footer--acoes-em-linha .card__actions > :last-child [data-tooltip]::after,
+.card__footer--acoes-em-linha .card__actions > [data-tooltip]:last-child::after {
+    left: auto;
+    right: 0;
+    transform: translateY(4px);
+}
+
+.card__footer--acoes-em-linha .card__actions > :last-child [data-tooltip]:hover::after,
+.card__footer--acoes-em-linha .card__actions > :last-child [data-tooltip]:focus-visible::after,
+.card__footer--acoes-em-linha .card__actions > [data-tooltip]:last-child:hover::after,
+.card__footer--acoes-em-linha .card__actions > [data-tooltip]:last-child:focus-visible::after {
+    transform: translateY(0);
+}
+
+/*
     Datas no rodapé do card em 2 colunas alinhadas: rótulo ("Cadastro",
     "Manutenção") | ícone + data. O .card__date vira display:contents
     pra que os spans de cada linha caiam direto no grid do .card__dates

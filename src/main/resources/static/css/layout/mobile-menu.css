@@ -262,4 +262,15 @@
         min-width: 19px;
         min-height: 19px;
     }
+
+    /* Notificações e Configurações ainda não implementadas */
+    .mobile-menu__icon-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .mobile-menu__icon-btn:disabled:hover {
+        background: transparent;
+        transform: none;
+    }
 }

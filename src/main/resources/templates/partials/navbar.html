@@ -33,8 +33,8 @@
                     </button>
 
                     <div class="navbar__dropdown-menu">
-                        <a th:href="@{/solicitacao/painel}">Minhas Solicitações</a>
-                        <a th:href="@{/analiseSolicitacao/painel}">Painel de Solicitações</a>
+                        <a class="is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Minhas Solicitações <span class="link-soon">Em breve</span></a>
+                        <a class="is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Painel de Solicitações <span class="link-soon">Em breve</span></a>
                     </div>
                 </div>
 
@@ -47,7 +47,7 @@
                     <div class="navbar__dropdown-menu">
                         <a th:href="@{/frasco/cadastraFrasco}">Novo Frasco</a>
                         <a th:href="@{/movimentacao/cadastrarMovimentacao}">Nova Movimentação</a>
-                        <a th:href="@{/solicitacao/cadastrarSolicitacao}">Nova Solicitação</a>
+                        <a class="is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Nova Solicitação <span class="link-soon">Em breve</span></a>
                     </div>
                 </div>
             </nav>
@@ -57,12 +57,16 @@
                     <i class="icon" id="themeIcon" data-lucide="moon"></i>
                 </button>
 
-                <div class="navbar__dropdown navbar__notifications-dropdown">
-                    <button class="navbar__notifications navbar__dropdown-btn glass" type="button" aria-haspopup="true" aria-label="Notificações">
+                <!-- Notificações ainda não implementadas: botão desabilitado e sem a
+                     classe navbar__dropdown (includes.js abre qualquer .navbar__dropdown
+                     no hover). O painel abaixo é o mock do protótipo, mantido como
+                     comentário do Thymeleaf (não é renderizado) pra quando for implementado. -->
+                <div class="navbar__notifications-dropdown">
+                    <button class="navbar__notifications glass tooltip-below" type="button" disabled data-tooltip="Notificações · Em breve" aria-label="Notificações (em breve)">
                         <i class="icon icon--md" data-lucide="bell"></i>
-                        <span class="navbar__notifications-badge">4</span>
                     </button>
 
+                    <!--/*
                     <div class="notif-panel">
                         <div class="notif-panel__header">
                             <span class="notif-panel__title">Notificações</span>
@@ -137,9 +141,10 @@
 
                         <a href="#" class="notif-panel__footer">Ver todas as notificações</a>
                     </div>
+                    */-->
                 </div>
 
-                <button class="navbar__config glass tooltip-below" data-tooltip="Configurações" aria-label="Configurações">
+                <button class="navbar__config glass tooltip-below" type="button" disabled data-tooltip="Configurações · Em breve" aria-label="Configurações (em breve)">
                     <i class="icon icon--md" data-lucide="settings"></i>
                 </button>
 
@@ -175,15 +180,15 @@
 
             <div class="mobile-menu__group">
                 <span class="mobile-menu__group-title">Solicitações</span>
-                <a th:href="@{/solicitacao/painel}" class="mobile-menu__link">Minhas Solicitações</a>
-                <a th:href="@{/analiseSolicitacao/painel}" class="mobile-menu__link">Painel de Solicitações</a>
+                <a class="mobile-menu__link is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Minhas Solicitações <span class="link-soon">Em breve</span></a>
+                <a class="mobile-menu__link is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Painel de Solicitações <span class="link-soon">Em breve</span></a>
             </div>
 
             <div class="mobile-menu__group">
                 <span class="mobile-menu__group-title">Cadastros</span>
                 <a th:href="@{/frasco/cadastraFrasco}" class="mobile-menu__link">Novo Frasco</a>
                 <a th:href="@{/movimentacao/cadastrarMovimentacao}" class="mobile-menu__link">Nova Movimentação</a>
-                <a th:href="@{/solicitacao/cadastrarSolicitacao}" class="mobile-menu__link">Nova Solicitação</a>
+                <a class="mobile-menu__link is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Nova Solicitação <span class="link-soon">Em breve</span></a>
             </div>
         </nav>
 
@@ -195,11 +200,11 @@
                     <i class="icon" data-lucide="moon"></i>
                 </button>
 
-                <button class="mobile-menu__icon-btn" type="button" aria-label="Notificações">
+                <button class="mobile-menu__icon-btn" type="button" disabled title="Notificações · Em breve" aria-label="Notificações (em breve)">
                     <i class="icon" data-lucide="bell"></i>
                 </button>
 
-                <button class="mobile-menu__icon-btn" type="button" aria-label="Configurações">
+                <button class="mobile-menu__icon-btn" type="button" disabled title="Configurações · Em breve" aria-label="Configurações (em breve)">
                     <i class="icon" data-lucide="settings"></i>
                 </button>
             </div>

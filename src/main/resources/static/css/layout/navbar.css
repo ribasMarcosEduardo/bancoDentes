@@ -199,6 +199,25 @@
     position: relative;
 }
 
+/* Notificações e Configurações ainda não implementadas — botão apagado,
+   sem o hover (fundo/ícone girando), mas com o tooltip "Em breve". */
+.navbar__config:disabled,
+.navbar__notifications:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.navbar__config:disabled:hover,
+.navbar__notifications:disabled:hover {
+    background: var(--surface-elevated);
+    transform: none;
+}
+
+.navbar__config:disabled:hover .icon,
+.navbar__notifications:disabled:hover .icon {
+    transform: none;
+}
+
 .navbar__notifications-badge {
     position: absolute;
     top: -3px;
@@ -547,6 +566,41 @@
 .navbar__dropdown-menu a:hover {
     background: var(--surface-muted);
     color: var(--text);
+}
+
+/* Itens de menu ainda não liberados nesta versão (ex.: telas de
+   solicitação) — continuam visíveis, mas sem link e apagados, com a
+   etiqueta "Em breve". Vale pro dropdown e pro menu mobile. */
+.navbar__dropdown-menu a.is-disabled,
+.mobile-menu__link.is-disabled {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.navbar__dropdown-menu a.is-disabled:hover,
+.mobile-menu__link.is-disabled:hover {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.link-soon {
+    flex-shrink: 0;
+
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+
+    background: var(--surface-muted);
+    color: var(--text-muted);
+
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* Entre ~1150px e 1000px (onde mobile-menu.css assume com o menu

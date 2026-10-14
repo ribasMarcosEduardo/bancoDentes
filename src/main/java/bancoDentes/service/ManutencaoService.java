@@ -4,17 +4,23 @@ import bancoDentes.dto.ManutencaoDTO;
 import bancoDentes.exception.ManutencaoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Manutencao;
+import bancoDentes.model.Movimentacao;
 import bancoDentes.model.enumModels.OrigemManutencao;
 import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.model.enumModels.StatusManutencao;
+import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ManutencaoRepository;
+import bancoDentes.repository.MovimentacaoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Service responsável por gerenciar as regras de negócio referente
@@ -28,6 +34,7 @@ public class ManutencaoService extends BaseService{
 
     private final ManutencaoRepository manutencaoRepository;
     private final FrascoRepository frascoRepository;
+    private final MovimentacaoRepository movimentacaoRepository;
 
     /**
      * Recupera todas as manutenções cadastrados no sistema.
@@ -49,6 +56,17 @@ public class ManutencaoService extends BaseService{
         Manutencao manutencao = dto.mapearManutencao(frasco);
 
         return manutencaoRepository.save(manutencao);
+    }
+
+    /**
+     * Manutenções em aberto indexadas pelo código do frasco — usado pelo painel de
+     * frascos pra concluir a manutenção ali mesmo, sem trocar de tela.
+     */
+    public Map<Long, Manutencao> getManutencoesAbertasPorFrasco() {
+        return manutencaoRepository.findByStatusManutencao(StatusManutencao.EM_ABERTO).stream()
+                .filter(m -> m.getFrasco() != null)
+                .collect(Collectors.toMap(m -> m.getFrasco().getCodigo(), Function.identity(),
+                        (primeira, outra) -> primeira));
     }
 
     /**
@@ -104,9 +122,10 @@ public class ManutencaoService extends BaseService{
                 .orElseThrow(() -> new ManutencaoException(getText("error.manutencao.naoEncontrado")));
 
         Frasco frasco = manutencao.getFrasco();
+        registrarDescarteManutencao(frasco, novaQuantidade);
         frasco.setQuantidade(novaQuantidade);
 
-        frasco.setDatCad(LocalDateTime.now());
+        // Data de cadastro é preservada; só a próxima manutenção é recalculada
         frasco.setDatManutencao(LocalDateTime.now().plusYears(1));
 
         frasco.setStatusFrasco(novaQuantidade == 0 ? StatusFrasco.INATIVO : StatusFrasco.DIS_IMPRESSAO);
@@ -115,6 +134,32 @@ public class ManutencaoService extends BaseService{
 
         manutencao.setStatusManutencao(bancoDentes.model.enumModels.StatusManutencao.FINALIZADA);
         manutencaoRepository.save(manutencao);
+    }
+
+    /**
+     * Se a conclusão da manutenção reduziu a quantidade do frasco, registra os dentes
+     * removidos como uma Saída, pra que o histórico de movimentações cubra o descarte.
+     *
+     * @param frasco
+     * @param novaQuantidade
+     */
+    private void registrarDescarteManutencao(Frasco frasco, Long novaQuantidade) {
+        long saldoAtual = frasco.getQuantidade() != null ? frasco.getQuantidade() : 0L;
+        long removidos = saldoAtual - (novaQuantidade != null ? novaQuantidade : 0L);
+        if (removidos <= 0L) {
+            return;
+        }
+
+        movimentacaoRepository.save(new Movimentacao(
+                TipoMovimentacao.SAIDA,
+                LocalDateTime.now(),
+                frasco.getLocal(),
+                getText("msg.movimentacao.descarteManutencao"),
+                frasco,
+                removidos,
+                saldoAtual,
+                null
+        ));
     }
 
     /**

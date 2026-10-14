@@ -38,6 +38,15 @@ public class MovimentacaoService extends BaseService {
         return movimentacaoRepository.findAll();
     }
 
+    /**
+     * Recupera as movimentações de um frasco específico.
+     *
+     * @param codFrasco
+     */
+    public List<Movimentacao> getMovimentacoesDoFrasco(Long codFrasco) {
+        return movimentacaoRepository.findByFrascoCodigo(codFrasco);
+    }
+
     @Transactional
     public List<Movimentacao> save(MovimentacaoDTO dto) throws Exception {
         validarFrascosMovimentaveis(dto);
@@ -128,10 +137,13 @@ public class MovimentacaoService extends BaseService {
                     Frasco frascoOrigem = frascoRepository.findById(itemDto.codFrasco())
                             .orElseThrow(() ->  new MovimentacaoException(getText("error.frasco.naoEncontrado")));
 
-                    long qtdTransferida = (itemDto.quantidade() != null) ? itemDto.quantidade() : 0L;
-                    quantidadeTotal += qtdTransferida;
-
                     long saldoAnteriorOrigem = frascoOrigem.getQuantidade() != null ? frascoOrigem.getQuantidade() : 0L;
+
+                    // Transferência esvazia a origem: usa o saldo real no momento da gravação,
+                    // não a quantidade do formulário (que pode estar desatualizada), pra que
+                    // nenhum dente suma ou apareça sem registro.
+                    long qtdTransferida = saldoAnteriorOrigem;
+                    quantidadeTotal += qtdTransferida;
 
                     frascoOrigem.setQuantidade(0L);
                     frascoOrigem.setStatusFrasco(bancoDentes.model.enumModels.StatusFrasco.INATIVO);

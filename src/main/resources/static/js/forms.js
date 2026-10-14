@@ -214,16 +214,17 @@ function setupCadastroFrasco() {
     function aplicarEstadoSelecionado() {
         const hasGrupo = tipoDente.value !== "";
 
+        // Na edição a quantidade fica travada: mudanças de quantidade passam
+        // por movimentação, pra ficarem registradas no histórico do frasco.
+        const quantidadeLiberada = hasGrupo && !isEdicao;
+        quantidadeGroup.classList.toggle("form-group--disabled", !quantidadeLiberada);
+        quantidadeInput.disabled = !quantidadeLiberada;
+        setDisabled(quantidadeControls, !quantidadeLiberada);
+
         if (hasGrupo) {
-            quantidadeGroup.classList.remove("form-group--disabled");
-            quantidadeInput.disabled = false;
-            setDisabled(quantidadeControls, false);
             enableSection(atributosFrascoSection);
             setDisabled(atributosControls, false);
         } else {
-            quantidadeGroup.classList.add("form-group--disabled");
-            quantidadeInput.disabled = true;
-            setDisabled(quantidadeControls, true);
             disableSection(atributosFrascoSection);
             setDisabled(atributosControls, true);
         }

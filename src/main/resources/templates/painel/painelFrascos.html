@@ -274,9 +274,22 @@
                     <i class="icon" data-lucide="pen-line"></i>
                   </button>
 
-                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
-                    <i class="icon" data-lucide="toolbox"></i>
-                  </button>
+                  <th:block th:with="manAberta=${frasco.emManutencao ? manutencoesAbertas.get(frasco.codigo) : null}">
+                    <button th:unless="${manAberta != null}" type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
+                      <i class="icon" data-lucide="toolbox"></i>
+                    </button>
+                    <button th:if="${manAberta != null}" type="button" class="result-list__action result-list__action--green js-concluir-manutencao"
+                            th:data-id="${manAberta.codigo}"
+                            th:data-codigo="${frasco.identificacao}"
+                            th:data-grupo="${frasco.tipoDente != null ? frasco.tipoDente : ''}"
+                            th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
+                            th:data-local="${frasco.local != null ? frasco.local.nome : ''}"
+                            th:data-origem="${manAberta.origem != null ? manAberta.origem : ''}"
+                            th:data-qtd="${manAberta.quantidade != null ? manAberta.quantidade : 0}"
+                            data-tooltip="Concluir manutenção" aria-label="Concluir manutenção">
+                      <i class="icon" data-lucide="check-circle"></i>
+                    </button>
+                  </th:block>
 
                   <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--blue"
@@ -365,6 +378,29 @@
                       </div>
                     </section>
 
+                    <section class="request-panel request-panel--full" th:if="${frasco.inativo}"
+                             th:with="h=${historicoFrascos.get(frasco.codigo)}">
+                      <h4 class="request-panel__title">Histórico do frasco</h4>
+                      <div class="request-details__grid">
+                        <div class="request-detail">
+                          <span class="request-details__label">Dentes que entraram</span>
+                          <span th:text="${h != null ? h.entradas() : 0}">0</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Saídas e descartes</span>
+                          <span th:text="${h != null ? h.saidas() : 0}">0</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Transferidos para outros frascos</span>
+                          <span th:text="${h != null ? h.transferencias() : 0}">0</span>
+                        </div>
+                        <div class="request-detail">
+                          <span class="request-details__label">Sobra no encerramento</span>
+                          <span th:text="${frasco.quantidade != null ? frasco.quantidade : 0}">0</span>
+                        </div>
+                      </div>
+                    </section>
+
                     <section class="request-panel request-panel--frascos-actions">
                       <h4 class="request-panel__title">Ações</h4>
                       <div class="request-panel__actions">
@@ -375,9 +411,22 @@
                           <i class="icon" data-lucide="pen-line"></i>
                         </button>
 
-                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
-                          <i class="icon" data-lucide="toolbox"></i>
-                        </button>
+                        <th:block th:with="manAberta=${frasco.emManutencao ? manutencoesAbertas.get(frasco.codigo) : null}">
+                          <button th:unless="${manAberta != null}" type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
+                            <i class="icon" data-lucide="toolbox"></i>
+                          </button>
+                          <button th:if="${manAberta != null}" type="button" class="result-list__action result-list__action--green js-concluir-manutencao"
+                                  th:data-id="${manAberta.codigo}"
+                                  th:data-codigo="${frasco.identificacao}"
+                                  th:data-grupo="${frasco.tipoDente != null ? frasco.tipoDente : ''}"
+                                  th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
+                                  th:data-local="${frasco.local != null ? frasco.local.nome : ''}"
+                                  th:data-origem="${manAberta.origem != null ? manAberta.origem : ''}"
+                                  th:data-qtd="${manAberta.quantidade != null ? manAberta.quantidade : 0}"
+                                  data-tooltip="Concluir manutenção" aria-label="Concluir manutenção">
+                            <i class="icon" data-lucide="check-circle"></i>
+                          </button>
+                        </th:block>
 
                         <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
                           <button type="submit" class="result-list__action result-list__action--blue"
@@ -388,6 +437,10 @@
                             <i class="icon" data-lucide="printer"></i>
                           </button>
                         </form>
+
+                        <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
+                          <i class="icon" data-lucide="history"></i>
+                        </a>
 
                         <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                           <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
@@ -456,7 +509,7 @@
                 </div>
               </div>
 
-              <footer class="card__footer">
+              <footer class="card__footer card__footer--acoes-em-linha">
                 <div class="card__dates">
                   <p class="card__date"><span>Cadastro</span>
                     <span class="card__date-value" th:if="${frasco.datCad != null}"><i class="icon" data-lucide="calendar" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy')}">21/06/25</th:block></span>
@@ -477,9 +530,22 @@
                     <i class="icon" data-lucide="pen-line"></i>
                   </button>
 
-                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
-                    <i class="icon" data-lucide="toolbox"></i>
-                  </button>
+                  <th:block th:with="manAberta=${frasco.emManutencao ? manutencoesAbertas.get(frasco.codigo) : null}">
+                    <button th:unless="${manAberta != null}" type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
+                      <i class="icon" data-lucide="toolbox"></i>
+                    </button>
+                    <button th:if="${manAberta != null}" type="button" class="card__action card__action--green js-concluir-manutencao"
+                            th:data-id="${manAberta.codigo}"
+                            th:data-codigo="${frasco.identificacao}"
+                            th:data-grupo="${frasco.tipoDente != null ? frasco.tipoDente : ''}"
+                            th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
+                            th:data-local="${frasco.local != null ? frasco.local.nome : ''}"
+                            th:data-origem="${manAberta.origem != null ? manAberta.origem : ''}"
+                            th:data-qtd="${manAberta.quantidade != null ? manAberta.quantidade : 0}"
+                            data-tooltip="Concluir manutenção" aria-label="Concluir manutenção">
+                      <i class="icon" data-lucide="check-circle"></i>
+                    </button>
+                  </th:block>
 
                   <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
                     <button type="submit" class="card__action card__action--blue"
@@ -490,6 +556,10 @@
                       <i class="icon" data-lucide="printer"></i>
                     </button>
                   </form>
+
+                  <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
+                    <i class="icon" data-lucide="history"></i>
+                  </a>
 
                   <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
@@ -517,7 +587,10 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 
+<th:block th:insert="~{partials/modal_concluir_manutencao}"></th:block>
+
 <script th:src="@{/js/bundles/painel.js}"></script>
+<script th:src="@{/js/manutencao-concluir.js}"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {

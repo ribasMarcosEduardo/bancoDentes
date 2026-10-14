@@ -154,6 +154,18 @@
                 </div>
             </div>
 
+            <div class="frasco-filter-bar glass-frost" th:if="${frascoFiltro != null}">
+                <span class="frasco-filter-bar__label">
+                    <i class="icon" data-lucide="history" aria-hidden="true"></i>
+                    Movimentações do frasco
+                    <strong th:text="${frascoFiltro.identificacao != null ? frascoFiltro.identificacao : 'FR-' + frascoFiltro.codigo}">FR-000</strong>
+                </span>
+                <a th:href="@{/movimentacao/painel}" class="frasco-filter-bar__clear">
+                    <i class="icon" data-lucide="x"></i>
+                    Ver todas
+                </a>
+            </div>
+
             <div class="active-filters-bar glass-frost" id="activeFiltersBar">
                 <div class="active-filters-bar__inner">
                     <div class="active-filters-bar__header">
@@ -190,8 +202,13 @@
 
                 <section class="results results--list" id="resultsView">
 
-                    <th:block th:if="${#lists.isEmpty(movimentacao)}">
+                    <th:block th:if="${#lists.isEmpty(movimentacao) and frascoFiltro == null}">
                         <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhuma movimentação registrada', 'Ainda não há movimentações registradas. Registre a primeira movimentação para começar.', false)}">
+                        </div>
+                    </th:block>
+
+                    <th:block th:if="${#lists.isEmpty(movimentacao) and frascoFiltro != null}">
+                        <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhuma movimentação para este frasco', 'Este frasco ainda não tem movimentações registradas.', false)}">
                         </div>
                     </th:block>
 

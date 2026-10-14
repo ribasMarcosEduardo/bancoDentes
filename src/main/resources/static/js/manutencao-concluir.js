@@ -2,7 +2,7 @@ function setupManutencaoConcluirModal() {
     const overlay = document.querySelector("#modalConcluirManutencao");
     const resultsView = document.querySelector("#resultsView");
 
-    if (!overlay || !resultsView) return;
+    if (!overlay) return;
 
     const closeBtn = document.querySelector("#modalConcluirManutencaoClose");
     const cancelBtn = document.querySelector("#modalConcluirManutencaoCancelar");
@@ -23,11 +23,16 @@ function setupManutencaoConcluirModal() {
     if (!qtdInput) return;
 
     let linhaAtual = null;
+    let codManutencaoAtual = null;
 
-    function open(row) {
-        linhaAtual = row;
+    // "fonte" é quem carrega os data-* do frasco: a linha no painel de
+    // manutenções, ou o próprio botão no painel de frascos (lá o mesmo
+    // frasco aparece em linha, área expandida e card).
+    function open(fonte, codManutencao) {
+        linhaAtual = fonte;
+        codManutencaoAtual = codManutencao;
 
-        const { codigo = "---", grupo = "---", estado = "---", local = "---", origem = "---", qtd = "0" } = row.dataset;
+        const { codigo = "---", grupo = "---", estado = "---", local = "---", origem = "---", qtd = "0" } = fonte.dataset;
         const qtdAtual = Number(qtd) || 0;
 
         // data-* vazio ("") quando o campo não existe no frasco - o
@@ -55,6 +60,7 @@ function setupManutencaoConcluirModal() {
         overlay.classList.remove("is-open");
         document.body.classList.remove("modal-open");
         linhaAtual = null;
+        codManutencaoAtual = null;
         stopRepeat();
     }
 
@@ -69,14 +75,14 @@ function setupManutencaoConcluirModal() {
         qtdInput.value = String(valor);
     }
 
-    resultsView.addEventListener("click", (event) => {
+    (resultsView || document).addEventListener("click", (event) => {
         const trigger = event.target.closest(".js-concluir-manutencao");
-        if (!trigger) return;
+        if (!trigger || trigger.disabled) return;
 
-        const row = trigger.closest(".request-row");
-        if (!row) return;
+        const fonte = trigger.closest("[data-qtd]");
+        if (!fonte) return;
 
-        open(row);
+        open(fonte, trigger.dataset.id);
     });
 
     closeBtn?.addEventListener("click", close);
@@ -129,8 +135,7 @@ function setupManutencaoConcluirModal() {
 
         clampQtdInput();
 
-        const actionBtn = linhaAtual.querySelector(".js-concluir-manutencao");
-        const codManutencao = actionBtn ? actionBtn.dataset.id : null;
+        const codManutencao = codManutencaoAtual;
 
         const codigo = linhaAtual.dataset.codigo || "---";
         const novaQuantidade = Number(qtdInput.value);

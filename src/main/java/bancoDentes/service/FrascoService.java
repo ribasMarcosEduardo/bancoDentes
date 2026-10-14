@@ -1,6 +1,7 @@
 package bancoDentes.service;
 
 import bancoDentes.dto.FrascoDTO;
+import bancoDentes.dto.HistoricoFrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Movimentacao;
@@ -15,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +52,8 @@ public class FrascoService extends BaseService{
             if (frascoDoBanco.isInativo()) {
                 throw new FrascoException(this.getText("error.frasco.inativo.editar"));
             }
-            BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao", "statusFrasco");
+            // Quantidade não muda pela edição: alterações passam por movimentação (histórico)
+            BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao", "statusFrasco", "quantidade");
             frasco = frascoDoBanco;
         } else {
             frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
@@ -202,6 +205,24 @@ public class FrascoService extends BaseService{
 
         frasco.disponivel();
         return frascoRepository.save(frasco);
+    }
+
+    /**
+     * Resumo das quantidades movimentadas por frasco (código do frasco -> histórico),
+     * calculado numa única consulta agregada sobre as movimentações.
+     */
+    public Map<Long, HistoricoFrascoDTO> getHistoricoFrascos() {
+        Map<Long, HistoricoFrascoDTO> historicos = new HashMap<>();
+
+        for (Object[] linha : movimentacaoRepository.somarQuantidadesPorFrascoETipo()) {
+            Long codFrasco = (Long) linha[0];
+            TipoMovimentacao tipo = (TipoMovimentacao) linha[1];
+            long soma = linha[2] != null ? ((Number) linha[2]).longValue() : 0L;
+
+            historicos.merge(codFrasco, HistoricoFrascoDTO.vazio().somar(tipo, soma),
+                    (atual, novo) -> atual.somar(tipo, soma));
+        }
+        return historicos;
     }
 
     /**

@@ -5,6 +5,7 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.service.FrascoService;
+import bancoDentes.service.ManutencaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class FrascoPainelController extends BaseController {
 
     private final FrascoService frascoService;
+    private final ManutencaoService manutencaoService;
 
     /**
      * Exibe o painel principal com a listagem de todos os frascos cadastrados.
@@ -34,6 +36,8 @@ public class FrascoPainelController extends BaseController {
     public String exibePainelFrascos(Model model) {
         model.addAttribute("frascos", frascoService.getFrascos());
         model.addAttribute("frascosComVinculo", frascoService.getCodigosComVinculo());
+        model.addAttribute("historicoFrascos", frascoService.getHistoricoFrascos());
+        model.addAttribute("manutencoesAbertas", manutencaoService.getManutencoesAbertasPorFrasco());
         return "painel/painelFrascos";
     }
 

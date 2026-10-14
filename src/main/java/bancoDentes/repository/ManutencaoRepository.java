@@ -11,4 +11,6 @@ public interface ManutencaoRepository extends JpaRepository<Manutencao, Long> {
 
     List<Manutencao> findByFrascoAndStatusManutencao(Frasco frasco, StatusManutencao statusManutencao);
 
+    List<Manutencao> findByStatusManutencao(StatusManutencao statusManutencao);
+
 }
