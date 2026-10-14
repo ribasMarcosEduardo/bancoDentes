@@ -1,0 +1,110 @@
+/* Tela 1 do fluxo de impressão de etiquetas - fila de frascos com status
+   Disponível para impressão (painel/filaEtiquetas.html). Stepper e barra
+   de ações ficam em pages/etiquetas.css. */
+
+.result-table--etiqueta-selecao .result-table__head > span:first-child,
+.result-table--etiqueta-selecao .result-list > span:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: stretch;
+}
+
+.etiqueta-selecao-checkbox {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+
+    accent-color: var(--step-line-active);
+    cursor: pointer;
+}
+
+/* A linha inteira é um <label> - clicar em qualquer ponto marca ou
+   desmarca. Desmarcada fica apagada: o frasco continua na fila, só não
+   entra nesta impressão. */
+.etiqueta-fila-row {
+    cursor: pointer;
+
+    transition: opacity 0.2s ease;
+}
+
+.etiqueta-fila-row:has(.etiqueta-selecao-checkbox:not(:checked)) {
+    opacity: 0.5;
+}
+
+/*
+    O botão de remover fica encostado no fim da linha, e o balão do
+    tooltip centralizado estourava pra fora da .result-table
+    (overflow:hidden), cortando o texto. Ancora o balão pela direita,
+    mesma ideia do primeiro botão de .request-panel__actions em
+    base/utilities.css (lá pela esquerda). A seta (::before) continua
+    centralizada no botão.
+*/
+.result-table--etiqueta-selecao .result-list__actions > [data-tooltip]:last-child::after {
+    left: auto;
+    right: 0;
+    transform: translateY(4px);
+}
+
+.result-table--etiqueta-selecao .result-list__actions > [data-tooltip]:last-child:hover::after,
+.result-table--etiqueta-selecao .result-list__actions > [data-tooltip]:last-child:focus-visible::after {
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .etiqueta-fila-row {
+        transition: none;
+    }
+}
+
+@media (max-width: 860px) {
+
+    /*
+        list.css força min-width:720px nas listas até 860px (scroll
+        horizontal pra tabelas com muitas colunas). Aqui as colunas são
+        curtas e cabem sem isso - com o min-width a coluna de Manutenção
+        saía da área visível e a barra de rolagem criava uma faixa vazia
+        embaixo da tabela.
+    */
+    .result-table--etiqueta-selecao .result-table__head,
+    .result-table--etiqueta-selecao .result-list {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /*
+        No celular sobra checkbox, Identificador, Qtd., Próxima
+        manutenção e ações (o que vai impresso na etiqueta).
+        Ordem dos filhos: 1 checkbox, 2 Identificador, 3 Grupo, 4 Local,
+        5 Qtd., 6 Próxima manutenção, 7 ações.
+    */
+    .result-table--etiqueta-selecao .result-table__head,
+    .result-table--etiqueta-selecao .result-list {
+        grid-template-columns: 24px 1.2fr 0.5fr 1fr 48px;
+    }
+
+    .result-table--etiqueta-selecao .result-table__head span:nth-child(3),
+    .result-table--etiqueta-selecao .result-table__head span:nth-child(4),
+    .result-table--etiqueta-selecao .result-list > span:nth-child(3),
+    .result-table--etiqueta-selecao .result-list > span:nth-child(4) {
+        display: none;
+    }
+}
+
+/* Linhas da fila entram em cascata depois do cabeçalho da página (ver
+   transições em pages/etiquetas.css). Só as primeiras ganham atraso
+   crescente; o resto entra junto, pra fila longa não ficar esperando. */
+html:not(.vt-nav) .etiqueta-fila-row {
+    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+}
+
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(1) { animation-delay: 0.18s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(2) { animation-delay: 0.22s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(3) { animation-delay: 0.26s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(4) { animation-delay: 0.30s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(5) { animation-delay: 0.34s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(6) { animation-delay: 0.38s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(7) { animation-delay: 0.42s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(8) { animation-delay: 0.46s; }

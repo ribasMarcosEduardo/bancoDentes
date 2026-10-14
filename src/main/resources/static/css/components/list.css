@@ -51,7 +51,29 @@
         0.6fr
         minmax(125px, 1.1fr)
         1fr
-        148px;
+        186px;
+}
+
+/* Fila de impressão de etiquetas (painel/filaEtiquetas.html). Primeira
+   coluna estreita, só com a checkbox (alinhamento dela em
+   pages/fila_etiquetas.css).
+   Checkbox | Identificador | Grupo | Local | Qtd. | Próxima manutenção | ações */
+.result-table--etiqueta-selecao .result-table__head,
+.result-table--etiqueta-selecao .result-list {
+    grid-template-columns:
+        24px
+        1.1fr
+        0.9fr
+        0.8fr
+        0.5fr
+        1fr
+        48px;
+}
+
+/* Ações no fim da linha, encostadas à direita como a seta de expandir
+   nas outras listas */
+.result-table--etiqueta-selecao .result-list__actions {
+    justify-self: end;
 }
 
 .result-table--solicitacoes .result-table__head,
@@ -68,26 +90,6 @@
         var(--list-first-col)
         repeat(4, 1fr)
         40px;
-}
-
-/* Checkbox | Identificador | Grupo | Local | Cadastro | Manutenção — ver
-   selecao_frascos_etiqueta.html. Primeira coluna fixa e estreita (só a
-   checkbox), diferente das outras variantes acima (que reservam a
-   primeira coluna pro identificador/nome). */
-.result-table--etiqueta-selecao .result-table__head,
-.result-table--etiqueta-selecao .result-list {
-    grid-template-columns:
-        40px
-        1.1fr
-        0.9fr
-        0.8fr
-        0.9fr
-        0.9fr;
-}
-
-.result-table--etiqueta-selecao .result-table__head span:first-child,
-.result-table--etiqueta-selecao .result-list span:first-child {
-    justify-self: center;
 }
 
 /*

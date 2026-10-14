@@ -163,6 +163,9 @@
             <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
               <i class="icon" data-lucide="filter"></i>
             </button>
+            <a th:href="@{/etiqueta/fila}" class="btn btn-secondary" data-tooltip="Imprimir etiquetas" aria-label="Imprimir etiquetas">
+              <i class="orderBy-icon" data-lucide="printer"></i>
+            </a>
             <button type="button" class="btn btn-secondary" id="btnSortOrder">
               <span class="btn__label">Ordenar</span>
               <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
@@ -270,6 +273,16 @@
                     <i class="icon" data-lucide="toolbox"></i>
                   </button>
 
+                  <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--blue"
+                            th:disabled="${!frasco.podeEnviarParaImpressao}"
+                            th:data-identificacao="${frasco.identificacao}"
+                            th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
+                            aria-label="Enviar para impressão">
+                      <i class="icon" data-lucide="printer"></i>
+                    </button>
+                  </form>
+
                   <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                       <i class="icon" data-lucide="archive-x"></i>
@@ -349,6 +362,16 @@
                           <i class="icon" data-lucide="toolbox"></i>
                         </button>
 
+                        <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--blue"
+                                  th:disabled="${!frasco.podeEnviarParaImpressao}"
+                                  th:data-identificacao="${frasco.identificacao}"
+                                  th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
+                                  aria-label="Enviar para impressão">
+                            <i class="icon" data-lucide="printer"></i>
+                          </button>
+                        </form>
+
                         <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                           <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                             <i class="icon" data-lucide="archive-x"></i>
@@ -427,6 +450,16 @@
                     <i class="icon" data-lucide="toolbox"></i>
                   </button>
 
+                  <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
+                    <button type="submit" class="card__action card__action--blue"
+                            th:disabled="${!frasco.podeEnviarParaImpressao}"
+                            th:data-identificacao="${frasco.identificacao}"
+                            th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
+                            aria-label="Enviar para impressão">
+                      <i class="icon" data-lucide="printer"></i>
+                    </button>
+                  </form>
+
                   <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
                       <i class="icon" data-lucide="archive-x"></i>
@@ -464,6 +497,33 @@
                 buttonsStyling: false,
                 customClass: {
                     confirmButton: "btn btn-outline btn-outline-danger",
+                    cancelButton: "btn btn-secondary",
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll(".print-form").forEach(form => {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const identificacao = form.querySelector("button")?.dataset.identificacao;
+
+            Swal.fire({
+                icon: "question",
+                title: "Enviar para impressão?",
+                text: `O frasco ${identificacao || ""} vai para a fila de impressão de etiquetas.`,
+                showCancelButton: true,
+                reverseButtons: true,
+                confirmButtonText: "Sim, enviar",
+                cancelButtonText: "Cancelar",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
                     cancelButton: "btn btn-secondary",
                 },
             }).then((result) => {

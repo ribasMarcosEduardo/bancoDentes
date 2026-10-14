@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Impressão de Etiquetas</title>
+
+  <!--
+      Documento de impressão, deliberadamente fora do layout do sistema
+      (sem navbar/footer/tema, sem css/style.css). Os frascos já chegam
+      distribuídos nas células pelo GeradorEtiquetasService; aqui só se
+      posiciona cada etiqueta em mm, sem JS no layout da folha.
+  -->
+  <link rel="stylesheet" th:href="@{/css/print/etiquetas.css}">
+
+  <!-- Tamanho da folha vem do modelo escolhido -->
+  <style th:inline="css">
+    @page {
+      size: [(${modelo.folhaLarguraMm})]mm [(${modelo.folhaAlturaMm})]mm;
+      margin: 0;
+    }
+
+    .folha {
+      width: [(${modelo.folhaLarguraMm})]mm;
+      height: [(${modelo.folhaAlturaMm})]mm;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="painel-impressao no-print">
+  <h1>Impressão de etiquetas</h1>
+
+  <p th:text="${modelo.nome} + ', ' + ${#lists.size(frascos)} + (${#lists.size(frascos)} == 1 ? ' frasco' : ' frascos') + ' em ' + ${#lists.size(folhas)} + (${#lists.size(folhas)} == 1 ? ' folha' : ' folhas') + ', começando na célula ' + ${posicaoInicial + 1} + ' da 1ª folha.'">
+    Folha A4 - 96 etiquetas de 31x17mm, 12 frascos em 1 folha, começando na célula 1 da 1ª folha.
+  </p>
+
+  <p>No diálogo de impressão (Ctrl+P), confirme escala <strong>"100% / Tamanho real"</strong> e cabeçalhos e rodapés desligados.</p>
+
+  <p>Depois de conferir que as etiquetas saíram certas, confirme a impressão para tirar esses frascos da fila.</p>
+
+  <form class="painel-impressao__acoes" th:action="@{/etiqueta/confirmar}" method="post">
+    <input type="hidden" name="frascos" th:each="frasco : ${frascos}" th:value="${frasco.codigo}">
+
+    <button type="button" class="painel-impressao__btn" id="btnImprimir">Imprimir</button>
+    <button type="submit" class="painel-impressao__btn painel-impressao__btn--primario" id="btnConfirmarImpressao">Confirmar impressão</button>
+  </form>
+</div>
+
+<div class="folhas-container">
+  <section class="folha" th:each="folha : ${folhas}">
+    <div th:each="celula : ${folha.celulas}"
+         class="etiqueta"
+         th:classappend="${celula.vazia} ? 'etiqueta--vazia'"
+         th:style="'top:' + ${celula.topMm} + 'mm;left:' + ${celula.leftMm} + 'mm;width:' + ${modelo.celulaLarguraMm} + 'mm;height:' + ${modelo.celulaAlturaMm} + 'mm;'">
+      <th:block th:unless="${celula.vazia}">
+        <span class="etiqueta__codigo" th:text="${celula.frasco.identificacao}">PMbd-A001</span>
+        <span class="etiqueta__info" th:text="'Qtd. ' + ${celula.frasco.quantidade}">Qtd. 8</span>
+        <span class="etiqueta__info" th:if="${celula.frasco.datManutencao != null}"
+              th:text="'Manut: ' + ${#temporals.format(celula.frasco.datManutencao, 'dd/MM/yyyy')}">Manut: 21/06/2026</span>
+      </th:block>
+    </div>
+  </section>
+</div>
+
+<script th:src="@{/js/etiquetas-imprimir.js}"></script>
+
+</body>
+</html>

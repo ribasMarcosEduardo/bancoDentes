@@ -65,6 +65,25 @@ public class FrascoPainelController extends BaseController {
     }
 
     /**
+     * Coloca um frasco na fila de impressão de etiquetas.
+     *
+     * @param codigo
+     */
+    @PostMapping("/enviarImpressao/{codigo}")
+    public String enviarParaImpressao(@PathVariable("codigo") Long codigo) {
+        try {
+            Frasco frasco = frascoService.enviarParaImpressao(codigo);
+            this.saveMessage(this.getText("msg.sucesso.frasco.enviadoImpressao", frasco.getIdentificacao()));
+        } catch (FrascoException e) {
+            this.saveError(e.getMessage());
+        } catch (Exception e) {
+            this.saveError(this.getText("error.frasco.enviarImpressao"));
+        }
+
+        return "redirect:/frasco/painel";
+    }
+
+    /**
      * Processa exclusão de um frasco.
      *
      * @param codigo

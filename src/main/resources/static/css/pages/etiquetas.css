@@ -1,0 +1,172 @@
+/* Partes comuns às telas do fluxo de impressão de etiquetas (fila e
+   configuração da folha): stepper e barra fixa de ações no rodapé. */
+
+/* Espaço extra no fim da página pra .etiqueta-acoes-bar (fixa no
+   rodapé da viewport, ver abaixo) nunca cobrir o fim do conteúdo nem o
+   footer. */
+.page {
+    padding-bottom: calc(var(--page-pad) + 88px);
+}
+
+.etiquetas-stepper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    padding: 1.25rem 1.5rem;
+}
+
+/* Barra de ação fixa - mostra a contagem de frascos e leva pra etapa
+   seguinte (ou volta pra anterior). */
+.etiqueta-acoes-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    padding: 1rem clamp(1rem, 4vw, 2rem);
+
+    background: var(--surface-muted);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+}
+
+.etiqueta-acoes-bar__count {
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.etiqueta-acoes-bar__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .etiqueta-acoes-bar,
+    .etiqueta-acoes-bar__actions {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @view-transition {
+        navigation: none;
+    }
+}
+
+.etiquetas-stepper {
+    view-transition-name: etiquetas-stepper;
+}
+
+.etiqueta-acoes-bar {
+    view-transition-name: etiquetas-acoes;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.28s;
+}
+
+::view-transition-group(etiquetas-stepper),
+::view-transition-group(etiquetas-acoes) {
+    animation-duration: 0.35s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* fill-mode backwards (e não both) em tudo: depois de entrar, o elemento
+   volta pros próprios estilos - a linha desmarcada da fila continua com a
+   opacidade reduzida, por exemplo. */
+
+html:not(.vt-nav) .form-shell > * {
+    animation: fade-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+html:not(.vt-nav) .form-shell > :nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+html:not(.vt-nav) .form-shell > :nth-child(n + 3) {
+    animation-delay: 0.12s;
+}
+
+@keyframes etiqueta-bar-in {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+html:not(.vt-nav) .etiqueta-acoes-bar {
+    animation: etiqueta-bar-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+}
+
+/* ---- Stepper ---- */
+
+/* Só o "from": o "to" é o próprio estilo de etapa ativa (stepper.css) */
+@keyframes etiqueta-step-ativar {
+    from {
+        border-color: var(--border);
+        background: var(--surface-soft);
+        color: var(--text-muted);
+        transform: scale(0.9);
+    }
+}
+
+@keyframes etiqueta-linha-preencher {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+/* Etapa 1: o círculo acende ao carregar */
+html:not(.vt-nav) .etiquetas-stepper > .step--active:first-child .step__circle {
+    animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+}
+
+/* Linha preenchida desenhada por cima do trilho, crescendo da esquerda -
+   o fundo da linha volta a ser o trilho vazio e a cor ativa vem do
+   ::after. */
+.etiquetas-stepper .stepper__line.is-filled {
+    position: relative;
+    overflow: hidden;
+
+    background: var(--step-line-bg);
+}
+
+.etiquetas-stepper .stepper__line.is-filled::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    border-radius: inherit;
+    background: var(--step-line-active);
+
+    transform-origin: left center;
+    animation: etiqueta-linha-preencher 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s backwards;
+}
+
+/* Etapa seguinte à linha preenchida: acende quando a linha chega nela */
+.etiquetas-stepper .stepper__line.is-filled + .step--active .step__circle {
+    animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+}

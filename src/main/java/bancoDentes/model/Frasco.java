@@ -149,4 +149,22 @@ public class Frasco {
         this.statusFrasco = StatusFrasco.DISPONIVEL;
     }
 
+    public void paraImpressao(){
+        this.statusFrasco = StatusFrasco.DIS_IMPRESSAO;
+    }
+
+    /**
+     * Só frascos disponíveis entram na fila de impressão manualmente — em manutenção
+     * já voltam para a fila ao concluir, e inativos não recebem etiqueta.
+     */
+    @Transient
+    public boolean isPodeEnviarParaImpressao() {
+        return this.statusFrasco == StatusFrasco.DISPONIVEL;
+    }
+
+    @Transient
+    public boolean isNaFilaImpressao() {
+        return this.statusFrasco == StatusFrasco.DIS_IMPRESSAO;
+    }
+
 }

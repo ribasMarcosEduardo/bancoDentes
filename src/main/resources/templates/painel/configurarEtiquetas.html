@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script>
+    (function () {
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+        document.documentElement.classList.add(theme);
+    })();
+  </script>
+
+  <script>
+    // Chegou por View Transition (navegação dentro do fluxo): a troca já é
+    // animada, então a entrada em sequência da página é pulada (ver
+    // css/pages/etiquetas.css). Precisa rodar no <head>, antes do 1º paint.
+    window.addEventListener("pagereveal", function (e) {
+        if (e.viewTransition) document.documentElement.classList.add("vt-nav");
+    });
+  </script>
+
+  <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/etiquetas.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/configurar_etiquetas.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <title>Configurar Impressão de Etiquetas</title>
+</head>
+
+<body>
+
+<div class="background">
+  <div class="blob blob--blue"></div>
+  <div class="blob blob--green"></div>
+</div>
+
+<div th:replace="~{partials/navbar :: navbar}"></div>
+
+<main class="page">
+  <section class="form-shell">
+
+    <header class="page-header">
+      <h1>Configurar impressão</h1>
+      <p>Escolha o modelo de folha e a partir de qual célula a impressão deve começar.</p>
+    </header>
+
+    <div class="stepper etiquetas-stepper">
+      <div class="step step--done" data-step="selecao">
+        <div class="step__circle">
+          <i class="icon" data-lucide="list-checks"></i>
+        </div>
+        <span>Selecionar frascos</span>
+      </div>
+
+      <div class="stepper__line is-filled"></div>
+
+      <div class="step step--active" data-step="configurar">
+        <div class="step__circle">
+          <i class="icon" data-lucide="layout-grid"></i>
+        </div>
+        <span>Configurar folha</span>
+      </div>
+
+      <div class="stepper__line"></div>
+
+      <div class="step" data-step="gerar">
+        <div class="step__circle">
+          <i class="icon" data-lucide="printer"></i>
+        </div>
+        <span>Gerar</span>
+      </div>
+    </div>
+
+    <form id="formConfigEtiquetas" th:action="@{/etiqueta/imprimir}" method="post" target="_blank"
+          class="etiqueta-config-layout" th:data-total-frascos="${#lists.size(frascos)}">
+
+      <input type="hidden" name="frascos" th:each="frasco : ${frascos}" th:value="${frasco.codigo}">
+      <input type="hidden" name="posicaoInicial" id="posicaoInicialInput" value="0">
+
+      <div class="form-card etiqueta-config-painel">
+        <div class="form-group">
+          <label for="modeloFolhaSelect">Modelo de folha</label>
+          <div class="select-wrapper">
+            <select class="form-control" id="modeloFolhaSelect" name="modelo">
+              <option th:each="modelo : ${modelos}"
+                      th:value="${modelo}"
+                      th:text="${modelo.nome}"
+                      th:data-colunas="${modelo.numColunas}"
+                      th:data-linhas="${modelo.numLinhas}"
+                      th:data-cel-largura="${modelo.celulaLarguraMm}"
+                      th:data-cel-altura="${modelo.celulaAlturaMm}"
+                      th:data-descricao="${modelo.descricao}">Folha A4 - 96 etiquetas de 31x17mm</option>
+            </select>
+            <i class="select-icon icon" data-lucide="chevron-down"></i>
+          </div>
+          <p class="field-hint" id="modeloFolhaDescricao"></p>
+        </div>
+
+        <div class="etiqueta-grid-wrapper">
+          <label>A partir de qual célula começar?</label>
+          <p class="field-hint">Clique na primeira célula ainda disponível na folha física.</p>
+
+          <div class="etiqueta-grid" id="etiquetaGridPosicao"></div>
+
+          <div class="etiqueta-grid__legenda">
+            <span class="etiqueta-grid__legenda-item">
+              <span class="etiqueta-grid__legenda-swatch etiqueta-grid__legenda-swatch--pulada"></span>
+              Já ocupada na folha física
+            </span>
+            <span class="etiqueta-grid__legenda-item">
+              <span class="etiqueta-grid__legenda-swatch etiqueta-grid__legenda-swatch--disponivel"></span>
+              Disponível, a impressão começa aqui
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card etiqueta-config-resumo">
+        <h2>Resumo</h2>
+        <p id="etiquetaResumoTexto"></p>
+
+        <div class="etiqueta-preview" id="etiquetaPreview"></div>
+
+        <p class="field-hint etiqueta-config-nota">
+          A folha abre em uma nova aba. No diálogo de impressão (Ctrl+P), confirme escala "100% / Tamanho real" e cabeçalhos e rodapés desligados.
+        </p>
+      </div>
+    </form>
+
+  </section>
+</main>
+
+<div class="etiqueta-acoes-bar">
+  <span class="etiqueta-acoes-bar__count" id="etiquetaConfigCount"
+        th:text="${#lists.size(frascos)} + (${#lists.size(frascos)} == 1 ? ' frasco selecionado' : ' frascos selecionados')">1 frasco selecionado</span>
+
+  <div class="etiqueta-acoes-bar__actions">
+    <a th:href="@{/etiqueta/fila}" class="btn btn-ghost">
+      <i class="orderBy-icon" data-lucide="arrow-left"></i>
+      <span class="btn__label">Voltar</span>
+    </a>
+
+    <button type="submit" form="formConfigEtiquetas" class="btn btn-primary" id="btnImprimirEtiquetas">
+      <i class="orderBy-icon" data-lucide="printer"></i>
+      <span class="btn__label">Imprimir</span>
+    </button>
+  </div>
+</div>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+
+<script th:src="@{/js/bundles/form.js}"></script>
+<script th:src="@{/js/etiquetas-configurar.js}"></script>
+
+</body>
+</html>
