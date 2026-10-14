@@ -1,3 +1,11 @@
+// Minúsculas e sem acento, pra "manutencao" achar "Manutenção" na busca
+function normalizarBusca(texto) {
+    return (texto || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
 // Seleciona os elementos do DOM e inicializa as variáveis de controle
 function setupFilters() {
     const sections = document.querySelectorAll(".filter-section");
@@ -16,6 +24,8 @@ function setupFilters() {
     const paginationRange = document.getElementById("paginationRange");
     const paginationInfo = document.getElementById("paginationInfo");
     const paginationLabel = paginationInfo ? (paginationInfo.getAttribute("data-label") || "Resultados Encontrados") : "";
+    // Busca da toolbar do painel (os campos de busca dos modais ficam fora da .toolbar)
+    const searchInput = document.querySelector(".toolbar input[type='search']");
 
     let sortAscending = false;
     let currentPage = 1;
@@ -113,8 +123,18 @@ function setupFilters() {
             }
         });
 
+        const termoBusca = normalizarBusca(searchInput?.value);
+
         rows.forEach(row => {
             let shouldShow = true;
+
+            // Busca pelo texto do data-busca de cada linha (ex.: identificação do
+            // frasco). Itens sem data-busca não entram na busca.
+            if (termoBusca && row.hasAttribute("data-busca")
+                && !normalizarBusca(row.getAttribute("data-busca")).includes(termoBusca)) {
+                row.classList.add('is-hidden-by-filter');
+                return;
+            }
 
             // Itens marcados com data-oculto-padrao="true" (ex.: frascos inativos)
             // ficam escondidos até o status deles ser marcado no filtro "Status".
@@ -340,10 +360,18 @@ function setupFilters() {
             checkboxes.forEach((checkbox) => {
                 checkbox.checked = false;
             });
+            if (searchInput && searchInput.value) {
+                searchInput.value = "";
+                // Atualiza o botão "x" da busca (search.js escuta "input")
+                searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+            }
             renderActiveFilters();
             applyFilters();
         });
     });
+
+    // Busca filtra enquanto digita; o "x" (search.js) dispara "input" ao limpar
+    searchInput?.addEventListener("input", applyFilters);
 
     // Aplica os filtros já na carga para esconder os itens ocultos por padrão
     applyFilters();

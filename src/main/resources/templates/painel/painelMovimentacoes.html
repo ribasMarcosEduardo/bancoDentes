@@ -232,6 +232,7 @@
                                  th:classappend="'request-row--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}"
                                  th:data-codigo="${mov.codigo}"
                                  th:data-tipo="${mov.tipoMovimentacao.nome}"
+                                 th:data-busca="${'MOV-' + #numbers.formatInteger(mov.codigo, 3) + ' ' + (mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : '') + ' ' + (mov.observacao != null ? mov.observacao : '')}"
                                  th:data-grupo="${mov.frasco != null ? mov.frasco.tipoDente : ''}">
 
                             <div class="result-list">
