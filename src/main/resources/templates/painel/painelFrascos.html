@@ -239,6 +239,7 @@
 
             <article th:each="frasco : ${frascos}"
                      class="request-row"
+                     th:classappend="${frasco.statusFrasco != null} ? 'request-row--' + ${frasco.statusFrasco.css}"
                      th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
                      th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"

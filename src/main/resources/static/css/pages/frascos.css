@@ -417,6 +417,22 @@
     color: var(--status-frasco-inativo);
 }
 
+.request-row--frasco-disponivel .request-details::before {
+    background: var(--status-frasco-disponivel);
+}
+
+.request-row--frasco-impressao .request-details::before {
+    background: var(--status-frasco-impressao);
+}
+
+.request-row--frasco-manutencao .request-details::before {
+    background: var(--status-frasco-manutencao);
+}
+
+.request-row--frasco-inativo .request-details::before {
+    background: var(--status-frasco-inativo);
+}
+
 /*
     Status no corpo do card. .status-pill vem com justify-self:center
     (pensado pra coluna da lista) — no card a pill alinha à esquerda,
