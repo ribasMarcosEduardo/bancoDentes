@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,9 @@ public class FrascoService extends BaseService{
 
         if (frasco.getCodigo() != null) {
             Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
+            if (frascoDoBanco.isInativo()) {
+                throw new FrascoException(this.getText("error.frasco.inativo.editar"));
+            }
             BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao", "statusFrasco");
             frasco = frascoDoBanco;
         } else {
@@ -160,12 +164,50 @@ public class FrascoService extends BaseService{
     }
 
     /**
-     * Exclui frasco com base no código.
+     * Recupera os códigos dos frascos que possuem histórico e por isso só podem ser inativados.
+     */
+    public Set<Long> getCodigosComVinculo() {
+        return frascoRepository.findCodigosComVinculo();
+    }
+
+    /**
+     * Exclui frasco com base no código. Só é permitido para frascos sem histórico
+     * (movimentação, manutenção ou item de análise); os demais devem ser inativados.
      *
      * @param codigoFrasco
      */
-    public void excluirFrasco(Long codigoFrasco) {
-        frascoRepository.deleteById(codigoFrasco);
+    @Transactional
+    public Frasco excluirFrasco(Long codigoFrasco) {
+        Frasco frasco = buscarPorId(codigoFrasco);
+
+        if (frascoRepository.possuiVinculo(codigoFrasco)) {
+            throw new FrascoException(this.getText("error.frasco.excluir.possuiVinculo"));
+        }
+
+        frascoRepository.delete(frasco);
+        return frasco;
+    }
+
+    /**
+     * Inativa um frasco que possui histórico, preservando seus vínculos.
+     * Frascos em manutenção não podem ser inativados por aqui: o descarte deve ser
+     * feito concluindo a manutenção com quantidade 0, que já inativa o frasco.
+     *
+     * @param codigoFrasco
+     */
+    @Transactional
+    public Frasco inativarFrasco(Long codigoFrasco) {
+        Frasco frasco = buscarPorId(codigoFrasco);
+
+        if (frasco.getStatusFrasco() == StatusFrasco.INATIVO) {
+            throw new FrascoException(this.getText("error.frasco.inativar.jaInativo"));
+        }
+        if (frasco.isEmManutencao()) {
+            throw new FrascoException(this.getText("error.frasco.inativar.emManutencao"));
+        }
+
+        frasco.inativo();
+        return frascoRepository.save(frasco);
     }
 
     public List<Frasco> getFrascosFiltrados(Solicitacao solicitacao) {

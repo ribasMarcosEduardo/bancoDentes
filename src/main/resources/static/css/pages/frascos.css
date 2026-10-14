@@ -107,7 +107,8 @@
     */
     .result-table--frascos .result-list__actions .result-list__action,
     .result-table--frascos .result-list__actions .print-form,
-    .result-table--frascos .result-list__actions .delete-form {
+    .result-table--frascos .result-list__actions .delete-form,
+    .result-table--frascos .result-list__actions .inactivate-form {
         display: none;
     }
 

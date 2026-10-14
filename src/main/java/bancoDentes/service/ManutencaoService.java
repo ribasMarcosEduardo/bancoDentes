@@ -89,6 +89,9 @@ public class ManutencaoService extends BaseService{
         if (frasco.isEmManutencao()) {
             throw new ManutencaoException(getText("error.manutencao.frascoJaEmManutencao"));
         }
+        if (frasco.isInativo()) {
+            throw new ManutencaoException(getText("error.manutencao.frascoInativo"));
+        }
 
         registrarManutencao(new ManutencaoDTO(
                 frasco.getCodigo(),

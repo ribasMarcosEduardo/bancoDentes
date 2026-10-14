@@ -113,15 +113,19 @@ function setupFilters() {
             }
         });
 
-        const hasActiveFilters = Object.keys(selectedFilters).length > 0;
-
         rows.forEach(row => {
-            if (!hasActiveFilters) {
-                row.classList.remove('is-hidden-by-filter');
-                return;
-            }
-
             let shouldShow = true;
+
+            // Itens marcados com data-oculto-padrao="true" (ex.: frascos inativos)
+            // ficam escondidos até o status deles ser marcado no filtro "Status".
+            if (row.getAttribute("data-oculto-padrao") === "true") {
+                const rowStatus = (row.getAttribute("data-status") || "").toLowerCase().trim();
+                const statusSelecionados = selectedFilters["Status"] || [];
+                if (!statusSelecionados.includes(rowStatus)) {
+                    row.classList.add('is-hidden-by-filter');
+                    return;
+                }
+            }
 
             for (const group in selectedFilters) {
                 let rowValue = "";
@@ -341,10 +345,11 @@ function setupFilters() {
         });
     });
 
+    // Aplica os filtros já na carga para esconder os itens ocultos por padrão
+    applyFilters();
+
     if (paginationRange) {
         sortTable();
-    } else {
-        applyPagination();
     }
 }
 

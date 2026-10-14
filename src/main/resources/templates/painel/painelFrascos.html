@@ -244,6 +244,7 @@
                      th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-status="${frasco.statusFrasco != null ? frasco.statusFrasco.nome : ''}"
+                     th:data-oculto-padrao="${frasco.inativo}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
@@ -260,17 +261,20 @@
                       th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
                 <span th:unless="${frasco.statusFrasco != null}">---</span>
 
-                <span th:if="${frasco.datManutencao != null}" class="manutencao"
+                <span th:if="${frasco.prazoManutencao != null}" class="manutencao"
                       th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
                       th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
-                <span th:unless="${frasco.datManutencao != null}">---</span>
+                <span th:unless="${frasco.prazoManutencao != null}">---</span>
 
                 <div class="result-list__actions">
-                  <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                  <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+                  <button th:if="${frasco.inativo}" type="button" class="result-list__action result-list__action--blue" disabled data-tooltip="Frasco inativo" aria-label="Editar">
+                    <i class="icon" data-lucide="pen-line"></i>
+                  </button>
 
-                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao}" th:data-tooltip="${frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção'}" aria-label="Manutenção">
+                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
                     <i class="icon" data-lucide="toolbox"></i>
                   </button>
 
@@ -284,8 +288,17 @@
                     </button>
                   </form>
 
-                  <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
-                    <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                  <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
+                      <i class="icon" data-lucide="trash-2"></i>
+                    </button>
+                  </form>
+                  <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red"
+                            th:disabled="${frasco.inativo or frasco.emManutencao}"
+                            th:data-identificacao="${frasco.identificacao}"
+                            th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
+                            aria-label="Inativar">
                       <i class="icon" data-lucide="archive-x"></i>
                     </button>
                   </form>
@@ -344,10 +357,10 @@
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Data de manutenção</span>
-                          <span th:if="${frasco.datManutencao != null}" class="manutencao"
+                          <span th:if="${frasco.prazoManutencao != null}" class="manutencao"
                                 th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
                                 th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block><span class="manutencao__status" th:text="${frasco.prazoManutencao.rotulo}">Vencida</span></span>
-                          <span th:unless="${frasco.datManutencao != null}">---</span>
+                          <span th:unless="${frasco.prazoManutencao != null}">---</span>
                         </div>
                       </div>
                     </section>
@@ -355,11 +368,14 @@
                     <section class="request-panel request-panel--frascos-actions">
                       <h4 class="request-panel__title">Ações</h4>
                       <div class="request-panel__actions">
-                        <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                        <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
                           <i class="icon" data-lucide="pen-line"></i>
                         </a>
+                        <button th:if="${frasco.inativo}" type="button" class="result-list__action result-list__action--blue" disabled data-tooltip="Frasco inativo" aria-label="Editar">
+                          <i class="icon" data-lucide="pen-line"></i>
+                        </button>
 
-                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao}" th:data-tooltip="${frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção'}" aria-label="Manutenção">
+                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
                           <i class="icon" data-lucide="toolbox"></i>
                         </button>
 
@@ -373,8 +389,17 @@
                           </button>
                         </form>
 
-                        <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
-                          <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                        <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
+                            <i class="icon" data-lucide="trash-2"></i>
+                          </button>
+                        </form>
+                        <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--red"
+                                  th:disabled="${frasco.inativo or frasco.emManutencao}"
+                                  th:data-identificacao="${frasco.identificacao}"
+                                  th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
+                                  aria-label="Inativar">
                             <i class="icon" data-lucide="archive-x"></i>
                           </button>
                         </form>
@@ -393,6 +418,7 @@
                      th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
                      th:data-status="${frasco.statusFrasco != null ? frasco.statusFrasco.nome : ''}"
+                     th:data-oculto-padrao="${frasco.inativo}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
@@ -436,18 +462,22 @@
                     <span class="card__date-value" th:if="${frasco.datCad != null}"><i class="icon" data-lucide="calendar" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy')}">21/06/25</th:block></span>
                     <span class="card__date-value" th:unless="${frasco.datCad != null}">---</span>
                   </p>
-                  <p class="card__date" th:if="${frasco.datManutencao != null}"><span>Manutenção</span>
-                    <span class="manutencao" th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
+                  <p class="card__date"><span>Manutenção</span>
+                    <span class="manutencao" th:if="${frasco.prazoManutencao != null}" th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
                           th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
+                    <span class="card__date-value" th:unless="${frasco.prazoManutencao != null}">---</span>
                   </p>
                 </div>
 
                 <div class="card__actions">
-                  <a th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
+                  <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
+                  <button th:if="${frasco.inativo}" type="button" class="card__action card__action--blue" disabled data-tooltip="Frasco inativo" aria-label="Editar">
+                    <i class="icon" data-lucide="pen-line"></i>
+                  </button>
 
-                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao}" th:data-tooltip="${frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção'}" aria-label="Manutenção">
+                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
                     <i class="icon" data-lucide="toolbox"></i>
                   </button>
 
@@ -461,8 +491,17 @@
                     </button>
                   </form>
 
-                  <form th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
-                    <button type="submit" class="result-list__action result-list__action--red" data-tooltip="Apagar">
+                  <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
+                      <i class="icon" data-lucide="trash-2"></i>
+                    </button>
+                  </form>
+                  <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--red"
+                            th:disabled="${frasco.inativo or frasco.emManutencao}"
+                            th:data-identificacao="${frasco.identificacao}"
+                            th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
+                            aria-label="Inativar">
                       <i class="icon" data-lucide="archive-x"></i>
                     </button>
                   </form>
@@ -494,6 +533,34 @@
                 reverseButtons: true,
                 focusCancel: true,
                 confirmButtonText: "Sim, excluir",
+                cancelButtonText: "Cancelar",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-outline btn-outline-danger",
+                    cancelButton: "btn btn-secondary",
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll(".inactivate-form").forEach(form => {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const identificacao = form.querySelector("button")?.dataset.identificacao;
+
+            Swal.fire({
+                icon: "warning",
+                title: "Deseja inativar este frasco?",
+                text: `O frasco ${identificacao || ""} possui histórico e por isso não pode ser excluído. Ele será marcado como inativo e o histórico será mantido.`,
+                showCancelButton: true,
+                reverseButtons: true,
+                focusCancel: true,
+                confirmButtonText: "Sim, inativar",
                 cancelButtonText: "Cancelar",
                 buttonsStyling: false,
                 customClass: {

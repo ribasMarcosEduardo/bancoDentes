@@ -85,11 +85,13 @@ public class Frasco {
 
     /**
      * Situação da data de manutenção em relação a hoje (usada pelos painéis).
-     * Calculada na leitura, não é persistida. Sem data de manutenção retorna null.
+     * Calculada na leitura, não é persistida. Retorna null sem data de manutenção,
+     * se o frasco estiver inativo (a data fica no banco, mas não tem mais prazo) ou
+     * em manutenção (a data só é recalculada quando a manutenção é concluída).
      */
     @Transient
     public PrazoManutencao getPrazoManutencao() {
-        if (datManutencao == null) {
+        if (datManutencao == null || isInativo() || isEmManutencao()) {
             return null;
         }
         LocalDate hoje = LocalDate.now();
@@ -170,6 +172,11 @@ public class Frasco {
     @Transient
     public boolean isNaFilaImpressao() {
         return this.statusFrasco == StatusFrasco.DIS_IMPRESSAO;
+    }
+
+    @Transient
+    public boolean isInativo() {
+        return this.statusFrasco == StatusFrasco.INATIVO;
     }
 
 }

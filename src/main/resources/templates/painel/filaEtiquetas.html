@@ -121,10 +121,10 @@
             <span th:text="${frasco.tipoDente}">Pré-Molar</span>
             <span th:text="${frasco.local != null ? (frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : frasco.local.nome) : '---'}">BDH</span>
             <span th:text="${frasco.quantidade}">0</span>
-            <span th:if="${frasco.datManutencao != null}" class="manutencao"
+            <span th:if="${frasco.prazoManutencao != null}" class="manutencao"
                   th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
                   th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
-            <span th:unless="${frasco.datManutencao != null}">---</span>
+            <span th:unless="${frasco.prazoManutencao != null}">---</span>
             <div class="result-list__actions">
               <!-- Sem form próprio (não dá pra aninhar form): submete o form da
                    fila com formaction apontando pra remoção deste frasco. -->
