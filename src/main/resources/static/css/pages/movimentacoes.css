@@ -409,6 +409,12 @@
     .result-table--movimentacoes .result-list > span:nth-child(6) {
         display: none;
     }
+
+    /* Sem a coluna Data, a data aparece na área expandida (escondida por
+       padrão em list.css, já que nas demais larguras está na própria linha) */
+    .result-table--movimentacoes .request-detail--data {
+        display: grid;
+    }
 }
 
 @media (max-width: 500px) {

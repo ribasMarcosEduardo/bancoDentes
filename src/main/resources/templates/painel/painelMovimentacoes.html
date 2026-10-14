@@ -15,7 +15,7 @@
     <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
-    <link rel="stylesheet" th:href="@{/css/pages/historico_solicitacoes.css(v=${#dates.createNow().getTime()})}">
+    <link rel="stylesheet" th:href="@{/css/pages/movimentacoes.css(v=${#dates.createNow().getTime()})}">
 
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap"
           rel="stylesheet">
@@ -275,16 +275,34 @@
                                 <div class="request-details__content">
                                     <div class="request-details__layout">
                                         <section class="request-panel">
-                                            <h4 class="request-panel__title">Detalhes da Movimentação</h4>
+                                            <h4 class="request-panel__title">Movimentação</h4>
 
-                                            <div class="request-details__grid request-details__grid--dense">
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Tipo</span>
-                                                    <span th:text="${mov.tipoMovimentacao.nome}">-</span>
+                                            <!-- Saldo anterior -> quantidade movimentada (com o sinal e a cor do tipo) -> saldo após -->
+                                            <div class="saldo-fluxo" th:classappend="'saldo-fluxo--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}">
+                                                <div class="saldo-fluxo__item">
+                                                    <span class="request-details__label">Saldo anterior</span>
+                                                    <strong class="saldo-fluxo__valor" th:text="${mov.saldoAnterior != null ? mov.saldoAnterior : '---'}">24</strong>
                                                 </div>
 
+                                                <i class="icon saldo-fluxo__seta" data-lucide="arrow-right" aria-hidden="true"></i>
+
+                                                <div class="saldo-fluxo__item saldo-fluxo__item--mov">
+                                                    <span class="request-details__label" th:text="${mov.tipoMovimentacao.nome}">Saída</span>
+                                                    <strong class="saldo-fluxo__valor"
+                                                            th:text="${(mov.tipoMovimentacao.name() == 'ENTRADA' ? '+' : '−') + (mov.quantidade != null ? mov.quantidade : 0)}">−6</strong>
+                                                </div>
+
+                                                <i class="icon saldo-fluxo__seta" data-lucide="arrow-right" aria-hidden="true"></i>
+
+                                                <div class="saldo-fluxo__item">
+                                                    <span class="request-details__label">Saldo após</span>
+                                                    <strong class="saldo-fluxo__valor" th:text="${mov.saldoPosterior != null ? mov.saldoPosterior : '---'}">18</strong>
+                                                </div>
+                                            </div>
+
+                                            <div class="request-details__grid">
                                                 <div class="request-detail">
-                                                    <span class="request-details__label">Origem da movimentação</span>
+                                                    <span class="request-details__label">Origem</span>
                                                     <span th:text="${mov.origem != null ? mov.origem : '---'}">Registro manual</span>
                                                 </div>
 
@@ -293,54 +311,48 @@
                                                     <span th:text="${#lists.isEmpty(mov.transferencias) ? 'Doação/Outros' : 'Transferência de frascos'}">Doação/Outros</span>
                                                 </div>
 
-                                                <div class="request-detail" th:if="${mov.movimentacaoVinculada != null}">
-                                                    <span class="request-details__label">Mov. Referência</span>
-                                                    <span th:text="'MOV-' + ${#numbers.formatInteger(mov.movimentacaoVinculada.codigo, 3)}">-</span>
-                                                </div>
-
-                                                <div class="request-detail" th:if="${mov.movimentacaoVinculada != null and mov.movimentacaoVinculada.frasco != null}">
-                                                    <span class="request-details__label">Frasco de destino</span>
-                                                    <span th:text="${mov.movimentacaoVinculada.frasco.identificacao != null ? mov.movimentacaoVinculada.frasco.identificacao : 'FR-' + mov.movimentacaoVinculada.frasco.codigo}">-</span>
-                                                </div>
-
-                                                <div class="request-detail" th:if="${!#lists.isEmpty(mov.transferencias)}">
-                                                    <span class="request-details__label">Frascos de origem</span>
-                                                    <span><th:block th:each="t, iter : ${mov.transferencias}"><th:block th:text="${(t.frasco.identificacao != null ? t.frasco.identificacao : 'FR-' + t.frasco.codigo) + ' (' + t.quantidade + ')'}">FR-000 (0)</th:block><th:block th:unless="${iter.last}">, </th:block></th:block></span>
-                                                </div>
-
                                                 <div class="request-detail">
-                                                    <span class="request-details__label">Quantidade movimentada</span>
-                                                    <span th:text="${mov.quantidade != null ? mov.quantidade : 0}">-</span>
-                                                </div>
-
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Local da Movimentação</span>
+                                                    <span class="request-details__label">Local</span>
                                                     <span th:text="${mov.local != null ? mov.local.nome : 'Banco de Dentes Humanos'}">Banco de Dentes Humanos</span>
                                                 </div>
 
-                                                <div class="request-details__pair">
-                                                    <div class="request-detail">
-                                                        <span class="request-details__label">Saldo anterior</span>
-                                                        <span th:text="${mov.saldoAnterior != null ? mov.saldoAnterior : '---'}">-</span>
-                                                    </div>
-
-                                                    <div class="request-detail">
-                                                        <span class="request-details__label">Saldo após</span>
-                                                        <span th:text="${mov.saldoPosterior != null ? mov.saldoPosterior : '---'}">-</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Data da Movimentação</span>
+                                                <!-- Já aparece na linha da lista; só reaparece aqui em telas estreitas -->
+                                                <div class="request-detail request-detail--data">
+                                                    <span class="request-details__label">Data</span>
                                                     <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yyyy')}">-</span>
                                                 </div>
+                                            </div>
+
+                                            <div class="mov-vinculos" th:if="${!#lists.isEmpty(mov.transferencias)}">
+                                                <span class="request-details__label">Frascos de origem</span>
+                                                <ul class="mov-vinculos__lista">
+                                                    <li class="mov-vinculos__item" th:each="t : ${mov.transferencias}">
+                                                        <strong th:text="${t.frasco.identificacao != null ? t.frasco.identificacao : 'FR-' + t.frasco.codigo}">FR-000</strong>
+                                                        <span th:text="${t.quantidade + (t.quantidade == 1 ? ' dente' : ' dentes')}">0 dentes</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            <div class="mov-vinculos" th:if="${mov.movimentacaoVinculada != null and mov.movimentacaoVinculada.frasco != null}">
+                                                <span class="request-details__label">Transferido para</span>
+                                                <ul class="mov-vinculos__lista">
+                                                    <li class="mov-vinculos__item">
+                                                        <strong th:text="${mov.movimentacaoVinculada.frasco.identificacao != null ? mov.movimentacaoVinculada.frasco.identificacao : 'FR-' + mov.movimentacaoVinculada.frasco.codigo}">FR-000</strong>
+                                                        <span th:text="'MOV-' + ${#numbers.formatInteger(mov.movimentacaoVinculada.codigo, 3)}">MOV-000</span>
+                                                    </li>
+                                                </ul>
                                             </div>
                                         </section>
 
                                         <section class="request-panel">
-                                            <h4 class="request-panel__title">Detalhes do Frasco Referente</h4>
+                                            <h4 class="request-panel__title">Frasco</h4>
 
                                             <div class="request-details__grid">
+                                                <div class="request-detail">
+                                                    <span class="request-details__label">Identificação</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : (mov.frasco != null ? 'FR-' + mov.frasco.codigo : '---')}">-</span>
+                                                </div>
+
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Grupo dentário</span>
                                                     <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '---'}">-</span>
@@ -352,26 +364,32 @@
                                                 </div>
 
                                                 <div class="request-detail">
+                                                    <span class="request-details__label">Dentição</span>
+                                                    <span th:text="${mov.frasco != null && mov.frasco.denticao != null ? mov.frasco.denticao.nome : '---'}">-</span>
+                                                </div>
+
+                                                <!-- Molar/pré-molar se identificam pela numeração; os demais, pela arcada -->
+                                                <div class="request-detail" th:if="${mov.frasco != null && mov.frasco.tipoDente != null && mov.frasco.tipoDente.usaNumeracao}">
+                                                    <span class="request-details__label">Numeração</span>
+                                                    <span th:text="${mov.frasco.posicao != null ? mov.frasco.posicao : '---'}">-</span>
+                                                </div>
+
+                                                <div class="request-detail" th:unless="${mov.frasco != null && mov.frasco.tipoDente != null && mov.frasco.tipoDente.usaNumeracao}">
                                                     <span class="request-details__label">Arcada</span>
                                                     <span th:text="${mov.frasco != null && mov.frasco.arcada != null ? mov.frasco.arcada : '---'}">-</span>
                                                 </div>
-
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Posição</span>
-                                                    <span th:text="${mov.frasco != null && mov.frasco.posicao != null ? mov.frasco.posicao : '---'}">-</span>
-                                                </div>
-
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Data de cadastro (Frasco)</span>
-                                                    <span th:text="${mov.frasco != null && mov.frasco.datCad != null ? #temporals.format(mov.frasco.datCad, 'dd/MM/yyyy') : '---'}">-</span>
-                                                </div>
-
                                             </div>
+
+                                            <a th:if="${mov.frasco != null && frascoFiltro == null}" class="request-panel__link"
+                                               th:href="@{/movimentacao/painel(frasco=${mov.frasco.codigo})}">
+                                                <i class="icon" data-lucide="history" aria-hidden="true"></i>
+                                                Ver movimentações deste frasco
+                                            </a>
                                         </section>
 
                                         <section class="request-panel request-panel--full">
                                             <h4 class="request-panel__title">Observações</h4>
-                                            <div class="request-notes"
+                                            <div class="request-notes request-notes--compact"
                                                  th:classappend="${#strings.isEmpty(mov.observacao)} ? 'request-notes--empty' : ''"
                                                  th:text="${not #strings.isEmpty(mov.observacao) ? mov.observacao : 'Nenhuma observação informada.'}">
                                             </div>
