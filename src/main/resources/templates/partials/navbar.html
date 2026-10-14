@@ -9,24 +9,22 @@
             </a>
 
             <nav class="navbar__nav glass-soft">
-                <a href="index.html" class="navbar__link">Dashboard</a>
-
+                <!-- Frascos é link (vai direto pro painel); o menu abre no
+                     hover ou ao focar pelo teclado (ver setupNavbarDropdowns
+                     em includes.js) -->
                 <div class="navbar__dropdown">
-                    <button class="navbar__link navbar__dropdown-btn" type="button">
+                    <a th:href="@{/frasco/painel}" class="navbar__link navbar__dropdown-btn">
                         Frascos
                         <i class="icon icon--chevron" data-lucide="chevron-down"></i>
-                    </button>
+                    </a>
 
                     <div class="navbar__dropdown-menu">
                         <a th:href="@{/frasco/painel}">Painel de Frascos</a>
                         <a th:href="@{/movimentacao/painel}">Movimentações</a>
                         <a th:href="@{/manutencao/painel}">Manutenções</a>
                         <a th:href="@{/etiqueta/fila}">Imprimir Etiquetas</a>
-                        <a th:href="@{/frasco/cadastraFrasco}">Cadastrar Frasco</a>
                     </div>
                 </div>
-
-                <a href="usuarios.html" class="navbar__link">Usuários</a>
 
                 <div class="navbar__dropdown">
                     <button class="navbar__link navbar__dropdown-btn" type="button">
@@ -37,6 +35,19 @@
                     <div class="navbar__dropdown-menu">
                         <a th:href="@{/solicitacao/painel}">Minhas Solicitações</a>
                         <a th:href="@{/analiseSolicitacao/painel}">Painel de Solicitações</a>
+                    </div>
+                </div>
+
+                <div class="navbar__dropdown">
+                    <button class="navbar__link navbar__dropdown-btn" type="button">
+                        Cadastros
+                        <i class="icon icon--chevron" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="navbar__dropdown-menu">
+                        <a th:href="@{/frasco/cadastraFrasco}">Novo Frasco</a>
+                        <a th:href="@{/movimentacao/cadastrarMovimentacao}">Nova Movimentação</a>
+                        <a th:href="@{/solicitacao/cadastrarSolicitacao}">Nova Solicitação</a>
                     </div>
                 </div>
             </nav>
@@ -154,23 +165,25 @@
         </div>
 
         <nav class="mobile-menu__nav">
-            <a href="index.html" class="mobile-menu__link">Dashboard</a>
-
             <div class="mobile-menu__group">
                 <span class="mobile-menu__group-title">Frascos</span>
                 <a th:href="@{/frasco/painel}" class="mobile-menu__link">Painel de Frascos</a>
                 <a th:href="@{/movimentacao/painel}" class="mobile-menu__link">Movimentações</a>
                 <a th:href="@{/manutencao/painel}" class="mobile-menu__link">Manutenções</a>
                 <a th:href="@{/etiqueta/fila}" class="mobile-menu__link">Imprimir Etiquetas</a>
-                <a th:href="@{/frasco/cadastraFrasco}" class="mobile-menu__link">Cadastrar Frasco</a>
             </div>
-
-            <a href="usuarios.html" class="mobile-menu__link">Usuários</a>
 
             <div class="mobile-menu__group">
                 <span class="mobile-menu__group-title">Solicitações</span>
                 <a th:href="@{/solicitacao/painel}" class="mobile-menu__link">Minhas Solicitações</a>
                 <a th:href="@{/analiseSolicitacao/painel}" class="mobile-menu__link">Painel de Solicitações</a>
+            </div>
+
+            <div class="mobile-menu__group">
+                <span class="mobile-menu__group-title">Cadastros</span>
+                <a th:href="@{/frasco/cadastraFrasco}" class="mobile-menu__link">Novo Frasco</a>
+                <a th:href="@{/movimentacao/cadastrarMovimentacao}" class="mobile-menu__link">Nova Movimentação</a>
+                <a th:href="@{/solicitacao/cadastrarSolicitacao}" class="mobile-menu__link">Nova Solicitação</a>
             </div>
         </nav>
 

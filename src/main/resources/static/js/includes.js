@@ -162,7 +162,28 @@ function setupNavbarDropdowns() {
             }
         });
 
+        // Abre ao focar pelo teclado e fecha quando o foco sai do
+        // dropdown inteiro (botão + itens) - necessário pro "Frascos",
+        // que é link e navega no clique em vez de abrir o menu.
+        // Só nos menus de navegação (o de notificações continua abrindo
+        // no clique).
+        if (dropdown.closest(".navbar__nav")) {
+            dropdown.addEventListener("focusin", () => {
+                closeAll(dropdown);
+                dropdown.classList.add("is-open");
+            });
+
+            dropdown.addEventListener("focusout", (event) => {
+                if (!dropdown.contains(event.relatedTarget) && pinned !== dropdown) {
+                    dropdown.classList.remove("is-open");
+                }
+            });
+        }
+
         btn.addEventListener("click", (event) => {
+            // Link (Frascos): segue a navegação normalmente
+            if (btn.tagName === "A") return;
+
             event.stopPropagation();
 
             const wasPinned = pinned === dropdown;
