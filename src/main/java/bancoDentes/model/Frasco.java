@@ -113,7 +113,28 @@ public class Frasco {
             this.identificacao = String.format("%s%s-%s",
                     siglaTipo,
                     siglaLocal,
-                    codigo);
+                    formatarSequencial(codigo));
+    }
+
+    private static final int NUMEROS_POR_BLOCO = 999;
+
+    // Sem I e O, que na etiqueta se confundem com 1 e 0
+    private static final String LETRAS_SEQUENCIAL = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+    /**
+     * 1 → A001, 999 → A999, 1000 → B001 ... Z999 → AA001, AA001 ... ZZ999 → AAA001.
+     */
+    static String formatarSequencial(long codigo) {
+        long bloco = (codigo - 1) / NUMEROS_POR_BLOCO;
+        long numero = (codigo - 1) % NUMEROS_POR_BLOCO + 1;
+        int base = LETRAS_SEQUENCIAL.length();
+
+        StringBuilder letras = new StringBuilder();
+        for (long n = bloco + 1; n > 0; n = (n - 1) / base) {
+            letras.insert(0, LETRAS_SEQUENCIAL.charAt((int) ((n - 1) % base)));
+        }
+
+        return String.format("%s%03d", letras, numero);
     }
 
     public void emManutencao(){

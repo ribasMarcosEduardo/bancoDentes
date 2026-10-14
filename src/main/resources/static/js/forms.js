@@ -310,9 +310,9 @@ function setupCadastroFrasco() {
 
 setupCadastroFrasco();
 
-// Prévia do identificador no cadastro: o formato é {sigla grupo}{sigla local}-{codigo}
-// (Frasco.gerarIdentificacao), mas o código é o ID do banco e só existe depois de
-// salvar — então mostra só o prefixo. As siglas vêm do data-sigla das <option>.
+// Prévia do identificador no cadastro: o formato é {sigla grupo}{sigla local}-{A001}
+// (Frasco.gerarIdentificacao), mas o sequencial sai do ID do banco, que só existe
+// depois de salvar — então mostra só o prefixo. As siglas vêm do data-sigla das <option>.
 function setupPreviaIdentificadorFrasco() {
     const identificador = document.querySelector("#identificadorFrasco");
     const tipoDente = document.querySelector("#tipoDente");
