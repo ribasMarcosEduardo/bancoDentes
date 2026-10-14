@@ -27,6 +27,11 @@ public record FrascoDTO(
         return new FrascoDTO(null,null,null,null, null, null, null, null, null, null,null,null);
     }
 
+    public static FrascoDTO novo() {
+        LocalDate hoje = LocalDate.now();
+        return new FrascoDTO(null, null, hoje, hoje.plusYears(1), null, null, null, null, null, null, null, null);
+    }
+
     public Frasco mapearFrasco(){
         Frasco frasco = new Frasco();
         frasco.setCodigo(this.codigo);

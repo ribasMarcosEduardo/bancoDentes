@@ -43,7 +43,7 @@ public class FrascoPainelController extends BaseController {
      */
     @GetMapping("/cadastraFrasco")
     public String cadastraFrasco(Model model) {
-        model.addAttribute("frascoDTO", FrascoDTO.empty());
+        model.addAttribute("frascoDTO", FrascoDTO.novo());
         return "form/frascoForm";
     }
 

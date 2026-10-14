@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -40,6 +41,12 @@ public class FrascoService extends BaseService{
             frasco = frascoDoBanco;
         } else {
             frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
+        }
+        if (frasco.getDatCad() == null) {
+            frasco.setDatCad(LocalDate.now().atStartOfDay());
+        }
+        if (frasco.getDatManutencao() == null) {
+            frasco.setDatManutencao(frasco.getDatCad().plusYears(1));
         }
         frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();

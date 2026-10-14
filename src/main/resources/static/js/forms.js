@@ -1317,9 +1317,10 @@ function setupSincronizacaoDatas() {
 
     datCad.addEventListener("change", () => {
         if (datCad.value) {
-            const [ano, mes, dia] = datCad.value.split("-");
-            const anoQueVem = parseInt(ano) + 1;
-            datManutencao.value = `${anoQueVem}-${mes}-${dia}`;
+            const [ano, mes, dia] = datCad.value.split("-").map(Number);
+            const ultimoDia = new Date(ano + 1, mes, 0).getDate();
+            const diaAjustado = String(Math.min(dia, ultimoDia)).padStart(2, "0");
+            datManutencao.value = `${ano + 1}-${String(mes).padStart(2, "0")}-${diaAjustado}`;
         } else {
             datManutencao.value = "";
         }
