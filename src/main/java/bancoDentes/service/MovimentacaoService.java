@@ -274,4 +274,33 @@ public class MovimentacaoService extends BaseService {
 
         frascoRepository.save(frascoOrigem);
     }
+
+
+
+    /**
+     * Registra a quantidade inicial do frasco como uma Entrada sem frascos de origem
+     * (equivalente a "Doação/Outros"), pra que o histórico de movimentações cubra
+     * todos os dentes que já passaram pelo frasco.
+     *
+     * @param frasco
+     */
+    public void registrarEntradaCadastro(Frasco frasco) {
+        long quantidade = frasco.getQuantidade() != null ? frasco.getQuantidade() : 0L;
+        if (quantidade <= 0L) {
+            return;
+        }
+
+        movimentacaoRepository.save(new Movimentacao(
+                TipoMovimentacao.ENTRADA,
+                OrigemMovimentacao.CADASTRO,
+                frasco.getDatCad(),
+                frasco.getLocal(),
+                this.getText("msg.movimentacao.cadastroFrasco", frasco.getIdentificacao()),
+                frasco,
+                quantidade,
+                0L,
+                null
+        ));
+    }
+
 }

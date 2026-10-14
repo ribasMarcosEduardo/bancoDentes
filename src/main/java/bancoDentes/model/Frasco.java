@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -66,6 +67,7 @@ public class Frasco {
 
     @PrePersist
     public void onPrePersist() {
+        this.statusFrasco = StatusFrasco.DIS_IMPRESSAO;
         limparCamposSeEndo();
     }
 
@@ -151,7 +153,7 @@ public class Frasco {
         this.statusFrasco = StatusFrasco.DISPONIVEL;
     }
 
-    public void paraImpressao(){
+    public void disImpressao(){
         this.statusFrasco = StatusFrasco.DIS_IMPRESSAO;
     }
 
@@ -170,6 +172,11 @@ public class Frasco {
     }
 
     @Transient
+    public boolean isDisponivel() {
+        return this.statusFrasco == StatusFrasco.DISPONIVEL;
+    }
+
+    @Transient
     public boolean isNaFilaImpressao() {
         return this.statusFrasco == StatusFrasco.DIS_IMPRESSAO;
     }
@@ -177,6 +184,22 @@ public class Frasco {
     @Transient
     public boolean isInativo() {
         return this.statusFrasco == StatusFrasco.INATIVO;
+    }
+
+    public boolean isNew(){
+        return this.version == null;
+    }
+
+    /**
+     * Reavalia o status da etiqueta. Se a identificação mudou e o frasco está disponível,
+     * envia o frasco novamente para a fila de impressão.
+     */
+    public void reavaliarEtiqueta(String identificacaoAnterior) {
+        boolean identificacaoMudou = !Objects.equals(identificacaoAnterior, this.identificacao);
+
+        if (identificacaoMudou && isDisponivel()) {
+            disImpressao();
+        }
     }
 
 }

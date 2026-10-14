@@ -11,6 +11,7 @@ import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
+import bancoDentes.service.validator.FrascoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -37,6 +38,8 @@ public class FrascoService extends BaseService{
 
     private final FrascoRepository frascoRepository;
     private final MovimentacaoRepository movimentacaoRepository;
+    private final MovimentacaoService movimentacaoService;
+    private final FrascoValidator frascoValidator;
 
     /**
      * Salva um novo frasco ou atualiza um frasco já existente no banco de dados.
@@ -46,67 +49,45 @@ public class FrascoService extends BaseService{
     @Transactional
     public Frasco save(FrascoDTO frascoDTO) {
         Frasco frasco = frascoDTO.mapearFrasco();
-        boolean novo = frasco.getCodigo() == null;
 
-        if (!novo) {
-            Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
-            if (frascoDoBanco.isInativo()) {
-                throw new FrascoException(this.getText("error.frasco.inativo.editar"));
-            }
-            // Quantidade não muda pela edição: alterações passam por movimentação (histórico)
-            BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao", "statusFrasco", "quantidade");
-            frasco = frascoDoBanco;
-        } else {
-            frasco.setStatusFrasco(StatusFrasco.DIS_IMPRESSAO);
+        if (frasco.isNew()) {
+            return cadastrar(frasco);
         }
-        if (frasco.getDatCad() == null) {
-            frasco.setDatCad(LocalDate.now().atStartOfDay());
-        }
-        if (frasco.getDatManutencao() == null) {
-            frasco.setDatManutencao(frasco.getDatCad().plusYears(1));
-        }
-        String identificacaoAnterior = frasco.getIdentificacao();
+
+        return atualizar(frasco);
+    }
+
+    /**
+     * Lógica interna e exclusiva para a criação de um NOVO frasco.
+     */
+    private Frasco cadastrar(Frasco frasco) {
         frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();
 
-        // Grupo/local alterados na edição mudam a identificação: a etiqueta colada no
-        // frasco fica desatualizada, então ele volta pra fila de impressão. Em manutenção,
-        // ele já entra na fila ao concluir; na fila, continua nela.
-        boolean identificacaoMudou = !novo && !Objects.equals(identificacaoAnterior, frasco.getIdentificacao());
-        if (identificacaoMudou && frasco.getStatusFrasco() == StatusFrasco.DISPONIVEL) {
-            frasco.paraImpressao();
-        }
+        movimentacaoService.registrarEntradaCadastro(frasco);
 
-        if (novo) {
-            registrarEntradaCadastro(frasco);
-        }
         return frasco;
     }
 
     /**
-     * Registra a quantidade inicial do frasco como uma Entrada sem frascos de origem
-     * (equivalente a "Doação/Outros"), pra que o histórico de movimentações cubra
-     * todos os dentes que já passaram pelo frasco.
+     * Método responsável por orquestrar o processo de atualização
      *
      * @param frasco
      */
-    private void registrarEntradaCadastro(Frasco frasco) {
-        long quantidade = frasco.getQuantidade() != null ? frasco.getQuantidade() : 0L;
-        if (quantidade <= 0L) {
-            return;
-        }
+    private Frasco atualizar(Frasco frasco) {
+        Frasco frascoDoBanco = buscarPorId(frasco.getCodigo());
 
-        movimentacaoRepository.save(new Movimentacao(
-                TipoMovimentacao.ENTRADA,
-                OrigemMovimentacao.CADASTRO,
-                frasco.getDatCad(),
-                frasco.getLocal(),
-                this.getText("msg.movimentacao.cadastroFrasco", frasco.getIdentificacao()),
-                frasco,
-                quantidade,
-                0L,
-                null
-        ));
+        frascoValidator.validaFrasco(frascoDoBanco);
+        String identificacaoAnterior = frascoDoBanco.getIdentificacao();
+
+        BeanUtils.copyProperties(frasco, frascoDoBanco, "codigo", "identificacao", "statusFrasco", "quantidade");
+
+        Frasco frascoAtualizado = frascoRepository.saveAndFlush(frascoDoBanco);
+        frascoAtualizado.gerarIdentificacao();
+
+        frascoAtualizado.reavaliarEtiqueta(identificacaoAnterior);
+
+        return frascoAtualizado;
     }
 
     /**
@@ -159,7 +140,7 @@ public class FrascoService extends BaseService{
             throw new FrascoException(this.getText("error.frasco.enviarImpressao.status"));
         }
 
-        frasco.paraImpressao();
+        frasco.disImpressao();
         return frascoRepository.save(frasco);
     }
 
@@ -273,6 +254,7 @@ public class FrascoService extends BaseService{
      */
     @Transactional
     public Frasco inativarFrasco(Long codigoFrasco) {
+
         Frasco frasco = buscarPorId(codigoFrasco);
 
         if (frasco.getStatusFrasco() == StatusFrasco.INATIVO) {
