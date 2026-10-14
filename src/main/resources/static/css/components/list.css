@@ -41,12 +41,17 @@
         80px;
 }
 
+/* Identificador | Grupo | Estado | Qtd. | Status | Manutenção | ações.*/
 .result-table--frascos .result-table__head,
 .result-table--frascos .result-list {
     grid-template-columns:
         var(--list-first-col)
-        repeat(6, 1fr)
-        80px;
+        1fr
+        1fr
+        0.6fr
+        minmax(125px, 1.1fr)
+        1fr
+        148px;
 }
 
 .result-table--solicitacoes .result-table__head,

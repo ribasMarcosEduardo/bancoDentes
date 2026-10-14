@@ -228,9 +228,8 @@
               <span>Identificador</span>
               <span>Grupo</span>
               <span>Estado</span>
-              <span>Local</span>
               <span>Qtd.</span>
-              <span>Cadastro</span>
+              <span>Status</span>
               <span>Manutenção</span>
               <span></span>
             </div>
@@ -249,11 +248,14 @@
                 <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
                 <span th:text="${frasco.tipoDente}">Grupo</span>
                 <span th:text="${frasco.estado != null ? frasco.estado : '-'}">Estado</span>
-
-                <span th:text="${frasco.local != null ? (frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : frasco.local.nome) : '-'}">Local</span>
                 <span th:text="${frasco.quantidade}">0</span>
 
-                <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yy') : '-'}">00/00/00</span>
+                <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco"
+                      th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
+                      th:title="${frasco.statusFrasco.nome}"
+                      th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
+                <span th:unless="${frasco.statusFrasco != null}">-</span>
+
                 <span th:if="${frasco.datManutencao != null}" class="manutencao"
                       th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
                       th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
@@ -323,7 +325,8 @@
 
                         <div class="request-detail">
                           <span class="request-details__label">Data de cadastro</span>
-                          <span th:text="${frasco.datCad != null ? #temporals.format(frasco.datCad, 'dd/MM/yy') : '-'}">-</span>
+                          <span class="request-detail__date" th:if="${frasco.datCad != null}"><i class="icon" data-lucide="calendar" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy')}">21/06/25</th:block></span>
+                          <span th:unless="${frasco.datCad != null}">-</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Data de manutenção</span>
@@ -381,6 +384,14 @@
               </header>
 
               <div class="card__body">
+                <div class="card__row card__row--status">
+                  <span class="card__label">Status</span>
+                  <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco"
+                        th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
+                        th:title="${frasco.statusFrasco.nome}"
+                        th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
+                  <span class="card__value" th:unless="${frasco.statusFrasco != null}">-</span>
+                </div>
                 <div class="card__row">
                   <span class="card__label">Estado</span>
                   <span class="card__value" th:text="${frasco.estado != null ? frasco.estado : '-'}">-</span>

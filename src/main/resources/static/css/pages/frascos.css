@@ -71,34 +71,45 @@
     /*
         Na lista de frascos, o resto das colunas já dá pra ver na área
         expandida da linha — no celular só cabe o essencial.
-        Ordem dos filhos: 1 Identificador, 2 Grupo, 3 Estado, 4 Local,
-        5 Qtd., 6 Cadastro, 7 Manutenção, 8 ações.
+        Ordem dos filhos: 1 Identificador, 2 Grupo, 3 Estado, 4 Qtd.,
+        5 Status, 6 Manutenção, 7 ações. Sobra Identificador, Qtd.,
+        Status e ações.
     */
     .result-table--frascos .result-table__head,
     .result-table--frascos .result-list {
         min-width: 0;
-        grid-template-columns: 1.3fr 1fr 0.6fr 76px;
+        grid-template-columns: 1.3fr 0.6fr 120px 32px;
+    }
+
+    /*
+        Os 3 botões de ação (148px) não cabem na linha nessa largura —
+        some daqui e a coluna fica só com a seta de expandir (32px); a
+        seção "Ações" no fim da área expandida (sempre visível) continua
+        dando acesso a eles. O form de excluir some junto: vazio, ele
+        ainda ocupava um gap do flex ao lado da seta.
+    */
+    .result-table--frascos .result-list__actions .result-list__action,
+    .result-table--frascos .result-list__actions .delete-form {
+        display: none;
     }
 
     .result-table--frascos .result-table__head span:nth-child(2),
     .result-table--frascos .result-table__head span:nth-child(3),
     .result-table--frascos .result-table__head span:nth-child(6),
-    .result-table--frascos .result-table__head span:nth-child(7),
     .result-table--frascos .result-list > span:nth-child(2),
     .result-table--frascos .result-list > span:nth-child(3),
-    .result-table--frascos .result-list > span:nth-child(6),
-    .result-table--frascos .result-list > span:nth-child(7) {
+    .result-table--frascos .result-list > span:nth-child(6) {
         display: none;
     }
 }
 
 @media (max-width: 360px) {
 
-    /* Sobra só Identificador, Qtd. e ações — Local também dá pra ver
+    /* Sobra só Identificador, Status e ações — Qtd. também dá pra ver
        expandindo a linha */
     .result-table--frascos .result-table__head,
     .result-table--frascos .result-list {
-        grid-template-columns: 1.4fr 0.7fr 76px;
+        grid-template-columns: 1.3fr 120px 32px;
     }
 
     .result-table--frascos .result-table__head span:nth-child(4),
@@ -164,9 +175,9 @@
 
 
     /*
-        Estado, Cadastro e Manutenção somem daqui — sobra Identificador,
-        Grupo, Local e Qtd. na linha não expandida; os outros dados
-        continuam visíveis expandindo a linha.
+        Estado e Manutenção somem daqui — sobra Identificador, Grupo,
+        Qtd. e Status na linha não expandida; os outros dados continuam
+        visíveis expandindo a linha.
 
         min-width:0 sobrescreve o min-width:720px de list.css (regra
         genérica pra tabelas com mais colunas, que força scroll
@@ -178,16 +189,16 @@
         min-width: 0;
         grid-template-columns:
             var(--list-first-col)
-            repeat(3, 1fr)
-            80px;
+            1fr
+            0.6fr
+            120px
+            148px;
     }
 
     .result-table--frascos .result-table__head span:nth-child(3),
     .result-table--frascos .result-table__head span:nth-child(6),
-    .result-table--frascos .result-table__head span:nth-child(7),
-    .result-table--frascos .result-list span:nth-child(3),
-    .result-table--frascos .result-list span:nth-child(6),
-    .result-table--frascos .result-list span:nth-child(7) {
+    .result-table--frascos .result-list > span:nth-child(3),
+    .result-table--frascos .result-list > span:nth-child(6) {
         display: none;
     }
 }
@@ -234,16 +245,6 @@
     .pagination:has(.sector-switch) .pagination__nav {
         justify-content: flex-end;
         align-self: stretch;
-    }
-
-    /*
-        Nessa largura o botão de ação não cabe mais na linha da lista
-        ao lado do texto e da seta de expandir — some daqui; a seção
-        "Ações" no fim da área expandida (sempre visível) continua
-        dando acesso a ele.
-    */
-    .result-table--frascos .result-list__actions .result-list__action {
-        display: none;
     }
 }
 
@@ -299,7 +300,18 @@
     color: var(--text-soft);
 }
 
-.card__date-value .icon {
+/* Data de cadastro na área expandida da lista, com o mesmo ícone de
+   calendário do card. A cor do texto continua vindo de
+   `.request-detail span:last-child` (list.css), igual aos outros
+   valores dos detalhes; só o ícone é apagado. */
+.request-detail__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.card__date-value .icon,
+.request-detail__date .icon {
     width: 14px;
     height: 14px;
     min-width: 14px;
@@ -376,4 +388,67 @@ span.manutencao .manutencao__status {
     color: inherit;
     font-size: 0.72rem;
     font-weight: 600;
+}
+
+
+/*
+    Pill de Status do frasco na lista. Reaproveita .status-pill
+    (list.css), mas com largura do conteúdo em vez dos 86px fixos
+    ("Em manutenção" não cabe neles). Cores por status vêm do enum
+    StatusFrasco (getCss) e evitam o vermelho/âmbar da coluna de
+    Manutenção ao lado, pra não confundir status com prazo:
+    disponível = verde, para impressão = azul, em manutenção = violeta,
+    inativo = cinza (não é erro, só fora de uso). Mesmo esquema de
+    contraste das datas de manutenção: tom escuro no claro, claro no
+    escuro.
+*/
+:root.light {
+    --status-frasco-disponivel: #15803d;
+    --status-frasco-impressao: #1d4ed8;
+    --status-frasco-manutencao: #7e22ce;
+    --status-frasco-inativo: #4b5563;
+}
+
+:root.dark {
+    --status-frasco-disponivel: #4ade80;
+    --status-frasco-impressao: #60a5fa;
+    --status-frasco-manutencao: #c084fc;
+    --status-frasco-inativo: #9ca3af;
+}
+
+.status-pill--frasco {
+    width: auto;
+
+    white-space: nowrap;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.status-pill--frasco-disponivel {
+    color: var(--status-frasco-disponivel);
+}
+
+.status-pill--frasco-impressao {
+    color: var(--status-frasco-impressao);
+}
+
+.status-pill--frasco-manutencao {
+    color: var(--status-frasco-manutencao);
+}
+
+.status-pill--frasco-inativo {
+    color: var(--status-frasco-inativo);
+}
+
+/*
+    Status no corpo do card. .status-pill vem com justify-self:center
+    (pensado pra coluna da lista) — no card a pill alinha à esquerda,
+    junto dos outros valores. align-items:center porque a pill é mais
+    alta que o texto e o rótulo ficaria colado no topo da linha.
+*/
+.card__row--status {
+    align-items: center;
+}
+
+.card__row--status .status-pill {
+    justify-self: start;
 }
