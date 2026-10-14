@@ -20,9 +20,12 @@
 }
 
 /*
-    Entre 607px e 1271px a busca fica sozinha na primeira linha da
+    Entre 607px e 1325px a busca fica sozinha na primeira linha da
     toolbar; embaixo, Exibir + view-switch grudam na esquerda e
-    filtro + Ordenar + Novo frasco na direita, na mesma linha. Vem
+    filtro + imprimir etiquetas + Ordenar + Novo frasco na direita, na
+    mesma linha. Nos outros painéis o corte é 1271px; aqui vai até
+    1325px por causa do botão de imprimir a mais, que fazia as ações
+    quebrarem de linha e cortava a busca nesse intervalo. Vem
     depois do bloco de 1115px acima de propósito: pra faixa em que os
     dois se sobrepõem (607–1115px), o justify-content:space-between
     daqui precisa vencer o justify-content:right de lá.
@@ -36,7 +39,7 @@
     mesmo valor nos dois lados, a união das duas faixas cobre qualquer
     largura real, sem intervalo morto.
 */
-@media (min-width: 607px) and (max-width: 1271px) {
+@media (min-width: 607px) and (max-width: 1325px) {
 
     .toolbar {
         flex-direction: column;
@@ -133,11 +136,40 @@
     }
 }
 
-@media (max-width: 390px) {
+/*
+    Botões da toolbar nunca quebram o texto ("Novo frasco" ia pra duas
+    linhas em tela estreita). O de imprimir etiquetas é só ícone: fica
+    quadrado, do tamanho da altura do botão, e não estica junto com os
+    outros quando a toolbar empilha (toolbar.css, até 607px).
+*/
+.toolbar .btn {
+    white-space: nowrap;
+}
 
-    /* Só existe em frascos.html — some o texto e deixa só o ícone */
+.toolbar__row > .btn--icone {
+    flex: 0 0 auto;
+    width: var(--btn-height);
+    padding: 0;
+}
+
+@media (max-width: 700px) {
+
+    /* Só existe em frascos.html — some o texto do Ordenar e deixa só o
+       ícone. Até 700px (e não só no celular): com o botão de imprimir
+       etiquetas a mais, a linha única de 607-700px e a linha de botões
+       do celular só cabem assim. */
     .btn__label {
         display: none;
+    }
+}
+
+@media (max-width: 607px) {
+
+    /* Onde nem assim cabe (~360px pra baixo), o Novo frasco desce pra
+       uma linha própria e ocupa a largura toda, em vez de estourar a
+       página */
+    .toolbar__row--buttons {
+        flex-wrap: wrap;
     }
 }
 
