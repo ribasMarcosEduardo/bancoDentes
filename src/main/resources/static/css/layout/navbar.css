@@ -247,8 +247,12 @@
 
     background: var(--surface);
 
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    /* Desfoque mais forte (mesmo do .glass-frost-strong) pra os itens
+       ficarem legíveis por cima de qualquer conteúdo. Só funciona porque
+       a navbar e a pílula de links não são mais "backdrop root" - ver o
+       fim deste arquivo. */
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
 
     box-shadow: var(--shadow);
 
@@ -505,8 +509,12 @@
 
     background: var(--surface-soft);
 
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    /* Desfoque mais forte (mesmo do .glass-frost-strong) pra os itens
+       ficarem legíveis por cima de qualquer conteúdo. Só funciona porque
+       a navbar e a pílula de links não são mais "backdrop root" - ver o
+       fim deste arquivo. */
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
 
     box-shadow: var(--shadow);
 
@@ -652,4 +660,47 @@
         transform: translate(-50%, -50%) rotate(0deg) scale(1);
         opacity: 1;
     }
+}
+
+/*
+    Um elemento com backdrop-filter vira "backdrop root" pros
+    descendentes: o backdrop-filter de um filho só enxerga o que está
+    dentro desse ancestral. Como a navbar (.glass) e a pílula de links
+    (.glass-soft) tinham backdrop-filter, o dropdown só borrava o fundo
+    da própria pílula, nunca o conteúdo da página atrás dele.
+
+    O desfoque dos dois passa pra um ::before atrás do conteúdo - mesmo
+    visual, mas eles deixam de ser ancestral com backdrop-filter e o
+    dropdown/painel de notificações passa a desfocar a página de verdade.
+*/
+.navbar.glass,
+.navbar__nav.glass-soft {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.navbar__nav.glass-soft {
+    position: relative;
+    isolation: isolate;
+}
+
+.navbar.glass::before,
+.navbar__nav.glass-soft::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.navbar.glass::before {
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+.navbar__nav.glass-soft::before {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
