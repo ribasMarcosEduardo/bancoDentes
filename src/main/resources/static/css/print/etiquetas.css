@@ -134,16 +134,42 @@
   background: #1e40af;
 }
 
+/* Voltar fica à esquerda, sem moldura - ação secundária em relação a
+   Imprimir e Confirmar */
+.painel-impressao__btn--voltar {
+  margin-right: auto;
+  border-color: transparent;
+  background: none;
+}
+
 .painel-impressao__btn:focus-visible {
   outline: 2px solid #1d4ed8;
   outline-offset: 2px;
 }
 
 @media screen {
+  /* No <html> também: com a folha mais larga que a tela, a área rolável
+     passa da largura do body e ficava branca */
+  html,
+  body {
+    background: #6b6b6b;
+  }
+
   body {
     margin: 0;
     padding: 12mm 16px;
-    background: #6b6b6b;
+  }
+
+  /* Centralizar com align-items:center jogava a folha pros dois lados
+     quando ela é mais larga que a tela, e o pedaço da esquerda não dava
+     pra alcançar rolando. Com margin auto ela centraliza quando cabe e
+     encosta na esquerda (rolável) quando não cabe. */
+  .folhas-container {
+    align-items: flex-start;
+  }
+
+  .folha {
+    margin-inline: auto;
   }
 
   /* Entrada só na tela: painel primeiro, depois as folhas em sequência

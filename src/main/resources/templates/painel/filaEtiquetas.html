@@ -45,7 +45,7 @@
 
     <header class="page-header">
       <h1>Imprimir etiquetas</h1>
-      <p>Frascos aguardando etiqueta adesiva. Desmarque os que não devem ser impressos agora. Eles continuam na fila.</p>
+      <p>Frascos aguardando etiqueta adesiva.<span class="page-header__extra"> Desmarque os que não devem ser impressos agora. Eles continuam na fila.</span></p>
     </header>
 
     <div class="stepper etiquetas-stepper">
@@ -72,6 +72,22 @@
           <i class="icon" data-lucide="printer"></i>
         </div>
         <span>Gerar</span>
+      </div>
+
+      <!-- Versão compacta do stepper (abaixo de tablet, ver css/pages/etiquetas.css) -->
+      <div class="etapa-compacta etapa-compacta--etapa-1">
+        <div class="etapa-compacta__anel">
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <circle class="etapa-compacta__trilho" cx="28" cy="28" r="24" pathLength="100"></circle>
+            <circle class="etapa-compacta__progresso" cx="28" cy="28" r="24" pathLength="100"></circle>
+          </svg>
+          <span class="etapa-compacta__contagem">1 de 3</span>
+        </div>
+
+        <div class="etapa-compacta__texto">
+          <span class="etapa-compacta__titulo">Selecionar frascos</span>
+          <span class="etapa-compacta__proxima">Próxima: Configurar folha</span>
+        </div>
       </div>
     </div>
 
@@ -127,7 +143,7 @@
   </section>
 </main>
 
-<div class="etiqueta-acoes-bar" id="etiquetaSelecaoBar">
+<div class="etiqueta-acoes-bar etiqueta-acoes-bar--tres-acoes" id="etiquetaSelecaoBar">
   <span class="etiqueta-acoes-bar__count" id="etiquetaSelecaoCount"
         th:text="${#lists.isEmpty(frascos)} ? 'Nenhum frasco na fila' : ${#lists.size(frascos)} + ' de ' + ${#lists.size(frascos)} + ' frascos selecionados'">Nenhum frasco na fila</span>
 
@@ -142,7 +158,7 @@
             th:formaction="@{/etiqueta/confirmar}"
             th:disabled="${#lists.isEmpty(frascos)}">
       <i class="orderBy-icon" data-lucide="check"></i>
-      <span class="btn__label">Confirmar impressão</span>
+      <span class="btn__label">Confirmar<span class="btn__label-extra"> impressão</span></span>
     </button>
 
     <button type="submit" form="formFilaEtiquetas" class="btn btn-primary" id="btnContinuarEtiqueta"

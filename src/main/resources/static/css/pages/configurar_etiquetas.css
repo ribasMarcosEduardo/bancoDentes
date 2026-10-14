@@ -9,9 +9,38 @@
     align-items: start;
 }
 
+/* Select do modelo ocupa a largura do card (sem isso fica do tamanho
+   do texto e corta o nome no celular) */
+.etiqueta-config-painel .select-wrapper {
+    width: 100%;
+}
+
 @media (max-width: 900px) {
     .etiqueta-config-layout {
         grid-template-columns: 1fr;
+    }
+
+    /* Em coluna única a grade pegaria a largura toda e, mantendo a
+       proporção da etiqueta, ficaria com quase duas telas de altura */
+    .etiqueta-grid:not(.etiqueta-grid--mini) {
+        max-width: 360px;
+    }
+}
+
+/* Mesmo respiro dos cards de cadastro_frasco.css em tela estreita */
+@media (max-width: 735px) {
+    .form-card {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /* Menos moldura em volta da grade - sobra mais área de toque pra
+       cada célula */
+    .etiqueta-grid:not(.etiqueta-grid--mini) {
+        padding: 0.6rem;
+        gap: 2px;
     }
 }
 

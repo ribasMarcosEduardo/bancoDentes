@@ -52,11 +52,228 @@
     gap: 0.75rem;
 }
 
-@media (max-width: 600px) {
-    .etiqueta-acoes-bar,
+/* Do tablet pra baixo o subtítulo da página fica só na primeira frase -
+   o resto (.page-header__extra) ocupava espaço demais acima da lista. */
+@media (max-width: 1024px) {
+    .page-header__extra {
+        display: none;
+    }
+}
+
+/* ---- Etapa compacta (abaixo de tablet) ----
+
+   Os passos do stepper têm min-width:140px (stepper.css) e não cabem
+   bem numa tela estreita. Abaixo de 768px o .etiquetas-stepper troca os
+   passos por um anel de progresso ("1 de 3") com o nome da etapa atual
+   e a próxima como subtítulo. O container continua o mesmo, então a
+   View Transition entre as telas segue funcionando. */
+
+.etapa-compacta {
+    display: none;
+}
+
+@media (max-width: 767px) {
+
+    .etiquetas-stepper {
+        justify-content: flex-start;
+        padding: 1rem 1.25rem;
+    }
+
+    .etiquetas-stepper > .step,
+    .etiquetas-stepper > .stepper__line {
+        display: none;
+    }
+
+    .etapa-compacta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        min-width: 0;
+    }
+}
+
+/* Progresso de cada tela (de 0 a 100) e o da tela anterior, de onde o
+   anel parte na animação de entrada */
+.etapa-compacta--etapa-1 {
+    --progresso: 33.33;
+    --progresso-anterior: 0;
+}
+
+.etapa-compacta--etapa-2 {
+    --progresso: 66.67;
+    --progresso-anterior: 33.33;
+}
+
+.etapa-compacta__anel {
+    position: relative;
+    flex-shrink: 0;
+
+    width: 56px;
+    height: 56px;
+}
+
+/* Começa no topo (12h) e cresce no sentido horário. pathLength="100" no
+   SVG: o traço vai de 0 a 100, então o vazio é 100 - progresso. */
+.etapa-compacta__anel svg {
+    width: 100%;
+    height: 100%;
+
+    transform: rotate(-90deg);
+}
+
+.etapa-compacta__trilho,
+.etapa-compacta__progresso {
+    fill: none;
+    stroke-width: 5;
+}
+
+.etapa-compacta__trilho {
+    stroke: var(--step-line-bg);
+}
+
+.etapa-compacta__progresso {
+    stroke: var(--step-line-active);
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: calc(100 - var(--progresso));
+}
+
+.etapa-compacta__contagem {
+    position: absolute;
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    color: var(--text);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.etapa-compacta__texto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    min-width: 0;
+}
+
+.etapa-compacta__titulo {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.etapa-compacta__proxima {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* Mesma margem lateral menor dos painéis (generic.css) quando a tela
+   aperta. */
+@media (max-width: 1110px) {
+    :root {
+        --page-pad: 1rem;
+    }
+}
+
+/* Mesmo corte das outras páginas (generic.css / cadastro_frasco.css):
+   abaixo de 1000px só fica o menu hambúrguer. */
+@media (max-width: 1000px) {
+    .navbar {
+        display: none;
+    }
+}
+
+/* Até 708px a barra com 3 ações (fila) já não cabe numa linha; a de 2
+   ações (configuração) só a partir de 600px - ver o bloco seguinte, que
+   devolve ela ao layout em linha entre 600 e 708px. */
+@media (max-width: 708px) {
+
+    /* Barra mais alta (duas linhas) - mais folga no fim */
+    .page {
+        padding-bottom: calc(var(--page-pad) + 140px);
+    }
+
+    /*
+        Barra em grid: 1ª linha contagem + Voltar, 2ª linha as ações
+        principais dividindo a largura (uma só ocupa a linha inteira).
+        __actions vira display:contents pros botões entrarem direto no
+        grid.
+    */
+    .etiqueta-acoes-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem 0.75rem;
+
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    }
+
     .etiqueta-acoes-bar__actions {
+        display: contents;
+    }
+
+    .etiqueta-acoes-bar__count {
+        grid-row: 1;
+        grid-column: 1;
+        align-self: center;
+
+        font-size: 0.85rem;
+    }
+
+    .etiqueta-acoes-bar__actions > .btn-ghost {
+        grid-row: 1;
+        grid-column: 2;
+        justify-self: end;
+    }
+
+    .etiqueta-acoes-bar__actions > button.btn {
+        grid-row: 2;
         justify-content: center;
-        text-align: center;
+        min-width: 0;
+        padding-inline: 0.75rem;
+    }
+
+    .etiqueta-acoes-bar__actions > button.btn:only-of-type {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (600px < width <= 708px) {
+
+    body:not(:has(.etiqueta-acoes-bar--tres-acoes)) .page {
+        padding-bottom: calc(var(--page-pad) + 88px);
+    }
+
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) {
+        display: flex;
+
+        padding: 1rem clamp(1rem, 4vw, 2rem);
+    }
+
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) .etiqueta-acoes-bar__actions {
+        display: flex;
+    }
+
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) .etiqueta-acoes-bar__count {
+        font-size: 0.92rem;
+    }
+
+    /* Mesmo padding do .btn (buttons.css); posições de grid não valem
+       no flex, então não precisam ser desfeitas */
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) .etiqueta-acoes-bar__actions > button.btn {
+        padding-inline: 1rem;
+    }
+}
+
+@media (max-width: 420px) {
+
+    /* "Confirmar impressão" não cabe em meia barra - fica só
+       "Confirmar", o ícone de check completa o sentido */
+    .etiqueta-acoes-bar .btn__label-extra {
+        display: none;
     }
 }
 
@@ -164,6 +381,21 @@ html:not(.vt-nav) .etiquetas-stepper > .step--active:first-child .step__circle {
 
     transform-origin: left center;
     animation: etiqueta-linha-preencher 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s backwards;
+}
+
+/* Etapa compacta: o anel cresce desde o progresso da etapa anterior
+   (--progresso-anterior) até o atual, mesma ideia da linha do stepper */
+@keyframes etiqueta-anel-avancar {
+    from {
+        stroke-dashoffset: calc(100 - var(--progresso-anterior, 0));
+    }
+}
+
+/* Na etapa 2 sempre (é o "avanço" vindo da fila); na etapa 1 só no
+   carregamento direto, como o círculo do stepper acima */
+.etapa-compacta--etapa-2 .etapa-compacta__progresso,
+html:not(.vt-nav) .etapa-compacta--etapa-1 .etapa-compacta__progresso {
+    animation: etiqueta-anel-avancar 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.15s backwards;
 }
 
 /* Etapa seguinte à linha preenchida: acende quando a linha chega nela */

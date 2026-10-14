@@ -44,6 +44,10 @@
   <form class="painel-impressao__acoes" th:action="@{/etiqueta/confirmar}" method="post">
     <input type="hidden" name="frascos" th:each="frasco : ${frascos}" th:value="${frasco.codigo}">
 
+    <!-- Volta pra configuração com os mesmos frascos (o form já leva os
+         códigos; só muda o destino) -->
+    <button type="submit" class="painel-impressao__btn painel-impressao__btn--voltar"
+            th:formaction="@{/etiqueta/configurar}">Voltar</button>
     <button type="button" class="painel-impressao__btn" id="btnImprimir">Imprimir</button>
     <button type="submit" class="painel-impressao__btn painel-impressao__btn--primario" id="btnConfirmarImpressao">Confirmar impressão</button>
   </form>

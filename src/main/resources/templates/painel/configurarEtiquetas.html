@@ -73,9 +73,25 @@
         </div>
         <span>Gerar</span>
       </div>
+
+      <!-- Versão compacta do stepper (abaixo de tablet, ver css/pages/etiquetas.css) -->
+      <div class="etapa-compacta etapa-compacta--etapa-2">
+        <div class="etapa-compacta__anel">
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <circle class="etapa-compacta__trilho" cx="28" cy="28" r="24" pathLength="100"></circle>
+            <circle class="etapa-compacta__progresso" cx="28" cy="28" r="24" pathLength="100"></circle>
+          </svg>
+          <span class="etapa-compacta__contagem">2 de 3</span>
+        </div>
+
+        <div class="etapa-compacta__texto">
+          <span class="etapa-compacta__titulo">Configurar folha</span>
+          <span class="etapa-compacta__proxima">Próxima: Gerar</span>
+        </div>
+      </div>
     </div>
 
-    <form id="formConfigEtiquetas" th:action="@{/etiqueta/imprimir}" method="post" target="_blank"
+    <form id="formConfigEtiquetas" th:action="@{/etiqueta/imprimir}" method="post"
           class="etiqueta-config-layout" th:data-total-frascos="${#lists.size(frascos)}">
 
       <input type="hidden" name="frascos" th:each="frasco : ${frascos}" th:value="${frasco.codigo}">
@@ -126,7 +142,7 @@
         <div class="etiqueta-preview" id="etiquetaPreview"></div>
 
         <p class="field-hint etiqueta-config-nota">
-          A folha abre em uma nova aba. No diálogo de impressão (Ctrl+P), confirme escala "100% / Tamanho real" e cabeçalhos e rodapés desligados.
+          No diálogo de impressão (Ctrl+P), confirme escala "100% / Tamanho real" e cabeçalhos e rodapés desligados.
         </p>
       </div>
     </form>

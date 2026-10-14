@@ -108,3 +108,37 @@ html:not(.vt-nav) .etiqueta-fila-row:nth-child(5) { animation-delay: 0.34s; }
 html:not(.vt-nav) .etiqueta-fila-row:nth-child(6) { animation-delay: 0.38s; }
 html:not(.vt-nav) .etiqueta-fila-row:nth-child(7) { animation-delay: 0.42s; }
 html:not(.vt-nav) .etiqueta-fila-row:nth-child(8) { animation-delay: 0.46s; }
+
+@media (max-width: 420px) {
+
+    /*
+        Sem espaço pra Qtd. também - sobra checkbox, Identificador,
+        Próxima manutenção e ações, com menos respiro entre colunas.
+    */
+    .result-table--etiqueta-selecao .result-table__head,
+    .result-table--etiqueta-selecao .result-list {
+        grid-template-columns: 20px auto minmax(0, 1fr) 32px;
+        column-gap: 0.6rem;
+        padding-inline: 0.85rem;
+    }
+
+    .result-table--etiqueta-selecao .result-table__head span:nth-child(5),
+    .result-table--etiqueta-selecao .result-list > span:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+
+    /* No limite, a data fica sem o ícone de prazo (a cor continua
+       indicando vencida/próxima) */
+    .result-table--etiqueta-selecao .result-list .manutencao .icon {
+        display: none;
+    }
+
+    .result-table--etiqueta-selecao .result-table__head,
+    .result-table--etiqueta-selecao .result-list {
+        column-gap: 0.5rem;
+        padding-inline: 0.65rem;
+    }
+}
