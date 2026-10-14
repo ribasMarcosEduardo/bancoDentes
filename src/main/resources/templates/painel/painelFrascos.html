@@ -62,6 +62,21 @@
 
         <div class="filter-section">
           <button type="button" class="filter-section__toggle" aria-expanded="true">
+            Status do frasco
+            <i class="icon" data-lucide="chevron-down"></i>
+          </button>
+          <div class="filter-section__content">
+            <div class="filter-section__inner">
+              <label class="checkbox-filter" th:each="s : ${T(bancoDentes.model.enumModels.StatusFrasco).values()}">
+                <input type="checkbox" th:value="${s.nome}" data-filter-group="Status">
+                <span th:text="${s.nome}">Disponível</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <button type="button" class="filter-section__toggle" aria-expanded="true">
             Estado do dente
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
@@ -225,6 +240,7 @@
                      th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
                      th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
+                     th:data-status="${frasco.statusFrasco != null ? frasco.statusFrasco.nome : ''}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
@@ -349,6 +365,7 @@
                      th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
                      th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
+                     th:data-status="${frasco.statusFrasco != null ? frasco.statusFrasco.nome : ''}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">

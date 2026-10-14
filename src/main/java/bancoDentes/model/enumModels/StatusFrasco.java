@@ -1,9 +1,9 @@
 package bancoDentes.model.enumModels;
 
 public enum StatusFrasco {
-    EM_MANUTENCA("Em manutenção"),
     DISPONIVEL("Disponível"),
     DIS_IMPRESSAO("Disponível para impressão"),
+    EM_MANUTENCA("Em manutenção"),
     INATIVO("Inativo");
 
     private final String nome;

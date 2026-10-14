@@ -2,11 +2,11 @@ package bancoDentes.model.enumModels;
 
 public enum TipoDente {
 
-    CANINO("Canino", "CN"),
-    ENDO("Endo", "EN"),
-    INCISIVO("Incisivo", "IN"),
     MOLAR("Molar", "MP"),
-    PRE_MOLAR("Pré-Molar", "PM");
+    PRE_MOLAR("Pré-Molar", "PM"),
+    CANINO("Canino", "CN"),
+    INCISIVO("Incisivo", "IN"),
+    ENDO("Endo", "EN");
 
     private final String nome;
     private final String sigla;
