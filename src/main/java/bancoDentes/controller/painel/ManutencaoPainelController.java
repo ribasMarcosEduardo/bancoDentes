@@ -2,6 +2,7 @@ package bancoDentes.controller.painel;
 
 import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.ManutencaoDTO;
+import bancoDentes.exception.ManutencaoException;
 import bancoDentes.service.ManutencaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +38,16 @@ public class ManutencaoPainelController extends BaseController {
 
     @PostMapping("/concluir/{codManutencao}")
     @ResponseBody
-    public ResponseEntity<Void> concluirManutencao(
+    public ResponseEntity<String> concluirManutencao(
             @PathVariable("codManutencao") Long codManutencao,
-            @RequestBody ManutencaoDTO dto) throws Exception {
+            @RequestBody ManutencaoDTO dto) {
 
-        manutencaoService.concluirManutencao(codManutencao, dto.quantidadeCalculada());
+        try {
+            manutencaoService.concluirManutencao(codManutencao, dto.quantidadeCalculada());
+        } catch (ManutencaoException e) {
+            // Regra de negócio (já finalizada, quantidade inválida): o modal mostra a mensagem
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
         return ResponseEntity.ok().build();
     }

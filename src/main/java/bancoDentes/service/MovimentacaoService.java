@@ -47,7 +47,7 @@ public class MovimentacaoService extends BaseService {
         return movimentacaoRepository.findByFrascoCodigo(codFrasco);
     }
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public List<Movimentacao> save(MovimentacaoDTO dto) throws Exception {
         validarFrascosMovimentaveis(dto);
 
@@ -55,12 +55,12 @@ public class MovimentacaoService extends BaseService {
             return salvarMovimentacaoSaida(dto);
         }
 
+        validarTransferencia(dto);
         return salvarMovimentacaoEntrada(dto);
     }
 
     /**
      * Garante, antes de qualquer gravação, que nenhum frasco envolvido está inativo.
-     * Feito no início porque MovimentacaoException é checada e não desfaz a transação.
      */
     private void validarFrascosMovimentaveis(MovimentacaoDTO dto) throws MovimentacaoException {
         List<Long> codigos = new ArrayList<>();
@@ -76,6 +76,41 @@ public class MovimentacaoService extends BaseService {
         for (Frasco frasco : frascoRepository.findAllById(codigos)) {
             if (frasco.isInativo()) {
                 throw new MovimentacaoException(getText("error.movimentacao.frascoInativo", frasco.getIdentificacao()));
+            }
+        }
+    }
+
+    /**
+     * Na entrada por transferência, repete no servidor as regras que o modal já aplica:
+     * o destino não pode ser também origem, e cada origem precisa ter as mesmas
+     * características do destino (grupo, estado, arcada e dentição).
+     */
+    private void validarTransferencia(MovimentacaoDTO dto) throws MovimentacaoException {
+        if (dto.itens() == null || dto.itens().isEmpty() || dto.codFrasco() == null) {
+            return;
+        }
+
+        Frasco destino = frascoRepository.findById(dto.codFrasco())
+                .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
+
+        for (ItemMovimentacaoDTO item : dto.itens()) {
+            if (item == null || item.codFrasco() == null) {
+                continue;
+            }
+
+            Frasco origem = frascoRepository.findById(item.codFrasco())
+                    .orElseThrow(() -> new MovimentacaoException(getText("error.frasco.naoEncontrado")));
+
+            if (origem.getCodigo().equals(destino.getCodigo())) {
+                throw new MovimentacaoException(getText("error.movimentacao.origemIgualDestino", origem.getIdentificacao()));
+            }
+
+            boolean compativel = origem.getTipoDente() == destino.getTipoDente()
+                    && origem.getEstado() == destino.getEstado()
+                    && origem.getArcada() == destino.getArcada()
+                    && origem.getDenticao() == destino.getDenticao();
+            if (!compativel) {
+                throw new MovimentacaoException(getText("error.movimentacao.origemIncompativel", origem.getIdentificacao()));
             }
         }
     }
@@ -186,6 +221,13 @@ public class MovimentacaoService extends BaseService {
 
                     long qtdSaida = (itemDto.quantidade() != null) ? itemDto.quantidade() : 0L;
                     long saldoAtual = frascoOrigem.getQuantidade() != null ? frascoOrigem.getQuantidade() : 0L;
+
+                    // Catálogo do formulário pode estar desatualizado: não deixa sair mais
+                    // dentes do que o frasco tem (o histórico registraria saídas inexistentes)
+                    if (qtdSaida > saldoAtual) {
+                        throw new MovimentacaoException(getText("error.movimentacao.saidaMaiorQueSaldo",
+                                frascoOrigem.getIdentificacao(), qtdSaida, saldoAtual));
+                    }
 
                     if (qtdSaida > 0L) {
                         registrarManutencaoSaida(frascoOrigem, saldoAtual, qtdSaida);

@@ -64,8 +64,17 @@ public class FrascoService extends BaseService{
         if (frasco.getDatManutencao() == null) {
             frasco.setDatManutencao(frasco.getDatCad().plusYears(1));
         }
+        String identificacaoAnterior = frasco.getIdentificacao();
         frasco = frascoRepository.saveAndFlush(frasco);
         frasco.gerarIdentificacao();
+
+        // Grupo/local alterados na edição mudam a identificação: a etiqueta colada no
+        // frasco fica desatualizada, então ele volta pra fila de impressão. Em manutenção,
+        // ele já entra na fila ao concluir; na fila, continua nela.
+        boolean identificacaoMudou = !novo && !Objects.equals(identificacaoAnterior, frasco.getIdentificacao());
+        if (identificacaoMudou && frasco.getStatusFrasco() == StatusFrasco.DISPONIVEL) {
+            frasco.paraImpressao();
+        }
 
         if (novo) {
             registrarEntradaCadastro(frasco);

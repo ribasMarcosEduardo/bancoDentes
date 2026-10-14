@@ -154,7 +154,11 @@ function setupManutencaoConcluirModal() {
                 body: JSON.stringify({ quantidadeCalculada: novaQuantidade })
             });
 
-            if (!response.ok) throw new Error("Erro ao concluir manutenção no servidor.");
+            if (!response.ok) {
+                const mensagem = response.status === 400 ? await response.text() : "";
+                ToastError.fire({ icon: "error", title: mensagem || "Não foi possível concluir a manutenção." });
+                return;
+            }
 
             close();
 
