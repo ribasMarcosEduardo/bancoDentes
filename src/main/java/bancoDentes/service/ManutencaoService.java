@@ -86,6 +86,10 @@ public class ManutencaoService extends BaseService{
         Frasco frasco = frascoRepository.findById(codFrasco)
                 .orElseThrow(() -> new ManutencaoException(getText("error.frasco.naoEncontrado")));
 
+        if (frasco.isEmManutencao()) {
+            throw new ManutencaoException(getText("error.manutencao.frascoJaEmManutencao"));
+        }
+
         registrarManutencao(new ManutencaoDTO(
                 frasco.getCodigo(),
                 frasco.getQuantidade(),

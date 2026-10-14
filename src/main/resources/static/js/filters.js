@@ -162,7 +162,8 @@ function setupFilters() {
 
         const visibleRows = currentRows.filter(row =>
             !row.classList.contains('is-hidden-by-filter') &&
-            !row.classList.contains('is-hidden-by-sector')
+            !row.classList.contains('is-hidden-by-sector') &&
+            !row.classList.contains('is-hidden-by-status')
         );
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
@@ -212,9 +213,10 @@ function setupFilters() {
         }
     }
 
-    // Exposto global pro setSector (results.js) recalcular contagem/
-    // paginação/estado vazio ao trocar Todos/BDH/Biobanco — setSector
-    // só marca a classe is-hidden-by-sector em cada item, quem decide
+    // Exposto global pro setSector/setStatus (results.js) recalcular
+    // contagem/paginação/estado vazio ao trocar Todos/BDH/Biobanco ou
+    // Em andamento/Concluídas — eles só marcam is-hidden-by-sector /
+    // is-hidden-by-status em cada item, quem decide
     // o que fica visível de fato é sempre esta função. results.js roda
     // depois de filters.js (ver ordem dos <script> nas páginas que têm
     // #sectorSwitch), então já encontra isto definido.
@@ -305,7 +307,8 @@ function setupFilters() {
                 const currentRows = document.querySelectorAll(".request-row");
                 const visibleRows = Array.from(currentRows).filter(row =>
                     !row.classList.contains('is-hidden-by-filter') &&
-                    !row.classList.contains('is-hidden-by-sector')
+                    !row.classList.contains('is-hidden-by-sector') &&
+                    !row.classList.contains('is-hidden-by-status')
                 );
                 const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 

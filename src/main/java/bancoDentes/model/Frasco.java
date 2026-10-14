@@ -163,6 +163,11 @@ public class Frasco {
     }
 
     @Transient
+    public boolean isEmManutencao() {
+        return this.statusFrasco == StatusFrasco.EM_MANUTENCA;
+    }
+
+    @Transient
     public boolean isNaFilaImpressao() {
         return this.statusFrasco == StatusFrasco.DIS_IMPRESSAO;
     }

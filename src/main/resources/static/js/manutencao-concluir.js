@@ -12,6 +12,8 @@ function setupManutencaoConcluirModal() {
     const grupoEl = document.querySelector("#modalConcluirManutencaoGrupo");
     const estadoEl = document.querySelector("#modalConcluirManutencaoEstado");
     const localEl = document.querySelector("#modalConcluirManutencaoLocal");
+    const origemEl = document.querySelector("#modalConcluirManutencaoOrigem");
+    const detalhesEl = overlay.querySelector(".manutencao-detalhes");
     const qtdAtualEl = document.querySelector("#modalConcluirManutencaoQtdAtual");
 
     const qtdInput = document.querySelector("#modalConcluirManutencaoQtdNova");
@@ -25,13 +27,20 @@ function setupManutencaoConcluirModal() {
     function open(row) {
         linhaAtual = row;
 
-        const { codigo = "---", grupo = "---", estado = "---", local = "---", qtd = "0" } = row.dataset;
+        const { codigo = "---", grupo = "---", estado = "---", local = "---", origem = "---", qtd = "0" } = row.dataset;
         const qtdAtual = Number(qtd) || 0;
 
-        if (codigoEl) codigoEl.textContent = codigo;
-        if (grupoEl) grupoEl.textContent = grupo;
-        if (estadoEl) estadoEl.textContent = estado;
-        if (localEl) localEl.textContent = local;
+        // data-* vazio ("") quando o campo não existe no frasco - o
+        // default da desestruturação só cobre atributo ausente
+        if (codigoEl) codigoEl.textContent = codigo || "---";
+        if (grupoEl) grupoEl.textContent = grupo || "---";
+        if (estadoEl) estadoEl.textContent = estado || "---";
+        if (localEl) localEl.textContent = local || "---";
+        if (origemEl) origemEl.textContent = origem || "---";
+
+        // Cada abertura começa com os detalhes recolhidos
+        if (detalhesEl) detalhesEl.open = false;
+
         if (qtdAtualEl) qtdAtualEl.textContent = String(qtdAtual);
 
         qtdInput.max = String(qtdAtual);
@@ -127,7 +136,7 @@ function setupManutencaoConcluirModal() {
         const novaQuantidade = Number(qtdInput.value);
 
         if (!codManutencao) {
-            if (window.Swal) Swal.fire('Erro', 'Código da manutenção não identificado.', 'error');
+            ToastError.fire({ icon: "error", title: "Não foi possível identificar esta manutenção." });
             return;
         }
 
@@ -144,23 +153,17 @@ function setupManutencaoConcluirModal() {
 
             close();
 
-            if (window.Swal) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Manutenção Concluída!',
-                    html: `Frasco <strong>${codigo}</strong> atualizado com sucesso para <strong>${novaQuantidade}</strong> dentes.`,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } else if (typeof showToast === "function") {
-                showToast(`Manutenção do frasco <strong>${codigo}</strong> concluída — quantidade atualizada para <strong>${novaQuantidade}</strong>.`);
-            }
-
+            // Toast de sucesso depois do reload (flash em sessionStorage,
+            // ver setupFlashToast em includes.js)
+            sessionStorage.setItem(
+                FLASH_TOAST_KEY,
+                `Manutenção do frasco <strong>${codigo}</strong> concluída. Quantidade atualizada para <strong>${novaQuantidade}</strong> dentes.`
+            );
             location.reload();
 
         } catch (error) {
             console.error(error);
-            if (window.Swal) Swal.fire('Erro', 'Não foi possível concluir a manutenção no servidor.', 'error');
+            ToastError.fire({ icon: "error", title: "Não foi possível concluir a manutenção." });
         }
     });
 }

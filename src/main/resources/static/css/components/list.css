@@ -380,6 +380,11 @@
     background: #22c55e;
 }
 
+/* Manutenção concluída: mesmo verde da movimentação de entrada */
+.request-row--manutencao-concluida .request-details::before {
+    background: #22c55e;
+}
+
 .request-row--saida .request-details::before {
     background: #ef4444;
 }

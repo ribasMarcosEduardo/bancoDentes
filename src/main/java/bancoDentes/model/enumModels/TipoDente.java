@@ -29,6 +29,21 @@ public enum TipoDente {
         return sigla;
     }
 
+    /**
+     * Molares e pré-molares são identificados pela numeração do dente.
+     */
+    public boolean isUsaNumeracao() {
+        return this == MOLAR || this == PRE_MOLAR;
+    }
+
+    /**
+     * Caninos e incisivos são identificados pela arcada. Endo entra junto só pra
+     * manter o mesmo formato na visualização (a arcada dele é sempre vazia).
+     */
+    public boolean isUsaArcada() {
+        return this == CANINO || this == INCISIVO || this == ENDO;
+    }
+
     public static String getSiglaDente(TipoDente tipoDente) {
         if (tipoDente == null) return null;
         return tipoDente.getSigla();

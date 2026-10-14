@@ -269,7 +269,7 @@
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
 
-                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                  <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao}" th:data-tooltip="${frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção'}" aria-label="Manutenção">
                     <i class="icon" data-lucide="toolbox"></i>
                   </button>
 
@@ -358,7 +358,7 @@
                           <i class="icon" data-lucide="pen-line"></i>
                         </a>
 
-                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                        <button type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao}" th:data-tooltip="${frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção'}" aria-label="Manutenção">
                           <i class="icon" data-lucide="toolbox"></i>
                         </button>
 
@@ -446,7 +446,7 @@
                     <i class="icon" data-lucide="pen-line"></i>
                   </a>
 
-                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" data-tooltip="Manutenção" aria-label="Manutenção">
+                  <button type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao}" th:data-tooltip="${frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção'}" aria-label="Manutenção">
                     <i class="icon" data-lucide="toolbox"></i>
                   </button>
 
@@ -541,13 +541,25 @@
         const codFrasco = btn.dataset.id;
         if (!codFrasco) return;
 
+        // Linha da lista ou card - os dois têm o identificador visível
+        const item = btn.closest("[data-codigo]");
+        const identificacao = item?.querySelector(".result-list__code, .card__code")?.textContent.trim();
+        const frascoHtml = identificacao ? `O frasco <strong>${identificacao}</strong>` : "O frasco";
+
         const result = await Swal.fire({
             icon: "question",
-            title: "Enviar para Manutenção?",
-            text: "Deseja registrar uma manutenção para este frasco utilizando a quantidade atual?",
+            title: "Enviar para manutenção?",
+            html: `${frascoHtml} vai para manutenção com a quantidade atual de dentes.`,
             showCancelButton: true,
+            reverseButtons: true,
+            focusCancel: true,
             confirmButtonText: "Sim, enviar",
-            cancelButtonText: "Cancelar"
+            cancelButtonText: "Cancelar",
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: "btn btn-primary",
+                cancelButton: "btn btn-secondary",
+            },
         });
 
         if (!result.isConfirmed) return;
@@ -560,18 +572,13 @@
 
             if (!response.ok) throw new Error("Erro ao registrar manutenção.");
 
-            await Swal.fire({
-                icon: "success",
-                title: "Sucesso!",
-                text: "Frasco enviado para manutenção com sucesso.",
-                timer: 2000,
-                showConfirmButton: false
-            });
-
+            // Toast de sucesso depois do reload (flash em sessionStorage,
+            // ver setupFlashToast em includes.js)
+            sessionStorage.setItem(FLASH_TOAST_KEY, `${frascoHtml} foi enviado para manutenção.`);
             location.reload();
         } catch (error) {
             console.error(error);
-            Swal.fire("Erro", "Não foi possível registrar a manutenção.", "error");
+            ToastError.fire({ icon: "error", title: "Não foi possível enviar o frasco para manutenção." });
         }
     });
 });
