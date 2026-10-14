@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Banco de Dentes Humanos e Biobanco do curso de Odontologia da Unoesc Joaçaba — armazenamento, higienização, controle e cessão de dentes humanos para o ensino pré-clínico e a pesquisa científica.">
+
+    <!-- Landing só tem tema claro por enquanto: a classe "light" vai fixa
+         no <html> (sem o script de tema salvo/prefers-color-scheme das
+         páginas internas), então todas as variáveis de base/variables.css
+         já nascem na variante clara. -->
+
+    <script>
+        // Liga as animações de entrada ANTES do primeiro paint: os blocos
+        // com [data-reveal] só nascem invisíveis quando há JS pra revelá-los
+        // depois (ver js/landing.js). Sem JS, a página aparece estática e
+        // completa, sem nada preso em opacity: 0.
+        document.documentElement.classList.add("lp-motion");
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/landing.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Banco de Dentes Humanos e Biobanco - Unoesc Joaçaba</title>
+</head>
+
+<body class="landing">
+
+    <!-- ======================================================
+         NAVBAR DA LANDING
+         Transparente por cima do hero (logo branca) e vira vidro
+         claro ao rolar (logo colorida) — ver .lp-nav.is-scrolled
+         em landing.css e js/landing.js.
+         ====================================================== -->
+    <header class="lp-nav" id="lpNav">
+        <div class="lp-nav__inner">
+
+            <a href="#inicio" class="lp-nav__brand" aria-label="Banco de Dentes Humanos e Biobanco Unoesc - início">
+                <img th:src="@{/assets/UNOESC+ODONTO+BANCO%20BRANCO.png}" alt="" class="lp-nav__logo lp-nav__logo--light">
+                <img th:src="@{/assets/UNOESC+ODONTO+BANCO%20COLORIDA.png}" alt="" class="lp-nav__logo lp-nav__logo--color">
+            </a>
+
+            <nav class="lp-nav__links" aria-label="Seções da página">
+                <a href="#o-bdh" class="lp-nav__link">O BDH</a>
+                <a href="#bdh-biobanco" class="lp-nav__link">BDH e Biobanco</a>
+                <a href="#como-funciona" class="lp-nav__link">Como funciona</a>
+                <a href="#sistema" class="lp-nav__link">O sistema</a>
+                <a href="#odontologia" class="lp-nav__link">Odontologia</a>
+                <a href="#campus" class="lp-nav__link">Campus</a>
+            </nav>
+
+            <div class="lp-nav__actions">
+                <a href="#" class="btn lp-btn lp-btn--nav">
+                    <i class="icon" data-lucide="log-in"></i>
+                    Acessar sistema
+                </a>
+
+                <button class="lp-nav__toggle" id="lpNavToggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="lpNavMenu">
+                    <i class="icon" data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menu mobile: painel de vidro que desce logo abaixo da barra -->
+        <div class="lp-nav__menu glass-frost-strong" id="lpNavMenu">
+            <a href="#o-bdh" class="lp-nav__menu-link">O BDH</a>
+            <a href="#bdh-biobanco" class="lp-nav__menu-link">BDH e Biobanco</a>
+            <a href="#como-funciona" class="lp-nav__menu-link">Como funciona</a>
+            <a href="#sistema" class="lp-nav__menu-link">O sistema</a>
+            <a href="#odontologia" class="lp-nav__menu-link">Odontologia</a>
+            <a href="#campus" class="lp-nav__menu-link">Campus</a>
+
+            <a href="#" class="btn lp-btn lp-btn--brand lp-nav__menu-cta">
+                <i class="icon" data-lucide="log-in"></i>
+                Acessar sistema
+            </a>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- ======================================================
+             HERO
+             Foto do laboratório com blur leve + gradiente azul → verde
+             institucional (mesma direção do "Backgrounds" do brandbook).
+             ====================================================== -->
+        <section class="lp-hero" id="inicio">
+            <div class="lp-hero__media" aria-hidden="true"></div>
+            <div class="lp-hero__overlay" aria-hidden="true"></div>
+
+            <div class="lp-container lp-hero__content">
+                <span class="lp-hero__eyebrow">
+                    <i class="icon" data-lucide="graduation-cap"></i>
+                    Curso de Odontologia &middot; Unoesc Joaçaba
+                </span>
+
+                <h1 class="lp-hero__title">
+                    <span class="lp-hero__title-light">Banco de Dentes</span>
+                    <span class="lp-hero__title-strong">Humanos e <span class="lp-hero__title-accent">Biobanco</span></span>
+                </h1>
+
+                <p class="lp-hero__lead">
+                    O setor que garante o fornecimento legal, ético e seguro de dentes humanos
+                    para as atividades práticas da pré-clínica e para a pesquisa científica
+                    da Odontologia Unoesc.
+                </p>
+
+                <div class="lp-hero__actions">
+                    <a href="#" class="btn lp-btn lp-btn--light lp-btn--lg">
+                        <i class="icon" data-lucide="log-in"></i>
+                        Acessar sistema
+                    </a>
+
+                    <a href="#o-bdh" class="btn lp-btn lp-btn--ghost lp-btn--lg">
+                        Conhecer o setor
+                        <i class="icon" data-lucide="arrow-down"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="lp-container lp-hero__bottom">
+                <ul class="lp-hero__facts lp-glass-hero">
+                    <li class="lp-hero__fact">
+                        <i class="icon" data-lucide="heart-handshake"></i>
+                        <span>
+                            <strong>Sem fins lucrativos</strong>
+                            Vinculado ao curso de Odontologia
+                        </span>
+                    </li>
+                    <li class="lp-hero__fact">
+                        <i class="icon" data-lucide="shield-check"></i>
+                        <span>
+                            <strong>Legal e ético</strong>
+                            Origem e destino de cada dente registrados
+                        </span>
+                    </li>
+                    <li class="lp-hero__fact">
+                        <i class="icon" data-lucide="calendar-check"></i>
+                        <span>
+                            <strong>Desde 2011</strong>
+                            Aprovado pela Resolução n.&ordm; 01/CG/11
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             O QUE É O BDH
+             ====================================================== -->
+        <section class="lp-section" id="o-bdh">
+            <div class="lp-container lp-split">
+
+                <div class="lp-split__text">
+                    <span class="lp-kicker">O setor</span>
+                    <h2 class="lp-title">O que é o <strong>BDH</strong></h2>
+
+                    <p class="lp-text">
+                        Um Banco de Dentes Humanos — ou pelo seu acrônimo, <strong>BDH</strong> — é um setor
+                        sem fins lucrativos vinculado a uma faculdade ou universidade. É o principal
+                        responsável pela cessão de dentes humanos para atividades práticas e aulas
+                        didáticas nos cursos formativos de Odontologia.
+                    </p>
+
+                    <p class="lp-text">
+                        É um setor indispensável porque garante o fornecimento legal, ético e seguro
+                        de material biológico para o ensino pré-clínico. Trabalha com a valorização e
+                        divulgação do dente como órgão, com a arrecadação, preparação, cessão e
+                        empréstimo de dentes, além da administração de registros e da realização de
+                        pesquisas e atividades didáticas.
+                    </p>
+
+                    <ul class="lp-checklist">
+                        <li><i class="icon" data-lucide="check"></i> Valorização do dente como órgão</li>
+                        <li><i class="icon" data-lucide="check"></i> Arrecadação, preparo e cessão</li>
+                        <li><i class="icon" data-lucide="check"></i> Registros e rastreabilidade</li>
+                        <li><i class="icon" data-lucide="check"></i> Apoio a pesquisas e atividades didáticas</li>
+                    </ul>
+                </div>
+
+                <div class="lp-split__media">
+                    <figure class="lp-media lp-media--portrait lp-media--tinted">
+                        <img th:src="@{/assets/entrada_banco_dentes.jpg}" alt="Entrada do Banco de Dentes Humanos da Unoesc, com balcão de atendimento e porta de vidro com a identidade visual da instituição" loading="lazy">
+                    </figure>
+
+                    <!-- Cartão flutuante sobre a imagem: linha do tempo da implantação -->
+                    <div class="lp-timeline-card lp-glass-light">
+                        <span class="lp-timeline-card__title">
+                            <i class="icon" data-lucide="landmark"></i>
+                            Implantação na Unoesc Joaçaba
+                        </span>
+                        <ol class="lp-timeline">
+                            <li>
+                                <span class="lp-timeline__year">2009</span>
+                                <span class="lp-timeline__desc">Projeto de Pesquisa n.&ordm; 1.149/09</span>
+                            </li>
+                            <li>
+                                <span class="lp-timeline__year">2010</span>
+                                <span class="lp-timeline__desc">Processo n.&ordm; 1.255/10</span>
+                            </li>
+                            <li>
+                                <span class="lp-timeline__year">2011</span>
+                                <span class="lp-timeline__desc">Aprovado pela Resolução n.&ordm; 01/CG/11, em 17 de março</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             BDH x BIOBANCO
+             Fundo com manchas de cor da marca pra dar o que o vidro
+             desfocar — os dois cartões grandes são .glass-frost.
+             ====================================================== -->
+        <section class="lp-section lp-section--tinted" id="bdh-biobanco">
+            <div class="lp-blobs" aria-hidden="true">
+                <span class="lp-blob lp-blob--blue"></span>
+                <span class="lp-blob lp-blob--green"></span>
+            </div>
+
+            <div class="lp-container">
+                <header class="lp-section__head lp-section__head--center">
+                    <span class="lp-kicker">Dois acervos, duas finalidades</span>
+                    <h2 class="lp-title">BDH e <strong>Biobanco</strong></h2>
+                    <p class="lp-text lp-text--center">
+                        Parecidos, mas com funções diferentes: o que define o destino de cada dente
+                        é a sua origem e a existência do Termo de Consentimento Livre e Esclarecido (TCLE).
+                    </p>
+                </header>
+
+                <div class="lp-compare">
+                    <article class="lp-compare__card glass-frost">
+                        <header class="lp-compare__head">
+                            <span class="lp-compare__icon lp-compare__icon--blue">
+                                <i class="icon" data-lucide="book-open"></i>
+                            </span>
+                            <div>
+                                <span class="lp-compare__label">Ensino</span>
+                                <h3 class="lp-compare__title">Banco de Dentes Humanos</h3>
+                            </div>
+                        </header>
+
+                        <p class="lp-compare__text">
+                            Lida diretamente com o fornecimento de dentes para as atividades de ensino
+                            formativo do curso, como as práticas da pré-clínica.
+                        </p>
+
+                        <dl class="lp-compare__list">
+                            <div>
+                                <dt><i class="icon" data-lucide="hand-heart"></i> Origem</dt>
+                                <dd>Doações de alunos e de clínicas da região</dd>
+                            </div>
+                            <div>
+                                <dt><i class="icon" data-lucide="file-x"></i> TCLE</dt>
+                                <dd>Não possui termo de consentimento</dd>
+                            </div>
+                            <div>
+                                <dt><i class="icon" data-lucide="target"></i> Uso</dt>
+                                <dd>Exclusivamente atividades de ensino do curso</dd>
+                            </div>
+                        </dl>
+                    </article>
+
+                    <article class="lp-compare__card glass-frost">
+                        <header class="lp-compare__head">
+                            <span class="lp-compare__icon lp-compare__icon--green">
+                                <i class="icon" data-lucide="microscope"></i>
+                            </span>
+                            <div>
+                                <span class="lp-compare__label">Pesquisa</span>
+                                <h3 class="lp-compare__title">Biobanco</h3>
+                            </div>
+                        </header>
+
+                        <p class="lp-compare__text">
+                            Armazena dentes extraídos na clínica da universidade e os fornece legalmente
+                            apenas para pesquisa científica — publicações exigem o termo.
+                        </p>
+
+                        <dl class="lp-compare__list">
+                            <div>
+                                <dt><i class="icon" data-lucide="hospital"></i> Origem</dt>
+                                <dd>Extrações na clínica da universidade</dd>
+                            </div>
+                            <div>
+                                <dt><i class="icon" data-lucide="file-check"></i> TCLE</dt>
+                                <dd>Assinado pelo paciente, que pode reaver seus dentes caso mude de ideia</dd>
+                            </div>
+                            <div>
+                                <dt><i class="icon" data-lucide="target"></i> Uso</dt>
+                                <dd>Unicamente pesquisa científica</dd>
+                            </div>
+                        </dl>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             BIOBANCO EM DETALHE (texto longo + imagem)
+             ====================================================== -->
+        <section class="lp-section">
+            <div class="lp-container lp-split lp-split--reverse">
+
+                <div class="lp-split__text">
+                    <span class="lp-kicker">Pesquisa científica</span>
+                    <h2 class="lp-title">Consentimento que <strong>garante a pesquisa</strong></h2>
+
+                    <p class="lp-text">
+                        No <strong>Biobanco</strong>, cada dente vem de um procedimento realizado na clínica da
+                        universidade, com o Termo de Consentimento Livre e Esclarecido assinado pelo
+                        paciente. É esse termo que permite que as pesquisas sejam publicadas.
+                    </p>
+
+                    <p class="lp-text">
+                        O termo também protege o paciente: ele garante o acesso aos próprios dentes
+                        caso mude de ideia. Por isso, o controle do Biobanco é separado do BDH — e os
+                        dentes doados sem termo seguem apenas para o ensino.
+                    </p>
+                </div>
+
+                <div class="lp-split__media">
+                    <figure class="lp-media lp-media--landscape">
+                        <img th:src="@{/assets/web/biobanco-clinica.jpg}" alt="Exame odontológico em clínica, com espelho e sonda" loading="lazy">
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             COMO FUNCIONA (fluxo do dente dentro do setor)
+             ====================================================== -->
+        <section class="lp-section lp-section--soft" id="como-funciona">
+            <div class="lp-container">
+                <header class="lp-section__head">
+                    <span class="lp-kicker">Rotina do setor</span>
+                    <h2 class="lp-title">Como <strong>funciona</strong></h2>
+                    <p class="lp-text">
+                        Do recebimento até a cessão, cada etapa é registrada para que se saiba de onde
+                        o dente veio, como foi preparado e para onde foi.
+                    </p>
+                </header>
+
+                <ol class="lp-steps">
+                    <li class="lp-step">
+                        <span class="lp-step__num">01</span>
+                        <span class="lp-step__icon"><i class="icon" data-lucide="hand-heart"></i></span>
+                        <h3 class="lp-step__title">Arrecadação</h3>
+                        <p class="lp-step__text">Dentes doados por alunos e clínicas da região, ou extraídos na clínica da universidade com TCLE.</p>
+                    </li>
+                    <li class="lp-step">
+                        <span class="lp-step__num">02</span>
+                        <span class="lp-step__icon"><i class="icon" data-lucide="droplets"></i></span>
+                        <h3 class="lp-step__title">Higienização e preparo</h3>
+                        <p class="lp-step__text">Limpeza, preparo e separação por tipo de dente, prontos para o uso seguro.</p>
+                    </li>
+                    <li class="lp-step">
+                        <span class="lp-step__num">03</span>
+                        <span class="lp-step__icon"><i class="icon" data-lucide="flask-conical"></i></span>
+                        <h3 class="lp-step__title">Armazenamento e controle</h3>
+                        <p class="lp-step__text">Frascos etiquetados, com movimentações e manutenções periódicas acompanhadas no sistema.</p>
+                    </li>
+                    <li class="lp-step">
+                        <span class="lp-step__num">04</span>
+                        <span class="lp-step__icon"><i class="icon" data-lucide="arrow-right-left"></i></span>
+                        <h3 class="lp-step__title">Cessão e empréstimo</h3>
+                        <p class="lp-step__text">Estudantes solicitam dentes para a pré-clínica; pesquisadores recebem do Biobanco.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             O SISTEMA (acesso único — destaque dos CTAs)
+             ====================================================== -->
+        <section class="lp-section" id="sistema">
+            <div class="lp-container">
+                <div class="lp-system">
+                    <div class="lp-system__intro">
+                        <span class="lp-kicker lp-kicker--light">Sistema de gestão</span>
+                        <h2 class="lp-title lp-title--light">Um acesso, <strong>três perfis</strong></h2>
+                        <p class="lp-text lp-text--light">
+                            O sistema web do BDH e Biobanco reúne estudantes, estagiários e coordenação em
+                            um só lugar. Entre com o seu código do Portal de Ensino e o sistema mostra
+                            o que é do seu perfil.
+                        </p>
+
+                        <a href="#" class="btn lp-btn lp-btn--light lp-btn--lg">
+                            <i class="icon" data-lucide="log-in"></i>
+                            Acessar sistema
+                        </a>
+
+                        <span class="lp-system__hint">
+                            <i class="icon" data-lucide="key-round"></i>
+                            É necessário ter acesso ao Portal de Ensino - Unoesc
+                        </span>
+                    </div>
+
+                    <ul class="lp-roles">
+                        <li class="lp-role lp-glass-hero">
+                            <span class="lp-role__icon"><i class="icon" data-lucide="user-round"></i></span>
+                            <div>
+                                <h3 class="lp-role__title">Estudantes</h3>
+                                <p class="lp-role__text">Solicitam dentes para as atividades práticas e acompanham o histórico das suas solicitações.</p>
+                            </div>
+                        </li>
+                        <li class="lp-role lp-glass-hero">
+                            <span class="lp-role__icon"><i class="icon" data-lucide="clipboard-list"></i></span>
+                            <div>
+                                <h3 class="lp-role__title">Estagiários</h3>
+                                <p class="lp-role__text">Fazem o controle e a gestão do BDH e Biobanco: frascos, doações, movimentações, manutenções e solicitações.</p>
+                            </div>
+                        </li>
+                        <li class="lp-role lp-glass-hero">
+                            <span class="lp-role__icon"><i class="icon" data-lucide="shield-user"></i></span>
+                            <div>
+                                <h3 class="lp-role__title">Coordenação</h3>
+                                <p class="lp-role__text">Acesso total, incluindo usuários, registros e logs de auditoria da gestão.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             ODONTOLOGIA UNOESC
+             ====================================================== -->
+        <section class="lp-section lp-section--soft" id="odontologia">
+            <div class="lp-container lp-split">
+
+                <div class="lp-split__text">
+                    <span class="lp-kicker">Graduação</span>
+                    <h2 class="lp-title">Odontologia <strong>Unoesc</strong></h2>
+
+                    <p class="lp-text">
+                        O curso de Odontologia da Unoesc oferece uma formação focada na excelência
+                        acadêmica e na prática clínica, aliando teoria e prática desde os primeiros
+                        semestres e incentivando a pesquisa e a extensão.
+                    </p>
+
+                    <p class="lp-text">
+                        O objetivo é formar cirurgiões-dentistas generalistas, críticos e reflexivos,
+                        com sólida base científica e tecnológica, capacitados para atuar de forma ética,
+                        humana e inovadora nos diferentes níveis de atenção à saúde. O BDH faz parte
+                        dessa formação: é dele que saem os dentes usados nas práticas da pré-clínica.
+                    </p>
+
+                    <ul class="lp-chips">
+                        <li class="lp-chip"><i class="icon" data-lucide="clock"></i> 10 semestres</li>
+                        <li class="lp-chip"><i class="icon" data-lucide="sun"></i> Presencial, matutino</li>
+                        <li class="lp-chip"><i class="icon" data-lucide="map-pin"></i> Campus Joaçaba</li>
+                    </ul>
+
+                    <a href="https://www.unoesc.edu.br/cursos/curso/odontologia/" class="lp-link" target="_blank" rel="noopener">
+                        Página oficial do curso
+                        <i class="icon" data-lucide="arrow-up-right"></i>
+                    </a>
+                </div>
+
+                <div class="lp-split__media">
+                    <figure class="lp-media lp-media--landscape">
+                        <img th:src="@{/assets/web/odontologia-clinica.jpg}" alt="Cirurgiã-dentista de máscara e luvas segurando instrumentais sob o refletor do consultório odontológico" loading="lazy">
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             UNOESC JOAÇABA
+             ====================================================== -->
+        <section class="lp-section lp-section--tinted" id="campus">
+            <div class="lp-blobs" aria-hidden="true">
+                <span class="lp-blob lp-blob--green lp-blob--top-left"></span>
+                <span class="lp-blob lp-blob--blue lp-blob--bottom-right"></span>
+            </div>
+
+            <div class="lp-container">
+                <header class="lp-section__head">
+                    <span class="lp-kicker">Onde estamos</span>
+                    <h2 class="lp-title">Unoesc <strong>Joaçaba</strong></h2>
+                </header>
+
+                <div class="lp-campus">
+                    <figure class="lp-media lp-media--wide lp-campus__photo">
+                        <img th:src="@{/assets/unoesc_campus_joacaba.jpeg}" alt="Vista aérea do prédio principal da Unoesc no campus de Joaçaba" loading="lazy">
+                    </figure>
+
+                    <div class="lp-campus__panel glass-frost">
+                        <p class="lp-text">
+                            Joaçaba é a sede administrativa e jurídica da Unoesc e da Fundação Universidade
+                            do Oeste de Santa Catarina, e abriga o maior campus da universidade — com
+                            cursos fortes na área da saúde, como Medicina, e o Hospital Universitário
+                            Santa Terezinha.
+                        </p>
+
+                        <ul class="lp-stats">
+                            <li class="lp-stat">
+                                <span class="lp-stat__value">+4 mil</span>
+                                <span class="lp-stat__label">estudantes de graduação</span>
+                            </li>
+                            <li class="lp-stat">
+                                <span class="lp-stat__value">61</span>
+                                <span class="lp-stat__label">laboratórios</span>
+                            </li>
+                            <li class="lp-stat">
+                                <span class="lp-stat__value">105</span>
+                                <span class="lp-stat__label">salas de aula</span>
+                            </li>
+                            <li class="lp-stat">
+                                <span class="lp-stat__value">4</span>
+                                <span class="lp-stat__label">auditórios</span>
+                            </li>
+                        </ul>
+
+                        <a href="https://www.unoesc.edu.br/campus/joacaba/" class="lp-link" target="_blank" rel="noopener">
+                            Conheça o campus
+                            <i class="icon" data-lucide="arrow-up-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- A Unoesc em geral (brandbook: "A Unoesc" + missão) -->
+                <div class="lp-about">
+                    <div class="lp-about__text">
+                        <h3 class="lp-subtitle">A <strong>Unoesc</strong></h3>
+                        <p class="lp-text">
+                            Universidade Comunitária fundada em 1968, protagonista no desenvolvimento
+                            social, cultural e econômico do Oeste de Santa Catarina — por meio do ensino,
+                            da pesquisa, da extensão e de serviços que atendem a milhares de pessoas.
+                        </p>
+                    </div>
+
+                    <ul class="lp-about__facts">
+                        <li>
+                            <i class="icon" data-lucide="calendar"></i>
+                            <span><strong>1968</strong> fundação</span>
+                        </li>
+                        <li>
+                            <i class="icon" data-lucide="map"></i>
+                            <span><strong>12</strong> municípios</span>
+                        </li>
+                        <li>
+                            <i class="icon" data-lucide="book-marked"></i>
+                            <span><strong>+200</strong> cursos</span>
+                        </li>
+                        <li>
+                            <i class="icon" data-lucide="users"></i>
+                            <span><strong>+550</strong> professores</span>
+                        </li>
+                    </ul>
+
+                    <blockquote class="lp-mission">
+                        <span class="lp-mission__label">Missão</span>
+                        Promover a formação humana e profissional, por meio do ensino, da pesquisa e
+                        da extensão, gerando conhecimento para o desenvolvimento regional com inovação
+                        e sustentabilidade.
+                    </blockquote>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================
+             CTA FINAL
+             ====================================================== -->
+        <section class="lp-section lp-section--cta">
+            <div class="lp-container">
+                <div class="lp-cta">
+                    <div>
+                        <h2 class="lp-cta__title">Pronto para <strong>começar?</strong></h2>
+                        <p class="lp-cta__text">Entre com o seu código do Portal de Ensino para solicitar dentes ou gerenciar o acervo.</p>
+                    </div>
+
+                    <a href="#" class="btn lp-btn lp-btn--brand lp-btn--lg">
+                        <i class="icon" data-lucide="log-in"></i>
+                        Acessar sistema
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ======================================================
+         RODAPÉ DA LANDING
+         ====================================================== -->
+    <footer class="lp-footer">
+        <div class="lp-container lp-footer__inner">
+            <div class="lp-footer__brand">
+                <img th:src="@{/assets/UNOESC+ODONTO+BANCO%20BRANCO.png}" alt="Unoesc · Odontologia Unoesc · Banco de Dentes e Biobanco Unoesc" class="lp-footer__logo">
+                <p>Banco de Dentes Humanos e Biobanco do curso de Odontologia da Unoesc Joaçaba.</p>
+            </div>
+
+            <div class="lp-footer__col">
+                <span class="lp-footer__heading">Campus Joaçaba</span>
+                <p>
+                    R. Getúlio Vargas, 2125 - Flor da Serra<br>
+                    Joaçaba - SC, 89600-000
+                </p>
+                <a href="tel:+554935512000">(49) 3551-2000</a>
+            </div>
+
+            <div class="lp-footer__col">
+                <span class="lp-footer__heading">Coordenação de Odontologia</span>
+                <a href="mailto:odontologia.jba@unoesc.edu.br">odontologia.jba@unoesc.edu.br</a>
+                <a href="tel:+554935512047">(49) 3551-2047</a>
+            </div>
+
+            <div class="lp-footer__col">
+                <span class="lp-footer__heading">Links</span>
+                <a href="https://www.unoesc.edu.br/" target="_blank" rel="noopener">unoesc.edu.br</a>
+                <a href="https://www.unoesc.edu.br/cursos/curso/odontologia/" target="_blank" rel="noopener">Curso de Odontologia</a>
+                <a href="#" class="lp-footer__access">
+                    <i class="icon" data-lucide="log-in"></i>
+                    Acessar sistema
+                </a>
+            </div>
+        </div>
+
+        <div class="lp-container lp-footer__bottom">
+            <span>&copy; 2026 Unoesc &middot; Fazendo parte da sua vida</span>
+            <span>Setor sem fins lucrativos</span>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script th:src="@{/js/landing.js}"></script>
+</body>
+</html>
