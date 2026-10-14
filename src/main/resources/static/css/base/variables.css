@@ -67,6 +67,14 @@ body.light{
     --glass-frost-strong-shadow: 0 8px 32px rgba(0,0,0,0.12);
     --glass-frost-strong-noise-opacity: 0.2;
 
+    /* Vidro leve (light) do .empty-state — um degrau abaixo do
+       .glass-frost da toolbar logo acima: título e filtros mais foscos,
+       toolbar e estado vazio mais leves */
+    --glass-light-bg-start: rgba(255,255,255,0.50);
+    --glass-light-bg-end: rgba(255,255,255,0.30);
+    --glass-light-border: rgba(255,255,255,0.45);
+    --glass-light-shadow: 0 6px 24px rgba(0,0,0,0.05);
+
     /* Vidro esverdeado (light) para o .glass-success — toast de sucesso.
        3 tons (menta -> verde -> floresta) em vez de 2, pra dar aquele
        degradê mais esfumado/diluído, com menos opacidade que o normal.
@@ -193,6 +201,12 @@ body.dark {
     --glass-frost-strong-border: var(--glass-frost-border);
     --glass-frost-strong-shadow: var(--glass-frost-shadow);
     --glass-frost-strong-noise-opacity: var(--glass-frost-noise-opacity);
+
+    /* Vidro leve (dark) do .empty-state — ver o bloco light */
+    --glass-light-bg-start: rgba(32,32,32,0.58);
+    --glass-light-bg-end: rgba(20,20,20,0.40);
+    --glass-light-border: rgba(255,255,255,0.07);
+    --glass-light-shadow: 0 6px 24px rgba(0,0,0,0.30);
 
     /* Vidro esverdeado (dark) para o .glass-success — toast de sucesso.
        3 tons (verde vivo -> floresta -> quase preto-esverdeado), mais

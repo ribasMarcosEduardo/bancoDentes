@@ -190,8 +190,13 @@
 
                 <section class="results results--list" id="resultsView">
 
-                    <div th:if="${#lists.isEmpty(movimentacao)}" class="alert alert-info shadow-sm mt-4" style="padding: 20px; text-align: center; background: rgba(255,255,255,0.5); border-radius: 8px;">
-                        <i data-lucide="info" class="me-2"></i> Não há nenhuma movimentação registrada.
+                    <th:block th:if="${#lists.isEmpty(movimentacao)}">
+                        <div th:replace="~{partials/empty_state :: empty_state('inbox', 'Nenhuma movimentação registrada', 'Ainda não há movimentações registradas. Registre a primeira movimentação para começar.', false)}">
+                        </div>
+                    </th:block>
+
+                    <div th:if="${!#lists.isEmpty(movimentacao)}" id="emptyStateFiltro" hidden
+                         th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhuma movimentação encontrada', 'Nenhuma movimentação corresponde aos filtros aplicados. Tente ajustar ou resetar os filtros.', true)}">
                     </div>
 
                     <div th:if="${!#lists.isEmpty(movimentacao)}" class="result-table result-table--movimentacoes">
