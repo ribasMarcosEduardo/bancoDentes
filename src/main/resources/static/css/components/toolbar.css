@@ -3,8 +3,14 @@
     justify-content: space-between;
     align-items: center;
 
+    /*
+        Gruda 1rem abaixo da navbar, que também é sticky (top:0,
+        z-index:50) — com top:1rem a toolbar grudava escondida atrás
+        dela. --navbar-height é medido em includes.js
+        (setupNavbarHeight) e vale 0 quando a navbar some (<=1000px).
+    */
     position: sticky;
-    top: 1rem;
+    top: calc(var(--navbar-height, 0px) + 1rem);
     align-self: start;
     z-index: 1;
 

@@ -118,6 +118,7 @@ async function loadIncludes() {
     setupMobileMenu();
     setupThemeToggle();
     setupNavbarDropdowns();
+    setupNavbarHeight();
     setupStickyPagination();
     setupScrollToTopButton();
 
@@ -244,6 +245,30 @@ function setupMobileMenu() {
     overlay.addEventListener("click", closeAll);
 }
 
+function setupNavbarHeight() {
+    // A navbar é sticky (top:0) e fica por cima de tudo, então quem
+    // também gruda no topo (.toolbar, ver components/toolbar.css) precisa
+    // começar abaixo dela. A altura varia (quebra em 2 linhas entre
+    // ~1150px e 1000px, display:none abaixo disso), então mede de
+    // verdade e expõe em --navbar-height. Escondida, offsetHeight é 0.
+    const navbar = document.querySelector(".navbar");
+
+    if (!navbar) return;
+
+    function update() {
+        document.documentElement.style.setProperty("--navbar-height", `${navbar.offsetHeight}px`);
+    }
+
+    update();
+    new ResizeObserver(update).observe(navbar);
+}
+
+// Distância do topo da tela em que a .toolbar gruda — lida do CSS
+// (navbar + 1rem, ver components/toolbar.css) em vez de fixa aqui.
+function getToolbarStickyTop(toolbar) {
+    return parseFloat(getComputedStyle(toolbar).top) || 0;
+}
+
 function setupStickyPagination() {
     // .pagination (setas + sector-switch + texto "X encontradas") fica
     // sticky logo abaixo da .toolbar (também sticky) — ver .pagination
@@ -259,13 +284,12 @@ function setupStickyPagination() {
 
     if (!toolbar || !pagination) return;
 
-    const TOOLBAR_STICKY_TOP = 16; // 1rem — precisa bater com .toolbar { top: 1rem } em toolbar.css
     const GAP_BELOW_TOOLBAR = 24; // 1.5rem — gap entre linhas de .main-panel
 
     let stickyTop = 0;
 
     function updateOffset() {
-        stickyTop = TOOLBAR_STICKY_TOP + toolbar.offsetHeight + GAP_BELOW_TOOLBAR;
+        stickyTop = getToolbarStickyTop(toolbar) + toolbar.offsetHeight + GAP_BELOW_TOOLBAR;
         pagination.style.setProperty("--pagination-sticky-top", `${stickyTop}px`);
     }
 
@@ -280,7 +304,16 @@ function setupStickyPagination() {
     updateOffset();
     updateStuckState();
 
-    new ResizeObserver(updateOffset).observe(toolbar);
+    // Observa a navbar também: a altura dela muda o top da toolbar.
+    const resizeObserver = new ResizeObserver(() => {
+        updateOffset();
+        updateStuckState();
+    });
+    resizeObserver.observe(toolbar);
+
+    const navbar = document.querySelector(".navbar");
+    if (navbar) resizeObserver.observe(navbar);
+
     window.addEventListener("scroll", updateStuckState, { passive: true });
     window.addEventListener("resize", updateStuckState);
 }
@@ -295,7 +328,6 @@ function setupScrollToTopButton() {
 
     if (!toolbar || !results) return;
 
-    const TOOLBAR_STICKY_TOP = 16; // 1rem — precisa bater com .toolbar { top: 1rem } em toolbar.css
     const BUTTON_SIZE = 48; // precisa bater com width/height de .scroll-to-top
     const EDGE_GAP = 20; // 1.25rem — mesma distância usada nos outros FABs (mobile-menu-toggle etc.)
     const DASHBOARD_EDGE_GAP = EDGE_GAP / 3; // 2/3 menor — perto do fim do .dashboard, folga total incomoda
@@ -429,7 +461,7 @@ function setupScrollToTopButton() {
     }
 
     function updateVisibility() {
-        const threshold = toolbar.offsetTop - TOOLBAR_STICKY_TOP;
+        const threshold = toolbar.offsetTop - getToolbarStickyTop(toolbar);
 
         const nowStuck = isStuck
             ? window.scrollY >= threshold - STUCK_HYSTERESIS
