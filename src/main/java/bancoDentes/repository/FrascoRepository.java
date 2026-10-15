@@ -61,6 +61,9 @@ public interface FrascoRepository extends JpaRepository<Frasco, Long> {
             "WHERE f.codigo = :codigo AND " + CONDICAO_POSSUI_VINCULO)
     boolean possuiVinculo(@Param("codigo") Long codigo);
 
+    @Query("SELECT f FROM Frasco f WHERE f.codigo IN :codigos AND f.statusFrasco = 'DIS_IMPRESSAO'")
+    List<Frasco> buscarDisponiveisParaImpressao(List<Long> codigos);
+
 }
 
 

@@ -11,6 +11,7 @@ import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
+import bancoDentes.service.validator.FrascoImpressaoValidator;
 import bancoDentes.service.validator.FrascoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class FrascoService extends BaseService{
     private final MovimentacaoRepository movimentacaoRepository;
     private final MovimentacaoService movimentacaoService;
     private final FrascoValidator frascoValidator;
+    private final FrascoImpressaoValidator frascoImpressaoValidator;
 
     /**
      * Salva um novo frasco ou atualiza um frasco já existente no banco de dados.
@@ -91,6 +93,38 @@ public class FrascoService extends BaseService{
     }
 
     /**
+     * Exclui frasco com base no código. Só é permitido para frascos sem histórico
+     * (movimentação, manutenção ou item de análise); os demais devem ser inativados.
+     *
+     * @param codigoFrasco
+     */
+    @Transactional
+    public Frasco excluirFrasco(Long codigoFrasco) {
+        Frasco frasco = buscarPorId(codigoFrasco);
+        frascoValidator.validaFrascoExclusao(frasco);
+
+        movimentacaoRepository.deleteByFrasco(frasco);
+        frascoRepository.delete(frasco);
+        return frasco;
+    }
+
+    /**
+     * Inativa um frasco que possui histórico, preservando seus vínculos.
+     * Frascos em manutenção não podem ser inativados por aqui: o descarte deve ser
+     * feito concluindo a manutenção com quantidade 0, que já inativa o frasco.
+     *
+     * @param codigoFrasco
+     */
+    @Transactional
+    public Frasco inativarFrasco(Long codigoFrasco) {
+        Frasco frasco = buscarPorId(codigoFrasco);
+        frascoValidator.validaFrascoInativacao(frasco);
+
+        frasco.inativo();
+        return frasco;
+    }
+
+    /**
      * Recupera todos os frascos cadastrados no sistema.
      */
     public List<Frasco> getFrascos() {
@@ -133,15 +167,11 @@ public class FrascoService extends BaseService{
      * @param codFrasco
      */
     @Transactional
-    public Frasco enviarParaImpressao(Long codFrasco) {
+    public Frasco disponibilizarParaImpressao(Long codFrasco) {
         Frasco frasco = buscarPorId(codFrasco);
-
-        if (!frasco.isPodeEnviarParaImpressao()) {
-            throw new FrascoException(this.getText("error.frasco.enviarImpressao.status"));
-        }
-
+        frascoImpressaoValidator.validaImpressaoEtiqueta(frasco);
         frasco.disImpressao();
-        return frascoRepository.save(frasco);
+        return frasco;
     }
 
     /**
@@ -152,34 +182,27 @@ public class FrascoService extends BaseService{
      * @param codigos
      */
     public List<Frasco> getFrascosParaImpressao(List<Long> codigos) {
-        if (codigos == null || codigos.isEmpty()) {
+        if (codigos.isEmpty()) {
             return List.of();
         }
 
-        Map<Long, Frasco> porCodigo = frascoRepository.findAllById(codigos).stream()
-                .filter(Frasco::isNaFilaImpressao)
+        List<Frasco> frascosValidos = frascoRepository.buscarDisponiveisParaImpressao(codigos);
+
+        Map<Long, Frasco> porCodigo = frascosValidos.stream()
                 .collect(Collectors.toMap(Frasco::getCodigo, Function.identity()));
 
         return codigos.stream()
-                .distinct()
                 .map(porCodigo::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
 
-    /**
-     * Tira da fila de impressão os frascos cuja etiqueta já foi impressa,
-     * voltando o status para Disponível. Frascos que já saíram da fila são ignorados.
-     *
-     * @param codigos
-     * @return quantidade de frascos atualizados
-     */
     @Transactional
-    public int confirmarImpressao(List<Long> codigos) {
-        List<Frasco> frascos = getFrascosParaImpressao(codigos);
-        frascos.forEach(Frasco::disponivel);
-        frascoRepository.saveAll(frascos);
-        return frascos.size();
+    public Long confirmarImpressao(List<Long> codigos) {
+        List<Frasco> frascoList = getFrascosParaImpressao(codigos);
+        frascoImpressaoValidator.validaListaFrascosImpressao(frascoList);
+        frascoList.forEach(Frasco::disponivel);
+        return (long) frascoList.size();
     }
 
     /**
@@ -190,13 +213,9 @@ public class FrascoService extends BaseService{
     @Transactional
     public Frasco removerDaFilaImpressao(Long codFrasco) {
         Frasco frasco = buscarPorId(codFrasco);
-
-        if (!frasco.isNaFilaImpressao()) {
-            throw new FrascoException(this.getText("error.etiqueta.foraDaFila"));
-        }
-
+        frascoValidator.validaFrasco(frasco);
         frasco.disponivel();
-        return frascoRepository.save(frasco);
+        return frasco;
     }
 
     /**
@@ -223,49 +242,6 @@ public class FrascoService extends BaseService{
      */
     public Set<Long> getCodigosComVinculo() {
         return frascoRepository.findCodigosComVinculo();
-    }
-
-    /**
-     * Exclui frasco com base no código. Só é permitido para frascos sem histórico
-     * (movimentação, manutenção ou item de análise); os demais devem ser inativados.
-     *
-     * @param codigoFrasco
-     */
-    @Transactional
-    public Frasco excluirFrasco(Long codigoFrasco) {
-        Frasco frasco = buscarPorId(codigoFrasco);
-
-        if (frascoRepository.possuiVinculo(codigoFrasco)) {
-            throw new FrascoException(this.getText("error.frasco.excluir.possuiVinculo"));
-        }
-
-        // Sem vínculo, a única movimentação possível é a entrada do cadastro
-        movimentacaoRepository.deleteByFrasco(frasco);
-        frascoRepository.delete(frasco);
-        return frasco;
-    }
-
-    /**
-     * Inativa um frasco que possui histórico, preservando seus vínculos.
-     * Frascos em manutenção não podem ser inativados por aqui: o descarte deve ser
-     * feito concluindo a manutenção com quantidade 0, que já inativa o frasco.
-     *
-     * @param codigoFrasco
-     */
-    @Transactional
-    public Frasco inativarFrasco(Long codigoFrasco) {
-
-        Frasco frasco = buscarPorId(codigoFrasco);
-
-        if (frasco.getStatusFrasco() == StatusFrasco.INATIVO) {
-            throw new FrascoException(this.getText("error.frasco.inativar.jaInativo"));
-        }
-        if (frasco.isEmManutencao()) {
-            throw new FrascoException(this.getText("error.frasco.inativar.emManutencao"));
-        }
-
-        frasco.inativo();
-        return frascoRepository.save(frasco);
     }
 
     public List<Frasco> getFrascosFiltrados(Solicitacao solicitacao) {

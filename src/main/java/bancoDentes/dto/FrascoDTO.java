@@ -38,9 +38,11 @@ public record FrascoDTO(
         frasco.setVersion(this.version);
         if (this.datCad != null) {
             frasco.setDatCad(this.datCad.atStartOfDay());
-        }
-        if (this.datManutencao != null) {
-            frasco.setDatManutencao(this.datManutencao.atStartOfDay());
+            if (this.datManutencao != null) {
+                frasco.setDatManutencao(this.datManutencao.atStartOfDay());
+            } else {
+                frasco.setDatManutencao(this.datCad.plusYears(1).atStartOfDay());
+            }
         }
         frasco.setEstado(this.estadoDente);
         frasco.setQuantidade(this.quantidade);

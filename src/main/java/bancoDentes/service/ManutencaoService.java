@@ -13,6 +13,7 @@ import bancoDentes.model.enumModels.TipoMovimentacao;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ManutencaoRepository;
 import bancoDentes.repository.MovimentacaoRepository;
+import bancoDentes.service.validator.ManutencaoValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class ManutencaoService extends BaseService{
     private final ManutencaoRepository manutencaoRepository;
     private final FrascoRepository frascoRepository;
     private final MovimentacaoRepository movimentacaoRepository;
+    private final ManutencaoValidator manutencaoValidator;
 
     /**
      * Recupera todas as manutenções cadastrados no sistema.
@@ -50,24 +52,11 @@ public class ManutencaoService extends BaseService{
      */
     @Transactional(rollbackOn = Exception.class)
     public Manutencao registrarManutencao(ManutencaoDTO dto) throws ManutencaoException {
-
         Frasco frasco = frascoRepository.findById(dto.codFrasco())
                 .orElseThrow(() -> new ManutencaoException(getText("error.frasco.naoEncontrado")));
 
         Manutencao manutencao = dto.mapearManutencao(frasco);
-
         return manutencaoRepository.save(manutencao);
-    }
-
-    /**
-     * Manutenções em aberto indexadas pelo código do frasco — usado pelo painel de
-     * frascos pra concluir a manutenção ali mesmo, sem trocar de tela.
-     */
-    public Map<Long, Manutencao> getManutencoesAbertasPorFrasco() {
-        return manutencaoRepository.findByStatusManutencao(StatusManutencao.EM_ABERTO).stream()
-                .filter(m -> m.getFrasco() != null)
-                .collect(Collectors.toMap(m -> m.getFrasco().getCodigo(), Function.identity(),
-                        (primeira, outra) -> primeira));
     }
 
     /**
@@ -89,15 +78,8 @@ public class ManutencaoService extends BaseService{
         }
 
         abertas.forEach(m -> m.setQuantidade(novaQuantidade));
-        manutencaoRepository.saveAll(abertas);
     }
 
-    /**
-     * Finaliza as manutenções em aberto do frasco -> usado quando uma movimentação
-     * zera o frasco (ele é inativado), pra que a conclusão posterior não o reative.
-     *
-     * @param frasco
-     */
     @Transactional(rollbackOn = Exception.class)
     public void finalizarManutencoesAbertas(Frasco frasco) {
         List<Manutencao> abertas = manutencaoRepository.findByFrascoAndStatusManutencao(frasco, StatusManutencao.EM_ABERTO);
@@ -105,7 +87,17 @@ public class ManutencaoService extends BaseService{
             m.setQuantidade(0L);
             m.setStatusManutencao(StatusManutencao.FINALIZADA);
         });
-        manutencaoRepository.saveAll(abertas);
+    }
+
+    /**
+     * Manutenções em aberto indexadas pelo código do frasco — usado pelo painel de
+     * frascos pra concluir a manutenção ali mesmo, sem trocar de tela.
+     */
+    public Map<Long, Manutencao> getManutencoesAbertasPorFrasco() {
+        return manutencaoRepository.findByStatusManutencao(StatusManutencao.EM_ABERTO).stream()
+                .filter(m -> m.getFrasco() != null)
+                .collect(Collectors.toMap(m -> m.getFrasco().getCodigo(), Function.identity(),
+                        (primeira, outra) -> primeira));
     }
 
     /**
@@ -118,35 +110,21 @@ public class ManutencaoService extends BaseService{
      */
     @Transactional(rollbackOn = Exception.class)
     public void concluirManutencao(Long codManutencao, Long novaQuantidade) throws ManutencaoException {
-
-        Manutencao manutencao = manutencaoRepository.findById(codManutencao)
-                .orElseThrow(() -> new ManutencaoException(getText("error.manutencao.naoEncontrado")));
-
-        // Página desatualizada (outra aba/usuário, ou uma saída que zerou o frasco):
-        // concluir de novo reativaria o frasco e duplicaria o descarte.
-        if (manutencao.getStatusManutencao() != StatusManutencao.EM_ABERTO) {
-            throw new ManutencaoException(getText("error.manutencao.jaFinalizada"));
-        }
-
+        Manutencao manutencao = manutencaoValidator.validarConclusaoManutencao(codManutencao, novaQuantidade);
         Frasco frasco = manutencao.getFrasco();
-        long quantidadeAtual = frasco.getQuantidade() != null ? frasco.getQuantidade() : 0L;
-        // A conclusão só pode manter ou reduzir (descarte); aumento passa por movimentação
-        if (novaQuantidade == null || novaQuantidade < 0 || novaQuantidade > quantidadeAtual) {
-            throw new ManutencaoException(getText("error.manutencao.quantidadeInvalida", quantidadeAtual));
-        }
 
         registrarDescarteManutencao(frasco, novaQuantidade);
-        frasco.setQuantidade(novaQuantidade);
 
-        // Data de cadastro é preservada; só a próxima manutenção é recalculada
+        frasco.setQuantidade(novaQuantidade);
         frasco.setDatManutencao(LocalDateTime.now().plusYears(1));
 
-        frasco.setStatusFrasco(novaQuantidade == 0 ? StatusFrasco.INATIVO : StatusFrasco.DIS_IMPRESSAO);
-
-        frascoRepository.save(frasco);
+        if (novaQuantidade == 0L) {
+            frasco.inativo();
+        } else {
+            frasco.disImpressao();
+        }
 
         manutencao.setStatusManutencao(StatusManutencao.FINALIZADA);
-        manutencaoRepository.save(manutencao);
     }
 
     /**
@@ -159,20 +137,15 @@ public class ManutencaoService extends BaseService{
     private void registrarDescarteManutencao(Frasco frasco, Long novaQuantidade) {
         long saldoAtual = frasco.getQuantidade() != null ? frasco.getQuantidade() : 0L;
         long removidos = saldoAtual - (novaQuantidade != null ? novaQuantidade : 0L);
+
         if (removidos <= 0L) {
             return;
         }
 
         movimentacaoRepository.save(new Movimentacao(
-                TipoMovimentacao.SAIDA,
-                OrigemMovimentacao.MANUTENCAO,
-                LocalDateTime.now(),
-                frasco.getLocal(),
-                getText("msg.movimentacao.descarteManutencao"),
-                frasco,
-                removidos,
-                saldoAtual,
-                null
+                TipoMovimentacao.SAIDA, OrigemMovimentacao.MANUTENCAO, LocalDateTime.now(),
+                frasco.getLocal(), getText("msg.movimentacao.descarteManutencao"), frasco,
+                removidos, saldoAtual, null
         ));
     }
 
@@ -181,23 +154,12 @@ public class ManutencaoService extends BaseService{
      */
     @Transactional(rollbackOn = Exception.class)
     public void registrarManutencaoDireta(Long codFrasco) throws ManutencaoException {
-        Frasco frasco = frascoRepository.findById(codFrasco)
-                .orElseThrow(() -> new ManutencaoException(getText("error.frasco.naoEncontrado")));
-
-        if (frasco.isEmManutencao()) {
-            throw new ManutencaoException(getText("error.manutencao.frascoJaEmManutencao"));
-        }
-        if (frasco.isInativo()) {
-            throw new ManutencaoException(getText("error.manutencao.frascoInativo"));
-        }
+        Frasco frasco = manutencaoValidator.validarRegistroManutencaoDireta(codFrasco);
 
         registrarManutencao(new ManutencaoDTO(
-                frasco.getCodigo(),
-                frasco.getQuantidade(),
-                OrigemManutencao.MANUTENCAO
+                frasco.getCodigo(), frasco.getQuantidade(), OrigemManutencao.MANUTENCAO
         ));
 
         frasco.emManutencao();
-        frascoRepository.save(frasco);
     }
 }

@@ -5,6 +5,7 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.service.FrascoService;
+import bancoDentes.service.ImpressaoService;
 import bancoDentes.service.ManutencaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,7 @@ public class FrascoPainelController extends BaseController {
 
     private final FrascoService frascoService;
     private final ManutencaoService manutencaoService;
+    private final ImpressaoService impressaoService;
 
     /**
      * Exibe o painel principal com a listagem de todos os frascos cadastrados.
@@ -82,7 +84,7 @@ public class FrascoPainelController extends BaseController {
     @PostMapping("/enviarImpressao/{codigo}")
     public String enviarParaImpressao(@PathVariable("codigo") Long codigo) {
         try {
-            Frasco frasco = frascoService.enviarParaImpressao(codigo);
+            Frasco frasco = impressaoService.enviarParaImpressao(codigo);
             this.saveMessage(this.getText("msg.sucesso.frasco.enviadoImpressao", frasco.getIdentificacao()));
         } catch (FrascoException e) {
             this.saveError(e.getMessage());

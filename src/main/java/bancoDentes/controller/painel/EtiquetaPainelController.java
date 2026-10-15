@@ -8,6 +8,7 @@ import bancoDentes.model.enumModels.ModeloFolhaEtiqueta;
 import bancoDentes.model.enumModels.StatusFrasco;
 import bancoDentes.service.FrascoService;
 import bancoDentes.service.GeradorEtiquetasService;
+import bancoDentes.service.ImpressaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +31,7 @@ public class EtiquetaPainelController extends BaseController {
 
     private final FrascoService frascoService;
     private final GeradorEtiquetasService geradorEtiquetasService;
+    private final ImpressaoService impressaoService;
 
     /**
      * Exibe a fila de impressão: todos os frascos com status Disponível para impressão.
@@ -121,17 +123,13 @@ public class EtiquetaPainelController extends BaseController {
     @PostMapping("/confirmar")
     public String confirmarImpressao(@RequestParam(value = "frascos", required = false) List<Long> codigos) {
         try {
-            int quantidade = frascoService.confirmarImpressao(codigos);
-
-            if (quantidade == 0) {
-                this.saveError(this.getText("error.etiqueta.nenhumFrasco"));
-            } else {
-                this.saveMessage(this.getText("msg.sucesso.etiqueta.impressa", quantidade));
-            }
+            Long quantidade = frascoService.confirmarImpressao(codigos);
+            this.saveMessage(this.getText("msg.sucesso.etiqueta.impressa", quantidade));
+        } catch (FrascoException e) {
+            this.saveError(this.getText(e.getMessage()));
         } catch (Exception e) {
             this.saveError(this.getText("error.etiqueta.confirmar"));
         }
-
         return "redirect:/etiqueta/fila";
     }
 
