@@ -381,3 +381,55 @@
 .checkbox-filter:hover {
     color: var(--text);
 }
+
+/*
+    Barra de filtro por frasco do painel de movimentações (link "Ver
+    movimentações" do painel de frascos, ?frasco=). O filtro é feito no
+    servidor, então a barra é estática e "Ver todas" só volta pro painel
+    sem o parâmetro.
+*/
+.frasco-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+
+    padding: 1.1rem 1.25rem;
+}
+
+.frasco-filter-bar__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.frasco-filter-bar__label strong {
+    color: var(--text);
+}
+
+.frasco-filter-bar__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.frasco-filter-bar__clear:hover {
+    color: var(--text);
+}
+
+.frasco-filter-bar .icon {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+}

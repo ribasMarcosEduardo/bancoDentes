@@ -1,0 +1,111 @@
+/* Grade clicável pra escolher a célula inicial da folha de etiquetas
+   (painel/configurarEtiquetas.html) - primeiro componente do tipo "grade
+   de células selecionáveis" do projeto. Também usada, sem clique, na
+   prévia das folhas (.etiqueta-grid--mini, ver
+   pages/configurar_etiquetas.css).
+
+   grid-template-columns e --cel-aspect são setados via JS inline
+   (js/etiquetas-configurar.js), porque variam conforme o número de
+   colunas e a proporção de célula do modelo de folha escolhido. */
+
+.etiqueta-grid-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.etiqueta-grid {
+    display: grid;
+    gap: 3px;
+
+    padding: 1rem;
+
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.etiqueta-grid__cel {
+    aspect-ratio: var(--cel-aspect, 1);
+    position: relative;
+    min-width: 0;
+    min-height: 12px;
+
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+
+    background: var(--surface);
+    padding: 0;
+    cursor: pointer;
+
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+/* Borda de contorno (não border-color) - nas células --disponivel o
+   fundo já é var(--step-line-active), então mudar só a cor da borda no
+   hover ficava invisível (verde sobre verde). O box-shadow usa
+   --primary, que nunca se confunde com o fundo de nenhum estado da
+   célula, e o z-index garante que a célula ampliada (scale) sempre
+   apareça por cima das vizinhas, não por baixo. */
+.etiqueta-grid__cel:hover {
+    z-index: 2;
+    box-shadow: 0 0 0 2px var(--primary);
+    transform: scale(1.15);
+}
+
+.etiqueta-grid__cel:focus-visible {
+    z-index: 2;
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
+/* Célula antes da posição escolhida - representa um adesivo já ausente
+   na folha física, que a impressão vai pular. */
+.etiqueta-grid__cel--pulada {
+    background: var(--surface-muted);
+    border-style: dashed;
+    opacity: 0.6;
+}
+
+/* Célula na posição escolhida em diante - onde a impressão de fato
+   começa a preencher. Reaproveita a cor "ativa" do stepper (ver
+   components/stepper.css) pra manter o mesmo vocabulário visual de
+   "etapa em andamento/concluída" usado no resto do fluxo. */
+.etiqueta-grid__cel--disponivel {
+    background: var(--step-line-active);
+    border-color: var(--step-line-active);
+}
+
+.etiqueta-grid__legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.etiqueta-grid__legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.etiqueta-grid__legenda-swatch {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    border: 1px solid var(--border-strong);
+    flex-shrink: 0;
+}
+
+.etiqueta-grid__legenda-swatch--pulada {
+    background: var(--surface-muted);
+    border-style: dashed;
+    opacity: 0.6;
+}
+
+.etiqueta-grid__legenda-swatch--disponivel {
+    background: var(--step-line-active);
+    border-color: var(--step-line-active);
+}

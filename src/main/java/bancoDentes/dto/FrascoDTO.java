@@ -27,15 +27,22 @@ public record FrascoDTO(
         return new FrascoDTO(null,null,null,null, null, null, null, null, null, null,null,null);
     }
 
+    public static FrascoDTO novo() {
+        LocalDate hoje = LocalDate.now();
+        return new FrascoDTO(null, null, hoje, hoje.plusYears(1), null, null, null, null, null, null, null, null);
+    }
+
     public Frasco mapearFrasco(){
         Frasco frasco = new Frasco();
         frasco.setCodigo(this.codigo);
         frasco.setVersion(this.version);
         if (this.datCad != null) {
             frasco.setDatCad(this.datCad.atStartOfDay());
-        }
-        if (this.datManutencao != null) {
-            frasco.setDatManutencao(this.datManutencao.atStartOfDay());
+            if (this.datManutencao != null) {
+                frasco.setDatManutencao(this.datManutencao.atStartOfDay());
+            } else {
+                frasco.setDatManutencao(this.datCad.plusYears(1).atStartOfDay());
+            }
         }
         frasco.setEstado(this.estadoDente);
         frasco.setQuantidade(this.quantidade);

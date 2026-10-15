@@ -2,11 +2,11 @@ package bancoDentes.model.enumModels;
 
 public enum TipoDente {
 
+    MOLAR("Molar", "MO"),
+    PRE_MOLAR("Pré-Molar", "PM"),
     CANINO("Canino", "CN"),
-    ENDO("Endo", "EN"),
     INCISIVO("Incisivo", "IN"),
-    MOLAR("Molar", "MP"),
-    PRE_MOLAR("Pré-Molar", "PM");
+    ENDO("Endo", "EN");
 
     private final String nome;
     private final String sigla;
@@ -27,6 +27,21 @@ public enum TipoDente {
 
     public String getSigla() {
         return sigla;
+    }
+
+    /**
+     * Molares e pré-molares são identificados pela numeração do dente.
+     */
+    public boolean isUsaNumeracao() {
+        return this == MOLAR || this == PRE_MOLAR;
+    }
+
+    /**
+     * Caninos e incisivos são identificados pela arcada. Endo entra junto só pra
+     * manter o mesmo formato na visualização (a arcada dele é sempre vazia).
+     */
+    public boolean isUsaArcada() {
+        return this == CANINO || this == INCISIVO || this == ENDO;
     }
 
     public static String getSiglaDente(TipoDente tipoDente) {

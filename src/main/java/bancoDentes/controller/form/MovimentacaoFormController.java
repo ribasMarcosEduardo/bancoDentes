@@ -32,7 +32,7 @@ public class MovimentacaoFormController extends BaseController {
     @GetMapping("/frascosMovimentacao")
     @ResponseBody
     public List<Frasco> getFrascosCatalogo() {
-        return frascoService.getFrascosDisponiveis();
+        return frascoService.getFrascosMovimentaveis();
     }
 
     /**

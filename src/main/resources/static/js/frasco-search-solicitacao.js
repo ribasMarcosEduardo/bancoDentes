@@ -3,13 +3,13 @@ const DADOS = window.DADOS_ANALISE || { frascosDisponiveis: [], itensSalvos: [],
 const MOCK_FRASCOS = DADOS.frascosDisponiveis.map(f => ({
     id: f.identificacao || ('FR-' + f.codigo),
     codFrasco: f.codigo,
-    grupo: f.tipoDente || "—",
-    estado: f.estadoDente || "—",
-    arcada: f.arcada || "—",
-    denticao: f.denticao ? f.denticao.nome : "—",
+    grupo: f.tipoDente || "---",
+    estado: f.estadoDente || "---",
+    arcada: f.arcada || "---",
+    denticao: f.denticao ? f.denticao.nome : "---",
     disponivel: f.quantidade,
-    dataCadastro: f.datCad || "—",
-    dataManutencao: f.datManutencao || "—"
+    dataCadastro: f.datCad || "---",
+    dataManutencao: f.datManutencao || "---"
 }));
 
 const mapaCodigosItem = new Map();
@@ -302,22 +302,22 @@ function setupFrascoSearchModal() {
                     <div class="request-details__grid">
                         <div class="request-detail">
                             <span class="request-details__label">Grupo dentário</span>
-                            <span>${frasco.grupo ?? "—"}</span>
+                            <span>${frasco.grupo ?? "---"}</span>
                         </div>
 
                         <div class="request-detail">
                             <span class="request-details__label">Estado</span>
-                            <span>${frasco.estado ?? "—"}</span>
+                            <span>${frasco.estado ?? "---"}</span>
                         </div>
 
                         <div class="request-detail">
                             <span class="request-details__label">Arcada</span>
-                            <span>${frasco.arcada ?? "—"}</span>
+                            <span>${frasco.arcada ?? "---"}</span>
                         </div>
 
                         <div class="request-detail">
                             <span class="request-details__label">Dentição</span>
-                            <span>${frasco.denticao ?? "—"}</span>
+                            <span>${frasco.denticao ?? "---"}</span>
                         </div>
 
                         <div class="request-detail">
@@ -332,12 +332,12 @@ function setupFrascoSearchModal() {
 
                         <div class="request-detail">
                             <span class="request-details__label">Data de cadastro</span>
-                            <span>${frasco.dataCadastro ?? "—"}</span>
+                            <span>${frasco.dataCadastro ?? "---"}</span>
                         </div>
 
                         <div class="request-detail">
                             <span class="request-details__label">Próxima manutenção</span>
-                            <span>${frasco.dataManutencao ?? "—"}</span>
+                            <span>${frasco.dataManutencao ?? "---"}</span>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,127 @@
+/* Tela 2 do fluxo de impressão de etiquetas - modelo de folha e célula
+   inicial (painel/configurarEtiquetas.html). Stepper e barra de ações
+   ficam em pages/etiquetas.css. */
+
+.etiqueta-config-layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Select do modelo ocupa a largura do card (sem isso fica do tamanho
+   do texto e corta o nome no celular) */
+.etiqueta-config-painel .select-wrapper {
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .etiqueta-config-layout {
+        grid-template-columns: 1fr;
+    }
+
+    /* Em coluna única a grade pegaria a largura toda e, mantendo a
+       proporção da etiqueta, ficaria com quase duas telas de altura */
+    .etiqueta-grid:not(.etiqueta-grid--mini) {
+        max-width: 360px;
+    }
+}
+
+/* Mesmo respiro dos cards de cadastro_frasco.css em tela estreita */
+@media (max-width: 735px) {
+    .form-card {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /* Menos moldura em volta da grade - sobra mais área de toque pra
+       cada célula */
+    .etiqueta-grid:not(.etiqueta-grid--mini) {
+        padding: 0.6rem;
+        gap: 2px;
+    }
+}
+
+.etiqueta-config-painel,
+.etiqueta-config-resumo {
+    gap: 1.5rem;
+}
+
+.etiqueta-config-resumo h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+#etiquetaResumoTexto {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.etiqueta-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.etiqueta-preview__folha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.75rem;
+
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+}
+
+.etiqueta-preview__legenda {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* Versão só-leitura da grade - usada dentro de .etiqueta-preview__folha.
+   Menor e sem cursor de clique (é <span>, não <button>, mas o cursor
+   base de .etiqueta-grid__cel é pointer por padrão - ver
+   components/etiqueta-grid.css). */
+.etiqueta-grid--mini {
+    width: 160px;
+    padding: 0.5rem;
+    gap: 1.5px;
+}
+
+.etiqueta-grid--mini .etiqueta-grid__cel {
+    cursor: default;
+    min-height: 5px;
+}
+
+.etiqueta-grid--mini .etiqueta-grid__cel:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.etiqueta-config-nota {
+    margin: 0;
+}
+
+/* Os dois cards entram um depois do outro, logo após o stepper (ver
+   transições em pages/etiquetas.css). */
+html:not(.vt-nav) .etiqueta-config-layout > .form-card {
+    animation: fade-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.16s backwards;
+}
+
+html:not(.vt-nav) .etiqueta-config-layout > .form-card + .form-card {
+    animation-delay: 0.24s;
+}
+
+/* O form em si não entra junto com o .form-shell: ele só contém os cards,
+   que já têm a entrada própria acima (as duas somadas apagavam demais). */
+html:not(.vt-nav) .form-shell > .etiqueta-config-layout {
+    animation: none;
+}

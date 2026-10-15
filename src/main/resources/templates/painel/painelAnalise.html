@@ -338,22 +338,22 @@
                                             <div class="request-details__grid">
                                                 <div class="request-detail request-detail--solicitante">
                                                     <span class="request-details__label">Solicitante</span>
-                                                    <span th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : '-'}">Nome</span>
+                                                    <span th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : '---'}">Nome</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Estado</span>
-                                                    <span th:text="${solicitacao.estado != null ? solicitacao.estado.nome : '-'}">Hígido</span>
+                                                    <span th:text="${solicitacao.estado != null ? solicitacao.estado.nome : '---'}">Hígido</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Arcada</span>
-                                                    <span th:text="${solicitacao.arcada != null ? solicitacao.arcada.nome : '-'}">Inferior</span>
+                                                    <span th:text="${solicitacao.arcada != null ? solicitacao.arcada.nome : '---'}">Inferior</span>
                                                 </div>
 
                                                 <div class="request-detail">
                                                     <span class="request-details__label">Dentição</span>
-                                                    <span th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '-'}">Permanente</span>
+                                                    <span th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '---'}">Permanente</span>
                                                 </div>
 
                                                 <div class="request-detail">

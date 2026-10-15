@@ -73,9 +73,6 @@
             <input type="hidden" th:field="*{codFrasco}" id="frascoSelecionadoInput" />
             <input type="hidden" name="datManutencao" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" />
 
-            <!-- Local + Tipo numa linha só. Local vem em Banco de Dentes Humanos por padrão;
-                 trocar muda o setor da busca de frascos e esvazia a seleção feita
-                 (ver "change" de localSelect em frasco-search-movimentacao.js). -->
             <section class="form-section">
                 <h2 class="form-section__title"><i class="icon" data-lucide="arrow-left-right" aria-hidden="true"></i>Informações da Movimentação</h2>
 
@@ -95,8 +92,6 @@
                     <div class="form-group" id="tipoMovimentacaoGroup">
                         <label for="tipoMovimentacao">Tipo de movimentação <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
-                            <!-- Saída vem como padrão — forms.js (setupCadastroMovimentacao) aplica o
-                                 estado inicial do botão/título/lista a partir dele -->
                             <select class="form-control" th:field="*{tipoMovimentacao}" id="tipoMovimentacao" required>
                                 <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
                                         th:if="${tipo.name() != 'TRANSFERENCIA'}"
@@ -109,9 +104,6 @@
                 </div>
             </section>
 
-            <!-- Lista de frascos com o botão que a preenche no próprio cabeçalho (.field-card__head).
-                 Título, rótulo, botão e estado vazio mudam com o Tipo (ver setupCadastroMovimentacao
-                 em forms.js): em Entrada é um frasco só, o de destino. -->
             <section class="form-section" id="frascosSelecionadosSection">
                 <h2 class="form-section__title"><i class="icon" data-lucide="flask-conical" aria-hidden="true"></i><span id="frascosSectionTitle">Frascos Selecionados</span></h2>
 
@@ -142,10 +134,6 @@
                 </div>
             </section>
 
-            <!-- Só existe pra Entrada (ver atualizarOrigemDentes em frasco-search-movimentacao.js).
-                 O frasco escolhido acima é o destino; aqui se decide de onde os dentes vêm: de
-                 outro(s) frasco(s) (lista logo abaixo, #frascosOrigemSection) ou de uma
-                 doação/origem externa (quantidade digitada ao lado do select). -->
             <section class="form-section reveal-on-show" id="origemDentesSection" hidden>
                 <h2 class="form-section__title"><i class="icon" data-lucide="merge" aria-hidden="true"></i>Origem dos Dentes</h2>
 
@@ -185,10 +173,6 @@
                 </div>
             </section>
 
-            <!-- Só existe quando Origem = "Outro(s) frasco(s)" — continua a seção de cima, sem
-                 título nem divisória própria. Cada frasco escolhido entra INTEIRO no destino, por
-                 isso "Qtd. transferida" só reflete o que o frasco já tinha. O total corrido fica
-                 no próprio cabeçalho (#origemFrascosTotalValor). -->
             <section class="form-section form-section--continued reveal-on-show" id="frascosOrigemSection" hidden>
                 <div class="form-group">
                     <div class="analysis-card">
@@ -278,7 +262,7 @@
             const data = await response.json();
 
             const formatarData = (dataBase) => {
-                if (!dataBase) return "—";
+                if (!dataBase) return "---";
                 let d;
 
                 if (Array.isArray(dataBase)) {
@@ -286,7 +270,7 @@
                 } else {
                     d = new Date(dataBase);
                 }
-                if (isNaN(d)) return "—";
+                if (isNaN(d)) return "---";
                 return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
             };
 
@@ -300,7 +284,8 @@
                 setor: item.local ? item.local.toLowerCase() : "",
                 disponivel: item.quantidade || 0,
                 dataCadastro: formatarData(item.datCad),
-                dataManutencao: formatarData(item.datManutencao)
+                emManutencao: !!item.emManutencao,
+                dataManutencao: item.emManutencao ? "---" : formatarData(item.datManutencao)
             }));
 
             return window.catalogoFrascosCache;

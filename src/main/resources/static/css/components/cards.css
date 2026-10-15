@@ -184,3 +184,7 @@
 .card__action--red {
     border-color: rgba(239, 68, 68, 0.55);
 }
+
+.card__action--green {
+    border-color: rgba(34, 197, 94, 0.55);
+}

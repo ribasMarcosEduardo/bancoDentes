@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Folha de etiquetas - impressão (painel/imprimirEtiquetas.html)
+
+   Deliberadamente separado de css/style.css: este CSS rege um documento de
+   impressão, não uma tela do sistema - sem tokens de tema claro/escuro, sem
+   navbar/footer, sem glassmorphism.
+
+   Restrições pensadas pra compatibilidade com um motor de HTML-to-PDF no
+   futuro (openhtmltopdf, que não executa JS nem tem suporte estável a CSS
+   Grid/Flexbox no layout da folha):
+     - unidades físicas (mm), nunca %/vw/rem;
+     - @page define o tamanho exato da folha (no <style> do template, a
+       partir do ModeloFolhaEtiqueta escolhido);
+     - cada etiqueta é posicionada via position:absolute + top/left em mm,
+       calculados pelo GeradorEtiquetasService - o CSS só consome os
+       valores prontos, nunca calcula linha/coluna sozinho.
+   ========================================================================== */
+
+.folhas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12mm;
+}
+
+.folha {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+}
+
+.folha:last-child {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+.etiqueta {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4mm;
+  overflow: hidden;
+  padding: 1.2mm 1.6mm;
+  font-family: "IBM Plex Mono", "Courier New", monospace;
+  color: #000;
+  border: 0.2mm dashed #b8b8b8; /* guia de corte só em tela, pra visualizar os limites da célula - some na impressão (ver @media print) */
+}
+
+.etiqueta--vazia {
+  border-style: dotted;
+}
+
+.etiqueta__codigo {
+  font-size: 9pt; /* informação central da etiqueta - maior que os dados de apoio abaixo */
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.etiqueta__info {
+  /* Linhas de apoio (qtd. de dentes / manutenção). Nessa fonte
+     monoespaçada o negrito quase não se distingue do regular em corpo
+     pequeno, então além do tamanho a cor é preto puro (mais contraste
+     reforça a percepção do negrito). */
+  font-size: 8pt;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Painel de ações acima das folhas - só na tela. */
+.painel-impressao {
+  box-sizing: border-box;
+  max-width: 720px;
+  margin: 0 auto 12mm;
+  padding: 20px 24px;
+
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: #1c1c1c;
+}
+
+.painel-impressao h1 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.painel-impressao p {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.painel-impressao__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.painel-impressao__btn {
+  padding: 8px 18px;
+
+  border: 1px solid #b8b8b8;
+  border-radius: 8px;
+  background: #fff;
+
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1c1c1c;
+  cursor: pointer;
+}
+
+.painel-impressao__btn:hover {
+  background: #f2f2f2;
+}
+
+.painel-impressao__btn--primario {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.painel-impressao__btn--primario:hover {
+  background: #1e40af;
+}
+
+/* Voltar fica à esquerda, sem moldura - ação secundária em relação a
+   Imprimir e Confirmar */
+.painel-impressao__btn--voltar {
+  margin-right: auto;
+  border-color: transparent;
+  background: none;
+}
+
+.painel-impressao__btn:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+@media screen {
+  /* No <html> também: com a folha mais larga que a tela, a área rolável
+     passa da largura do body e ficava branca */
+  html,
+  body {
+    background: #6b6b6b;
+  }
+
+  body {
+    margin: 0;
+    padding: 12mm 16px;
+  }
+
+  /* Centralizar com align-items:center jogava a folha pros dois lados
+     quando ela é mais larga que a tela, e o pedaço da esquerda não dava
+     pra alcançar rolando. Com margin auto ela centraliza quando cabe e
+     encosta na esquerda (rolável) quando não cabe. */
+  .folhas-container {
+    align-items: flex-start;
+  }
+
+  .folha {
+    margin-inline: auto;
+  }
+
+  /* Entrada só na tela: painel primeiro, depois as folhas em sequência
+     (mesmo movimento das outras telas do fluxo, ver pages/etiquetas.css).
+     Este documento não carrega globals.css, então tem o próprio
+     keyframe e a própria regra de movimento reduzido. */
+  .painel-impressao,
+  .folha {
+    animation: impressao-entrada 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .folha:nth-child(1) { animation-delay: 0.1s; }
+  .folha:nth-child(2) { animation-delay: 0.18s; }
+  .folha:nth-child(n + 3) { animation-delay: 0.26s; }
+}
+
+@keyframes impressao-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .painel-impressao,
+  .folha {
+    animation: none;
+  }
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+
+  /* Bloco em vez de flex na impressão - quebra de página dentro de um
+     container flex não é respeitada de forma confiável pelos navegadores,
+     e a 2ª folha poderia começar no meio da 1ª página. */
+  .folhas-container {
+    display: block;
+  }
+
+  .folha {
+    box-shadow: none;
+  }
+
+  .etiqueta {
+    border: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

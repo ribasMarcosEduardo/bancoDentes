@@ -247,6 +247,214 @@ body.modal-open {
     line-height: 1.4;
 }
 
+/* ---- Modal de Concluir Manutenção ----
+   Frasco identificado numa linha só no topo, quantidades logo abaixo
+   (atual -> nova) e o resto dos dados recolhido em "Detalhes do frasco",
+   pra caber sem rolar em telas baixas. */
+
+.manutencao-resumo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.manutencao-resumo__icone {
+    flex-shrink: 0;
+
+    width: var(--btn-height);
+    height: var(--btn-height);
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 0.75rem;
+
+    background: var(--btn-tonal-bg);
+    color: var(--text-soft);
+}
+
+.manutencao-resumo__icone .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.manutencao-resumo__texto {
+    display: grid;
+    gap: 0.1rem;
+
+    min-width: 0;
+}
+
+.manutencao-resumo__codigo {
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.manutencao-resumo__meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/*
+    Grid de 2 linhas: rótulos em cima, valores embaixo. Os wrappers
+    (__atual e o .form-group de __nova) viram display:contents pros
+    rótulos e valores entrarem direto no grid - assim "Atual" e "Após a
+    manutenção" ficam na mesma linha, e o número atual, a seta e o
+    seletor centralizados entre si na linha de baixo.
+*/
+.manutencao-quantidade {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 0.45rem 1rem;
+
+    margin-bottom: 0.75rem;
+}
+
+.manutencao-quantidade__atual,
+.manutencao-quantidade__nova {
+    display: contents;
+}
+
+/* Mesmo estilo nos dois rótulos (o da nova quantidade é <label> de
+   formulário, que tem estilo próprio em forms.css) */
+.manutencao-quantidade .manutencao-quantidade__rotulo {
+    grid-row: 1;
+
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.manutencao-quantidade__atual .manutencao-quantidade__rotulo {
+    grid-column: 1;
+}
+
+.manutencao-quantidade__nova .manutencao-quantidade__rotulo {
+    grid-column: 3;
+}
+
+.manutencao-quantidade__atual .modal-qty-highlight {
+    grid-row: 2;
+    grid-column: 1;
+
+    white-space: nowrap;
+}
+
+.manutencao-quantidade__seta {
+    grid-row: 2;
+    grid-column: 2;
+
+    width: 18px;
+    height: 18px;
+
+    color: var(--icon-muted);
+}
+
+.manutencao-quantidade__nova .number-input {
+    grid-row: 2;
+    grid-column: 3;
+}
+
+.manutencao-quantidade__nova .number-input--compact {
+    max-width: none;
+}
+
+/* Tela estreita: uma coluna só, na ordem atual -> nova, sem a seta */
+@media (max-width: 420px) {
+
+    .manutencao-quantidade {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+    }
+
+    .manutencao-quantidade .manutencao-quantidade__rotulo,
+    .manutencao-quantidade__atual .modal-qty-highlight,
+    .manutencao-quantidade__nova .number-input {
+        grid-row: auto;
+        grid-column: 1;
+    }
+
+    .manutencao-quantidade__atual .modal-qty-highlight {
+        margin-bottom: 0.5rem;
+    }
+
+    .manutencao-quantidade__seta {
+        display: none;
+    }
+}
+
+/* Detalhes recolhidos - <details> nativo (teclado e leitor de tela de
+   graça). A abertura anima onde o navegador suporta ::details-content
+   com interpolate-size; nos outros abre direto. */
+.manutencao-detalhes {
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+
+    interpolate-size: allow-keywords;
+}
+
+.manutencao-detalhes__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    list-style: none;
+    cursor: pointer;
+
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.manutencao-detalhes__toggle::-webkit-details-marker {
+    display: none;
+}
+
+.manutencao-detalhes__toggle:hover {
+    color: var(--text);
+}
+
+.manutencao-detalhes__toggle:focus-visible {
+    outline: 2px solid var(--input-border-focus);
+    outline-offset: 4px;
+    border-radius: 0.4rem;
+}
+
+.manutencao-detalhes__toggle .icon {
+    width: 16px;
+    height: 16px;
+
+    transition: transform 0.25s ease;
+}
+
+.manutencao-detalhes[open] .manutencao-detalhes__toggle .icon {
+    transform: rotate(180deg);
+}
+
+.manutencao-detalhes::details-content {
+    block-size: 0;
+    overflow: clip;
+    opacity: 0;
+
+    transition:
+        block-size 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease,
+        content-visibility 0.35s allow-discrete;
+}
+
+.manutencao-detalhes[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+}
+
+.manutencao-detalhes__grid {
+    padding-top: 0.85rem;
+}
+
 /* Busca + filtros */
 
 .modal-search {

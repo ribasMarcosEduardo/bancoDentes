@@ -1,0 +1,1989 @@
+/* ==========================================================
+   Landing page do BDH e Biobanco (index.html)
+
+   Segue o Brandbook Unoesc 2026 (graduação):
+   - cores institucionais azul #1e4679 e verde #46b653, e as
+     variações claras de cada uma (faixa de tons do brandbook);
+   - gradientes SEMPRE entre esses dois tons (o "Backgrounds" do
+     brandbook: azul à esquerda → verde à direita sobre foto);
+   - títulos no padrão "palavra leve + palavra forte"
+     (ex.: "Cores **Institucionais**");
+   - família Nexa nos títulos quando estiver instalada; como não
+     é distribuída pelo Google Fonts, cai pra Google Sans (a mesma
+     fonte das páginas internas do sistema).
+
+   Prefixo .lp- em tudo pra não colidir com as classes do
+   dashboard (.navbar, .footer, .card etc.), que continuam vindo
+   de style.css. Só tema claro por enquanto.
+   ========================================================== */
+
+.landing {
+    --brand-blue: #1e4679;
+    --brand-blue-deep: #173a66;
+    --brand-green: #46b653;
+    --brand-green-dark: #2f9a3d;
+
+    /* tons claros das faixas do brandbook, em transparência sobre branco */
+    --brand-blue-05: rgba(30, 70, 121, 0.05);
+    --brand-blue-10: rgba(30, 70, 121, 0.10);
+    --brand-blue-20: rgba(30, 70, 121, 0.20);
+    --brand-green-10: rgba(70, 182, 83, 0.10);
+    --brand-green-16: rgba(70, 182, 83, 0.16);
+
+    --lp-font-display: "Nexa", var(--font-main);
+    --lp-nav-height: 84px;
+    --lp-radius-lg: 1.5rem;
+
+    /* Curva única de movimento da landing (desaceleração longa, sem
+       "quique") — ver bloco ANIMAÇÕES no fim do arquivo. */
+    --lp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    background: var(--page-bg);
+    color: var(--text);
+}
+
+html:has(.landing) {
+    scroll-behavior: smooth;
+}
+
+.landing main {
+    flex: 1;
+}
+
+.landing section[id] {
+    scroll-margin-top: calc(var(--lp-nav-height) - 8px);
+}
+
+.lp-container {
+    width: min(1200px, calc(100% - 2rem));
+    margin: 0 auto;
+}
+
+/* ==========================================================
+   VIDROS DA LANDING
+   Complementam os de components/glass.css: aqui o vidro fica
+   por cima de foto/gradiente escuro, então é branco bem mais
+   transparente (o .glass-frost normal, pensado pra fundo claro,
+   lavaria a foto de branco).
+   ========================================================== */
+
+.lp-glass-hero {
+    background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.24);
+    border-radius: 1rem;
+    box-shadow:
+        0 10px 30px rgba(10, 30, 60, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.28);
+}
+
+.lp-glass-light {
+    background: linear-gradient(135deg, rgba(255,255,255,0.86), rgba(255,255,255,0.62));
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 1rem;
+    box-shadow:
+        0 14px 40px rgba(30, 70, 121, 0.16),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* ==========================================================
+   BOTÕES (estendem .btn de components/buttons.css)
+   ========================================================== */
+
+.lp-btn .icon {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+.lp-btn--lg {
+    height: 50px;
+    padding: 0 1.4rem;
+    font-size: 0.98rem;
+}
+
+.lp-btn--brand {
+    background: var(--brand-blue);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(30, 70, 121, 0.25);
+}
+
+.lp-btn--brand:hover {
+    background: var(--brand-blue-deep);
+}
+
+.lp-btn--light {
+    background: #ffffff;
+    color: var(--brand-blue);
+    box-shadow: 0 6px 18px rgba(10, 30, 60, 0.18);
+}
+
+.lp-btn--light:hover {
+    background: #f3f6fa;
+}
+
+.lp-btn--ghost {
+    background: rgba(255,255,255,0.10);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.lp-btn--ghost:hover {
+    background: rgba(255,255,255,0.18);
+}
+
+/* Botão da navbar: branco por cima do hero, azul quando a barra vira vidro */
+.lp-btn--nav {
+    background: #ffffff;
+    color: var(--brand-blue);
+    box-shadow: 0 4px 14px rgba(10, 30, 60, 0.16);
+}
+
+.lp-nav.is-scrolled .lp-btn--nav {
+    background: var(--brand-blue);
+    color: #ffffff;
+}
+
+.lp-nav.is-scrolled .lp-btn--nav:hover {
+    background: var(--brand-blue-deep);
+}
+
+/* ==========================================================
+   NAVBAR
+   ========================================================== */
+
+.lp-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+
+    border-bottom: 1px solid transparent;
+
+    user-select: none;
+
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        backdrop-filter 0.3s ease;
+}
+
+.lp-nav.is-scrolled {
+    background: linear-gradient(to bottom right, rgba(255,255,255,0.88), rgba(255,255,255,0.66));
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border-bottom-color: var(--border);
+    box-shadow: 0 8px 32px rgba(30, 70, 121, 0.08);
+}
+
+.lp-nav__inner {
+    width: min(1280px, calc(100% - 2rem));
+    height: var(--lp-nav-height);
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.lp-nav__brand {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.lp-nav__logo {
+    display: block;
+    height: 40px;
+    width: auto;
+    transition: opacity 0.3s ease;
+}
+
+/* As duas logos ficam empilhadas e só troca a opacidade — sem
+   "pulo" de layout, já que têm exatamente o mesmo tamanho. */
+.lp-nav__logo--color {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+}
+
+.lp-nav.is-scrolled .lp-nav__logo--light { opacity: 0; }
+.lp-nav.is-scrolled .lp-nav__logo--color { opacity: 1; }
+
+.lp-nav__links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.lp-nav__link {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.9rem;
+
+    border-radius: 999px;
+
+    color: rgba(255,255,255,0.86);
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lp-nav__link:hover {
+    background: rgba(255,255,255,0.14);
+    color: #ffffff;
+}
+
+.lp-nav.is-scrolled .lp-nav__link {
+    color: var(--text-soft);
+}
+
+.lp-nav.is-scrolled .lp-nav__link:hover {
+    background: var(--brand-blue-05);
+    color: var(--brand-blue);
+}
+
+.lp-nav.is-scrolled .lp-nav__link.is-active {
+    background: var(--brand-blue-10);
+    color: var(--brand-blue);
+}
+
+.lp-nav__link.is-active {
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+}
+
+.lp-nav__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.lp-nav__toggle {
+    display: none;
+
+    width: 42px;
+    height: 42px;
+    padding: 0;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 0.75rem;
+
+    background: rgba(255,255,255,0.10);
+    color: #ffffff;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.lp-nav.is-scrolled .lp-nav__toggle {
+    border-color: var(--border);
+    background: var(--surface-elevated);
+    color: var(--brand-blue);
+}
+
+/* Menu mobile — escondido no desktop */
+.lp-nav__menu {
+    display: none;
+}
+
+@media (max-width: 1120px) {
+    .lp-nav__links {
+        display: none;
+    }
+
+    .lp-nav__toggle {
+        display: inline-flex;
+    }
+
+    .lp-nav__menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 1rem;
+        right: 1rem;
+
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.75rem;
+
+        border-radius: 1rem;
+    }
+
+    .lp-nav__menu.is-open {
+        display: flex;
+        animation: fade-slide-in 0.3s var(--lp-ease-out) both;
+    }
+
+    .lp-nav__menu-link {
+        padding: 0.85rem 1rem;
+        border-radius: 0.75rem;
+
+        color: var(--text);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .lp-nav__menu-link:hover,
+    .lp-nav__menu-link.is-active {
+        background: var(--brand-blue-05);
+        color: var(--brand-blue);
+    }
+
+    .lp-nav__menu-cta {
+        margin-top: 0.5rem;
+        height: 48px;
+    }
+}
+
+@media (max-width: 560px) {
+    .landing {
+        --lp-nav-height: 68px;
+    }
+
+    .lp-nav__logo {
+        height: 30px;
+    }
+
+    /* No celular o CTA da barra sai e fica só dentro do menu
+       (e no próprio hero, logo abaixo) — senão espreme a logo. */
+    .lp-btn--nav {
+        display: none;
+    }
+}
+
+/* ==========================================================
+   HERO
+   ========================================================== */
+
+.lp-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    min-height: max(100svh, 680px);
+
+    display: flex;
+    flex-direction: column;
+
+    padding-top: var(--lp-nav-height);
+
+    /* Base enquanto a foto do fundo carrega (o gradiente fica por cima) */
+    background-color: var(--brand-blue-deep);
+    color: #ffffff;
+}
+
+/* Foto com blur leve. O inset negativo + scale escondem a borda
+   clara que o blur cria nas extremidades da imagem. */
+.lp-hero__media {
+    position: absolute;
+    inset: -24px;
+    z-index: -2;
+
+    background: url("../../assets/web/hero-laboratorio.jpg") center 35% / cover no-repeat;
+
+    filter: blur(3px) saturate(0.95);
+    transform: scale(1.03);
+}
+
+/* Gradiente institucional azul → verde (direção do brandbook) +
+   escurecido em azul embaixo pra destacar o vidro dos fatos. */
+.lp-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(23, 58, 102, 0.55) 0%,
+            rgba(23, 58, 102, 0) 38%
+        ),
+        linear-gradient(
+            100deg,
+            rgba(30, 70, 121, 0.95) 0%,
+            rgba(30, 70, 121, 0.84) 38%,
+            rgba(30, 70, 121, 0.52) 68%,
+            rgba(70, 182, 83, 0.62) 100%
+        );
+}
+
+.lp-hero__content {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem;
+
+    padding: 3rem 0 2.5rem;
+
+    animation: fade-slide-in 0.8s var(--lp-ease-out) both;
+}
+
+.lp-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.45rem 0.9rem;
+
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.lp-hero__eyebrow .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    color: var(--brand-green);
+}
+
+.lp-hero__title {
+    max-width: 18ch;
+    margin: 0;
+
+    font-family: var(--lp-font-display);
+    font-size: clamp(2.6rem, 6.4vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+}
+
+.lp-hero__title-light,
+.lp-hero__title-strong {
+    display: block;
+}
+
+.lp-hero__title-light {
+    font-weight: 300;
+}
+
+.lp-hero__title-strong {
+    font-weight: 700;
+}
+
+.lp-hero__title-accent {
+    color: var(--brand-green);
+}
+
+.lp-hero__lead {
+    max-width: 560px;
+    margin: 0;
+
+    color: rgba(255,255,255,0.86);
+    font-size: clamp(1rem, 1.6vw, 1.15rem);
+    line-height: 1.65;
+}
+
+.lp-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.lp-hero__bottom {
+    padding-bottom: 2rem;
+}
+
+.lp-hero__facts {
+    margin: 0;
+    padding: 1.1rem 1.25rem;
+    list-style: none;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.lp-hero__fact {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: rgba(255,255,255,0.78);
+}
+
+.lp-hero__fact + .lp-hero__fact {
+    padding-left: 1rem;
+    border-left: 1px solid rgba(255,255,255,0.18);
+}
+
+.lp-hero__fact .icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--brand-green);
+}
+
+.lp-hero__fact strong {
+    display: block;
+    color: #ffffff;
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .lp-hero__facts {
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+    }
+
+    .lp-hero__fact + .lp-hero__fact {
+        padding-left: 0;
+        padding-top: 0.9rem;
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.18);
+    }
+}
+
+/* ==========================================================
+   SEÇÕES + TIPOGRAFIA
+   ========================================================== */
+
+.lp-section {
+    position: relative;
+    padding: clamp(4.5rem, 9vw, 7.5rem) 0;
+}
+
+.lp-section--soft {
+    background: linear-gradient(180deg, rgba(30, 70, 121, 0.035), rgba(30, 70, 121, 0.015));
+    border-top: 1px solid var(--brand-blue-05);
+    border-bottom: 1px solid var(--brand-blue-05);
+}
+
+.lp-section--tinted {
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.lp-section__head {
+    max-width: 640px;
+    margin-bottom: 3rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.lp-section__head--center {
+    margin-left: auto;
+    margin-right: auto;
+    align-items: center;
+    text-align: center;
+}
+
+.lp-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    color: var(--brand-green-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.lp-kicker::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--brand-green);
+}
+
+.lp-kicker--light {
+    color: rgba(255,255,255,0.9);
+}
+
+.lp-title {
+    margin: 0;
+
+    color: var(--brand-blue);
+    font-family: var(--lp-font-display);
+    font-size: clamp(2rem, 4vw, 2.9rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+}
+
+.lp-title strong {
+    font-weight: 700;
+}
+
+.lp-title--light {
+    color: #ffffff;
+}
+
+.lp-subtitle {
+    margin: 0 0 0.75rem;
+
+    color: var(--brand-blue);
+    font-family: var(--lp-font-display);
+    font-size: 1.6rem;
+    font-weight: 300;
+}
+
+.lp-subtitle strong {
+    font-weight: 700;
+}
+
+.lp-text {
+    margin: 0;
+
+    color: var(--text-soft);
+    font-size: 1.02rem;
+    line-height: 1.75;
+}
+
+.lp-text strong {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.lp-text--center {
+    text-align: center;
+}
+
+.lp-text--light {
+    color: rgba(255,255,255,0.84);
+}
+
+.lp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    align-self: flex-start;
+
+    color: var(--brand-blue);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+}
+
+.lp-link .icon {
+    width: 17px;
+    height: 17px;
+    min-width: 17px;
+    min-height: 17px;
+    transition: transform 0.2s ease;
+}
+
+.lp-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.lp-link:hover .icon {
+    transform: translate(2px, -2px);
+}
+
+/* Manchas de cor da marca atrás das seções com vidro — mesma ideia
+   dos .blob de layout/background.css do dashboard, só que presas à
+   seção (não fixas na tela) e com as cores institucionais exatas. */
+.lp-blobs {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    /* Esmaece as manchas nas bordas de cima e de baixo da seção —
+       sem isso o overflow:hidden corta o blur numa linha reta e a
+       seção seguinte parece "grudada" num degrau de cor. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 78%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 78%, transparent 100%);
+}
+
+.lp-blob {
+    position: absolute;
+    width: 620px;
+    height: 620px;
+    border-radius: 50%;
+    filter: blur(120px);
+}
+
+.lp-blob--blue {
+    background: var(--brand-blue);
+    opacity: 0.20;
+    left: -180px;
+    top: 10%;
+}
+
+.lp-blob--green {
+    background: var(--brand-green);
+    opacity: 0.24;
+    right: -160px;
+    bottom: -10%;
+}
+
+.lp-blob--top-left {
+    left: -200px;
+    right: auto;
+    top: -120px;
+    bottom: auto;
+}
+
+.lp-blob--bottom-right {
+    right: -200px;
+    left: auto;
+    bottom: -160px;
+    top: auto;
+}
+
+/* ==========================================================
+   BLOCOS TEXTO + IMAGEM
+   ========================================================== */
+
+.lp-split {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: clamp(2.5rem, 6vw, 5rem);
+}
+
+.lp-split--reverse .lp-split__text {
+    order: 2;
+}
+
+.lp-split__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.lp-split__text .lp-title {
+    margin-bottom: 0.4rem;
+}
+
+.lp-split__media {
+    position: relative;
+}
+
+/* Moldura comum das imagens — o mesmo aspect-ratio vale pra imagem
+   real e pro slot vazio, então trocar um pelo outro não mexe no
+   layout. */
+.lp-media {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+
+    border-radius: var(--lp-radius-lg);
+    background: var(--brand-blue-05);
+    box-shadow: 0 24px 60px rgba(30, 70, 121, 0.16);
+}
+
+.lp-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lp-media--portrait  { aspect-ratio: 4 / 5; }
+.lp-media--landscape { aspect-ratio: 4 / 3; }
+.lp-media--wide      { aspect-ratio: 16 / 9; }
+
+/* Degradê leve da marca sobre a foto: cor mais presente nas bordas
+   (azul em cima/esquerda, verde embaixo/direita) e centro quase limpo. */
+/* isolation: isolate prende o z-index do degradê dentro da moldura; sem
+   isso ele competia com o cartão da linha do tempo (que fica por cima
+   da foto) e o cobria assim que as animações de entrada terminavam. */
+.lp-media--tinted {
+    isolation: isolate;
+}
+
+.lp-media--tinted::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 45%,
+            rgba(30, 70, 121, 0.34) 100%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(30, 70, 121, 0.6) 0%,
+            rgba(30, 70, 121, 0) 48%,
+            rgba(70, 182, 83, 0) 52%,
+            rgba(70, 182, 83, 0.55) 100%
+        );
+}
+
+/* Slot de imagem pendente (ver comentário no HTML com a sugestão) */
+.lp-media--slot {
+    border: 2px dashed var(--brand-blue-20);
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            rgba(30, 70, 121, 0.025) 0 14px,
+            rgba(30, 70, 121, 0.05) 14px 28px
+        );
+    box-shadow: none;
+}
+
+.lp-slot {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+
+    padding: 1.5rem;
+
+    color: rgba(30, 70, 121, 0.55);
+    text-align: center;
+}
+
+.lp-slot .icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    stroke-width: 1.6;
+    margin-bottom: 0.4rem;
+}
+
+.lp-slot__title {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.lp-slot__hint {
+    max-width: 26ch;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+/* Lista com checks */
+.lp-checklist {
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem 1.25rem;
+}
+
+.lp-checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+
+    color: var(--text);
+    font-size: 0.93rem;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.lp-checklist .icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    padding: 4px;
+
+    border-radius: 999px;
+    background: var(--brand-green-16);
+    color: var(--brand-green-dark);
+    stroke-width: 3;
+}
+
+/* Cartão da linha do tempo, flutuando sobre a imagem */
+.lp-timeline-card {
+    position: absolute;
+    left: -2.5rem;
+    bottom: -2rem;
+    width: min(340px, 92%);
+
+    padding: 1.25rem 1.35rem;
+
+    /* Mais opaco que o vidro padrão, pra ler bem sobre a foto */
+    background: linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
+}
+
+.lp-timeline-card__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    color: var(--brand-blue);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.lp-timeline-card__title .icon {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    color: var(--brand-green-dark);
+}
+
+.lp-timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.lp-timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+}
+
+.lp-timeline__year {
+    color: var(--brand-green-dark);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.lp-timeline__desc {
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+/* Chips de informação */
+.lp-chips {
+    margin: 0.3rem 0 0;
+    padding: 0;
+    list-style: none;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.lp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    padding: 0.5rem 0.9rem;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+
+    color: var(--text);
+    font-size: 0.86rem;
+    font-weight: 500;
+}
+
+.lp-chip .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    color: var(--brand-green-dark);
+}
+
+@media (max-width: 900px) {
+    .lp-split {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-split--reverse .lp-split__text {
+        order: 0;
+    }
+
+    .lp-media--portrait {
+        aspect-ratio: 4 / 3;
+    }
+
+    .lp-timeline-card {
+        position: relative;
+        left: auto;
+        bottom: auto;
+        width: auto;
+        margin: -3rem 1rem 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .lp-checklist {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================
+   BDH x BIOBANCO
+   ========================================================== */
+
+.lp-compare {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 1.5rem;
+    row-gap: 0;
+}
+
+/* Subgrid: as linhas (cabeçalho, texto e cada item da lista) são
+   compartilhadas entre os dois cartões, então "Origem", "TCLE" e "Uso"
+   ficam sempre na mesma altura nos dois lados — mesmo quando o texto de
+   um item quebra em mais linhas que o do outro cartão. */
+.lp-compare__card {
+    display: grid;
+    grid-row: span 5;
+    grid-template-rows: subgrid;
+    row-gap: 1.25rem;
+    align-content: start;
+
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+
+    border-radius: var(--lp-radius-lg);
+}
+
+.lp-compare__head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lp-compare__icon {
+    flex-shrink: 0;
+
+    width: 52px;
+    height: 52px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 0.9rem;
+    color: #ffffff;
+}
+
+.lp-compare__icon--blue {
+    background: var(--brand-blue);
+    box-shadow: 0 8px 20px rgba(30, 70, 121, 0.28);
+}
+
+.lp-compare__icon--green {
+    background: var(--brand-green);
+    box-shadow: 0 8px 20px rgba(70, 182, 83, 0.32);
+}
+
+.lp-compare__label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.lp-compare__title {
+    margin: 0.15rem 0 0;
+    color: var(--brand-blue);
+    font-family: var(--lp-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.lp-compare__text {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.7;
+}
+
+.lp-compare__list {
+    grid-row: span 3;
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+
+    margin: 0;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--brand-blue-10);
+}
+
+/* Cada item ocupa uma linha do subgrid; o espaçamento vem do padding
+   (e não do gap) pra que o divisor entre itens acompanhe a linha mais
+   alta dos dois cartões. */
+.lp-compare__list > div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0.75rem;
+    align-items: start;
+
+    padding: 0.85rem 0;
+}
+
+.lp-compare__list > div + div {
+    border-top: 1px dashed var(--brand-blue-10);
+}
+
+.lp-compare__list > div:last-child {
+    padding-bottom: 0;
+}
+
+.lp-compare__list dt {
+    display: inline-flex;
+    line-height: 1.5;
+    align-items: center;
+    gap: 0.4rem;
+
+    color: var(--brand-blue);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.lp-compare__list dt .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    align-self: center;
+}
+
+.lp-compare__list dd {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.93rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+    .lp-compare {
+        grid-template-columns: 1fr;
+        row-gap: 1.5rem;
+    }
+
+    /* Empilhados não há o que alinhar entre cartões — sai do subgrid */
+    .lp-compare__card {
+        grid-row: auto;
+        grid-template-rows: none;
+    }
+
+    .lp-compare__list {
+        grid-row: auto;
+        grid-template-rows: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .lp-compare__list > div {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+}
+
+/* ==========================================================
+   COMO FUNCIONA
+   ========================================================== */
+
+.lp-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+
+    counter-reset: none;
+}
+
+.lp-step {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    padding: 1.6rem 1.5rem 1.75rem;
+
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    background: var(--surface);
+    box-shadow: 0 10px 24px rgba(30, 70, 121, 0.06);
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lp-step:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 34px rgba(30, 70, 121, 0.10);
+}
+
+.lp-step__num {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.3rem;
+
+    color: var(--brand-blue-10);
+    font-family: var(--lp-font-display);
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.lp-step__icon {
+    width: 46px;
+    height: 46px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 0.8rem;
+    background: var(--brand-blue-10);
+    color: var(--brand-blue);
+}
+
+.lp-step:nth-child(even) .lp-step__icon {
+    background: var(--brand-green-16);
+    color: var(--brand-green-dark);
+}
+
+.lp-step__title {
+    margin: 0.35rem 0 0;
+    color: var(--brand-blue);
+    font-size: 1.08rem;
+    font-weight: 700;
+}
+
+.lp-step__text {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 1000px) {
+    .lp-steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .lp-steps {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================
+   O SISTEMA (painel em gradiente da marca)
+   ========================================================== */
+
+.lp-system {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+
+    padding: clamp(2rem, 5vw, 4rem);
+
+    border-radius: 1.75rem;
+    background:
+        linear-gradient(
+            115deg,
+            var(--brand-blue-deep) 0%,
+            var(--brand-blue) 45%,
+            rgba(70, 182, 83, 0.95) 135%
+        );
+    box-shadow: 0 30px 70px rgba(30, 70, 121, 0.28);
+
+    color: #ffffff;
+}
+
+/* Brilhos internos — dão cor pros cartões de vidro desfocarem */
+.lp-system::before,
+.lp-system::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+.lp-system::before {
+    width: 380px;
+    height: 380px;
+    right: 6%;
+    top: -120px;
+    background: var(--brand-green);
+    opacity: 0.55;
+}
+
+.lp-system::after {
+    width: 320px;
+    height: 320px;
+    right: 30%;
+    bottom: -160px;
+    background: #ffffff;
+    opacity: 0.12;
+}
+
+.lp-system__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.lp-system__intro .lp-btn {
+    margin-top: 0.5rem;
+}
+
+.lp-system__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    color: rgba(255,255,255,0.7);
+    font-size: 0.84rem;
+}
+
+.lp-system__hint .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.lp-roles {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.lp-role {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+
+    padding: 1.15rem 1.25rem;
+}
+
+.lp-role__icon {
+    flex-shrink: 0;
+
+    width: 44px;
+    height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 0.8rem;
+    background: rgba(255,255,255,0.16);
+    color: #ffffff;
+}
+
+.lp-role__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.lp-role__text {
+    margin: 0;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+    .lp-system {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================
+   CAMPUS + UNOESC
+   ========================================================== */
+
+.lp-campus {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    align-items: center;
+}
+
+.lp-campus__photo {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+/* Painel de vidro sobrepondo a borda da foto */
+.lp-campus__panel {
+    grid-column: 2;
+    grid-row: 1;
+    margin-left: -4.5rem;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+
+    border-radius: var(--lp-radius-lg);
+}
+
+.lp-stats {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.lp-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+
+    padding: 0.9rem 1rem;
+
+    border-radius: 0.85rem;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.7);
+}
+
+.lp-stat__value {
+    color: var(--brand-blue);
+    font-family: var(--lp-font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.lp-stat__label {
+    color: var(--text-muted);
+    font-size: 0.83rem;
+}
+
+.lp-about {
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 1.5rem 3rem;
+    align-items: start;
+}
+
+.lp-about__facts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.lp-about__facts li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    padding: 0.85rem 1rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+    background: var(--surface-soft);
+
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.lp-about__facts .icon {
+    flex-shrink: 0;
+    color: var(--brand-green-dark);
+}
+
+.lp-about__facts strong {
+    color: var(--brand-blue);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-right: 0.15rem;
+}
+
+.lp-mission {
+    grid-column: 1 / -1;
+    margin: 0.5rem 0 0;
+
+    padding: 1.25rem 1.5rem;
+
+    border-left: 3px solid var(--brand-green);
+    border-radius: 0 0.85rem 0.85rem 0;
+    background: var(--brand-blue-05);
+
+    color: var(--text-soft);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.lp-mission__label {
+    display: block;
+    margin-bottom: 0.25rem;
+
+    color: var(--brand-blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+    .lp-campus {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-campus__panel {
+        grid-column: 1;
+        grid-row: 2;
+        margin: -3rem 1rem 0;
+    }
+
+    .lp-about {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .lp-about__facts {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================
+   CTA FINAL
+   ========================================================== */
+
+.lp-section--cta {
+    padding-top: clamp(1rem, 3vw, 2rem);
+}
+
+/* A seção do campus (com as manchas) já termina com respiro próprio;
+   aqui só um divisor sutil marca a passagem pra chamada final. */
+.lp-section--cta::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: min(1200px, calc(100% - 2rem));
+    height: 1px;
+
+    background: linear-gradient(90deg, transparent, var(--brand-blue-10) 20%, var(--brand-blue-10) 80%, transparent);
+}
+
+.lp-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem 2rem;
+
+    padding: clamp(1.75rem, 4vw, 2.75rem);
+
+    border: 1px solid var(--brand-blue-10);
+    border-radius: var(--lp-radius-lg);
+    background:
+        linear-gradient(
+            100deg,
+            rgba(30, 70, 121, 0.07),
+            rgba(70, 182, 83, 0.09)
+        );
+}
+
+.lp-cta__title {
+    margin: 0 0 0.4rem;
+
+    color: var(--brand-blue);
+    font-family: var(--lp-font-display);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 300;
+}
+
+.lp-cta__title strong {
+    font-weight: 700;
+}
+
+.lp-cta__text {
+    margin: 0;
+    color: var(--text-soft);
+}
+
+/* ==========================================================
+   RODAPÉ
+   ========================================================== */
+
+.lp-footer {
+    background: var(--brand-blue);
+    color: rgba(255,255,255,0.74);
+    font-size: 0.9rem;
+}
+
+.lp-footer__inner {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 2.5rem;
+
+    padding: 3.5rem 0 2.5rem;
+}
+
+.lp-footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.lp-footer__brand p {
+    margin: 0;
+    max-width: 32ch;
+    line-height: 1.6;
+}
+
+.lp-footer__logo {
+    display: block;
+    width: min(260px, 100%);
+    height: auto;
+}
+
+.lp-footer__col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+}
+
+.lp-footer__col p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.lp-footer__heading {
+    margin-bottom: 0.3rem;
+
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.lp-footer a {
+    color: rgba(255,255,255,0.86);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.lp-footer a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.lp-footer .lp-footer__access {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+
+    padding: 0.5rem 0.9rem;
+
+    border-radius: 999px;
+    background: var(--brand-green);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.lp-footer .lp-footer__access:hover {
+    background: var(--brand-green-dark);
+    text-decoration: none;
+}
+
+.lp-footer__access .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.lp-footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+
+    padding: 1.25rem 0 1.5rem;
+
+    border-top: 1px solid rgba(255,255,255,0.12);
+
+    color: rgba(255,255,255,0.55);
+    font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+    .lp-footer__inner {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .lp-footer__brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 520px) {
+    .lp-footer__inner {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================
+   ANIMAÇÕES E TRANSIÇÕES
+
+   Intensidade baixa de propósito (setor institucional, visual
+   calmo): nada em loop, nada chamativo. Cada animação tem um
+   motivo:
+   - entrada das seções ao rolar  -> ordem de leitura (hierarquia);
+   - brilho nas molduras de imagem -> estado "carregando";
+   - fundo do hero com fade        -> estado "foto pronta";
+   - hero esmaecendo ao rolar      -> passagem pro conteúdo;
+   - botão afundando no clique     -> feedback da ação.
+
+   Só transform/translate/scale e opacity (nada que force layout).
+   Tudo fica dentro de prefers-reduced-motion: no-preference — quem
+   pede menos movimento no sistema vê a página estática e completa.
+   A classe .lp-motion vem do script no <head> do index.html e é
+   removida pelo landing.js quando não há como animar.
+   ========================================================== */
+
+@keyframes lp-reveal-up {
+    from {
+        opacity: 0;
+        translate: 0 var(--reveal-distance, 28px);
+    }
+
+    to {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes lp-media-zoom {
+    from { scale: 1.08; }
+    to   { scale: 1; }
+}
+
+@keyframes lp-shimmer {
+    from { translate: -100% 0; }
+    to   { translate: 100% 0; }
+}
+
+@keyframes lp-hero-exit {
+    to {
+        opacity: 0;
+        translate: 0 -48px;
+    }
+}
+
+/* Sentinela da navbar (criado pelo landing.js): sai da tela = página
+   rolada. Invisível e fora do fluxo. */
+.lp-scroll-sentinel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 24px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Feedback de clique nos botões da landing */
+.lp-btn {
+    transition-timing-function: var(--lp-ease-out);
+}
+
+.lp-btn:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.1s;
+}
+
+/* Foto entrando com fade quando termina de carregar */
+.lp-media img {
+    transition: opacity 0.6s var(--lp-ease-out);
+}
+
+.lp-media.is-loading img {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+    /* --- Entrada das seções (scroll reveal) ---
+       Usa a propriedade translate (e não transform) pra não brigar com
+       os transforms de hover que já existem, ex.: .lp-step:hover. */
+
+    .lp-motion [data-reveal]:not(.is-revealed) {
+        opacity: 0;
+    }
+
+    /* "backwards" e não "both": segura o estado inicial durante o
+       delay da cascata, mas solta o elemento quando termina. Com
+       "both" a animação ficava ativa pra sempre e o Chrome deixava
+       retângulos opacos no backdrop-filter dos .lp-role. */
+    .lp-motion [data-reveal].is-revealed {
+        animation: lp-reveal-up 0.9s var(--lp-ease-out) backwards;
+        animation-delay: calc(var(--reveal-i, 0) * 80ms);
+    }
+
+    .lp-motion [data-reveal="media"].is-revealed {
+        --reveal-distance: 36px;
+        animation-duration: 1.1s;
+    }
+
+    .lp-motion [data-reveal="media"].is-revealed img {
+        animation: lp-media-zoom 1.6s var(--lp-ease-out) both;
+        animation-delay: calc(var(--reveal-i, 0) * 80ms);
+    }
+
+    /* --- Molduras de imagem carregando ---
+       Único efeito "contínuo" da página, e só enquanto a foto não chega. */
+
+    .lp-media.is-loading::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+
+        background: linear-gradient(
+            100deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.55) 50%,
+            transparent 80%
+        );
+
+        animation: lp-shimmer 1.4s linear infinite;
+    }
+
+    /* --- Fundo do hero ---
+       Nasce escondido (aparece o azul + gradiente) e entra com fade e um
+       leve "assentar" do zoom quando o landing.js confirma o carregamento. */
+
+    .lp-motion .lp-hero__media {
+        opacity: 0;
+        transform: scale(1.08);
+        transition:
+            opacity 1.2s var(--lp-ease-out),
+            transform 2s var(--lp-ease-out);
+    }
+
+    .lp-motion .lp-hero__media.is-loaded {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    /* --- Itens do menu mobile em cascata --- */
+
+    .lp-nav__menu.is-open > * {
+        --reveal-distance: 10px;
+        animation: lp-reveal-up 0.5s var(--lp-ease-out) both;
+    }
+
+    .lp-nav__menu.is-open > :nth-child(2) { animation-delay: 30ms; }
+    .lp-nav__menu.is-open > :nth-child(3) { animation-delay: 60ms; }
+    .lp-nav__menu.is-open > :nth-child(4) { animation-delay: 90ms; }
+    .lp-nav__menu.is-open > :nth-child(5) { animation-delay: 120ms; }
+    .lp-nav__menu.is-open > :nth-child(6) { animation-delay: 150ms; }
+    .lp-nav__menu.is-open > :nth-child(7) { animation-delay: 180ms; }
+}
+
+/* --- Passagem hero -> conteúdo ---
+   Animação ligada à rolagem em CSS puro (animation-timeline), sem JS:
+   conforme o hero sai da tela, o conteúdo dele esmaece e sobe um pouco.
+   Navegadores sem suporte simplesmente não fazem — nada quebra.
+
+   A timeline é nomeada no próprio hero (que tem overflow: hidden e por
+   isso seria o "scroller" dos filhos se eles usassem view() direto).
+   O vidro dos fatos anima a si mesmo, não o wrapper: opacity < 1 num
+   ancestral cortaria o backdrop-filter dele. */
+
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        .lp-hero {
+            view-timeline-name: --lp-hero;
+        }
+
+        .lp-hero__content {
+            animation:
+                fade-slide-in 0.8s var(--lp-ease-out) both,
+                lp-hero-exit linear both;
+            animation-timeline: auto, --lp-hero;
+            animation-range: normal, exit 8% exit 65%;
+        }
+
+        .lp-hero__facts {
+            animation: lp-hero-exit linear both;
+            animation-timeline: --lp-hero;
+            animation-range: exit 8% exit 50%;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:has(.landing) {
+        scroll-behavior: auto;
+    }
+
+    .lp-media img,
+    .lp-btn {
+        transition: none;
+    }
+}

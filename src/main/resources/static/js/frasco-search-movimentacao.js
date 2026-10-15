@@ -15,7 +15,7 @@ function normalizarTexto(str) {
 
 // "21/06/25" -> Date — formato usado em todo o protótipo (dd/mm/aa).
 function parseDataBr(data) {
-    if (!data) return new Date(); // Fallback caso venha nulo
+    if (!data || data === "---") return new Date(); // Fallback caso venha nulo/sem data
     const [dia, mes, ano] = data.split("/").map(Number);
     return new Date(2000 + ano, mes - 1, dia);
 }
@@ -551,7 +551,9 @@ function setupFrascoSearchModal() {
                 const bateEstado = !estado || normalizarTexto(frasco.estado) === normalizarTexto(estado);
                 const bateDenticao = !denticao || normalizarTexto(frasco.denticao) === normalizarTexto(denticao);
 
-                const bateStatus = status !== "escolhidos" || estaSelecionado(frasco);
+                const bateStatus = status === "escolhidos" ? estaSelecionado(frasco)
+                    : status === "manutencao" ? frasco.emManutencao
+                    : true;
 
                 return bateSetor && bateTermo && bateGrupo && bateEstado && bateDenticao && bateStatus;
             });
@@ -586,6 +588,8 @@ function setupFrascoSearchModal() {
 
                 if (filtroStatus?.value === "escolhidos") {
                     emptyState.textContent = "Nenhum frasco escolhido ainda.";
+                } else if (filtroStatus?.value === "manutencao") {
+                    emptyState.textContent = "Nenhum frasco em manutenção com esses critérios.";
                 } else {
                     emptyState.textContent = "Nenhum frasco encontrado com esses critérios.";
                 }
@@ -718,7 +722,7 @@ function setupFrascoSearchModal() {
                         <span class="modal-result__dates">
                             <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                             <span class="modal-result__dates-sep">·</span>
-                            <span class="modal-result__date">Manutenção ${frasco.dataManutencao}</span>
+                            <span class="modal-result__date">${frasco.emManutencao ? "Em manutenção" : `Manutenção ${frasco.dataManutencao}`}</span>
                         </span>
                     </div>
                 </div>
@@ -858,7 +862,7 @@ function setupFrascoSearchModal() {
                         <span class="modal-result__dates">
                             <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                             <span class="modal-result__dates-sep">·</span>
-                            <span class="modal-result__date">Manutenção ${frasco.dataManutencao}</span>
+                            <span class="modal-result__date">${frasco.emManutencao ? "Em manutenção" : `Manutenção ${frasco.dataManutencao}`}</span>
                         </span>
                     </div>
                 </div>
@@ -955,7 +959,7 @@ function setupFrascoSearchModal() {
                         <span class="modal-result__dates">
                             <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                             <span class="modal-result__dates-sep">·</span>
-                            <span class="modal-result__date">Manutenção ${frasco.dataManutencao}</span>
+                            <span class="modal-result__date">${frasco.emManutencao ? "Em manutenção" : `Manutenção ${frasco.dataManutencao}`}</span>
                         </span>
                     </div>
                 </div>
