@@ -2,30 +2,29 @@
     <header class="navbar glass">
         <div class="navbar__inner">
 
-            <a href="index.html" class="navbar__brand tooltip-below" data-tooltip="Início" aria-label="Início">
+            <a th:href="@{/}" class="navbar__brand tooltip-below" data-tooltip="Início" aria-label="Início">
                 <span class="navbar__logo">
                     <i class="icon icon--logo" data-lucide="home"></i>
                 </span>
             </a>
 
             <nav class="navbar__nav glass-soft">
-                <a href="index.html" class="navbar__link">Dashboard</a>
-
+                <!-- Frascos é link (vai direto pro painel); o menu abre no
+                     hover ou ao focar pelo teclado (ver setupNavbarDropdowns
+                     em includes.js) -->
                 <div class="navbar__dropdown">
-                    <button class="navbar__link navbar__dropdown-btn" type="button">
+                    <a th:href="@{/frasco/painel}" class="navbar__link navbar__dropdown-btn">
                         Frascos
                         <i class="icon icon--chevron" data-lucide="chevron-down"></i>
-                    </button>
+                    </a>
 
                     <div class="navbar__dropdown-menu">
                         <a th:href="@{/frasco/painel}">Painel de Frascos</a>
                         <a th:href="@{/movimentacao/painel}">Movimentações</a>
                         <a th:href="@{/manutencao/painel}">Manutenções</a>
-                        <a th:href="@{/frasco/cadastraFrasco}">Cadastrar Frasco</a>
+                        <a th:href="@{/etiqueta/fila}">Imprimir Etiquetas</a>
                     </div>
                 </div>
-
-                <a href="usuarios.html" class="navbar__link">Usuários</a>
 
                 <div class="navbar__dropdown">
                     <button class="navbar__link navbar__dropdown-btn" type="button">
@@ -34,8 +33,21 @@
                     </button>
 
                     <div class="navbar__dropdown-menu">
-                        <a th:href="@{/solicitacao/painel}">Minhas Solicitações</a>
-                        <a th:href="@{/analiseSolicitacao/painel}">Painel de Solicitações</a>
+                        <a class="is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Minhas Solicitações <span class="link-soon">Em breve</span></a>
+                        <a class="is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Painel de Solicitações <span class="link-soon">Em breve</span></a>
+                    </div>
+                </div>
+
+                <div class="navbar__dropdown">
+                    <button class="navbar__link navbar__dropdown-btn" type="button">
+                        Cadastros
+                        <i class="icon icon--chevron" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="navbar__dropdown-menu">
+                        <a th:href="@{/frasco/cadastraFrasco}">Novo Frasco</a>
+                        <a th:href="@{/movimentacao/cadastrarMovimentacao}">Nova Movimentação</a>
+                        <a class="is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Nova Solicitação <span class="link-soon">Em breve</span></a>
                     </div>
                 </div>
             </nav>
@@ -45,12 +57,16 @@
                     <i class="icon" id="themeIcon" data-lucide="moon"></i>
                 </button>
 
-                <div class="navbar__dropdown navbar__notifications-dropdown">
-                    <button class="navbar__notifications navbar__dropdown-btn glass" type="button" aria-haspopup="true" aria-label="Notificações">
+                <!-- Notificações ainda não implementadas: botão desabilitado e sem a
+                     classe navbar__dropdown (includes.js abre qualquer .navbar__dropdown
+                     no hover). O painel abaixo é o mock do protótipo, mantido como
+                     comentário do Thymeleaf (não é renderizado) pra quando for implementado. -->
+                <div class="navbar__notifications-dropdown">
+                    <button class="navbar__notifications glass tooltip-below" type="button" disabled data-tooltip="Notificações · Em breve" aria-label="Notificações (em breve)">
                         <i class="icon icon--md" data-lucide="bell"></i>
-                        <span class="navbar__notifications-badge">4</span>
                     </button>
 
+                    <!--/*
                     <div class="notif-panel">
                         <div class="notif-panel__header">
                             <span class="notif-panel__title">Notificações</span>
@@ -125,9 +141,10 @@
 
                         <a href="#" class="notif-panel__footer">Ver todas as notificações</a>
                     </div>
+                    */-->
                 </div>
 
-                <button class="navbar__config glass tooltip-below" data-tooltip="Configurações" aria-label="Configurações">
+                <button class="navbar__config glass tooltip-below" type="button" disabled data-tooltip="Configurações · Em breve" aria-label="Configurações (em breve)">
                     <i class="icon icon--md" data-lucide="settings"></i>
                 </button>
 
@@ -153,22 +170,25 @@
         </div>
 
         <nav class="mobile-menu__nav">
-            <a href="index.html" class="mobile-menu__link">Dashboard</a>
-
             <div class="mobile-menu__group">
                 <span class="mobile-menu__group-title">Frascos</span>
                 <a th:href="@{/frasco/painel}" class="mobile-menu__link">Painel de Frascos</a>
                 <a th:href="@{/movimentacao/painel}" class="mobile-menu__link">Movimentações</a>
                 <a th:href="@{/manutencao/painel}" class="mobile-menu__link">Manutenções</a>
-                <a th:href="@{/frasco/cadastraFrasco}" class="mobile-menu__link">Cadastrar Frasco</a>
+                <a th:href="@{/etiqueta/fila}" class="mobile-menu__link">Imprimir Etiquetas</a>
             </div>
-
-            <a href="usuarios.html" class="mobile-menu__link">Usuários</a>
 
             <div class="mobile-menu__group">
                 <span class="mobile-menu__group-title">Solicitações</span>
-                <a th:href="@{/solicitacao/painel}" class="mobile-menu__link">Minhas Solicitações</a>
-                <a th:href="@{/analiseSolicitacao/painel}" class="mobile-menu__link">Painel de Solicitações</a>
+                <a class="mobile-menu__link is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Minhas Solicitações <span class="link-soon">Em breve</span></a>
+                <a class="mobile-menu__link is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Painel de Solicitações <span class="link-soon">Em breve</span></a>
+            </div>
+
+            <div class="mobile-menu__group">
+                <span class="mobile-menu__group-title">Cadastros</span>
+                <a th:href="@{/frasco/cadastraFrasco}" class="mobile-menu__link">Novo Frasco</a>
+                <a th:href="@{/movimentacao/cadastrarMovimentacao}" class="mobile-menu__link">Nova Movimentação</a>
+                <a class="mobile-menu__link is-disabled" aria-disabled="true" tabindex="-1" title="Disponível em uma próxima versão">Nova Solicitação <span class="link-soon">Em breve</span></a>
             </div>
         </nav>
 
@@ -180,11 +200,11 @@
                     <i class="icon" data-lucide="moon"></i>
                 </button>
 
-                <button class="mobile-menu__icon-btn" type="button" aria-label="Notificações">
+                <button class="mobile-menu__icon-btn" type="button" disabled title="Notificações · Em breve" aria-label="Notificações (em breve)">
                     <i class="icon" data-lucide="bell"></i>
                 </button>
 
-                <button class="mobile-menu__icon-btn" type="button" aria-label="Configurações">
+                <button class="mobile-menu__icon-btn" type="button" disabled title="Configurações · Em breve" aria-label="Configurações (em breve)">
                     <i class="icon" data-lucide="settings"></i>
                 </button>
             </div>

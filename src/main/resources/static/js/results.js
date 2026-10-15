@@ -96,8 +96,87 @@ function setupSectorSwitch() {
         });
     });
 
+    // O "Limpar filtros" do estado vazio (partials/empty_state.html)
+    // também volta o setor pra "Todos" — o setor sozinho pode ser o
+    // motivo de não ter resultado. Os checkboxes ele já limpa pelo
+    // .filters-clear (filters.js); o da barra de filtros ativos não
+    // mexe no setor.
+    resultsView.querySelectorAll(".empty-state__action").forEach((button) => {
+        button.addEventListener("click", () => {
+            if (activeButton && activeButton.dataset.setor === "todos") return;
+            setSector("todos");
+            replayEntranceAnimation();
+        });
+    });
+
+    new ResizeObserver(() => moveIndicator(activeButton)).observe(switcher);
+}
+
+// Switch de status do painel de manutenções (Em andamento / Concluídas).
+// Mesma mecânica do setSector acima, mas noutra dimensão: marca
+// is-hidden-by-status em cada item e deixa applyPagination (filters.js)
+// decidir visibilidade/contagem/estado vazio. Sem opção "Todos" e sem
+// lembrar a escolha: a página sempre abre nas em andamento.
+function setupStatusSwitch() {
+    const switcher = document.querySelector("#statusSwitch");
+    const resultsView = document.querySelector("#resultsView");
+
+    if (!switcher || !resultsView) {
+        return;
+    }
+
+    const buttons = switcher.querySelectorAll(".sector-switch__btn");
+    const items = resultsView.querySelectorAll("[data-status]");
+    const indicator = switcher.querySelector(".sector-switch__indicator");
+
+    let activeButton = null;
+
+    function moveIndicator(button) {
+        if (!indicator || !button) return;
+
+        indicator.style.width = `${button.offsetWidth}px`;
+        indicator.style.transform = `translateX(${button.offsetLeft}px)`;
+    }
+
+    function setStatus(status) {
+        activeButton = null;
+
+        buttons.forEach((button) => {
+            const isActive = button.dataset.status === status;
+            button.classList.toggle("active", isActive);
+            button.setAttribute("aria-pressed", String(isActive));
+
+            if (isActive) activeButton = button;
+        });
+
+        moveIndicator(activeButton);
+
+        items.forEach((item) => {
+            item.classList.toggle("is-hidden-by-status", item.dataset.status !== status);
+        });
+
+        if (typeof window.applyPagination === "function") {
+            window.applyPagination();
+        }
+    }
+
+    setStatus("andamento");
+
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            setStatus(button.dataset.status);
+
+            resultsView.querySelectorAll(".results-grid, .result-table").forEach((el) => {
+                el.style.animation = "none";
+                void el.offsetWidth;
+                el.style.animation = "";
+            });
+        });
+    });
+
     new ResizeObserver(() => moveIndicator(activeButton)).observe(switcher);
 }
 
 setupViewSwitch();
 setupSectorSwitch();
+setupStatusSwitch();

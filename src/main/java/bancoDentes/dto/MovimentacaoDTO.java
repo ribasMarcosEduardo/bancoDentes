@@ -3,6 +3,7 @@ package bancoDentes.dto;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.Movimentacao;
 import bancoDentes.model.enumModels.Local;
+import bancoDentes.model.enumModels.OrigemMovimentacao;
 import bancoDentes.model.enumModels.TipoMovimentacao;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -33,6 +34,7 @@ public record MovimentacaoDTO(
         movimentacao.setCodigo(this.codigo);
         movimentacao.setVersion(this.version);
         movimentacao.setTipoMovimentacao(this.tipoMovimentacao);
+        movimentacao.setOrigem(OrigemMovimentacao.REGISTRO_MANUAL);
         movimentacao.setDatMovimentacao(this.datManutencao != null ? this.datManutencao.atStartOfDay() : LocalDateTime.now());
         movimentacao.setLocal(this.local);
         movimentacao.setObservacao(this.observacao);

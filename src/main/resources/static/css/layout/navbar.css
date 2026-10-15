@@ -199,6 +199,25 @@
     position: relative;
 }
 
+/* Notificações e Configurações ainda não implementadas — botão apagado,
+   sem o hover (fundo/ícone girando), mas com o tooltip "Em breve". */
+.navbar__config:disabled,
+.navbar__notifications:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.navbar__config:disabled:hover,
+.navbar__notifications:disabled:hover {
+    background: var(--surface-elevated);
+    transform: none;
+}
+
+.navbar__config:disabled:hover .icon,
+.navbar__notifications:disabled:hover .icon {
+    transform: none;
+}
+
 .navbar__notifications-badge {
     position: absolute;
     top: -3px;
@@ -247,8 +266,12 @@
 
     background: var(--surface);
 
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    /* Desfoque mais forte (mesmo do .glass-frost-strong) pra os itens
+       ficarem legíveis por cima de qualquer conteúdo. Só funciona porque
+       a navbar e a pílula de links não são mais "backdrop root" - ver o
+       fim deste arquivo. */
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
 
     box-shadow: var(--shadow);
 
@@ -505,8 +528,12 @@
 
     background: var(--surface-soft);
 
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    /* Desfoque mais forte (mesmo do .glass-frost-strong) pra os itens
+       ficarem legíveis por cima de qualquer conteúdo. Só funciona porque
+       a navbar e a pílula de links não são mais "backdrop root" - ver o
+       fim deste arquivo. */
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
 
     box-shadow: var(--shadow);
 
@@ -539,6 +566,41 @@
 .navbar__dropdown-menu a:hover {
     background: var(--surface-muted);
     color: var(--text);
+}
+
+/* Itens de menu ainda não liberados nesta versão (ex.: telas de
+   solicitação) — continuam visíveis, mas sem link e apagados, com a
+   etiqueta "Em breve". Vale pro dropdown e pro menu mobile. */
+.navbar__dropdown-menu a.is-disabled,
+.mobile-menu__link.is-disabled {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.navbar__dropdown-menu a.is-disabled:hover,
+.mobile-menu__link.is-disabled:hover {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.link-soon {
+    flex-shrink: 0;
+
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+
+    background: var(--surface-muted);
+    color: var(--text-muted);
+
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* Entre ~1150px e 1000px (onde mobile-menu.css assume com o menu
@@ -652,4 +714,47 @@
         transform: translate(-50%, -50%) rotate(0deg) scale(1);
         opacity: 1;
     }
+}
+
+/*
+    Um elemento com backdrop-filter vira "backdrop root" pros
+    descendentes: o backdrop-filter de um filho só enxerga o que está
+    dentro desse ancestral. Como a navbar (.glass) e a pílula de links
+    (.glass-soft) tinham backdrop-filter, o dropdown só borrava o fundo
+    da própria pílula, nunca o conteúdo da página atrás dele.
+
+    O desfoque dos dois passa pra um ::before atrás do conteúdo - mesmo
+    visual, mas eles deixam de ser ancestral com backdrop-filter e o
+    dropdown/painel de notificações passa a desfocar a página de verdade.
+*/
+.navbar.glass,
+.navbar__nav.glass-soft {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.navbar__nav.glass-soft {
+    position: relative;
+    isolation: isolate;
+}
+
+.navbar.glass::before,
+.navbar__nav.glass-soft::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.navbar.glass::before {
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+.navbar__nav.glass-soft::before {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }

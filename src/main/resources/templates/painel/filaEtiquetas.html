@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script>
+    (function () {
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+        document.documentElement.classList.add(theme);
+    })();
+  </script>
+
+  <script>
+    // Chegou por View Transition (navegação dentro do fluxo): a troca já é
+    // animada, então a entrada em sequência da página é pulada (ver
+    // css/pages/etiquetas.css). Precisa rodar no <head>, antes do 1º paint.
+    window.addEventListener("pagereveal", function (e) {
+        if (e.viewTransition) document.documentElement.classList.add("vt-nav");
+    });
+  </script>
+
+  <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/etiquetas.css}">
+  <link rel="stylesheet" th:href="@{/css/pages/fila_etiquetas.css}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <title>Imprimir Etiquetas</title>
+</head>
+
+<body>
+
+<div class="background">
+  <div class="blob blob--blue"></div>
+  <div class="blob blob--green"></div>
+</div>
+
+<div th:replace="~{partials/navbar :: navbar}"></div>
+
+<main class="page">
+  <section class="form-shell">
+
+    <header class="page-header">
+      <h1>Imprimir etiquetas</h1>
+      <p>Frascos aguardando etiqueta adesiva.<span class="page-header__extra"> Desmarque os que não devem ser impressos agora. Eles continuam na fila.</span></p>
+    </header>
+
+    <div class="stepper etiquetas-stepper">
+      <div class="step step--active" data-step="selecao">
+        <div class="step__circle">
+          <i class="icon" data-lucide="list-checks"></i>
+        </div>
+        <span>Selecionar frascos</span>
+      </div>
+
+      <div class="stepper__line"></div>
+
+      <div class="step" data-step="configurar">
+        <div class="step__circle">
+          <i class="icon" data-lucide="layout-grid"></i>
+        </div>
+        <span>Configurar folha</span>
+      </div>
+
+      <div class="stepper__line"></div>
+
+      <div class="step" data-step="gerar">
+        <div class="step__circle">
+          <i class="icon" data-lucide="printer"></i>
+        </div>
+        <span>Gerar</span>
+      </div>
+
+      <!-- Versão compacta do stepper (abaixo de tablet, ver css/pages/etiquetas.css) -->
+      <div class="etapa-compacta etapa-compacta--etapa-1">
+        <div class="etapa-compacta__anel">
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <circle class="etapa-compacta__trilho" cx="28" cy="28" r="24" pathLength="100"></circle>
+            <circle class="etapa-compacta__progresso" cx="28" cy="28" r="24" pathLength="100"></circle>
+          </svg>
+          <span class="etapa-compacta__contagem">1 de 3</span>
+        </div>
+
+        <div class="etapa-compacta__texto">
+          <span class="etapa-compacta__titulo">Selecionar frascos</span>
+          <span class="etapa-compacta__proxima">Próxima: Configurar folha</span>
+        </div>
+      </div>
+    </div>
+
+    <th:block th:if="${#lists.isEmpty(frascos)}">
+      <div th:replace="~{partials/empty_state :: empty_state('printer', 'Fila de impressão vazia', 'Nenhum frasco está aguardando etiqueta. Frascos novos ou com manutenção concluída entram aqui automaticamente; também dá para enviar um frasco pelo ícone de impressora no painel de frascos.', false)}">
+      </div>
+    </th:block>
+
+    <form th:if="${!#lists.isEmpty(frascos)}" id="formFilaEtiquetas" th:action="@{/etiqueta/configurar}" method="post">
+      <div class="result-table result-table--etiqueta-selecao">
+        <div class="result-table__head">
+          <span>
+            <input type="checkbox" class="etiqueta-selecao-checkbox" id="selecionarTodosEtiqueta" checked aria-label="Selecionar todos os frascos da fila">
+          </span>
+          <span>Identificador</span>
+          <span>Grupo</span>
+          <span>Local</span>
+          <span>Qtd.</span>
+          <span>Próxima manutenção</span>
+          <span></span>
+        </div>
+
+        <div id="listaFrascosEtiqueta">
+          <label th:each="frasco : ${frascos}" class="result-list etiqueta-fila-row">
+            <span>
+              <input type="checkbox" class="etiqueta-selecao-checkbox" name="frascos"
+                     th:value="${frasco.codigo}" checked
+                     th:aria-label="'Imprimir etiqueta de ' + ${frasco.identificacao}">
+            </span>
+            <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">PMbd-A001</span>
+            <span th:text="${frasco.tipoDente}">Pré-Molar</span>
+            <span th:text="${frasco.local != null ? (frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : frasco.local.nome) : '---'}">BDH</span>
+            <span th:text="${frasco.quantidade}">0</span>
+            <span th:if="${frasco.prazoManutencao != null}" class="manutencao"
+                  th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
+                  th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
+            <span th:unless="${frasco.prazoManutencao != null}">---</span>
+            <div class="result-list__actions">
+              <!-- Sem form próprio (não dá pra aninhar form): submete o form da
+                   fila com formaction apontando pra remoção deste frasco. -->
+              <button type="submit" class="result-list__action result-list__action--red js-remover-fila"
+                      th:formaction="@{/etiqueta/removerFila/{id}(id=${frasco.codigo})}"
+                      th:data-identificacao="${frasco.identificacao}"
+                      data-tooltip="Remover da fila" aria-label="Remover da fila">
+                <i class="icon" data-lucide="x"></i>
+              </button>
+            </div>
+          </label>
+        </div>
+      </div>
+    </form>
+
+  </section>
+</main>
+
+<div class="etiqueta-acoes-bar etiqueta-acoes-bar--tres-acoes" id="etiquetaSelecaoBar">
+  <span class="etiqueta-acoes-bar__count" id="etiquetaSelecaoCount"
+        th:text="${#lists.isEmpty(frascos)} ? 'Nenhum frasco na fila' : ${#lists.size(frascos)} + ' de ' + ${#lists.size(frascos)} + ' frascos selecionados'">Nenhum frasco na fila</span>
+
+  <div class="etiqueta-acoes-bar__actions">
+    <a th:href="@{/frasco/painel}" class="btn btn-ghost">
+      <i class="orderBy-icon" data-lucide="arrow-left"></i>
+      <span class="btn__label">Voltar</span>
+    </a>
+
+    <!-- Pra quando a aba de impressão foi fechada antes de confirmar -->
+    <button type="submit" form="formFilaEtiquetas" class="btn btn-tonal" id="btnConfirmarImpressaoFila"
+            th:formaction="@{/etiqueta/confirmar}"
+            th:disabled="${#lists.isEmpty(frascos)}">
+      <i class="orderBy-icon" data-lucide="check"></i>
+      <span class="btn__label">Confirmar<span class="btn__label-extra"> impressão</span></span>
+    </button>
+
+    <button type="submit" form="formFilaEtiquetas" class="btn btn-primary" id="btnContinuarEtiqueta"
+            th:disabled="${#lists.isEmpty(frascos)}">
+      <span class="btn__label">Continuar</span>
+      <i class="orderBy-icon" data-lucide="arrow-right"></i>
+    </button>
+  </div>
+</div>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+
+<script th:src="@{/js/bundles/form.js}"></script>
+<script th:src="@{/js/etiquetas-fila.js}"></script>
+
+</body>
+</html>

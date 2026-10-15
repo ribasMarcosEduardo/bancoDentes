@@ -41,12 +41,39 @@
         80px;
 }
 
+/* Identificador | Grupo | Estado | Qtd. | Status | Manutenção | ações.*/
 .result-table--frascos .result-table__head,
 .result-table--frascos .result-list {
     grid-template-columns:
         var(--list-first-col)
-        repeat(6, 1fr)
-        80px;
+        1fr
+        1fr
+        0.6fr
+        minmax(125px, 1.1fr)
+        1fr
+        186px;
+}
+
+/* Fila de impressão de etiquetas (painel/filaEtiquetas.html). Primeira
+   coluna estreita, só com a checkbox (alinhamento dela em
+   pages/fila_etiquetas.css).
+   Checkbox | Identificador | Grupo | Local | Qtd. | Próxima manutenção | ações */
+.result-table--etiqueta-selecao .result-table__head,
+.result-table--etiqueta-selecao .result-list {
+    grid-template-columns:
+        24px
+        1.1fr
+        0.9fr
+        0.8fr
+        0.5fr
+        1fr
+        48px;
+}
+
+/* Ações no fim da linha, encostadas à direita como a seta de expandir
+   nas outras listas */
+.result-table--etiqueta-selecao .result-list__actions {
+    justify-self: end;
 }
 
 .result-table--solicitacoes .result-table__head,
@@ -63,26 +90,6 @@
         var(--list-first-col)
         repeat(4, 1fr)
         40px;
-}
-
-/* Checkbox | Identificador | Grupo | Local | Cadastro | Manutenção — ver
-   selecao_frascos_etiqueta.html. Primeira coluna fixa e estreita (só a
-   checkbox), diferente das outras variantes acima (que reservam a
-   primeira coluna pro identificador/nome). */
-.result-table--etiqueta-selecao .result-table__head,
-.result-table--etiqueta-selecao .result-list {
-    grid-template-columns:
-        40px
-        1.1fr
-        0.9fr
-        0.8fr
-        0.9fr
-        0.9fr;
-}
-
-.result-table--etiqueta-selecao .result-table__head span:first-child,
-.result-table--etiqueta-selecao .result-list span:first-child {
-    justify-self: center;
 }
 
 /*
@@ -373,6 +380,11 @@
     background: #22c55e;
 }
 
+/* Manutenção concluída: mesmo verde da movimentação de entrada */
+.request-row--manutencao-concluida .request-details::before {
+    background: #22c55e;
+}
+
 .request-row--saida .request-details::before {
     background: #ef4444;
 }
@@ -403,6 +415,12 @@
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 1.5rem;
+}
+
+/* Painel que ocupa a largura toda da área expandida, abaixo dos demais
+   (ex.: observações em painelMovimentacoes.html, texto que pode ser longo). */
+.request-panel--full {
+    grid-column: 1 / -1;
 }
 
 .request-panel__title {
@@ -481,6 +499,162 @@
 .request-notes--empty {
     color: var(--text-muted);
     font-style: italic;
+}
+
+/* Observação curta (ex.: movimentações, quase sempre uma linha) sem a
+   altura mínima pensada pro texto livre das solicitações */
+.request-notes--compact {
+    min-height: 0;
+}
+
+/*
+    Faixa "Saldo anterior -> quantidade movimentada -> Saldo após" da visão
+    expandida de movimentações: os três números numa leitura só, com a
+    quantidade no sinal e na cor do tipo (mesmas cores das pills de tipo).
+*/
+.saldo-fluxo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    margin-bottom: 1.1rem;
+    padding: 0.9rem 1rem;
+
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+
+    background: var(--surface-soft);
+}
+
+.saldo-fluxo__item {
+    flex: 1;
+
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+
+    text-align: center;
+}
+
+.saldo-fluxo__valor {
+    color: var(--text);
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.saldo-fluxo__seta {
+    flex-shrink: 0;
+
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+
+    color: var(--icon-muted);
+}
+
+.saldo-fluxo--entrada .saldo-fluxo__item--mov .saldo-fluxo__valor {
+    color: #22c55e;
+}
+
+.saldo-fluxo--saida .saldo-fluxo__item--mov .saldo-fluxo__valor {
+    color: #ef4444;
+}
+
+.saldo-fluxo--transferencia .saldo-fluxo__item--mov .saldo-fluxo__valor {
+    color: #f59e0b;
+}
+
+/* Celular: a área expandida fica com ~230px úteis pros 3 números + 2 setas;
+   aperta espaçamentos, setas e números (os rótulos podem quebrar em 2 linhas) */
+@media (max-width: 480px) {
+    .saldo-fluxo {
+        gap: 0.3rem;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .saldo-fluxo__item .request-details__label {
+        font-size: 0.68rem;
+        line-height: 1.2;
+    }
+
+    .saldo-fluxo__valor {
+        font-size: 1.1rem;
+    }
+
+    .saldo-fluxo__seta {
+        width: 14px;
+        height: 14px;
+        min-width: 14px;
+        min-height: 14px;
+    }
+}
+
+/* Frascos ligados à movimentação (origens de uma entrada, destino de uma
+   transferência) como chips "identificação + quantidade/MOV" */
+.mov-vinculos {
+    display: grid;
+    gap: 0.45rem;
+
+    margin-top: 1.1rem;
+}
+
+.mov-vinculos__lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.mov-vinculos__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+
+    background: var(--surface-muted);
+    color: var(--text-soft);
+
+    font-size: 0.82rem;
+}
+
+.mov-vinculos__item strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Link discreto no fim de um painel da área expandida */
+.request-panel__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    margin-top: 1.1rem;
+
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.request-panel__link:hover {
+    color: var(--text);
+}
+
+.request-panel__link .icon {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
 }
 
 .request-details__actions {

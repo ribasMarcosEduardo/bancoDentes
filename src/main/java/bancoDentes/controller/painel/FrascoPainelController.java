@@ -5,6 +5,8 @@ import bancoDentes.dto.FrascoDTO;
 import bancoDentes.exception.FrascoException;
 import bancoDentes.model.Frasco;
 import bancoDentes.service.FrascoService;
+import bancoDentes.service.ImpressaoService;
+import bancoDentes.service.ManutencaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class FrascoPainelController extends BaseController {
 
     private final FrascoService frascoService;
+    private final ManutencaoService manutencaoService;
+    private final ImpressaoService impressaoService;
 
     /**
      * Exibe o painel principal com a listagem de todos os frascos cadastrados.
@@ -33,6 +37,9 @@ public class FrascoPainelController extends BaseController {
     @GetMapping("/painel")
     public String exibePainelFrascos(Model model) {
         model.addAttribute("frascos", frascoService.getFrascos());
+        model.addAttribute("frascosComVinculo", frascoService.getCodigosComVinculo());
+        model.addAttribute("historicoFrascos", frascoService.getHistoricoFrascos());
+        model.addAttribute("manutencoesAbertas", manutencaoService.getManutencoesAbertasPorFrasco());
         return "painel/painelFrascos";
     }
 
@@ -43,7 +50,7 @@ public class FrascoPainelController extends BaseController {
      */
     @GetMapping("/cadastraFrasco")
     public String cadastraFrasco(Model model) {
-        model.addAttribute("frascoDTO", FrascoDTO.empty());
+        model.addAttribute("frascoDTO", FrascoDTO.novo());
         return "form/frascoForm";
     }
 
@@ -58,10 +65,34 @@ public class FrascoPainelController extends BaseController {
     public String editar(@PathVariable("codigo") Long codigo, Model model) {
         Frasco frasco = frascoService.buscarPorId(codigo);
 
+        if (frasco.isInativo()) {
+            this.saveError(this.getText("error.frasco.inativo.editar"));
+            return "redirect:/frasco/painel";
+        }
+
         FrascoDTO dto = FrascoDTO.recuperaFrasco(frasco);
         model.addAttribute("frascoDTO", dto);
 
         return "form/frascoForm";
+    }
+
+    /**
+     * Coloca um frasco na fila de impressão de etiquetas.
+     *
+     * @param codigo
+     */
+    @PostMapping("/enviarImpressao/{codigo}")
+    public String enviarParaImpressao(@PathVariable("codigo") Long codigo) {
+        try {
+            Frasco frasco = impressaoService.enviarParaImpressao(codigo);
+            this.saveMessage(this.getText("msg.sucesso.frasco.enviadoImpressao", frasco.getIdentificacao()));
+        } catch (FrascoException e) {
+            this.saveError(e.getMessage());
+        } catch (Exception e) {
+            this.saveError(this.getText("error.frasco.enviarImpressao"));
+        }
+
+        return "redirect:/frasco/painel";
     }
 
     /**
@@ -72,13 +103,31 @@ public class FrascoPainelController extends BaseController {
     @PostMapping("/excluirFrasco/{codigo}")
     public String excluirFrasco(@PathVariable("codigo") Long codigo) {
         try {
-            frascoService.excluirFrasco(codigo);
-            this.saveMessage(this.getText("msg.sucesso.exclucao"));
+            Frasco frasco = frascoService.excluirFrasco(codigo);
+            this.saveMessage(this.getText("msg.sucesso.frasco.excluido", frasco.getIdentificacao()));
         } catch (FrascoException e) {
             this.saveError(e.getMessage());
-            return "redirect:/frasco/painel";
         } catch (Exception e) {
             this.saveError(this.getText("error.exclucao.frasco"));
+        }
+
+        return "redirect:/frasco/painel";
+    }
+
+    /**
+     * Inativa um frasco que possui histórico e por isso não pode ser excluído.
+     *
+     * @param codigo
+     */
+    @PostMapping("/inativarFrasco/{codigo}")
+    public String inativarFrasco(@PathVariable("codigo") Long codigo) {
+        try {
+            Frasco frasco = frascoService.inativarFrasco(codigo);
+            this.saveMessage(this.getText("msg.sucesso.frasco.inativado", frasco.getIdentificacao()));
+        } catch (FrascoException e) {
+            this.saveError(e.getMessage());
+        } catch (Exception e) {
+            this.saveError(this.getText("error.frasco.inativar"));
         }
 
         return "redirect:/frasco/painel";
