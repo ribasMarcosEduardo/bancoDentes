@@ -327,3 +327,57 @@
         order: 3;
     }
 }
+
+/*
+    Dois sector-switches na barra de paginação: status (Em andamento /
+    Concluídas) e local (Todos / BDH / Biobanco). Quando os dois não
+    cabem ao lado do texto de resultados, o de status vai pra uma linha
+    própria e o de local + setas ficam na linha de baixo. No celular,
+    pagination.css deixa .pagination__actions sem quebra e com rolagem
+    horizontal - aqui volta a quebrar, senão os dois switches + setas
+    ficariam escondidos num scroll lateral.
+*/
+@media (max-width: 900px) {
+
+    .pagination:has(#statusSwitch) .pagination__actions {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        row-gap: 0.6rem;
+
+        overflow-x: visible;
+    }
+
+    .pagination:has(#statusSwitch) #statusSwitch {
+        grid-column: 1 / -1;
+        justify-self: start;
+        margin-right: 0;
+    }
+
+    .pagination:has(#statusSwitch) #sectorSwitch {
+        grid-column: 1;
+        margin-right: 0;
+    }
+
+    .pagination:has(#statusSwitch) .pagination__nav {
+        grid-column: 3;
+    }
+}
+
+@media (max-width: 420px) {
+
+    /* Switch de local e setas também não cabem lado a lado: um por
+       linha (status / local / setas) */
+    .pagination:has(#statusSwitch) .pagination__actions {
+        grid-template-columns: auto;
+    }
+
+    .pagination:has(#statusSwitch) #sectorSwitch,
+    .pagination:has(#statusSwitch) .pagination__nav {
+        grid-column: 1;
+    }
+
+    .pagination:has(#statusSwitch) .pagination__nav {
+        justify-self: start;
+    }
+}

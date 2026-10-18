@@ -32,8 +32,18 @@ public class FrascoFormController extends BaseController {
     public String saveFrasco(@Validated @ModelAttribute("frascoDTO") FrascoDTO frascoDTO,
                              @RequestParam(name = "cadastrarOutro", defaultValue = "false") boolean cadastrarOutro) {
         try {
+            String identificacaoAnterior = frascoDTO.codigo() != null
+                    ? frascoService.buscarPorId(frascoDTO.codigo()).getIdentificacao()
+                    : null;
+
             Frasco frasco = frascoService.save(frascoDTO);
-            this.saveMessage(this.getText("msg.sucesso.frasco.cadastrado", frasco.getIdentificacao()));
+
+            if (identificacaoAnterior != null && !identificacaoAnterior.equals(frasco.getIdentificacao())) {
+                this.saveMessage(this.getText("msg.sucesso.frasco.identificacaoAlterada",
+                        identificacaoAnterior, frasco.getIdentificacao()));
+            } else {
+                this.saveMessage(this.getText("msg.sucesso.frasco.cadastrado", frasco.getIdentificacao()));
+            }
 
             if (cadastrarOutro) {
                 return "redirect:/frasco/cadastraFrasco";

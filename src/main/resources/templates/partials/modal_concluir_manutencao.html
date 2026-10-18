@@ -16,20 +16,68 @@
 
         <div class="modal__body">
 
+            <!-- Ordem pensada pra telas baixas (notebook): qual frasco,
+                 depois as quantidades (o que o fluxo pede), e os demais
+                 dados do frasco recolhidos no fim. -->
+            <div class="manutencao-resumo">
+                <span class="manutencao-resumo__icone" aria-hidden="true">
+                    <i class="icon" data-lucide="toolbox"></i>
+                </span>
+
+                <div class="manutencao-resumo__texto">
+                    <strong class="manutencao-resumo__codigo" id="modalConcluirManutencaoCodigo">---</strong>
+                    <span class="manutencao-resumo__meta" id="modalConcluirManutencaoGrupo">---</span>
+                </div>
+            </div>
+
             <section class="request-panel">
-                <h4 class="request-panel__title">Informações do Frasco</h4>
+                <h4 class="request-panel__title">Quantidade de dentes</h4>
 
-                <div class="request-details__grid">
-                    <div class="request-detail">
-                        <span class="request-details__label">Identificador</span>
-                        <span id="modalConcluirManutencaoCodigo">---</span>
+                <div class="manutencao-quantidade">
+                    <div class="manutencao-quantidade__atual">
+                        <span class="manutencao-quantidade__rotulo">Atual</span>
+                        <p class="modal-qty-highlight">
+                            <strong id="modalConcluirManutencaoQtdAtual">0</strong> dentes
+                        </p>
                     </div>
 
-                    <div class="request-detail">
-                        <span class="request-details__label">Grupo dentário</span>
-                        <span id="modalConcluirManutencaoGrupo">---</span>
-                    </div>
+                    <i class="icon manutencao-quantidade__seta" data-lucide="arrow-right" aria-hidden="true"></i>
 
+                    <div class="form-group manutencao-quantidade__nova">
+                        <label class="manutencao-quantidade__rotulo" for="modalConcluirManutencaoQtdNova">Após a manutenção</label>
+
+                        <div class="number-input number-input--compact">
+                            <input
+                                    class="form-control number-input__field"
+                                    type="number"
+                                    min="0"
+                                    value="0"
+                                    id="modalConcluirManutencaoQtdNova"
+                            >
+
+                            <div class="number-input__actions">
+                                <button type="button" class="number-input__btn" data-number-action="down" aria-label="Diminuir quantidade">
+                                    <i class="icon" data-lucide="minus"></i>
+                                </button>
+
+                                <button type="button" class="number-input__btn" data-number-action="up" aria-label="Aumentar quantidade">
+                                    <i class="icon" data-lucide="plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="modal-field-hint">Ajuste caso dentes tenham sido retirados ou descartados durante a manutenção.</p>
+            </section>
+
+            <details class="manutencao-detalhes">
+                <summary class="manutencao-detalhes__toggle">
+                    Detalhes do frasco
+                    <i class="icon" data-lucide="chevron-down" aria-hidden="true"></i>
+                </summary>
+
+                <div class="request-details__grid manutencao-detalhes__grid">
                     <div class="request-detail">
                         <span class="request-details__label">Estado</span>
                         <span id="modalConcluirManutencaoEstado">---</span>
@@ -39,46 +87,13 @@
                         <span class="request-details__label">Local</span>
                         <span id="modalConcluirManutencaoLocal">---</span>
                     </div>
-                </div>
-            </section>
 
-            <section class="request-panel">
-                <h4 class="request-panel__title">Quantidade atual</h4>
-
-                <p class="modal-qty-highlight">
-                    <strong id="modalConcluirManutencaoQtdAtual">0</strong> dentes
-                </p>
-            </section>
-
-            <section class="request-panel">
-                <h4 class="request-panel__title">Quantidade após a manutenção</h4>
-
-                <div class="form-group">
-                    <label for="modalConcluirManutencaoQtdNova">Nova quantidade</label>
-
-                    <div class="number-input number-input--compact">
-                        <input
-                                class="form-control number-input__field"
-                                type="number"
-                                min="0"
-                                value="0"
-                                id="modalConcluirManutencaoQtdNova"
-                        >
-
-                        <div class="number-input__actions">
-                            <button type="button" class="number-input__btn" data-number-action="down" aria-label="Diminuir quantidade">
-                                <i class="icon" data-lucide="minus"></i>
-                            </button>
-
-                            <button type="button" class="number-input__btn" data-number-action="up" aria-label="Aumentar quantidade">
-                                <i class="icon" data-lucide="plus"></i>
-                            </button>
-                        </div>
+                    <div class="request-detail">
+                        <span class="request-details__label">Origem do envio</span>
+                        <span id="modalConcluirManutencaoOrigem">---</span>
                     </div>
-
-                    <p class="modal-field-hint">Ajuste caso dentes tenham sido retirados ou descartados durante a manutenção.</p>
                 </div>
-            </section>
+            </details>
         </div>
 
         <footer class="modal__footer modal__footer--end">

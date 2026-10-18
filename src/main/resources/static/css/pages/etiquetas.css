@@ -1,0 +1,404 @@
+/* Partes comuns às telas do fluxo de impressão de etiquetas (fila e
+   configuração da folha): stepper e barra fixa de ações no rodapé. */
+
+/* Espaço extra no fim da página pra .etiqueta-acoes-bar (fixa no
+   rodapé da viewport, ver abaixo) nunca cobrir o fim do conteúdo nem o
+   footer. */
+.page {
+    padding-bottom: calc(var(--page-pad) + 88px);
+}
+
+.etiquetas-stepper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    padding: 1.25rem 1.5rem;
+}
+
+/* Barra de ação fixa - mostra a contagem de frascos e leva pra etapa
+   seguinte (ou volta pra anterior). */
+.etiqueta-acoes-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    padding: 1rem clamp(1rem, 4vw, 2rem);
+
+    background: var(--surface-muted);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+}
+
+.etiqueta-acoes-bar__count {
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.etiqueta-acoes-bar__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* Do tablet pra baixo o subtítulo da página fica só na primeira frase -
+   o resto (.page-header__extra) ocupava espaço demais acima da lista. */
+@media (max-width: 1024px) {
+    .page-header__extra {
+        display: none;
+    }
+}
+
+/* ---- Etapa compacta (abaixo de tablet) ----
+
+   Os passos do stepper têm min-width:140px (stepper.css) e não cabem
+   bem numa tela estreita. Abaixo de 768px o .etiquetas-stepper troca os
+   passos por um anel de progresso ("1 de 3") com o nome da etapa atual
+   e a próxima como subtítulo. O container continua o mesmo, então a
+   View Transition entre as telas segue funcionando. */
+
+.etapa-compacta {
+    display: none;
+}
+
+@media (max-width: 767px) {
+
+    .etiquetas-stepper {
+        justify-content: flex-start;
+        padding: 1rem 1.25rem;
+    }
+
+    .etiquetas-stepper > .step,
+    .etiquetas-stepper > .stepper__line {
+        display: none;
+    }
+
+    .etapa-compacta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        min-width: 0;
+    }
+}
+
+/* Progresso de cada tela (de 0 a 100) e o da tela anterior, de onde o
+   anel parte na animação de entrada */
+.etapa-compacta--etapa-1 {
+    --progresso: 33.33;
+    --progresso-anterior: 0;
+}
+
+.etapa-compacta--etapa-2 {
+    --progresso: 66.67;
+    --progresso-anterior: 33.33;
+}
+
+.etapa-compacta__anel {
+    position: relative;
+    flex-shrink: 0;
+
+    width: 56px;
+    height: 56px;
+}
+
+/* Começa no topo (12h) e cresce no sentido horário. pathLength="100" no
+   SVG: o traço vai de 0 a 100, então o vazio é 100 - progresso. */
+.etapa-compacta__anel svg {
+    width: 100%;
+    height: 100%;
+
+    transform: rotate(-90deg);
+}
+
+.etapa-compacta__trilho,
+.etapa-compacta__progresso {
+    fill: none;
+    stroke-width: 5;
+}
+
+.etapa-compacta__trilho {
+    stroke: var(--step-line-bg);
+}
+
+.etapa-compacta__progresso {
+    stroke: var(--step-line-active);
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: calc(100 - var(--progresso));
+}
+
+.etapa-compacta__contagem {
+    position: absolute;
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    color: var(--text);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.etapa-compacta__texto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    min-width: 0;
+}
+
+.etapa-compacta__titulo {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.etapa-compacta__proxima {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* Mesma margem lateral menor dos painéis (generic.css) quando a tela
+   aperta. */
+@media (max-width: 1110px) {
+    :root {
+        --page-pad: 1rem;
+    }
+}
+
+/* Mesmo corte das outras páginas (generic.css / cadastro_frasco.css):
+   abaixo de 1000px só fica o menu hambúrguer. */
+@media (max-width: 1000px) {
+    .navbar {
+        display: none;
+    }
+}
+
+/* Até 708px a barra com 3 ações (fila) já não cabe numa linha; a de 2
+   ações (configuração) só a partir de 600px - ver o bloco seguinte, que
+   devolve ela ao layout em linha entre 600 e 708px. */
+@media (max-width: 708px) {
+
+    /* Barra mais alta (duas linhas) - mais folga no fim */
+    .page {
+        padding-bottom: calc(var(--page-pad) + 140px);
+    }
+
+    /*
+        Barra em grid: 1ª linha contagem + Voltar, 2ª linha as ações
+        principais dividindo a largura (uma só ocupa a linha inteira).
+        __actions vira display:contents pros botões entrarem direto no
+        grid.
+    */
+    .etiqueta-acoes-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem 0.75rem;
+
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    }
+
+    .etiqueta-acoes-bar__actions {
+        display: contents;
+    }
+
+    .etiqueta-acoes-bar__count {
+        grid-row: 1;
+        grid-column: 1;
+        align-self: center;
+
+        font-size: 0.85rem;
+    }
+
+    .etiqueta-acoes-bar__actions > .btn-ghost {
+        grid-row: 1;
+        grid-column: 2;
+        justify-self: end;
+    }
+
+    .etiqueta-acoes-bar__actions > button.btn {
+        grid-row: 2;
+        justify-content: center;
+        min-width: 0;
+        padding-inline: 0.75rem;
+    }
+
+    .etiqueta-acoes-bar__actions > button.btn:only-of-type {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (600px < width <= 708px) {
+
+    body:not(:has(.etiqueta-acoes-bar--tres-acoes)) .page {
+        padding-bottom: calc(var(--page-pad) + 88px);
+    }
+
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) {
+        display: flex;
+
+        padding: 1rem clamp(1rem, 4vw, 2rem);
+    }
+
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) .etiqueta-acoes-bar__actions {
+        display: flex;
+    }
+
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) .etiqueta-acoes-bar__count {
+        font-size: 0.92rem;
+    }
+
+    /* Mesmo padding do .btn (buttons.css); posições de grid não valem
+       no flex, então não precisam ser desfeitas */
+    .etiqueta-acoes-bar:not(.etiqueta-acoes-bar--tres-acoes) .etiqueta-acoes-bar__actions > button.btn {
+        padding-inline: 1rem;
+    }
+}
+
+@media (max-width: 420px) {
+
+    /* "Confirmar impressão" não cabe em meia barra - fica só
+       "Confirmar", o ícone de check completa o sentido */
+    .etiqueta-acoes-bar .btn__label-extra {
+        display: none;
+    }
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @view-transition {
+        navigation: none;
+    }
+}
+
+.etiquetas-stepper {
+    view-transition-name: etiquetas-stepper;
+}
+
+.etiqueta-acoes-bar {
+    view-transition-name: etiquetas-acoes;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.28s;
+}
+
+::view-transition-group(etiquetas-stepper),
+::view-transition-group(etiquetas-acoes) {
+    animation-duration: 0.35s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* fill-mode backwards (e não both) em tudo: depois de entrar, o elemento
+   volta pros próprios estilos - a linha desmarcada da fila continua com a
+   opacidade reduzida, por exemplo. */
+
+html:not(.vt-nav) .form-shell > * {
+    animation: fade-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+html:not(.vt-nav) .form-shell > :nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+html:not(.vt-nav) .form-shell > :nth-child(n + 3) {
+    animation-delay: 0.12s;
+}
+
+@keyframes etiqueta-bar-in {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+html:not(.vt-nav) .etiqueta-acoes-bar {
+    animation: etiqueta-bar-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+}
+
+/* ---- Stepper ---- */
+
+/* Só o "from": o "to" é o próprio estilo de etapa ativa (stepper.css) */
+@keyframes etiqueta-step-ativar {
+    from {
+        border-color: var(--border);
+        background: var(--surface-soft);
+        color: var(--text-muted);
+        transform: scale(0.9);
+    }
+}
+
+@keyframes etiqueta-linha-preencher {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+/* Etapa 1: o círculo acende ao carregar */
+html:not(.vt-nav) .etiquetas-stepper > .step--active:first-child .step__circle {
+    animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+}
+
+/* Linha preenchida desenhada por cima do trilho, crescendo da esquerda -
+   o fundo da linha volta a ser o trilho vazio e a cor ativa vem do
+   ::after. */
+.etiquetas-stepper .stepper__line.is-filled {
+    position: relative;
+    overflow: hidden;
+
+    background: var(--step-line-bg);
+}
+
+.etiquetas-stepper .stepper__line.is-filled::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    border-radius: inherit;
+    background: var(--step-line-active);
+
+    transform-origin: left center;
+    animation: etiqueta-linha-preencher 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s backwards;
+}
+
+/* Etapa compacta: o anel cresce desde o progresso da etapa anterior
+   (--progresso-anterior) até o atual, mesma ideia da linha do stepper */
+@keyframes etiqueta-anel-avancar {
+    from {
+        stroke-dashoffset: calc(100 - var(--progresso-anterior, 0));
+    }
+}
+
+/* Na etapa 2 sempre (é o "avanço" vindo da fila); na etapa 1 só no
+   carregamento direto, como o círculo do stepper acima */
+.etapa-compacta--etapa-2 .etapa-compacta__progresso,
+html:not(.vt-nav) .etapa-compacta--etapa-1 .etapa-compacta__progresso {
+    animation: etiqueta-anel-avancar 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.15s backwards;
+}
+
+/* Etapa seguinte à linha preenchida: acende quando a linha chega nela */
+.etiquetas-stepper .stepper__line.is-filled + .step--active .step__circle {
+    animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+}

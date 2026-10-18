@@ -188,6 +188,14 @@
                         <strong id="paginationInfo" data-label="Manutenções Encontradas" th:text="${#lists.size(manutencoes)} + ' Manutenções Encontradas'">0 Manutenções Encontradas</strong>
                     </div>
                     <div class="pagination__actions">
+                        <!-- Status da manutenção: abre sempre em "Em andamento", sem
+                             opção de ver tudo junto (ver setupStatusSwitch em results.js) -->
+                        <div class="sector-switch" id="statusSwitch" role="group" aria-label="Status da manutenção">
+                            <span class="sector-switch__indicator"></span>
+                            <button type="button" class="sector-switch__btn active" data-status="andamento" aria-pressed="true">Em andamento</button>
+                            <button type="button" class="sector-switch__btn" data-status="concluida" aria-pressed="false">Concluídas</button>
+                        </div>
+
                         <div class="sector-switch" id="sectorSwitch">
                             <span class="sector-switch__indicator"></span>
                             <button type="button" class="sector-switch__btn active" data-setor="todos">Todos</button>
@@ -229,8 +237,11 @@
 
                         <article th:each="m : ${manutencoes}"
                                  class="request-row"
+                                 th:classappend="${m.statusManutencao != null && m.statusManutencao.name() == 'FINALIZADA'} ? 'request-row--manutencao-concluida'"
                                  th:data-sort="${m.codigo}"
+                                 th:data-busca="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : ''}"
                                  th:data-setor="${m.frasco != null && m.frasco.local != null ? #strings.toLowerCase(m.frasco.local.name()) : ''}"
+                                 th:data-status="${m.statusManutencao != null && m.statusManutencao.name() == 'FINALIZADA' ? 'concluida' : 'andamento'}"
                                  th:data-codigo="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : ''}"
                                  th:data-grupo="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : ''}"
                                  th:data-estado="${m.frasco != null && m.frasco.estado != null ? m.frasco.estado : ''}"
@@ -239,8 +250,8 @@
                                  th:data-qtd="${m.quantidade != null ? m.quantidade : 0}">
 
                             <div class="result-list">
-                                <span class="result-list__code" th:text="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : (m.frasco != null ? 'FR-' + m.frasco.codigo : '-')}">FR-000</span>
-                                <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '-'}">Grupo</span>
+                                <span class="result-list__code" th:text="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : (m.frasco != null ? 'FR-' + m.frasco.codigo : '---')}">FR-000</span>
+                                <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '---'}">Grupo</span>
                                 <span th:text="${m.frasco != null ? m.quantidade : 0}">0</span>
 
                                 <div class="result-list__actions">
@@ -286,9 +297,16 @@
                                                     <span th:text="${m.frasco.denticao.nome}">Permanente</span>
                                                 </div>
 
-                                                <div class="request-detail" th:if="${m.frasco != null && (m.frasco.arcada != null || m.frasco.posicao != null)}">
-                                                    <span class="request-details__label">Arcada / Numeração</span>
-                                                    <span th:text="${(m.frasco.arcada != null ? m.frasco.arcada : '') + (m.frasco.arcada != null && m.frasco.posicao != null ? ', ' : '') + (m.frasco.posicao != null ? 'nº ' + m.frasco.posicao : '')}">Inferior, nº 21</span>
+                                                <!-- Arcada só pra caninos, incisivos e endo; numeração só
+                                                     pra molares e pré-molares (TipoDente.usaArcada/usaNumeracao) -->
+                                                <div class="request-detail" th:if="${m.frasco != null && m.frasco.tipoDente != null && m.frasco.tipoDente.usaArcada}">
+                                                    <span class="request-details__label">Arcada</span>
+                                                    <span th:text="${m.frasco.arcada != null ? m.frasco.arcada.nome : '---'}">Superior</span>
+                                                </div>
+
+                                                <div class="request-detail" th:if="${m.frasco != null && m.frasco.tipoDente != null && m.frasco.tipoDente.usaNumeracao}">
+                                                    <span class="request-details__label">Numeração</span>
+                                                    <span th:text="${m.frasco.posicao != null ? m.frasco.posicao : '---'}">21</span>
                                                 </div>
                                             </div>
 

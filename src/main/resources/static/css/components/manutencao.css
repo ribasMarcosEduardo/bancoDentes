@@ -1,0 +1,71 @@
+/* Data de manutenção com o prazo destacado (ícone + cor), a partir de
+   frasco.prazoManutencao. Usada no painel de frascos e na fila de
+   impressão de etiquetas. */
+
+/*
+    Status da data de manutenção — vencida (vermelho) ou nos próximos
+    30 dias (âmbar); em dia fica sem destaque. No sistema real o status
+    vem calculado do back-end; aqui as classes estão fixas no mock.
+    Tons mais escuros no claro e mais claros no escuro pra manter
+    contraste AA em texto pequeno.
+*/
+:root.light {
+    --manutencao-vencida: #dc2626;
+    --manutencao-proxima: #b45309;
+}
+
+:root.dark {
+    --manutencao-vencida: #f87171;
+    --manutencao-proxima: #fbbf24;
+}
+
+/* span.manutencao.x pra vencer `.request-detail span:last-child`
+   (list.css), que pinta o valor dos detalhes expandidos */
+span.manutencao {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    font-weight: 600;
+}
+
+span.manutencao.manutencao--vencida {
+    color: var(--manutencao-vencida);
+}
+
+span.manutencao.manutencao--proxima {
+    color: var(--manutencao-proxima);
+}
+
+/* Em dia: sem cor de alerta, mas com o mesmo peso das datas
+   vencidas/próximas e a cor de texto principal, pra se destacar das
+   outras colunas (que usam --text-soft) */
+span.manutencao.manutencao--em-dia {
+    color: var(--text);
+}
+
+span.manutencao.manutencao--em-dia .icon {
+    color: var(--icon-muted);
+}
+
+span.manutencao .icon {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+    flex-shrink: 0;
+}
+
+/* Rótulo por extenso só nos detalhes expandidos ("Vencida", "Vence em
+   breve") — na linha da lista e no card fica só ícone + cor + title */
+span.manutencao .manutencao__status {
+    margin-left: 0.2rem;
+    padding: 0.1rem 0.5rem;
+
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+
+    color: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+}

@@ -214,16 +214,17 @@ function setupCadastroFrasco() {
     function aplicarEstadoSelecionado() {
         const hasGrupo = tipoDente.value !== "";
 
+        // Na edição a quantidade fica travada: mudanças de quantidade passam
+        // por movimentação, pra ficarem registradas no histórico do frasco.
+        const quantidadeLiberada = hasGrupo && !isEdicao;
+        quantidadeGroup.classList.toggle("form-group--disabled", !quantidadeLiberada);
+        quantidadeInput.disabled = !quantidadeLiberada;
+        setDisabled(quantidadeControls, !quantidadeLiberada);
+
         if (hasGrupo) {
-            quantidadeGroup.classList.remove("form-group--disabled");
-            quantidadeInput.disabled = false;
-            setDisabled(quantidadeControls, false);
             enableSection(atributosFrascoSection);
             setDisabled(atributosControls, false);
         } else {
-            quantidadeGroup.classList.add("form-group--disabled");
-            quantidadeInput.disabled = true;
-            setDisabled(quantidadeControls, true);
             disableSection(atributosFrascoSection);
             setDisabled(atributosControls, true);
         }
@@ -309,6 +310,45 @@ function setupCadastroFrasco() {
 }
 
 setupCadastroFrasco();
+
+// Prévia do identificador no cadastro: o formato é {sigla grupo}{sigla local}-{A001}
+// (Frasco.gerarIdentificacao), mas o sequencial sai do ID do banco, que só existe
+// depois de salvar — então mostra só o prefixo. As siglas vêm do data-sigla das <option>.
+function setupPreviaIdentificadorFrasco() {
+    const identificador = document.querySelector("#identificadorFrasco");
+    const tipoDente = document.querySelector("#tipoDente");
+    const localFrasco = document.querySelector("#localFrasco");
+    const codigoInput = document.querySelector("input[name='codigo']");
+    const isEdicao = codigoInput && codigoInput.value !== "" && codigoInput.value !== "null";
+
+    if (!identificador || !tipoDente || !localFrasco || isEdicao) {
+        return;
+    }
+
+    function siglaSelecionada(select) {
+        const option = select.options[select.selectedIndex];
+        return option && option.value ? (option.dataset.sigla || "") : "";
+    }
+
+    function atualizarPrevia() {
+        const siglaGrupo = siglaSelecionada(tipoDente);
+
+        if (!siglaGrupo) {
+            identificador.textContent = "Gerado ao salvar";
+            identificador.removeAttribute("title");
+            return;
+        }
+
+        identificador.textContent = `${siglaGrupo}${siglaSelecionada(localFrasco)}-…`;
+        identificador.title = "O número final é definido ao salvar";
+    }
+
+    tipoDente.addEventListener("change", atualizarPrevia);
+    localFrasco.addEventListener("change", atualizarPrevia);
+    atualizarPrevia();
+}
+
+setupPreviaIdentificadorFrasco();
 
 function setupCadastroSolicitacao() {
     const grupoDentario = document.querySelector("#grupoDentario");
@@ -947,7 +987,7 @@ function setupCadastroMovimentacaoSubmit() {
         return Array.from(selectedFlasksList?.querySelectorAll(".request-row") || []).map((row) => {
             const spans = row.querySelectorAll(".selected-flask > span");
             return {
-                id: row.dataset.frascoId || spans[0]?.textContent.trim() || "—",
+                id: row.dataset.frascoId || spans[0]?.textContent.trim() || "---",
                 quantidade: spans[1] ? spans[1].textContent.trim() : null,
             };
         });
@@ -1278,9 +1318,10 @@ function setupSincronizacaoDatas() {
 
     datCad.addEventListener("change", () => {
         if (datCad.value) {
-            const [ano, mes, dia] = datCad.value.split("-");
-            const anoQueVem = parseInt(ano) + 1;
-            datManutencao.value = `${anoQueVem}-${mes}-${dia}`;
+            const [ano, mes, dia] = datCad.value.split("-").map(Number);
+            const ultimoDia = new Date(ano + 1, mes, 0).getDate();
+            const diaAjustado = String(Math.min(dia, ultimoDia)).padStart(2, "0");
+            datManutencao.value = `${ano + 1}-${String(mes).padStart(2, "0")}-${diaAjustado}`;
         } else {
             datManutencao.value = "";
         }

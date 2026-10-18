@@ -13,10 +13,28 @@
     padding: 4rem 2rem;
     text-align: center;
 
-    background: var(--surface-soft);
-    border: 1px solid var(--border);
+    /*
+        Vidro leve, um degrau abaixo do .glass-frost da toolbar que fica
+        logo acima. Hierarquia dos painéis: título e filtros mais
+        foscos, toolbar e estado vazio mais leves. Antes era
+        --surface-soft (quase opaco), que pesava mais que a própria
+        toolbar. As listas e cards de resultado não mudam.
+    */
+    background:
+        linear-gradient(
+            to bottom right,
+            var(--glass-light-bg-start),
+            var(--glass-light-bg-end)
+        );
+
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+
+    border: 1px solid var(--glass-light-border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    box-shadow:
+        var(--glass-light-shadow),
+        inset 0 1px 0 rgba(255,255,255,0.06);
 
     animation: empty-state-fade-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }

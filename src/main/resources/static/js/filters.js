@@ -1,3 +1,11 @@
+// Minúsculas e sem acento, pra "manutencao" achar "Manutenção" na busca
+function normalizarBusca(texto) {
+    return (texto || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
 // Seleciona os elementos do DOM e inicializa as variáveis de controle
 function setupFilters() {
     const sections = document.querySelectorAll(".filter-section");
@@ -16,6 +24,8 @@ function setupFilters() {
     const paginationRange = document.getElementById("paginationRange");
     const paginationInfo = document.getElementById("paginationInfo");
     const paginationLabel = paginationInfo ? (paginationInfo.getAttribute("data-label") || "Resultados Encontrados") : "";
+    // Busca da toolbar do painel (os campos de busca dos modais ficam fora da .toolbar)
+    const searchInput = document.querySelector(".toolbar input[type='search']");
 
     let sortAscending = false;
     let currentPage = 1;
@@ -113,15 +123,29 @@ function setupFilters() {
             }
         });
 
-        const hasActiveFilters = Object.keys(selectedFilters).length > 0;
+        const termoBusca = normalizarBusca(searchInput?.value);
 
         rows.forEach(row => {
-            if (!hasActiveFilters) {
-                row.classList.remove('is-hidden-by-filter');
+            let shouldShow = true;
+
+            // Busca pelo texto do data-busca de cada linha (ex.: identificação do
+            // frasco). Itens sem data-busca não entram na busca.
+            if (termoBusca && row.hasAttribute("data-busca")
+                && !normalizarBusca(row.getAttribute("data-busca")).includes(termoBusca)) {
+                row.classList.add('is-hidden-by-filter');
                 return;
             }
 
-            let shouldShow = true;
+            // Itens marcados com data-oculto-padrao="true" (ex.: frascos inativos)
+            // ficam escondidos até o status deles ser marcado no filtro "Status".
+            if (row.getAttribute("data-oculto-padrao") === "true") {
+                const rowStatus = (row.getAttribute("data-status") || "").toLowerCase().trim();
+                const statusSelecionados = selectedFilters["Status"] || [];
+                if (!statusSelecionados.includes(rowStatus)) {
+                    row.classList.add('is-hidden-by-filter');
+                    return;
+                }
+            }
 
             for (const group in selectedFilters) {
                 let rowValue = "";
@@ -132,6 +156,7 @@ function setupFilters() {
                 else if (group === "Arcada") rowValue = row.getAttribute("data-arcada");
                 else if (group === "Dentição") rowValue = row.getAttribute("data-denticao");
                 else if (group === "Origem") rowValue = row.getAttribute("data-origem");
+                else if (group === "Tipo") rowValue = row.getAttribute("data-tipo");
 
                 rowValue = (rowValue || "").toLowerCase().trim();
 
@@ -162,7 +187,8 @@ function setupFilters() {
 
         const visibleRows = currentRows.filter(row =>
             !row.classList.contains('is-hidden-by-filter') &&
-            !row.classList.contains('is-hidden-by-sector')
+            !row.classList.contains('is-hidden-by-sector') &&
+            !row.classList.contains('is-hidden-by-status')
         );
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
@@ -212,9 +238,10 @@ function setupFilters() {
         }
     }
 
-    // Exposto global pro setSector (results.js) recalcular contagem/
-    // paginação/estado vazio ao trocar Todos/BDH/Biobanco — setSector
-    // só marca a classe is-hidden-by-sector em cada item, quem decide
+    // Exposto global pro setSector/setStatus (results.js) recalcular
+    // contagem/paginação/estado vazio ao trocar Todos/BDH/Biobanco ou
+    // Em andamento/Concluídas — eles só marcam is-hidden-by-sector /
+    // is-hidden-by-status em cada item, quem decide
     // o que fica visível de fato é sempre esta função. results.js roda
     // depois de filters.js (ver ordem dos <script> nas páginas que têm
     // #sectorSwitch), então já encontra isto definido.
@@ -305,7 +332,8 @@ function setupFilters() {
                 const currentRows = document.querySelectorAll(".request-row");
                 const visibleRows = Array.from(currentRows).filter(row =>
                     !row.classList.contains('is-hidden-by-filter') &&
-                    !row.classList.contains('is-hidden-by-sector')
+                    !row.classList.contains('is-hidden-by-sector') &&
+                    !row.classList.contains('is-hidden-by-status')
                 );
                 const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 
@@ -333,15 +361,24 @@ function setupFilters() {
             checkboxes.forEach((checkbox) => {
                 checkbox.checked = false;
             });
+            if (searchInput && searchInput.value) {
+                searchInput.value = "";
+                // Atualiza o botão "x" da busca (search.js escuta "input")
+                searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+            }
             renderActiveFilters();
             applyFilters();
         });
     });
 
+    // Busca filtra enquanto digita; o "x" (search.js) dispara "input" ao limpar
+    searchInput?.addEventListener("input", applyFilters);
+
+    // Aplica os filtros já na carga para esconder os itens ocultos por padrão
+    applyFilters();
+
     if (paginationRange) {
         sortTable();
-    } else {
-        applyPagination();
     }
 }
 
