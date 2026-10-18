@@ -62,7 +62,7 @@
             Usuário ou senha incorretos.
         </div>
         <div th:if="${param.logout}" style="color: #3c763d; background-color: #dff0d8; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 14px;">
-            Você saiu do sistema com sucesso.
+            Sua sessão foi finalizada com sucesso.
         </div>
 
         <div class="login-form">
@@ -123,6 +123,12 @@
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script th:src="@{/js/login.js}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+    });
+</script>
 
 </body>
 </html>
