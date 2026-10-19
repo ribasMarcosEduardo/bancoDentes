@@ -47,19 +47,25 @@
     transition: opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
-/* Rolando pra baixo, toolbar e paginação saem de cena por trás da navbar;
-   rolando pra cima voltam (barras-ocultas, setupStickyPagination em includes.js) */
+/* Rolando pra baixo, toolbar e paginação esmaecem com uma leve subida;
+   rolando pra cima voltam (barras-ocultas, setupStickyPagination em includes.js).
+   Transição da regra base = a de voltar (mais rápida); a de sumir fica nos
+   estados escondidos, mais longa e suave. */
 .main-panel > .toolbar,
 .main-panel .pagination {
     transition:
-        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.25s ease;
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease;
 }
 
 html.barras-ocultas .main-panel > .toolbar {
-    transform: translateY(calc(-100% - 1rem));
+    transform: translateY(-12px);
     opacity: 0;
     pointer-events: none;
+
+    transition:
+        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Abertas já escondidas (painelMovimentacoes.html, ?frasco=): sem a animação
@@ -71,9 +77,13 @@ html.barras-sem-entrada .main-panel .pagination {
 
 /* Fora do topo ela ainda está no fluxo da página: só sai quando grudada */
 html.barras-ocultas .main-panel .pagination.is-stuck {
-    transform: translateY(calc(-1 * var(--pagination-sticky-top, 0px)));
+    transform: translateY(-12px);
     opacity: 0;
     pointer-events: none;
+
+    transition:
+        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pagination__actions {

@@ -335,9 +335,10 @@ function setupStickyPagination() {
     // da toolbar no fluxo, mesmo com ela grudada
     const toolbarGrudada = () => window.scrollY >= toolbar.offsetTop - getToolbarStickyTop(toolbar);
 
-    // Desktop só esconde depois de uma descida contínua maior, pra não ser
-    // brusco logo no começo da rolagem; no toque segue imediato
-    const LIMIAR_DESCIDA = window.matchMedia("(pointer: fine)").matches ? 80 : 0;
+    // Desktop só esconde depois de descer ~30% da tela com a toolbar já grudada
+    // (2-3 voltas da rodinha, que rola ~100px cada): o início do sticky não é
+    // brusco. No toque segue imediato.
+    const limiarDescida = () => window.matchMedia("(pointer: fine)").matches ? window.innerHeight * 0.3 : 0;
 
     function atualizarBarrasOcultas() {
         if (rolagemAutomatica) return;
@@ -365,7 +366,7 @@ function setupStickyPagination() {
         }
 
         descidaAcumulada += delta;
-        if (descidaAcumulada > LIMIAR_DESCIDA) raiz.classList.add("barras-ocultas");
+        if (descidaAcumulada > limiarDescida()) raiz.classList.add("barras-ocultas");
     }
 
     window.addEventListener("scroll", atualizarBarrasOcultas, { passive: true });
