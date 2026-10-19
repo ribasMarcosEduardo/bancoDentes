@@ -1757,6 +1757,19 @@ html:has(.landing) {
     min-height: 16px;
 }
 
+.lp-footer__nota {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.lp-footer__nota .icon {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+}
+
 .lp-footer__bottom {
     display: flex;
     justify-content: space-between;
