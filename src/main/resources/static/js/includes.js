@@ -328,24 +328,37 @@ function setupStickyPagination() {
     // e paginação somem; qualquer rolagem pra cima as traz de volta. Não some
     // com a busca/um select da toolbar em uso.
     let ultimoY = window.scrollY;
+    let descidaAcumulada = 0;
+
+    // Desktop só esconde depois de uma descida contínua maior, pra não ser
+    // brusco logo no começo da rolagem; no toque segue imediato
+    const LIMIAR_DESCIDA = window.matchMedia("(pointer: fine)").matches ? 80 : 0;
 
     function atualizarBarrasOcultas() {
         const y = window.scrollY;
-        if (Math.abs(y - ultimoY) < 6) return;
+        const delta = y - ultimoY;
+        if (Math.abs(delta) < 6) return;
+        ultimoY = y;
 
         // Salto maior que a tela = reposicionamento (ex.: rolagem restaurada
         // depois de uma ação), não rolagem do usuário
-        if (Math.abs(y - ultimoY) > window.innerHeight) {
-            ultimoY = y;
+        if (Math.abs(delta) > window.innerHeight) {
+            descidaAcumulada = 0;
             return;
         }
 
+        const raiz = document.documentElement;
         const ativo = document.activeElement;
         const editando = toolbar.contains(ativo) && ativo.matches("input, select, textarea");
-        const ocultar = y > ultimoY && pagination.classList.contains("is-stuck") && !editando;
 
-        document.documentElement.classList.toggle("barras-ocultas", ocultar);
-        ultimoY = y;
+        if (delta < 0 || !pagination.classList.contains("is-stuck") || editando) {
+            descidaAcumulada = 0;
+            raiz.classList.remove("barras-ocultas");
+            return;
+        }
+
+        descidaAcumulada += delta;
+        if (descidaAcumulada > LIMIAR_DESCIDA) raiz.classList.add("barras-ocultas");
     }
 
     window.addEventListener("scroll", atualizarBarrasOcultas, { passive: true });
