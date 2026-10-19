@@ -16,6 +16,11 @@
     opacity: 0.17;
 }
 
+/* No fundo claro (#fcfcfc) os 0.17 quase somem */
+:root.light .blob {
+    opacity: 0.3;
+}
+
 /* Blob azul */
 
 .blob--blue {
