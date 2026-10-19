@@ -29,24 +29,23 @@
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
 
-<main class="page">
+<main class="page page--compact">
     <section class="form-shell">
 
-        <header class="page-header">
-            <h1 th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
-            <p>Registre entradas e saídas de dentes vinculadas a um frasco.</p>
-        </header>
-
         <div class="toolbar glass-frost">
-            <!-- Data de hoje -->
-            <div class="toolbar__identity">
-                <span class="toolbar__identity-icon" aria-hidden="true">
-                    <i class="icon" data-lucide="calendar-days"></i>
-                </span>
+            <div class="toolbar__lead">
+                <h1 class="toolbar__title" th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
 
-                <div class="toolbar__identity-text">
-                    <span class="toolbar__identity-label">Data da movimentação</span>
-                    <span class="toolbar__identity-value" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/06/2025</span>
+                <!-- Data de hoje -->
+                <div class="toolbar__identity">
+                    <span class="toolbar__identity-icon" aria-hidden="true">
+                        <i class="icon" data-lucide="calendar-days"></i>
+                    </span>
+
+                    <div class="toolbar__identity-text">
+                        <span class="toolbar__identity-label">Data da movimentação</span>
+                        <span class="toolbar__identity-value" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/06/2025</span>
+                    </div>
                 </div>
             </div>
 

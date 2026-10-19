@@ -283,3 +283,47 @@
     font-weight: 500;
     font-style: italic;
 }
+
+
+/*
+    Título da página dentro da toolbar (telas de cadastro, form/*.html) —
+    substitui o .page-header separado pra economizar altura em notebooks.
+    .toolbar__lead agrupa título + bloco de identificação num único item
+    flex, pra não bagunçar o layout responsivo da toolbar em
+    pages/cadastro_frasco.css (que reordena os filhos diretos).
+*/
+.toolbar__lead {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    min-width: 0;
+}
+
+.toolbar__title {
+    margin: 0;
+    padding-right: 1rem;
+    border-right: 1px solid var(--border);
+
+    font-size: 1.3rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+
+    /* Sem espaço pra título e identificação lado a lado: título em cima */
+    .toolbar__lead {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .toolbar__title {
+        padding-right: 0;
+        border-right: none;
+
+        font-size: 1.15rem;
+        white-space: normal;
+    }
+}

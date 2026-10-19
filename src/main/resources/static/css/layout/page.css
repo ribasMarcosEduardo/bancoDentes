@@ -65,3 +65,14 @@
     margin: 0.5rem 0 0;
     color: var(--text-muted);
 }
+
+
+/*
+    Telas de cadastro (form/*.html): em notebooks a altura útil é
+    pequena, então a página usa menos respiro em volta. O título também
+    não tem .page-header próprio — vai dentro da toolbar
+    (.toolbar__title, ver components/toolbar.css).
+*/
+.page--compact {
+    --page-pad: 1rem;
+}

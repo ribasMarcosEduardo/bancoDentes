@@ -29,28 +29,27 @@
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
 
-<main class="page">
+<main class="page page--compact">
     <section class="form-shell">
 
-        <header class="page-header">
-            <h1 th:text="${frascoDTO.codigo != null} ? 'Edição de Frasco' : 'Cadastro de Frasco'">Cadastro de Frasco</h1>
-            <p>Preencha os dados para registrar um novo frasco no sistema.</p>
-        </header>
-
         <div class="toolbar glass-frost">
-            <!-- Em cadastro o identificador só nasce depois do POST (variante --pending),
-                 mas o prefixo (grupo + local) já é mostrado pelo forms.js; em edição
-                 mostra o valor real. -->
-            <div class="toolbar__identity">
-                <span class="toolbar__identity-icon" aria-hidden="true">
-                    <i class="icon" data-lucide="flask-conical"></i>
-                </span>
+            <div class="toolbar__lead">
+                <h1 class="toolbar__title" th:text="${frascoDTO.codigo != null} ? 'Edição de Frasco' : 'Cadastro de Frasco'">Cadastro de Frasco</h1>
 
-                <div class="toolbar__identity-text">
-                    <span class="toolbar__identity-label">Identificador</span>
-                    <span class="toolbar__identity-value" id="identificadorFrasco"
-                          th:classappend="${frascoDTO.codigo == null} ? 'toolbar__identity-value--pending'"
-                          th:text="${frascoDTO.codigo != null} ? ${frascoDTO.identificacao} : 'Gerado ao salvar'">Gerado ao salvar</span>
+                <!-- Em cadastro o identificador só nasce depois do POST (variante --pending),
+                     mas o prefixo (grupo + local) já é mostrado pelo forms.js; em edição
+                     mostra o valor real. -->
+                <div class="toolbar__identity">
+                    <span class="toolbar__identity-icon" aria-hidden="true">
+                        <i class="icon" data-lucide="flask-conical"></i>
+                    </span>
+
+                    <div class="toolbar__identity-text">
+                        <span class="toolbar__identity-label">Identificador</span>
+                        <span class="toolbar__identity-value" id="identificadorFrasco"
+                              th:classappend="${frascoDTO.codigo == null} ? 'toolbar__identity-value--pending'"
+                              th:text="${frascoDTO.codigo != null} ? ${frascoDTO.identificacao} : 'Gerado ao salvar'">Gerado ao salvar</span>
+                    </div>
                 </div>
             </div>
 
