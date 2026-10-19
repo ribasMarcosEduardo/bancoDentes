@@ -16,8 +16,17 @@
     // Chegou por View Transition (navegação dentro do fluxo): a troca já é
     // animada, então a entrada em sequência da página é pulada (ver
     // css/pages/etiquetas.css). Precisa rodar no <head>, antes do 1º paint.
+    // Vindo de fora do fluxo (ex.: painéis, que também têm @view-transition),
+    // cancela o fade e a página entra animada.
     window.addEventListener("pagereveal", function (e) {
-        if (e.viewTransition) document.documentElement.classList.add("vt-nav");
+        if (!e.viewTransition) return;
+
+        var origem = document.referrer ? new URL(document.referrer).pathname : "";
+        if (origem.indexOf("/etiqueta/") === 0) {
+            document.documentElement.classList.add("vt-nav");
+        } else {
+            e.viewTransition.skipTransition();
+        }
     });
   </script>
 
