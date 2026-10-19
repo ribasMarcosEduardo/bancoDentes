@@ -327,3 +327,35 @@
         grid-template-columns: 1fr;
     }
 }
+
+/*
+    Telas baixas (mesmo corte da navbar compacta, ver layout/navbar.css):
+    "Detalhes e datas" (cadastro de frasco) deixa de ser uma seção
+    separada — sem título nem divisória, os campos seguem direto os de
+    cima, igual a .form-section--continued (components/forms.css). Pelo
+    ID pra vencer .form-section + .form-section:has(> .form-section__title).
+*/
+@media (max-height: 800px) {
+
+    #atributosFrascoSection {
+        padding-top: 0;
+        border-top: none;
+
+        /* O .form-card separa as seções com gap de 2rem; puxa pra cima
+           pra ficar ~1.25rem, perto do 1.5rem entre linhas de campos
+           dentro de uma mesma seção (.form-grid) */
+        margin-top: -0.75rem;
+    }
+
+    #atributosFrascoSection > .form-section__title {
+        display: none;
+    }
+
+    /* "Escolha o grupo para liberar os demais campos." — os campos
+       travados/esmaecidos já passam o recado; aqui economiza a linha.
+       Fora daqui o JS (setupCadastroFrasco, js/forms.js) segue
+       mostrando/escondendo via [hidden]. */
+    #grupoDentarioHint {
+        display: none;
+    }
+}

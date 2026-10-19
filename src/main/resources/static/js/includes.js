@@ -284,12 +284,20 @@ function setupStickyPagination() {
 
     if (!toolbar || !pagination) return;
 
-    const GAP_BELOW_TOOLBAR = 24; // 1.5rem — gap entre linhas de .main-panel
-
     let stickyTop = 0;
 
+    // Espaço entre a toolbar e a pagination: gap de .main-panel (1.5rem)
+    // + margin-top do .list-panel (negativa em telas baixas, ver
+    // layout/page.css). Lido do CSS computado em vez de fixo pra
+    // acompanhar a media query; 24px (1.5rem) se não der pra medir.
+    function gapBelowToolbar() {
+        const gap = parseFloat(getComputedStyle(toolbar.parentElement).rowGap);
+        const margin = parseFloat(getComputedStyle(pagination.parentElement).marginTop) || 0;
+        return (Number.isNaN(gap) ? 24 : gap) + margin;
+    }
+
     function updateOffset() {
-        stickyTop = getToolbarStickyTop(toolbar) + toolbar.offsetHeight + GAP_BELOW_TOOLBAR;
+        stickyTop = getToolbarStickyTop(toolbar) + toolbar.offsetHeight + gapBelowToolbar();
         pagination.style.setProperty("--pagination-sticky-top", `${stickyTop}px`);
     }
 
@@ -315,7 +323,12 @@ function setupStickyPagination() {
     if (navbar) resizeObserver.observe(navbar);
 
     window.addEventListener("scroll", updateStuckState, { passive: true });
-    window.addEventListener("resize", updateStuckState);
+    window.addEventListener("resize", () => {
+        // A media query de altura muda o espaço sem mudar o tamanho da
+        // toolbar/navbar necessariamente — recalcula aqui também.
+        updateOffset();
+        updateStuckState();
+    });
 }
 
 function setupScrollToTopButton() {
