@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 /**
  * Controller referente ao painel de frascos
  *
@@ -90,6 +92,27 @@ public class FrascoPainelController extends BaseController {
             this.saveError(e.getMessage());
         } catch (Exception e) {
             this.saveError(this.getText("error.frasco.enviarImpressao"));
+        }
+
+        return "redirect:/frasco/painel";
+    }
+
+    /**
+     * Confirma, pelo painel, a impressão da etiqueta de um frasco que está na
+     * fila: ele volta para Disponível sem passar pela tela de impressão.
+     *
+     * @param codigo
+     */
+    @PostMapping("/confirmarImpressao/{codigo}")
+    public String confirmarImpressao(@PathVariable("codigo") Long codigo) {
+        try {
+            Frasco frasco = frascoService.buscarPorId(codigo);
+            frascoService.confirmarImpressao(List.of(codigo));
+            this.saveMessage(this.getText("msg.sucesso.frasco.impressaoConfirmada", frasco.getIdentificacao()));
+        } catch (FrascoException e) {
+            this.saveError(this.getText("error.etiqueta.foraDaFila"));
+        } catch (Exception e) {
+            this.saveError(this.getText("error.etiqueta.confirmar"));
         }
 
         return "redirect:/frasco/painel";

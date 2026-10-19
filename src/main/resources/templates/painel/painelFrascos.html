@@ -309,11 +309,19 @@
                     </button>
                   </th:block>
 
-                  <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
+                  <!-- Na fila: no lugar de enviar, confirma a impressão (volta para Disponível) -->
+                  <form th:if="${frasco.naFilaImpressao}" th:action="@{/frasco/confirmarImpressao/{id}(id=${frasco.codigo})}" method="post" class="confirm-print-form" style="display:inline;">
+                    <button type="submit" class="result-list__action result-list__action--green"
+                            th:data-identificacao="${frasco.identificacao}"
+                            data-tooltip="Confirmar impressão" aria-label="Confirmar impressão">
+                      <i class="icon" data-lucide="printer-check"></i>
+                    </button>
+                  </form>
+                  <form th:unless="${frasco.naFilaImpressao}" th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
                     <button type="submit" class="result-list__action result-list__action--blue"
                             th:disabled="${!frasco.podeEnviarParaImpressao}"
                             th:data-identificacao="${frasco.identificacao}"
-                            th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
+                            th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : 'Indisponível para impressão'}"
                             aria-label="Enviar para impressão">
                       <i class="icon" data-lucide="printer"></i>
                     </button>
@@ -435,11 +443,19 @@
                           </button>
                         </th:block>
 
-                        <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
+                        <!-- Na fila: no lugar de enviar, confirma a impressão (volta para Disponível) -->
+                        <form th:if="${frasco.naFilaImpressao}" th:action="@{/frasco/confirmarImpressao/{id}(id=${frasco.codigo})}" method="post" class="confirm-print-form" style="display:inline;">
+                          <button type="submit" class="result-list__action result-list__action--green"
+                                  th:data-identificacao="${frasco.identificacao}"
+                                  data-tooltip="Confirmar impressão" aria-label="Confirmar impressão">
+                            <i class="icon" data-lucide="printer-check"></i>
+                          </button>
+                        </form>
+                        <form th:unless="${frasco.naFilaImpressao}" th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
                           <button type="submit" class="result-list__action result-list__action--blue"
                                   th:disabled="${!frasco.podeEnviarParaImpressao}"
                                   th:data-identificacao="${frasco.identificacao}"
-                                  th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
+                                  th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : 'Indisponível para impressão'}"
                                   aria-label="Enviar para impressão">
                             <i class="icon" data-lucide="printer"></i>
                           </button>
@@ -572,11 +588,19 @@
                     </button>
                   </th:block>
 
-                  <form th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
+                  <!-- Na fila: no lugar de enviar, confirma a impressão (volta para Disponível) -->
+                  <form th:if="${frasco.naFilaImpressao}" th:action="@{/frasco/confirmarImpressao/{id}(id=${frasco.codigo})}" method="post" class="confirm-print-form" style="display:inline;">
+                    <button type="submit" class="card__action card__action--green"
+                            th:data-identificacao="${frasco.identificacao}"
+                            data-tooltip="Confirmar impressão" aria-label="Confirmar impressão">
+                      <i class="icon" data-lucide="printer-check"></i>
+                    </button>
+                  </form>
+                  <form th:unless="${frasco.naFilaImpressao}" th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
                     <button type="submit" class="card__action card__action--blue"
                             th:disabled="${!frasco.podeEnviarParaImpressao}"
                             th:data-identificacao="${frasco.identificacao}"
-                            th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
+                            th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : 'Indisponível para impressão'}"
                             aria-label="Enviar para impressão">
                       <i class="icon" data-lucide="printer"></i>
                     </button>
@@ -669,6 +693,34 @@
                 showCancelButton: true,
                 reverseButtons: true,
                 confirmButtonText: "Sim, enviar",
+                cancelButtonText: "Cancelar",
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                    cancelButton: "btn btn-secondary",
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.salvarEstadoPainel?.();
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll(".confirm-print-form").forEach(form => {
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const identificacao = form.querySelector("button")?.dataset.identificacao;
+
+            Swal.fire({
+                icon: "question",
+                title: "Confirmar impressão?",
+                text: `A etiqueta do frasco ${identificacao || ""} foi impressa? Ele sai da fila e volta para Disponível.`,
+                showCancelButton: true,
+                reverseButtons: true,
+                confirmButtonText: "Sim, confirmar",
                 cancelButtonText: "Cancelar",
                 buttonsStyling: false,
                 customClass: {
