@@ -30,7 +30,7 @@
 <div th:replace="~{partials/navbar :: navbar}"></div>
 
 <main class="page page--compact">
-    <section class="form-shell">
+    <section class="form-shell form-shell--scroll-nav">
 
         <div class="toolbar glass-frost">
             <div class="toolbar__lead">
@@ -234,6 +234,24 @@
               <span class="required-mark">*</span> Campos obrigatórios
             </p>
         </form>
+
+        <!-- Paradas além do topo da página; seções escondidas são puladas (forms.js) -->
+        <nav class="form-scroll-nav" aria-label="Navegar entre seções"
+             data-paradas="#origemDentesSection, #observacoesSection">
+            <div class="form-scroll-nav__inner glass">
+                <button type="button" class="form-scroll-nav__btn" data-scroll-nav="up"
+                        data-tooltip="Seção anterior" aria-label="Seção anterior" disabled>
+                    <i class="icon" data-lucide="arrow-up"></i>
+                </button>
+
+                <span class="form-scroll-nav__divider" aria-hidden="true"></span>
+
+                <button type="button" class="form-scroll-nav__btn tooltip-below" data-scroll-nav="down"
+                        data-tooltip="Próxima seção" aria-label="Próxima seção">
+                    <i class="icon" data-lucide="arrow-down"></i>
+                </button>
+            </div>
+        </nav>
     </section>
 </main>
 

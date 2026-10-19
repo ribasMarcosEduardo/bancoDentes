@@ -1330,5 +1330,80 @@ function setupSincronizacaoDatas() {
 
 setupSincronizacaoDatas();
 
+// Setas ao lado do formulário (.form-scroll-nav): pulam entre o topo da página
+// e as seções de data-paradas, descontando a toolbar sticky. Seções escondidas
+// (hidden) ficam de fora — ex.: sem Entrada, a próxima parada é Observações.
+function setupNavegacaoSecoes() {
+    const nav = document.querySelector(".form-scroll-nav");
+    if (!nav) return;
+
+    const btnAcima = nav.querySelector("[data-scroll-nav='up']");
+    const btnAbaixo = nav.querySelector("[data-scroll-nav='down']");
+    const toolbar = document.querySelector(".toolbar");
+    const seletores = (nav.dataset.paradas || "").split(",").map(sel => sel.trim()).filter(Boolean);
+    const FOLGA = 16;
+    const TOLERANCIA = 4;
+
+    function alturaToolbar() {
+        if (!toolbar) return FOLGA;
+        return (parseFloat(getComputedStyle(toolbar).top) || 0) + toolbar.offsetHeight + FOLGA;
+    }
+
+    function paradas() {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const ys = seletores
+            .map(sel => document.querySelector(sel))
+            .filter(el => el && el.offsetParent !== null)
+            .map(el => el.getBoundingClientRect().top + window.scrollY - alturaToolbar())
+            .map(y => Math.round(Math.min(Math.max(y, 0), maxScroll)));
+
+        return [...new Set([0, ...ys])].sort((a, b) => a - b);
+    }
+
+    function proximas() {
+        const y = window.scrollY;
+        const lista = paradas();
+        return {
+            acima: [...lista].reverse().find(p => p < y - TOLERANCIA),
+            abaixo: lista.find(p => p > y + TOLERANCIA)
+        };
+    }
+
+    function atualizar() {
+        const { acima, abaixo } = proximas();
+        btnAcima.disabled = acima === undefined;
+        btnAbaixo.disabled = abaixo === undefined;
+    }
+
+    btnAcima.addEventListener("click", () => {
+        const { acima } = proximas();
+        if (acima !== undefined) window.scrollTo({ top: acima, behavior: "smooth" });
+    });
+
+    btnAbaixo.addEventListener("click", () => {
+        const { abaixo } = proximas();
+        if (abaixo !== undefined) window.scrollTo({ top: abaixo, behavior: "smooth" });
+    });
+
+    let agendado = false;
+    function agendarAtualizacao() {
+        if (agendado) return;
+        agendado = true;
+        requestAnimationFrame(() => {
+            agendado = false;
+            atualizar();
+        });
+    }
+
+    window.addEventListener("scroll", agendarAtualizacao, { passive: true });
+    window.addEventListener("resize", agendarAtualizacao);
+    // Seções que aparecem/somem mudam a altura do form
+    new ResizeObserver(agendarAtualizacao).observe(document.querySelector(".form-card") || document.body);
+
+    atualizar();
+}
+
+setupNavegacaoSecoes();
+
 // Encerra a entrada animada dos cadastros (cadastro_frasco.css)
 setTimeout(() => document.documentElement.classList.add("form-pronto"), 1500);
