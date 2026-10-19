@@ -581,8 +581,32 @@ const savedTheme = localStorage.getItem("theme")
     || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 applyTheme(savedTheme);
 
+// Campos numéricos (quantidades): focar já seleciona o valor, pra digitar por
+// cima. No clique, o mouseup desfaria a seleção — por isso é cancelado quando
+// foi esse clique que deu o foco (clicar num campo já focado posiciona o cursor).
+function setupSelecionarNumeroAoFocar() {
+    const isCampoNumero = (el) => el instanceof HTMLInputElement && el.type === "number";
+    let focadoPeloClique = null;
+
+    document.addEventListener("mousedown", (event) => {
+        focadoPeloClique = isCampoNumero(event.target) && document.activeElement !== event.target
+            ? event.target
+            : null;
+    });
+
+    document.addEventListener("mouseup", (event) => {
+        if (focadoPeloClique && event.target === focadoPeloClique) event.preventDefault();
+        focadoPeloClique = null;
+    });
+
+    document.addEventListener("focusin", (event) => {
+        if (isCampoNumero(event.target)) event.target.select();
+    });
+}
+
 loadIncludes();
 setupFlashToast();
+setupSelecionarNumeroAoFocar();
 
 // Configuração global do Toast de Sucesso
 const Toast = Swal.mixin({
