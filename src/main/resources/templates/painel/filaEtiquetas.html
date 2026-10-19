@@ -103,6 +103,19 @@
     </th:block>
 
     <form th:if="${!#lists.isEmpty(frascos)}" id="formFilaEtiquetas" th:action="@{/etiqueta/configurar}" method="post">
+      <!-- Só aparece com mais de uma página (etiquetas-fila.js) -->
+      <div class="pagination__nav etiqueta-fila-paginacao" id="filaPaginacao" hidden>
+        <span class="pagination__range" id="filaPaginacaoRange">1-20</span>
+
+        <button type="button" class="btn btn-pagination" id="filaPaginaAnterior" data-tooltip="Página anterior" aria-label="Página anterior">
+          <i class="icon" data-lucide="chevron-left"></i>
+        </button>
+
+        <button type="button" class="btn btn-pagination" id="filaPaginaProxima" data-tooltip="Próxima página" aria-label="Próxima página">
+          <i class="icon" data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
       <div class="result-table result-table--etiqueta-selecao">
         <div class="result-table__head">
           <span>
