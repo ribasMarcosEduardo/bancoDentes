@@ -554,13 +554,25 @@
 .request-row--frasco-manutencao { --linha-status-cor: var(--tint-frasco-manutencao); }
 .request-row--frasco-inativo { --linha-status-cor: var(--tint-frasco-inativo); }
 
+/* Cor fraca em área grande vira faixas (banding): paradas intermediárias
+   suavizam o fim, e na área expandida (alta) o gradiente é mais curto, o
+   que estreita as faixas */
 .result-table--frascos .request-row .result-list,
 .result-table--frascos .request-row .request-details {
+    --linha-gradiente-fim: 60%;
+
     background-image: linear-gradient(
         to right,
         color-mix(in srgb, var(--linha-status-cor) var(--tint-linha), transparent) 0%,
-        transparent 50%
+        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.7), transparent) calc(var(--linha-gradiente-fim) * 0.25),
+        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.4), transparent) calc(var(--linha-gradiente-fim) * 0.5),
+        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.15), transparent) calc(var(--linha-gradiente-fim) * 0.75),
+        transparent var(--linha-gradiente-fim)
     );
+}
+
+.result-table--frascos .request-row .request-details {
+    --linha-gradiente-fim: 40%;
 }
 
 /* Barra lateral da área expandida no mesmo tom suave: translúcida e
