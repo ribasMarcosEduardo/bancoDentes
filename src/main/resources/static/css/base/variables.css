@@ -21,6 +21,14 @@
     --entrada-duracao: 0.6s;
 }
 
+/* Telas muito largas (ver html em base/globals.css): conteúdo mais largo e
+   em rem, escalando com a fonte (90rem ≈ 1980px com a fonte em 22px) */
+@media (min-width: 2800px) {
+    :root {
+        --container: 90rem;
+    }
+}
+
 :root.light,
 body.light{
     --page-bg: #fcfcfc;

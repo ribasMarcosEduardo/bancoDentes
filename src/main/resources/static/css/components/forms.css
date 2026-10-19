@@ -6,6 +6,13 @@
     gap: 1.5rem;
 }
 
+/* Telas muito largas: mesma proporção do 1100px, em rem (ver base/globals.css) */
+@media (min-width: 2800px) {
+    .form-shell {
+        width: min(68.75rem, 100%);
+    }
+}
+
 .form-toolbar {
     display: flex;
     align-items: center;
