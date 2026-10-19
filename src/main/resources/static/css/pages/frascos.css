@@ -315,45 +315,106 @@
     }
 }
 /*
-    Rodapé do card de frasco empilhado: datas em cima e as ações numa
-    linha própria embaixo. Com 5 ações (editar, manutenção/concluir,
-    imprimir, ver movimentações, apagar/inativar) elas não cabem mais ao
-    lado das datas na largura mínima do card. Os botões indisponíveis
-    continuam no lugar (desabilitados, com tooltip do motivo) pra manter
-    a mesma posição em todos os cards.
+    Card de frasco: as 3 ações principais (as mesmas da linha da lista) ao
+    lado das datas; editar e apagar/inativar menores no cabeçalho, abaixo
+    do identificador.
 */
-.card__footer--acoes-em-linha {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
+/* Card no mínimo (280px): datas + 3 ações ficam no limite — se não couber,
+   as ações descem pra linha de baixo, à direita */
+.results-grid .card__footer {
+    flex-wrap: wrap;
 }
 
-.card__footer--acoes-em-linha .card__actions {
-    justify-content: space-between;
-
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
+.results-grid .card__footer .card__actions {
+    margin-left: auto;
 }
 
-/*
-    Com space-between o último botão (Apagar/Inativar, dentro do próprio
-    form) encosta na borda direita do card e o balão centralizado era
-    cortado ("Inativar", "Em manutenção"). Ancora o balão dele pela
-    direita — mesma ideia de fila_etiquetas.css; o primeiro botão já é
-    ancorado pela esquerda em base/utilities.css. A seta (::before)
-    continua centralizada no botão.
-*/
-.card__footer--acoes-em-linha .card__actions > :last-child [data-tooltip]::after,
-.card__footer--acoes-em-linha .card__actions > [data-tooltip]:last-child::after {
+/* Cabeçalho em grade: grupo/detalhes | identificador (centralizado nas duas
+   linhas); status | editar/apagar na linha de baixo */
+.card__header--frasco {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--card-gap);
+    row-gap: 0.45rem;
+}
+
+.card__header--frasco .card__code {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+/* No card o status é só o texto colorido, sem o fundo da pill */
+.card__header--frasco .status-pill {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+
+    padding: 0;
+    background: none;
+    opacity: 0.75;
+}
+
+.card__header-actions {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.card__action--sm {
+    width: 26px;
+    height: 26px;
+}
+
+/* Discretos: borda cinza apagada; a cor da ação só aparece no hover/foco */
+.card__header-actions .card__action {
+    border-color: color-mix(in srgb, var(--border) 55%, transparent);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.card__header-actions .card__action--blue:not(:disabled):is(:hover, :focus-visible) {
+    border-color: rgba(59, 130, 246, 0.55);
+}
+
+.card__header-actions .card__action--red:not(:disabled):is(:hover, :focus-visible) {
+    border-color: rgba(239, 68, 68, 0.55);
+}
+
+.card__action--sm .icon {
+    width: 13px;
+    height: 13px;
+    min-width: 13px;
+    min-height: 13px;
+}
+
+/* O .card corta o que vaza (overflow:hidden): balão do botão encostado na
+   borda direita ancorado pela direita */
+.card__footer .card__actions > :last-child [data-tooltip]::after,
+.card__footer .card__actions > [data-tooltip]:last-child::after {
     left: auto;
     right: 0;
     transform: translateY(4px);
 }
 
-.card__footer--acoes-em-linha .card__actions > :last-child [data-tooltip]:hover::after,
-.card__footer--acoes-em-linha .card__actions > :last-child [data-tooltip]:focus-visible::after,
-.card__footer--acoes-em-linha .card__actions > [data-tooltip]:last-child:hover::after,
-.card__footer--acoes-em-linha .card__actions > [data-tooltip]:last-child:focus-visible::after {
+.card__footer .card__actions > :last-child [data-tooltip]:hover::after,
+.card__footer .card__actions > :last-child [data-tooltip]:focus-visible::after,
+.card__footer .card__actions > [data-tooltip]:last-child:hover::after,
+.card__footer .card__actions > [data-tooltip]:last-child:focus-visible::after {
+    transform: translateY(0);
+}
+
+.card__header-actions > :last-child [data-tooltip]::after {
+    left: auto;
+    right: 0;
+    transform: translateY(-4px);
+}
+
+.card__header-actions > :last-child [data-tooltip]:hover::after,
+.card__header-actions > :last-child [data-tooltip]:focus-visible::after {
     transform: translateY(0);
 }
 
@@ -477,16 +538,71 @@
     background: var(--status-frasco-inativo);
 }
 
-/*
-    Status no corpo do card. .status-pill vem com justify-self:center
-    (pensado pra coluna da lista) — no card a pill alinha à esquerda,
-    junto dos outros valores. align-items:center porque a pill é mais
-    alta que o texto e o rótulo ficaria colado no topo da linha.
-*/
-.card__row--status {
-    align-items: center;
+/* Blob do status: radial bem esfumado com centro no canto superior esquerdo,
+   recortado pelo overflow:hidden do .card e atrás do conteúdo (z-index -1) */
+.card--frasco-disponivel { --card-status-cor: var(--status-frasco-disponivel); }
+.card--frasco-impressao { --card-status-cor: var(--status-frasco-impressao); }
+.card--frasco-manutencao { --card-status-cor: var(--status-frasco-manutencao); }
+.card--frasco-inativo { --card-status-cor: var(--status-frasco-inativo); }
+
+.card.card--status {
+    position: relative;
+    isolation: isolate;
 }
 
-.card__row--status .status-pill {
-    justify-self: start;
+.card.card--status::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background: radial-gradient(
+        circle at 0 0,
+        color-mix(in srgb, var(--card-status-cor) 18%, transparent) 0%,
+        color-mix(in srgb, var(--card-status-cor) 8%, transparent) 35%,
+        transparent 75%
+    );
+}
+
+/* Identificador com borda na cor do status, "reluzente": gradiente com o
+   trecho mais claro no canto superior direito, como luz vindo dali. Borda
+   num ::before mascarado — o fundo do selo é translúcido no tema escuro.
+   Classes sem "__": dentro de th:* o Thymeleaf lê __...__ como pré-processamento. */
+.code-status--frasco-disponivel { --code-cor: var(--status-frasco-disponivel); }
+.code-status--frasco-impressao { --code-cor: var(--status-frasco-impressao); }
+.code-status--frasco-manutencao { --code-cor: var(--status-frasco-manutencao); }
+.code-status--frasco-inativo { --code-cor: var(--status-frasco-inativo); }
+
+.card__code.code-status {
+    position: relative;
+    box-shadow: 0 0 8px -4px color-mix(in srgb, var(--code-cor) 35%, transparent);
+}
+
+.card__code.code-status::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    padding: 1px;
+    border-radius: inherit;
+
+    background: linear-gradient(
+        to bottom left,
+        color-mix(in srgb, var(--code-cor) 70%, white) 0%,
+        color-mix(in srgb, var(--code-cor) 80%, transparent) 30%,
+        color-mix(in srgb, var(--code-cor) 25%, transparent) 100%
+    );
+
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
+}
+
+/* Status no cabeçalho do card, abaixo do subtítulo (BDH | Qtd. | Nº) */
+.status-pill--sm {
+    padding: 0.15rem 0.55rem;
+    font-size: 0.7rem;
 }

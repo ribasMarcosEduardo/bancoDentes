@@ -474,6 +474,7 @@
           <div class="results-grid">
             <article th:each="frasco : ${frascos}"
                      class="card"
+                     th:classappend="${frasco.statusFrasco != null} ? 'card--status card--' + ${frasco.statusFrasco.css}"
                      th:data-setor="${frasco.local != null ? #strings.toLowerCase(frasco.local) : ''}"
                      th:data-codigo="${frasco.codigo}"
                      th:data-grupo="${frasco.tipoDente}"
@@ -483,25 +484,45 @@
                      th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
-              <header class="card__header">
-                <div>
+              <header class="card__header card__header--frasco">
+                <div class="card__heading">
                   <h3 class="card__title" th:text="${frasco.tipoDente}">Grupo</h3>
-
                   <div class="card__meta" th:text="${frasco.local != null ? (frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : frasco.local.nome) : '---'} + ' | Qtd. ' + ${frasco.quantidade} + ${frasco.posicao != null ? ' | Nº ' + frasco.posicao : ''}">Meta</div>
-
                 </div>
-                <span class="card__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
+
+                <span class="card__code" th:classappend="${frasco.statusFrasco != null} ? 'code-status code-status--' + ${frasco.statusFrasco.css}" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
+
+                <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco status-pill--sm"
+                      th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
+                      th:title="${frasco.statusFrasco.nome}"
+                      th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
+
+                <div class="card__header-actions">
+                  <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--sm card__action--blue tooltip-below" data-tooltip="Editar" aria-label="Editar">
+                    <i class="icon" data-lucide="pen-line"></i>
+                  </a>
+                  <button th:if="${frasco.inativo}" type="button" class="card__action card__action--sm card__action--blue tooltip-below" disabled data-tooltip="Frasco inativo" aria-label="Editar">
+                    <i class="icon" data-lucide="pen-line"></i>
+                  </button>
+
+                  <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
+                    <button type="submit" class="card__action card__action--sm card__action--red tooltip-below" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
+                      <i class="icon" data-lucide="trash-2"></i>
+                    </button>
+                  </form>
+                  <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
+                    <button type="submit" class="card__action card__action--sm card__action--red tooltip-below"
+                            th:disabled="${frasco.inativo or frasco.emManutencao}"
+                            th:data-identificacao="${frasco.identificacao}"
+                            th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
+                            aria-label="Inativar">
+                      <i class="icon" data-lucide="archive-x"></i>
+                    </button>
+                  </form>
+                </div>
               </header>
 
               <div class="card__body">
-                <div class="card__row card__row--status">
-                  <span class="card__label">Status</span>
-                  <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco"
-                        th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
-                        th:title="${frasco.statusFrasco.nome}"
-                        th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
-                  <span class="card__value" th:unless="${frasco.statusFrasco != null}">---</span>
-                </div>
                 <div class="card__row">
                   <span class="card__label">Estado</span>
                   <span class="card__value" th:text="${frasco.estado != null ? frasco.estado : '---'}">-</span>
@@ -516,7 +537,7 @@
                 </div>
               </div>
 
-              <footer class="card__footer card__footer--acoes-em-linha">
+              <footer class="card__footer">
                 <div class="card__dates">
                   <p class="card__date"><span>Cadastro</span>
                     <span class="card__date-value" th:if="${frasco.datCad != null}"><i class="icon" data-lucide="calendar" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datCad, 'dd/MM/yy')}">21/06/25</th:block></span>
@@ -530,12 +551,9 @@
                 </div>
 
                 <div class="card__actions">
-                  <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Editar">
-                    <i class="icon" data-lucide="pen-line"></i>
+                  <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
+                    <i class="icon" data-lucide="history"></i>
                   </a>
-                  <button th:if="${frasco.inativo}" type="button" class="card__action card__action--blue" disabled data-tooltip="Frasco inativo" aria-label="Editar">
-                    <i class="icon" data-lucide="pen-line"></i>
-                  </button>
 
                   <th:block th:with="manAberta=${frasco.emManutencao ? manutencoesAbertas.get(frasco.codigo) : null}">
                     <button th:unless="${manAberta != null}" type="button" class="card__action card__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
@@ -561,25 +579,6 @@
                             th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
                             aria-label="Enviar para impressão">
                       <i class="icon" data-lucide="printer"></i>
-                    </button>
-                  </form>
-
-                  <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="card__action card__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
-                    <i class="icon" data-lucide="history"></i>
-                  </a>
-
-                  <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
-                    <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
-                      <i class="icon" data-lucide="trash-2"></i>
-                    </button>
-                  </form>
-                  <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
-                    <button type="submit" class="result-list__action result-list__action--red"
-                            th:disabled="${frasco.inativo or frasco.emManutencao}"
-                            th:data-identificacao="${frasco.identificacao}"
-                            th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
-                            aria-label="Inativar">
-                      <i class="icon" data-lucide="archive-x"></i>
                     </button>
                   </form>
                 </div>
