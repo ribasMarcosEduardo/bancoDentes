@@ -754,6 +754,18 @@
     -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 
+/*
+    Cantos de cima retos (a navbar encosta no topo da tela, arredondar ali
+    só deixava uma "fresta" nos cantos) e só os de baixo arredondados. O
+    raio padrão vem do .glass (1rem, components/glass.css), que é
+    importado depois deste arquivo — por isso .navbar.glass. O ::before do
+    desfoque (acima) acompanha via border-radius: inherit.
+*/
+.navbar.glass {
+    border-radius: 0 0 1rem 1rem;
+    border-top: none; /* encosta no topo da tela, a linha ali sobrava */
+}
+
 .navbar__nav.glass-soft::before {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
