@@ -13,6 +13,8 @@ function setupConfigurarEtiquetas() {
     const modeloDescricao = document.querySelector("#modeloFolhaDescricao");
     const posicaoInput = document.querySelector("#posicaoInicialInput");
     const gridEl = document.querySelector("#etiquetaGridPosicao");
+    const colunasEl = document.querySelector("#etiquetaGridColunas");
+    const linhasEl = document.querySelector("#etiquetaGridLinhas");
     const resumoTexto = document.querySelector("#etiquetaResumoTexto");
     const previewEl = document.querySelector("#etiquetaPreview");
     const barCount = document.querySelector("#etiquetaConfigCount");
@@ -25,10 +27,17 @@ function setupConfigurarEtiquetas() {
         const colunas = parseInt(option.dataset.colunas, 10);
         const linhas = parseInt(option.dataset.linhas, 10);
 
+        const celLargura = parseFloat(option.dataset.celLargura);
+        const celAltura = parseFloat(option.dataset.celAltura);
+
         return {
             colunas,
+            linhas,
             capacidade: colunas * linhas,
-            aspecto: `${option.dataset.celLargura} / ${option.dataset.celAltura}`,
+            aspecto: `${celLargura} / ${celAltura}`,
+            // largura/altura da folha inteira: o CSS limita a largura da grade
+            // pela altura da tela vezes essa proporção
+            proporcaoFolha: (colunas * celLargura) / (linhas * celAltura),
             descricao: option.dataset.descricao,
         };
     }
@@ -58,10 +67,25 @@ function setupConfigurarEtiquetas() {
 
     // Grade clicável: representa só o estado físico da folha em branco,
     // não sabe nada sobre frascos. Ver css/components/etiqueta-grid.css.
+    // Legendas de tabuleiro (C1… em cima, L1… à esquerda), com o mesmo
+    // repeat/gap/padding da grade pra alinhar com as células
+    function renderLegendas(modelo) {
+        if (colunasEl) {
+            colunasEl.style.gridTemplateColumns = `repeat(${modelo.colunas}, 1fr)`;
+            colunasEl.innerHTML = Array.from({ length: modelo.colunas }, (_, i) => `<span>C${i + 1}</span>`).join("");
+        }
+        if (linhasEl) {
+            linhasEl.style.gridTemplateRows = `repeat(${modelo.linhas}, 1fr)`;
+            linhasEl.innerHTML = Array.from({ length: modelo.linhas }, (_, i) => `<span>L${i + 1}</span>`).join("");
+        }
+    }
+
     function renderGridPosicao(modelo) {
         if (!gridEl) return;
 
         prepararGrade(gridEl, modelo);
+        gridEl.style.setProperty("--proporcao-folha", modelo.proporcaoFolha);
+        renderLegendas(modelo);
 
         for (let indice = 0; indice < modelo.capacidade; indice++) {
             const cel = document.createElement("button");
@@ -69,7 +93,9 @@ function setupConfigurarEtiquetas() {
             cel.className = "etiqueta-grid__cel";
             cel.classList.toggle("etiqueta-grid__cel--pulada", indice < posicaoInicial);
             cel.classList.toggle("etiqueta-grid__cel--disponivel", indice >= posicaoInicial);
-            cel.setAttribute("aria-label", `Começar na célula ${indice + 1}`);
+            const linha = Math.floor(indice / modelo.colunas) + 1;
+            const coluna = (indice % modelo.colunas) + 1;
+            cel.setAttribute("aria-label", `Começar na célula ${indice + 1} (L${linha}, C${coluna})`);
             cel.setAttribute("aria-pressed", String(indice === posicaoInicial));
             cel.addEventListener("click", () => {
                 posicaoInicial = indice;

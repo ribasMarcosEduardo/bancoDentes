@@ -12,6 +12,69 @@
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
+
+    container-type: inline-size;
+}
+
+/* Grade + legendas de tabuleiro: C1, C2… em cima e L1, L2… à esquerda
+   (montadas em renderLegendas, js/etiquetas-configurar.js). O padding das
+   legendas soma o padding + borda da grade, pra alinhar com as células. */
+.etiqueta-quadro {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    justify-content: center;
+    gap: 0.25rem 0.35rem;
+}
+
+.etiqueta-quadro__colunas,
+.etiqueta-quadro__linhas {
+    display: grid;
+    gap: 3px;
+
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.etiqueta-quadro__colunas {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0 calc(1rem + 1px);
+    text-align: center;
+}
+
+.etiqueta-quadro__linhas {
+    grid-column: 1;
+    grid-row: 2;
+    padding: calc(1rem + 1px) 0;
+}
+
+.etiqueta-quadro__linhas span {
+    display: grid;
+    align-items: center;
+    justify-items: end;
+}
+
+/* A grade cabe na tela: largura = a menor entre a do card e a altura
+   disponível (tela - navbar - rótulos, legenda e barra de ações) vezes a
+   proporção da folha (--proporcao-folha, do JS). As células mantêm a
+   proporção real, então ela cresce em telas grandes e encolhe em notebook. */
+.etiqueta-quadro .etiqueta-grid {
+    grid-column: 2;
+    grid-row: 2;
+
+    --grade-altura-max: calc(100dvh - var(--navbar-height, 0px) - 15rem);
+    width: min(calc(100cqw - 2.5rem), calc(var(--grade-altura-max) * var(--proporcao-folha, 1)));
+}
+
+/* Toque (celular/tablet): células grandes pra dedo valem mais que caber na
+   altura da tela — a grade usa a largura toda e a página rola */
+@media (max-width: 1000px), (pointer: coarse) {
+    .etiqueta-quadro .etiqueta-grid {
+        width: calc(100cqw - 2.5rem);
+    }
 }
 
 .etiqueta-grid {

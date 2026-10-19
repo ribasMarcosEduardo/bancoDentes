@@ -19,12 +19,6 @@
     .etiqueta-config-layout {
         grid-template-columns: 1fr;
     }
-
-    /* Em coluna única a grade pegaria a largura toda e, mantendo a
-       proporção da etiqueta, ficaria com quase duas telas de altura */
-    .etiqueta-grid:not(.etiqueta-grid--mini) {
-        max-width: 360px;
-    }
 }
 
 /* Mesmo respiro dos cards de cadastro_frasco.css em tela estreita */
@@ -40,6 +34,17 @@
        cada célula */
     .etiqueta-grid:not(.etiqueta-grid--mini) {
         padding: 0.6rem;
+        gap: 2px;
+    }
+
+    /* Legendas acompanham o padding/gap menores da grade */
+    .etiqueta-quadro__colunas {
+        padding: 0 calc(0.6rem + 1px);
+        gap: 2px;
+    }
+
+    .etiqueta-quadro__linhas {
+        padding: calc(0.6rem + 1px) 0;
         gap: 2px;
     }
 }

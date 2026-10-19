@@ -17,6 +17,20 @@
     padding: 1.25rem 1.5rem;
 }
 
+/* Título da página dentro do card do stepper (sem .page-header separado,
+   como nos cadastros): à esquerda, com divisória; os passos centralizam no resto */
+.etiquetas-stepper__titulo {
+    flex-shrink: 0;
+
+    margin: 0 1.5rem 0 0;
+    padding-right: 1.5rem;
+    border-right: 1px solid var(--border);
+
+    font-size: 1.3rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
 /* Barra de ação fixa - mostra a contagem de frascos e leva pra etapa
    seguinte (ou volta pra anterior). */
 .etiqueta-acoes-bar {
@@ -52,14 +66,6 @@
     gap: 0.75rem;
 }
 
-/* Do tablet pra baixo o subtítulo da página fica só na primeira frase -
-   o resto (.page-header__extra) ocupava espaço demais acima da lista. */
-@media (max-width: 1024px) {
-    .page-header__extra {
-        display: none;
-    }
-}
-
 /* ---- Etapa compacta (abaixo de tablet) ----
 
    Os passos do stepper têm min-width:140px (stepper.css) e não cabem
@@ -75,8 +81,21 @@
 @media (max-width: 767px) {
 
     .etiquetas-stepper {
+        flex-wrap: wrap;
         justify-content: flex-start;
+        gap: 0.75rem;
         padding: 1rem 1.25rem;
+    }
+
+    /* Título numa linha própria acima do anel de progresso */
+    .etiquetas-stepper__titulo {
+        width: 100%;
+        margin: 0;
+        padding: 0 0 0.75rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+
+        font-size: 1.1rem;
     }
 
     .etiquetas-stepper > .step,
@@ -357,7 +376,7 @@ html:not(.vt-nav) .etiqueta-acoes-bar {
 }
 
 /* Etapa 1: o círculo acende ao carregar */
-html:not(.vt-nav) .etiquetas-stepper > .step--active:first-child .step__circle {
+html:not(.vt-nav) .etiquetas-stepper > .step--active:first-of-type .step__circle {
     animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
 }
 
