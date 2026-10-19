@@ -351,46 +351,49 @@
     background: var(--border-strong);
 }
 
-.request-row--pendente .request-details::before {
-    background: #f59e0b;
+/* Cor de status de cada linha (mesmas das status-pill). Frascos define as
+   suas em pages/frascos.css. */
+.request-row--pendente { --linha-status-cor: #f59e0b; }
+.request-row--em_analise { --linha-status-cor: #3b82f6; }
+.request-row--em_separacao { --linha-status-cor: #6366f1; }
+.request-row--aguardando_retirada { --linha-status-cor: #a855f7; }
+.request-row--concluido { --linha-status-cor: #22c55e; }
+.request-row--negado { --linha-status-cor: #ef4444; }
+.request-row--entrada { --linha-status-cor: #22c55e; }
+.request-row--saida { --linha-status-cor: #ef4444; }
+.request-row--transferencia { --linha-status-cor: #f59e0b; }
+.request-row--manutencao-concluida { --linha-status-cor: #22c55e; }
+.request-row--edicao { --linha-status-cor: #14b8a6; }
+
+/* Linhas com status: gradiente leve da cor no início da linha e da área
+   expandida (background-image, pra o fundo do hover continuar por baixo).
+   Paradas intermediárias e, na área expandida (alta), um gradiente mais
+   curto evitam faixas (banding) da cor tão fraca. */
+.request-row[class*="request-row--"] > .result-list,
+.request-row[class*="request-row--"] > .request-details {
+    --linha-gradiente-fim: 60%;
+
+    background-image: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--linha-status-cor) var(--tint-linha), transparent) 0%,
+        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.7), transparent) calc(var(--linha-gradiente-fim) * 0.25),
+        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.4), transparent) calc(var(--linha-gradiente-fim) * 0.5),
+        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.15), transparent) calc(var(--linha-gradiente-fim) * 0.75),
+        transparent var(--linha-gradiente-fim)
+    );
 }
 
-.request-row--em_analise .request-details::before {
-    background: #3b82f6;
+.request-row[class*="request-row--"] > .request-details {
+    --linha-gradiente-fim: 40%;
 }
 
-.request-row--em_separacao .request-details::before {
-    background: #6366f1;
-}
-
-.request-row--aguardando_retirada .request-details::before {
-    background: #a855f7;
-}
-
-.request-row--concluido .request-details::before {
-    background: #22c55e;
-}
-
-.request-row--negado .request-details::before {
-    background: #ef4444;
-}
-
-/* Mesmas cores dos chips da coluna "Tipo" em movimentacoes.html */
-.request-row--entrada .request-details::before {
-    background: #22c55e;
-}
-
-/* Manutenção concluída: mesmo verde da movimentação de entrada */
-.request-row--manutencao-concluida .request-details::before {
-    background: #22c55e;
-}
-
-.request-row--saida .request-details::before {
-    background: #ef4444;
-}
-
-.request-row--transferencia .request-details::before {
-    background: #f59e0b;
+/* Barra lateral no mesmo tom: translúcida e esmaecendo pra baixo */
+.request-row[class*="request-row--"] > .request-details::before {
+    background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--linha-status-cor, var(--border-strong)) var(--tint-barra-topo), transparent),
+        color-mix(in srgb, var(--linha-status-cor, var(--border-strong)) var(--tint-barra-base), transparent)
+    );
 }
 
 .request-details__content {
@@ -663,10 +666,6 @@
     gap: 0.75rem;
 
     margin-top: 2rem;
-}
-
-.request-row--edicao .request-details::before {
-    background: #14b8a6;
 }
 
 .status-pill {

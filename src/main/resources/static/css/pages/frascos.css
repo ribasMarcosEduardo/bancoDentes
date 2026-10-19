@@ -500,9 +500,6 @@
 
     --tint-blob-centro: 24%;
     --tint-blob-meio: 11%;
-    --tint-linha: 13%;
-    --tint-barra-topo: 60%;
-    --tint-barra-base: 18%;
 }
 
 :root.dark {
@@ -518,9 +515,6 @@
 
     --tint-blob-centro: 18%;
     --tint-blob-meio: 8%;
-    --tint-linha: 9%;
-    --tint-barra-topo: 45%;
-    --tint-barra-base: 12%;
 }
 
 .status-pill--frasco {
@@ -546,45 +540,11 @@
     color: var(--status-frasco-inativo);
 }
 
-/* Gradiente do status na linha da lista (como o blob dos cards): cor bem
-   leve no início, sumindo na metade. background-image pra o fundo do
-   hover (.result-list:hover) continuar por baixo. */
+/* Cor do gradiente de status das linhas (regras em components/list.css) */
 .request-row--frasco-disponivel { --linha-status-cor: var(--tint-frasco-disponivel); }
 .request-row--frasco-impressao { --linha-status-cor: var(--tint-frasco-impressao); }
 .request-row--frasco-manutencao { --linha-status-cor: var(--tint-frasco-manutencao); }
 .request-row--frasco-inativo { --linha-status-cor: var(--tint-frasco-inativo); }
-
-/* Cor fraca em área grande vira faixas (banding): paradas intermediárias
-   suavizam o fim, e na área expandida (alta) o gradiente é mais curto, o
-   que estreita as faixas */
-.result-table--frascos .request-row .result-list,
-.result-table--frascos .request-row .request-details {
-    --linha-gradiente-fim: 60%;
-
-    background-image: linear-gradient(
-        to right,
-        color-mix(in srgb, var(--linha-status-cor) var(--tint-linha), transparent) 0%,
-        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.7), transparent) calc(var(--linha-gradiente-fim) * 0.25),
-        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.4), transparent) calc(var(--linha-gradiente-fim) * 0.5),
-        color-mix(in srgb, var(--linha-status-cor) calc(var(--tint-linha) * 0.15), transparent) calc(var(--linha-gradiente-fim) * 0.75),
-        transparent var(--linha-gradiente-fim)
-    );
-}
-
-.result-table--frascos .request-row .request-details {
-    --linha-gradiente-fim: 40%;
-}
-
-/* Barra lateral da área expandida no mesmo tom suave: translúcida e
-   esmaecendo pra baixo, em vez da cor sólida */
-.result-table--frascos .request-row .request-details::before {
-    background: linear-gradient(
-        to bottom,
-        color-mix(in srgb, var(--linha-status-cor, var(--border-strong)) var(--tint-barra-topo), transparent),
-        color-mix(in srgb, var(--linha-status-cor, var(--border-strong)) var(--tint-barra-base), transparent)
-    );
-}
-
 
 /* Blob do status: radial bem esfumado com centro no canto superior esquerdo,
    recortado pelo overflow:hidden do .card e atrás do conteúdo (z-index -1) */
