@@ -32,3 +32,25 @@ html.vt-nav .empty-state {
 i.icon[data-lucide] {
     display: inline-block;
 }
+
+/* Entrada em sequência, como a fila de etiquetas (pages/fila_etiquetas.css):
+   cabeçalho -> toolbar -> paginação -> itens. */
+html:not(.vt-nav) .main-panel > .page-header {
+    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.main-panel > .toolbar {
+    animation-delay: 0.06s;
+}
+
+.main-panel .pagination {
+    animation-delay: 0.12s;
+}
+
+/* Só na carga (painel-entrando, filters.js): o display:none da paginação
+   reiniciaria a animação a cada troca de página/filtro. --ordem-entrada
+   vem do JS (só os 8 primeiros visíveis); o resto entra junto. */
+html.painel-entrando:not(.vt-nav) .results :is(.request-row, .card) {
+    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(0.18s + var(--ordem-entrada, 8) * 0.04s);
+}

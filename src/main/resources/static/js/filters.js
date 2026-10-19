@@ -458,6 +458,25 @@ function setupFilters() {
     if (estadoSalvo?.scrollY) {
         requestAnimationFrame(() => window.scrollTo(0, estadoSalvo.scrollY));
     }
+
+    requestAnimationFrame(animarEntradaResultados);
+}
+
+// Cascata de entrada dos itens visíveis (css/layout/panel-transition.css).
+// Ordem pelos visíveis de fato: nth-child contaria os escondidos pelo filtro.
+function animarEntradaResultados() {
+    const raiz = document.documentElement;
+    if (raiz.classList.contains("vt-nav")) return;
+
+    [".results .request-row", ".results .card"].forEach(seletor => {
+        Array.from(document.querySelectorAll(seletor))
+            .filter(item => item.style.display !== "none")
+            .slice(0, 8)
+            .forEach((item, i) => item.style.setProperty("--ordem-entrada", i));
+    });
+
+    raiz.classList.add("painel-entrando");
+    setTimeout(() => raiz.classList.remove("painel-entrando"), 1200);
 }
 
 // Roda já (carregado no fim do <body> via bundles/painel.js, DOM do painel
