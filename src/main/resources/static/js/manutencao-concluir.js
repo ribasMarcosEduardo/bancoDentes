@@ -168,6 +168,7 @@ function setupManutencaoConcluirModal() {
                 FLASH_TOAST_KEY,
                 `Manutenção do frasco <strong>${codigo}</strong> concluída. Quantidade atualizada para <strong>${novaQuantidade}</strong> dentes.`
             );
+            window.salvarEstadoPainel?.();
             location.reload();
 
         } catch (error) {

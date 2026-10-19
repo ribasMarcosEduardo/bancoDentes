@@ -6,6 +6,23 @@ function normalizarBusca(texto) {
         .trim();
 }
 
+// Estado do painel guardado antes de uma ação que recarrega a própria página
+// (salvarEstadoPainel) e restaurado uma única vez na carga seguinte.
+// Expira rápido pra não reaparecer se a ação acabar levando pra outra tela.
+const ESTADO_PAINEL_KEY = "estadoPainel:" + location.pathname;
+const ESTADO_PAINEL_TTL_MS = 60 * 1000;
+
+function lerEstadoPainelSalvo() {
+    try {
+        const bruto = sessionStorage.getItem(ESTADO_PAINEL_KEY);
+        sessionStorage.removeItem(ESTADO_PAINEL_KEY);
+        const estado = bruto ? JSON.parse(bruto) : null;
+        return estado && Date.now() - estado.salvoEm < ESTADO_PAINEL_TTL_MS ? estado : null;
+    } catch {
+        return null;
+    }
+}
+
 // Seleciona os elementos do DOM e inicializa as variáveis de controle
 function setupFilters() {
     const sections = document.querySelectorAll(".filter-section");
@@ -63,24 +80,28 @@ function setupFilters() {
         applyPagination();
     }
 
+    function atualizarIconeOrdem() {
+        const icon = btnSortOrder?.querySelector(".orderBy-icon");
+        if (!icon) return false;
+
+        const newIcon = document.createElement("i");
+        newIcon.className = "orderBy-icon";
+        newIcon.setAttribute("data-lucide", sortAscending ? "arrow-down-up" : "arrow-up-down");
+        icon.replaceWith(newIcon);
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        return true;
+    }
+
     // Alterna a ordem e atualiza o ícone ao clicar no botão de ordenar
     if (btnSortOrder) {
         btnSortOrder.addEventListener("click", () => {
             sortAscending = !sortAscending;
             sortTable();
 
-            let icon = btnSortOrder.querySelector(".orderBy-icon");
-            if (icon) {
-                const newIcon = document.createElement("i");
-                newIcon.className = "orderBy-icon";
-                newIcon.setAttribute("data-lucide", sortAscending ? "arrow-down-up" : "arrow-up-down");
-
-                icon.replaceWith(newIcon);
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-
+            if (atualizarIconeOrdem()) {
                 // lucide.createIcons() troca o <i data-lucide> por um <svg> novo
                 // (mesma classe, nó diferente) — precisa reconsultar depois de
                 // rodar, senão a animação tenta grudar num elemento que já não
@@ -374,11 +395,60 @@ function setupFilters() {
     // Busca filtra enquanto digita; o "x" (search.js) dispara "input" ao limpar
     searchInput?.addEventListener("input", applyFilters);
 
+    window.salvarEstadoPainel = () => {
+        try {
+            sessionStorage.setItem(ESTADO_PAINEL_KEY, JSON.stringify({
+                salvoEm: Date.now(),
+                filtros: Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => [cb.getAttribute("data-filter-group"), cb.value]),
+                busca: searchInput?.value || "",
+                sortAscending,
+                sortSelect: sortSelect?.value,
+                pageSize: pageSizeSelect?.value,
+                page: currentPage
+            }));
+        } catch {
+            // sessionStorage indisponível: só perde a restauração
+        }
+    };
+
+    const estadoSalvo = lerEstadoPainelSalvo();
+
+    if (estadoSalvo) {
+        const marcados = new Set(estadoSalvo.filtros.map(([grupo, valor]) => grupo + "|" + valor));
+        checkboxes.forEach(cb => {
+            cb.checked = marcados.has(cb.getAttribute("data-filter-group") + "|" + cb.value);
+        });
+
+        if (searchInput && estadoSalvo.busca) {
+            searchInput.value = estadoSalvo.busca;
+            searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        if (pageSizeSelect && estadoSalvo.pageSize) {
+            pageSizeSelect.value = estadoSalvo.pageSize;
+            rowsPerPage = parseInt(pageSizeSelect.value);
+        }
+
+        if (sortSelect && estadoSalvo.sortSelect) sortSelect.value = estadoSalvo.sortSelect;
+        sortAscending = !!estadoSalvo.sortAscending;
+        if (sortAscending) atualizarIconeOrdem();
+
+        renderActiveFilters();
+    }
+
     // Aplica os filtros já na carga para esconder os itens ocultos por padrão
     applyFilters();
 
-    if (paginationRange) {
+    if (paginationRange || estadoSalvo?.sortAscending) {
         sortTable();
+    }
+
+    // applyPagination limita à última página existente
+    if (estadoSalvo?.page > 1) {
+        currentPage = estadoSalvo.page;
+        applyPagination();
     }
 }
 

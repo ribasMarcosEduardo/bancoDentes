@@ -619,6 +619,7 @@
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
+                    window.salvarEstadoPainel?.();
                     form.submit();
                 }
             });
@@ -647,6 +648,7 @@
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
+                    window.salvarEstadoPainel?.();
                     form.submit();
                 }
             });
@@ -674,6 +676,7 @@
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
+                    window.salvarEstadoPainel?.();
                     form.submit();
                 }
             });
@@ -721,6 +724,7 @@
             // Toast de sucesso depois do reload (flash em sessionStorage,
             // ver setupFlashToast em includes.js)
             sessionStorage.setItem(FLASH_TOAST_KEY, `${frascoHtml} foi enviado para manutenção.`);
+            window.salvarEstadoPainel?.();
             location.reload();
         } catch (error) {
             console.error(error);

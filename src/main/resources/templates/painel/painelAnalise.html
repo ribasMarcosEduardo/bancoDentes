@@ -469,6 +469,7 @@
 
                 if (inputJustificativa && form) {
                     inputJustificativa.value = result.value;
+                    window.salvarEstadoPainel?.();
                     form.submit();
                 } else {
                     Swal.fire(

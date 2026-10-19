@@ -384,6 +384,7 @@
                         reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            window.salvarEstadoPainel?.();
                             form.submit();
                         }
                     });
