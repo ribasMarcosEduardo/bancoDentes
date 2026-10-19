@@ -406,7 +406,8 @@ function setupFilters() {
                 sortAscending,
                 sortSelect: sortSelect?.value,
                 pageSize: pageSizeSelect?.value,
-                page: currentPage
+                page: currentPage,
+                scrollY: window.scrollY
             }));
         } catch {
             // sessionStorage indisponível: só perde a restauração
@@ -450,11 +451,15 @@ function setupFilters() {
         currentPage = estadoSalvo.page;
         applyPagination();
     }
+
+    // recarregarPagina (location.replace) e redirect de form não restauram a
+    // rolagem. rAF: depois dos outros scripts (results.js muda a altura com o
+    // setor) e antes do 1º frame
+    if (estadoSalvo?.scrollY) {
+        requestAnimationFrame(() => window.scrollTo(0, estadoSalvo.scrollY));
+    }
 }
 
-// Inicializa o script garantindo que o DOM já foi completamente carregado
-if (document.readyState === 'loading') {
-    document.addEventListener("DOMContentLoaded", setupFilters);
-} else {
-    setupFilters();
-}
+// Roda já (carregado no fim do <body> via bundles/painel.js, DOM do painel
+// pronto): o estado restaurado entra antes do 1º frame da View Transition
+setupFilters();

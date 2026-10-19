@@ -1,0 +1,34 @@
+/*
+    Painéis: troca de página (reload após ação, redirect de form) com fade
+    em vez do "pisca" branco. Só fade da raiz, sem view-transition-name na
+    navbar/toolbar: elementos nomeados são capturados isolados e perderiam
+    o backdrop-filter durante a transição.
+*/
+@view-transition {
+    navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @view-transition {
+        navigation: none;
+    }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.2s;
+}
+
+/* vt-nav: classe do pagereveal (<head> dos painéis) */
+html.vt-nav .toolbar,
+html.vt-nav .pagination,
+html.vt-nav .filters-header,
+html.vt-nav .filter-section,
+html.vt-nav .empty-state {
+    animation: none;
+}
+
+/* Reserva o espaço do ícone antes do Lucide trocar o <i> pelo <svg> */
+i.icon[data-lucide] {
+    display: inline-block;
+}

@@ -169,7 +169,7 @@ function setupManutencaoConcluirModal() {
                 `Manutenção do frasco <strong>${codigo}</strong> concluída. Quantidade atualizada para <strong>${novaQuantidade}</strong> dentes.`
             );
             window.salvarEstadoPainel?.();
-            location.reload();
+            recarregarPagina();
 
         } catch (error) {
             console.error(error);

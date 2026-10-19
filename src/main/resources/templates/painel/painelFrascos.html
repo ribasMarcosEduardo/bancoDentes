@@ -12,9 +12,20 @@
     })();
   </script>
 
+  <script>
+      // Chegou por View Transition: pula as animações de entrada (css/layout/panel-transition.css)
+      window.addEventListener("pagereveal", function (e) {
+          if (e.viewTransition) document.documentElement.classList.add("vt-nav");
+      });
+  </script>
+
+  <!-- Só pinta depois dos scripts do fim do <body> (filtros e ícones prontos) -->
+  <link rel="expect" href="#painel-fim" blocking="render">
+
   <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
+  <link rel="stylesheet" th:href="@{/css/layout/panel-transition.css}">
   <link rel="stylesheet" th:href="@{/css/pages/frascos.css(v=${#dates.createNow().getTime()})}">
 
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -725,7 +736,7 @@
             // ver setupFlashToast em includes.js)
             sessionStorage.setItem(FLASH_TOAST_KEY, `${frascoHtml} foi enviado para manutenção.`);
             window.salvarEstadoPainel?.();
-            location.reload();
+            recarregarPagina();
         } catch (error) {
             console.error(error);
             ToastError.fire({ icon: "error", title: "Não foi possível enviar o frasco para manutenção." });
@@ -734,5 +745,6 @@
 });
 </script>
 
+<span id="painel-fim" hidden></span>
 </body>
 </html>

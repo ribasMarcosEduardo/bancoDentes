@@ -532,6 +532,12 @@ function setupScrollToTopButton() {
 // que o backend Spring/Thymeleaf vai usar no projeto final.
 const FLASH_TOAST_KEY = "flashToastMessage";
 
+// location.reload() não dispara View Transition (ver css/layout/panel-transition.css);
+// replace na mesma URL sim, e não empilha histórico
+function recarregarPagina() {
+    location.replace(location.href.split("#")[0]);
+}
+
 function showToast(html) {
     // Nem toda página carrega o SweetAlert2 (só as com formulário/ações
     // que precisam dele) — sem essa guarda, uma página sem Swal quebraria
