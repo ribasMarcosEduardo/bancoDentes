@@ -497,6 +497,13 @@
     z-index: 1;
 }
 
+/* Com um menu aberto, a navbar (contexto de empilhamento dos menus) sobe
+   acima do container do Swal (1060) pra o menu ficar por cima do toast.
+   Fechado, o toast volta a ficar na frente da navbar. */
+.navbar:has(.navbar__dropdown.is-open) {
+    z-index: 1070;
+}
+
 /* Ponte invisível cobrindo o espaço entre o botão e o menu/painel,
    evitando que o hover "pisque" ou feche ao descer o mouse. Fica
    ancorada no próprio menu/painel (não no botão, que é bem menor),
