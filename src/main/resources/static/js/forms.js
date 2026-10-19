@@ -1329,3 +1329,6 @@ function setupSincronizacaoDatas() {
 }
 
 setupSincronizacaoDatas();
+
+// Encerra a entrada animada dos cadastros (cadastro_frasco.css)
+setTimeout(() => document.documentElement.classList.add("form-pronto"), 1500);

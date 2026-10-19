@@ -16,6 +16,9 @@
     --radius: 1rem;
     --container: 1400px;
     --page-pad: 2rem;
+
+    /* Animações de entrada das páginas (fade-slide-in e afins) */
+    --entrada-duracao: 0.6s;
 }
 
 :root.light,

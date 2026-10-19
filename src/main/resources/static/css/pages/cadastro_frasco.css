@@ -359,3 +359,29 @@
         display: none;
     }
 }
+
+/*
+    Entrada dos cadastros: toolbar (toolbar.css) -> card -> seções -> legenda.
+    Só na carga: forms.js põe .form-pronto depois, senão uma seção escondida
+    que volta a aparecer repetiria a entrada.
+*/
+@keyframes fade-slide-in-ate-estilo {
+    /* sem "to": termina no estilo do elemento (seção travada fica em 0.45) */
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+html:not(.form-pronto) .page--compact .form-card {
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
+}
+
+html:not(.form-pronto) .page--compact .form-card > :is(.form-section, .form-legend) {
+    animation: fade-slide-in-ate-estilo var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.16s backwards;
+}
+
+html:not(.form-pronto) .page--compact .form-card > .form-section:nth-of-type(2) { animation-delay: 0.22s; }
+html:not(.form-pronto) .page--compact .form-card > .form-section:nth-of-type(3) { animation-delay: 0.28s; }
+html:not(.form-pronto) .page--compact .form-card > .form-section:nth-of-type(n + 4) { animation-delay: 0.34s; }
+html:not(.form-pronto) .page--compact .form-card > .form-legend { animation-delay: 0.4s; }

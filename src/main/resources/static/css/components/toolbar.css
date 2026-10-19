@@ -22,7 +22,7 @@
     gap: 1rem;
     flex-wrap: wrap;
 
-    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /*

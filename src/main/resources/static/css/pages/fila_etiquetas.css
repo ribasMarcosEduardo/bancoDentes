@@ -97,7 +97,7 @@
    transições em pages/etiquetas.css). Só as primeiras ganham atraso
    crescente; o resto entra junto, pra fila longa não ficar esperando. */
 html:not(.vt-nav) .etiqueta-fila-row {
-    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
 }
 
 html:not(.vt-nav) .etiqueta-fila-row:nth-child(1) { animation-delay: 0.18s; }
