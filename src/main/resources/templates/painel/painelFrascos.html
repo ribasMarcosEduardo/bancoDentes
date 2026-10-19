@@ -67,21 +67,6 @@
 
         <div class="filter-section">
           <button type="button" class="filter-section__toggle" aria-expanded="true">
-            Grupo dentário
-            <i class="icon" data-lucide="chevron-down"></i>
-          </button>
-          <div class="filter-section__content">
-            <div class="filter-section__inner">
-              <label class="checkbox-filter" th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}">
-                <input type="checkbox" th:value="${nome}" data-filter-group="Grupo dentário">
-                <span th:text="${nome}">Molar</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="filter-section">
-          <button type="button" class="filter-section__toggle" aria-expanded="true">
             Status do frasco
             <i class="icon" data-lucide="chevron-down"></i>
           </button>
@@ -90,6 +75,21 @@
               <label class="checkbox-filter" th:each="s : ${T(bancoDentes.model.enumModels.StatusFrasco).values()}">
                 <input type="checkbox" th:value="${s.nome}" data-filter-group="Status">
                 <span th:text="${s.nome}">Disponível</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <button type="button" class="filter-section__toggle" aria-expanded="true">
+            Grupo dentário
+            <i class="icon" data-lucide="chevron-down"></i>
+          </button>
+          <div class="filter-section__content">
+            <div class="filter-section__inner">
+              <label class="checkbox-filter" th:each="nome : ${T(bancoDentes.model.enumModels.TipoDente).values()}">
+                <input type="checkbox" th:value="${nome}" data-filter-group="Grupo dentário">
+                <span th:text="${nome}">Molar</span>
               </label>
             </div>
           </div>
@@ -288,12 +288,9 @@
                 <span th:unless="${frasco.prazoManutencao != null}">---</span>
 
                 <div class="result-list__actions">
-                  <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
-                    <i class="icon" data-lucide="pen-line"></i>
+                  <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
+                    <i class="icon" data-lucide="history"></i>
                   </a>
-                  <button th:if="${frasco.inativo}" type="button" class="result-list__action result-list__action--blue" disabled data-tooltip="Frasco inativo" aria-label="Editar">
-                    <i class="icon" data-lucide="pen-line"></i>
-                  </button>
 
                   <th:block th:with="manAberta=${frasco.emManutencao ? manutencoesAbertas.get(frasco.codigo) : null}">
                     <button th:unless="${manAberta != null}" type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
@@ -319,21 +316,6 @@
                             th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : (frasco.naFilaImpressao ? 'Já está na fila de impressão' : 'Indisponível para impressão')}"
                             aria-label="Enviar para impressão">
                       <i class="icon" data-lucide="printer"></i>
-                    </button>
-                  </form>
-
-                  <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
-                    <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
-                      <i class="icon" data-lucide="trash-2"></i>
-                    </button>
-                  </form>
-                  <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
-                    <button type="submit" class="result-list__action result-list__action--red"
-                            th:disabled="${frasco.inativo or frasco.emManutencao}"
-                            th:data-identificacao="${frasco.identificacao}"
-                            th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
-                            aria-label="Inativar">
-                      <i class="icon" data-lucide="archive-x"></i>
                     </button>
                   </form>
 

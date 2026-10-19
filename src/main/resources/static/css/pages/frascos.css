@@ -99,7 +99,7 @@
     }
 
     /*
-        Os 4 botões de ação (186px) não cabem na linha nessa largura —
+        Os 3 botões de ação (150px) não cabem na linha nessa largura —
         some daqui e a coluna fica só com a seta de expandir (32px); a
         seção "Ações" no fim da área expandida (sempre visível) continua
         dando acesso a eles. Os forms de imprimir e excluir somem junto:
@@ -240,7 +240,7 @@
             1fr
             0.6fr
             120px
-            186px;
+            150px;
     }
 
     .result-table--frascos .result-table__head span:nth-child(3),
