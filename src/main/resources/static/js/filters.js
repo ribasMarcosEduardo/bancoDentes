@@ -80,6 +80,31 @@ function setupFilters() {
         applyPagination();
     }
 
+    // Ao reordenar: itens visíveis reentram em cascata e o texto de ordenação
+    // troca com fade (WAAPI — a regra de movimento reduzido do CSS não pega)
+    function animarReordenacao() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+        [".results .request-row", ".results .card"].forEach(seletor => {
+            Array.from(document.querySelectorAll(seletor))
+                .filter(item => item.offsetParent !== null)
+                .forEach((item, i) => {
+                    item.animate(
+                        [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
+                        { duration: 380, delay: Math.min(i, 8) * 35, easing, fill: "backwards" }
+                    );
+                });
+        });
+
+        // Com a paginação grudada o texto fica escondido (is-stuck) — sem fade
+        if (paginationInfo && !paginationInfo.closest(".is-stuck")) paginationInfo.animate(
+            [{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }],
+            { duration: 300, easing }
+        );
+    }
+
     function atualizarIconeOrdem() {
         const icon = btnSortOrder?.querySelector(".orderBy-icon");
         if (!icon) return false;
@@ -100,6 +125,7 @@ function setupFilters() {
         btnSortOrder.addEventListener("click", () => {
             sortAscending = !sortAscending;
             sortTable();
+            animarReordenacao();
 
             if (atualizarIconeOrdem()) {
                 // lucide.createIcons() troca o <i data-lucide> por um <svg> novo
@@ -128,6 +154,7 @@ function setupFilters() {
                 sortAscending = true;
             }
             sortTable();
+            animarReordenacao();
         });
     }
 
