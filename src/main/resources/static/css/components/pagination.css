@@ -9,7 +9,7 @@
     gap: 1rem;
     flex-wrap: wrap;
 
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
 
     /*
         Acompanha a .toolbar (também sticky) quando ela gruda no topo,
@@ -45,6 +45,27 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+/* Rolando pra baixo, toolbar e paginação saem de cena por trás da navbar;
+   rolando pra cima voltam (barras-ocultas, setupStickyPagination em includes.js) */
+.main-panel > .toolbar,
+.main-panel .pagination {
+    transition:
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+}
+
+html.barras-ocultas .main-panel > .toolbar {
+    transform: translateY(calc(-100% - 1rem));
+    opacity: 0;
+    pointer-events: none;
+}
+
+html.barras-ocultas .main-panel .pagination {
+    transform: translateY(calc(-1 * var(--pagination-sticky-top, 0px)));
+    opacity: 0;
+    pointer-events: none;
 }
 
 .pagination__actions {

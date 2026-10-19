@@ -323,6 +323,32 @@ function setupStickyPagination() {
     if (navbar) resizeObserver.observe(navbar);
 
     window.addEventListener("scroll", updateStuckState, { passive: true });
+
+    // Como em apps de feed: rolando pra baixo com a paginação grudada, toolbar
+    // e paginação somem; qualquer rolagem pra cima as traz de volta. Não some
+    // com a busca/um select da toolbar em uso.
+    let ultimoY = window.scrollY;
+
+    function atualizarBarrasOcultas() {
+        const y = window.scrollY;
+        if (Math.abs(y - ultimoY) < 6) return;
+
+        // Salto maior que a tela = reposicionamento (ex.: rolagem restaurada
+        // depois de uma ação), não rolagem do usuário
+        if (Math.abs(y - ultimoY) > window.innerHeight) {
+            ultimoY = y;
+            return;
+        }
+
+        const ativo = document.activeElement;
+        const editando = toolbar.contains(ativo) && ativo.matches("input, select, textarea");
+        const ocultar = y > ultimoY && pagination.classList.contains("is-stuck") && !editando;
+
+        document.documentElement.classList.toggle("barras-ocultas", ocultar);
+        ultimoY = y;
+    }
+
+    window.addEventListener("scroll", atualizarBarrasOcultas, { passive: true });
     window.addEventListener("resize", () => {
         // A media query de altura muda o espaço sem mudar o tamanho da
         // toolbar/navbar necessariamente — recalcula aqui também.
@@ -337,16 +363,11 @@ function setupScrollToTopButton() {
     // toolbar gruda no topo e some quando volta ao início da página.
     const toolbar = document.querySelector(".toolbar");
     const results = document.querySelector(".results");
-    const dashboard = document.querySelector(".dashboard");
 
     if (!toolbar || !results) return;
 
-    const BUTTON_SIZE = 48; // precisa bater com width/height de .scroll-to-top
-    const EDGE_GAP = 20; // 1.25rem — mesma distância usada nos outros FABs (mobile-menu-toggle etc.)
-    const DASHBOARD_EDGE_GAP = EDGE_GAP / 3; // 2/3 menor — perto do fim do .dashboard, folga total incomoda
-
-    const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
-
+    // Posição fixa no canto inferior direito, só CSS (scroll-to-top.css):
+    // calcular o top via JS a cada scroll fazia o botão tremer
     const button = document.createElement("button");
     button.type = "button";
     button.className = "scroll-to-top";
@@ -354,38 +375,6 @@ function setupScrollToTopButton() {
     button.innerHTML = '<i class="icon" data-lucide="arrow-up"></i>';
     document.body.appendChild(button);
     lucide.createIcons();
-
-    // Posição vertical vem toda daqui (não de "bottom" fixo no CSS) pra
-    // dar pra travar o botão sem ultrapassar o fim do .dashboard (todo
-    // o conteúdo da página, sidebar incluída) — numa página curta, o
-    // fim dele pode chegar antes de onde o botão ficaria normalmente
-    // perto do rodapé da tela. Alinhamento horizontal continua com
-    // .results, que é quem define a borda esquerda visível da lista.
-    function updatePosition() {
-        // No mobile o hambúrguer vira um FAB fixo no canto (ver
-        // .mobile-menu-toggle em layout/mobile-menu.css) — nessa faixa,
-        // quem posiciona o botão é o CSS (ver @media max-width:1000px
-        // em components/scroll-to-top.css), grudado do lado esquerdo
-        // dele. Só precisa limpar left/top daqui pra não brigar com o
-        // right/bottom do CSS (inline style sempre vence a folha de
-        // estilo pra mesma propriedade).
-        const isMobileMenuActive = mobileMenuToggle && getComputedStyle(mobileMenuToggle).display !== "none";
-
-        if (isMobileMenuActive) {
-            button.style.top = "";
-            button.style.left = "";
-            return;
-        }
-
-        const resultsRect = results.getBoundingClientRect();
-        const bottomBoundary = dashboard ? dashboard.getBoundingClientRect().bottom : resultsRect.bottom;
-
-        const preferredTop = window.innerHeight - EDGE_GAP - BUTTON_SIZE;
-        const maxTop = bottomBoundary - BUTTON_SIZE - DASHBOARD_EDGE_GAP;
-
-        button.style.top = `${Math.min(preferredTop, maxTop)}px`;
-        button.style.left = `${resultsRect.left}px`;
-    }
 
     // offsetTop reflete a posição "normal" (sem sticky) da toolbar no
     // fluxo do documento, mesmo enquanto ela está grudada — por isso
@@ -508,17 +497,10 @@ function setupScrollToTopButton() {
         }
     }
 
-    function updateAll() {
-        updatePosition();
-        updateVisibility();
-    }
+    updateVisibility();
 
-    updateAll();
-
-    // A posição precisa recalcular a cada scroll (não só resize) porque
-    // maxTop depende de onde .results está na tela nesse momento.
-    window.addEventListener("scroll", updateAll, { passive: true });
-    window.addEventListener("resize", updateAll);
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
 
     button.addEventListener("click", () => {
         window.scrollTo({ top: 0, behavior: "smooth" });

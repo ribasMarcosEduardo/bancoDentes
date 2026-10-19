@@ -22,7 +22,9 @@
     gap: 1rem;
     flex-wrap: wrap;
 
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) both;
+    /* backwards (não both): o fim da animação não pode segurar transform/opacity,
+       senão trava o esconder ao rolar (pagination.css) */
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /*
