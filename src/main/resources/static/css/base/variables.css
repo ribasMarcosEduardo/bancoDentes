@@ -16,11 +16,27 @@
     --radius: 1rem;
     --container: 1400px;
     --page-pad: 2rem;
+
+    /* Animações de entrada das páginas (fade-slide-in e afins) */
+    --entrada-duracao: 0.6s;
+}
+
+/* Telas muito largas (ver html em base/globals.css): conteúdo mais largo e
+   em rem, escalando com a fonte (90rem ≈ 1980px com a fonte em 22px) */
+@media (min-width: 2800px) {
+    :root {
+        --container: 90rem;
+    }
 }
 
 :root.light,
 body.light{
     --page-bg: #fcfcfc;
+
+    /* Gradiente do status nas linhas das listas (components/list.css) */
+    --tint-linha: 13%;
+    --tint-barra-topo: 60%;
+    --tint-barra-base: 18%;
     --surface: #ffffff;
     --surface-soft: rgba(255,255,255,0.78);
     --surface-muted: rgba(245,245,245,0.6);
@@ -149,6 +165,11 @@ body.light{
 :root.dark,
 body.dark {
     --page-bg: #202020;
+
+    /* Gradiente do status nas linhas das listas (components/list.css) */
+    --tint-linha: 9%;
+    --tint-barra-topo: 45%;
+    --tint-barra-base: 12%;
     --surface: #1c1c1c;
     --surface-soft: rgba(28,28,28,0.85);
     --surface-muted: rgba(255,255,255,0.05);

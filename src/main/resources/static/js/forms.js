@@ -988,50 +988,115 @@ function setupCadastroMovimentacaoSubmit() {
             const spans = row.querySelectorAll(".selected-flask > span");
             return {
                 id: row.dataset.frascoId || spans[0]?.textContent.trim() || "---",
-                quantidade: spans[1] ? spans[1].textContent.trim() : null,
+                quantidade: spans[1] ? Number(spans[1].textContent.trim()) || 0 : null,
             };
         });
     }
 
-    function totalDentesOrigemFrascos() {
-        return Array.from(origemFrascosList?.querySelectorAll(".request-row") || []).reduce((soma, row) => {
-            const quantidade = Number(row.querySelectorAll(".selected-flask > span")[1]?.textContent) || 0;
-            return soma + quantidade;
-        }, 0);
+    function frascosDeOrigem() {
+        return Array.from(origemFrascosList?.querySelectorAll(".request-row") || []).map((row) => ({
+            id: row.dataset.frascoId,
+            quantidade: Number(row.querySelectorAll(".selected-flask > span")[1]?.textContent) || 0,
+        }));
+    }
+
+    function escaparHtml(texto) {
+        return String(texto).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    }
+
+    // Helpers de frasco-search-movimentacao.js (mesma página)
+    const qtdDentes = (n) => (typeof formatarQtdDentes === "function" ? formatarQtdDentes(n) : `${n} dentes`);
+
+    function linhaResumo(label, valor) {
+        return `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`;
+    }
+
+    // Frasco + saldo antes -> depois; meta (grupo/estado...) vem do catálogo carregado pelos modais
+    function linhaFrascoResumo(id, delta) {
+        const frasco = (window.catalogoFrascosCache || []).find((f) => f.id === id);
+        const meta = frasco && typeof formatarMeta === "function"
+            ? [frasco.grupo && rotuloAtributoFrasco(frasco.grupo), formatarMeta(frasco)].filter(Boolean).join(" · ")
+            : "";
+        const sinal = delta >= 0 ? "+" : "−";
+        const saldo = frasco ? `<small>${frasco.disponivel} → ${Math.max(frasco.disponivel + delta, 0)}</small>` : "";
+
+        return `<div class="swal-resumo__row swal-resumo__row--frasco">
+                    <span>${escaparHtml(id)}${meta ? `<small>${meta}</small>` : ""}</span>
+                    <strong>${sinal}${Math.abs(delta)}${saldo}</strong>
+                </div>`;
+    }
+
+    function grupoResumo(titulo, conteudo) {
+        return `<div class="swal-resumo__grupo"><span class="swal-resumo__grupo-titulo">${titulo}</span>${conteudo}</div>`;
+    }
+
+    // Fechado por padrão: o resumo vai no cabeçalho, o detalhamento abre no clique
+    // (sem isso, a Entrada empurrava o botão de confirmar pra fora da tela)
+    // Abre/fecha em ligarGruposExpansiveis (didOpen do Swal)
+    function grupoExpansivel(titulo, resumo, conteudo) {
+        return `<div class="swal-resumo__grupo swal-resumo__grupo--expansivel">
+                    <button type="button" class="swal-resumo__grupo-toggle" aria-expanded="false">
+                        <span class="swal-resumo__grupo-titulo">${titulo}</span>
+                        <strong>${resumo}</strong>
+                    </button>
+                    <div class="swal-resumo__grupo-conteudo">
+                        <div class="swal-resumo__grupo-conteudo-inner">${conteudo}</div>
+                    </div>
+                </div>`;
+    }
+
+    function ligarGruposExpansiveis(popup) {
+        popup.querySelectorAll(".swal-resumo__grupo-toggle").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const aberto = btn.parentElement.classList.toggle("is-open");
+                btn.setAttribute("aria-expanded", String(aberto));
+            });
+        });
     }
 
     function montarResumoMovimentacao(frascos) {
-        const linhas = [
-            ["Local", textoSelecionado(localSelect)],
-            ["Tipo", textoSelecionado(tipoSelect)],
-        ];
+        const entrada = tipoSelect?.value?.toUpperCase() === "ENTRADA";
+        let html = linhaResumo("Local", textoSelecionado(localSelect)) + linhaResumo("Tipo", textoSelecionado(tipoSelect));
 
-        if (tipoSelect?.value === "entrada") {
-            linhas.push(["Origem dos Dentes", textoSelecionado(origemDentesSelect)]);
+        if (entrada) {
+            const origem = origemDentesSelect?.value;
+            const origens = origem === "frascos" ? frascosDeOrigem() : [];
+            const recebidos = origem === "doacao"
+                ? Number(quantidadeDoacaoInput?.value) || 0
+                : origens.reduce((soma, f) => soma + f.quantidade, 0);
 
-            if (origemDentesSelect?.value === "doacao") {
-                linhas.push(["Quantidade de dentes", `${quantidadeDoacaoInput?.value || "1"} dentes`]);
-            } else if (origemDentesSelect?.value === "frascos") {
-                linhas.push(["Quantidade total recebida", `${totalDentesOrigemFrascos()} dentes`]);
+            html += grupoExpansivel(
+                "Frasco de destino",
+                `${frascos.map(({ id }) => escaparHtml(id)).join(", ")} · +${recebidos}`,
+                frascos.map(({ id }) => linhaFrascoResumo(id, recebidos)).join("")
+            );
+
+            let origemHtml = "";
+            if (origem === "doacao") {
+                origemHtml = linhaResumo("Quantidade adicionada", qtdDentes(recebidos));
+            } else if (origem === "frascos") {
+                origemHtml = origens.map(({ id, quantidade }) => linhaFrascoResumo(id, -quantidade)).join("")
+                    + linhaResumo("Total transferido", qtdDentes(recebidos));
             }
+            html += grupoExpansivel(
+                "Origem dos dentes",
+                `${textoSelecionado(origemDentesSelect)} · ${qtdDentes(recebidos)}`,
+                origemHtml
+            );
+        } else {
+            const total = frascos.reduce((soma, f) => soma + (f.quantidade || 0), 0);
+            const linhas = frascos.map(({ id, quantidade }) => linhaFrascoResumo(id, -(quantidade || 0))).join("")
+                + linhaResumo("Total retirado", qtdDentes(total));
+
+            html += frascos.length >= 2
+                ? grupoExpansivel("Frascos de saída", `${frascos.length} frascos · ${qtdDentes(total)}`, linhas)
+                : grupoResumo("Frascos de saída", linhas);
         }
 
-        const linhasHtml = linhas
-            .map(([label, valor]) => `<div class="swal-resumo__row"><span>${label}</span><strong>${valor}</strong></div>`)
-            .join("");
-
-        const frascosHtml = frascos
-            .map(({ id, quantidade }) =>
-                quantidade === null
-                    ? `<div class="swal-resumo__row"><span>${id}</span></div>`
-                    : `<div class="swal-resumo__row"><span>${id}</span><strong>${quantidade} un.</strong></div>`
-            )
-            .join("");
-
-        const obsTexto = (observacoesField?.value || "").trim() || "Não Informado";
+        const obsTexto = escaparHtml((observacoesField?.value || "").trim() || "Não Informado");
         const obsHtml = `<div class="swal-resumo__obs"><span>Observações</span><p>${obsTexto}</p></div>`;
 
-        return `<p>Revise os dados antes de confirmar:</p><div class="swal-resumo">${linhasHtml}${frascosHtml}${obsHtml}</div>`;
+        return `<p>Revise os dados antes de confirmar:</p><div class="swal-resumo">${html}${obsHtml}</div>`;
     }
 
     form.addEventListener("submit", (event) => {
@@ -1089,6 +1154,8 @@ function setupCadastroMovimentacaoSubmit() {
             icon: "question",
             title: "Confirmar movimentação?",
             html: montarResumoMovimentacao(frascos),
+            width: "34rem",
+            didOpen: ligarGruposExpansiveis,
             showCancelButton: true,
             reverseButtons: true,
             focusCancel: true,
@@ -1329,3 +1396,81 @@ function setupSincronizacaoDatas() {
 }
 
 setupSincronizacaoDatas();
+
+// Setas ao lado do formulário (.form-scroll-nav): pulam entre o topo da página
+// e as seções de data-paradas, descontando a toolbar sticky. Seções escondidas
+// (hidden) ficam de fora — ex.: sem Entrada, a próxima parada é Observações.
+function setupNavegacaoSecoes() {
+    const nav = document.querySelector(".form-scroll-nav");
+    if (!nav) return;
+
+    const btnAcima = nav.querySelector("[data-scroll-nav='up']");
+    const btnAbaixo = nav.querySelector("[data-scroll-nav='down']");
+    const toolbar = document.querySelector(".toolbar");
+    const seletores = (nav.dataset.paradas || "").split(",").map(sel => sel.trim()).filter(Boolean);
+    const FOLGA = 16;
+    const TOLERANCIA = 4;
+
+    function alturaToolbar() {
+        if (!toolbar) return FOLGA;
+        return (parseFloat(getComputedStyle(toolbar).top) || 0) + toolbar.offsetHeight + FOLGA;
+    }
+
+    function paradas() {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const ys = seletores
+            .map(sel => document.querySelector(sel))
+            .filter(el => el && el.offsetParent !== null)
+            .map(el => el.getBoundingClientRect().top + window.scrollY - alturaToolbar())
+            .map(y => Math.round(Math.min(Math.max(y, 0), maxScroll)));
+
+        return [...new Set([0, ...ys])].sort((a, b) => a - b);
+    }
+
+    function proximas() {
+        const y = window.scrollY;
+        const lista = paradas();
+        return {
+            acima: [...lista].reverse().find(p => p < y - TOLERANCIA),
+            abaixo: lista.find(p => p > y + TOLERANCIA)
+        };
+    }
+
+    function atualizar() {
+        const { acima, abaixo } = proximas();
+        btnAcima.disabled = acima === undefined;
+        btnAbaixo.disabled = abaixo === undefined;
+    }
+
+    btnAcima.addEventListener("click", () => {
+        const { acima } = proximas();
+        if (acima !== undefined) window.scrollTo({ top: acima, behavior: "smooth" });
+    });
+
+    btnAbaixo.addEventListener("click", () => {
+        const { abaixo } = proximas();
+        if (abaixo !== undefined) window.scrollTo({ top: abaixo, behavior: "smooth" });
+    });
+
+    let agendado = false;
+    function agendarAtualizacao() {
+        if (agendado) return;
+        agendado = true;
+        requestAnimationFrame(() => {
+            agendado = false;
+            atualizar();
+        });
+    }
+
+    window.addEventListener("scroll", agendarAtualizacao, { passive: true });
+    window.addEventListener("resize", agendarAtualizacao);
+    // Seções que aparecem/somem mudam a altura do form
+    new ResizeObserver(agendarAtualizacao).observe(document.querySelector(".form-card") || document.body);
+
+    atualizar();
+}
+
+setupNavegacaoSecoes();
+
+// Encerra a entrada animada dos cadastros (cadastro_frasco.css)
+setTimeout(() => document.documentElement.classList.add("form-pronto"), 1500);

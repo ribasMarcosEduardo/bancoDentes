@@ -1,0 +1,56 @@
+/*
+    Painéis: troca de página (reload após ação, redirect de form) com fade
+    em vez do "pisca" branco. Só fade da raiz, sem view-transition-name na
+    navbar/toolbar: elementos nomeados são capturados isolados e perderiam
+    o backdrop-filter durante a transição.
+*/
+@view-transition {
+    navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @view-transition {
+        navigation: none;
+    }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.28s;
+}
+
+/* vt-nav: classe do pagereveal (<head> dos painéis) */
+html.vt-nav .toolbar,
+html.vt-nav .pagination,
+html.vt-nav .filters-header,
+html.vt-nav .filter-section,
+html.vt-nav .empty-state {
+    animation: none;
+}
+
+/* Reserva o espaço do ícone antes do Lucide trocar o <i> pelo <svg> */
+i.icon[data-lucide] {
+    display: inline-block;
+}
+
+/* Entrada em sequência, como a fila de etiquetas (pages/fila_etiquetas.css):
+   cabeçalho -> toolbar -> paginação -> itens. */
+html:not(.vt-nav) .main-panel > .page-header {
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.main-panel > .toolbar {
+    animation-delay: 0.06s;
+}
+
+.main-panel .pagination {
+    animation-delay: 0.12s;
+}
+
+/* Só na carga (painel-entrando, filters.js): o display:none da paginação
+   reiniciaria a animação a cada troca de página/filtro. --ordem-entrada
+   vem do JS (só os 8 primeiros visíveis); o resto entra junto. */
+html.painel-entrando:not(.vt-nav) .results :is(.request-row, .card) {
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(0.18s + var(--ordem-entrada, 8) * 0.04s);
+}

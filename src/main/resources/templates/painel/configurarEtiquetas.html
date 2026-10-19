@@ -16,8 +16,17 @@
     // Chegou por View Transition (navegação dentro do fluxo): a troca já é
     // animada, então a entrada em sequência da página é pulada (ver
     // css/pages/etiquetas.css). Precisa rodar no <head>, antes do 1º paint.
+    // Vindo de fora do fluxo (ex.: painéis, que também têm @view-transition),
+    // cancela o fade e a página entra animada.
     window.addEventListener("pagereveal", function (e) {
-        if (e.viewTransition) document.documentElement.classList.add("vt-nav");
+        if (!e.viewTransition) return;
+
+        var origem = document.referrer ? new URL(document.referrer).pathname : "";
+        if (origem.indexOf("/etiqueta/") === 0) {
+            document.documentElement.classList.add("vt-nav");
+        } else {
+            e.viewTransition.skipTransition();
+        }
     });
   </script>
 
@@ -43,12 +52,9 @@
 <main class="page">
   <section class="form-shell">
 
-    <header class="page-header">
-      <h1>Configurar impressão</h1>
-      <p>Escolha o modelo de folha e a partir de qual célula a impressão deve começar.</p>
-    </header>
-
     <div class="stepper etiquetas-stepper">
+      <h1 class="etiquetas-stepper__titulo">Configurar impressão</h1>
+
       <div class="step step--done" data-step="selecao">
         <div class="step__circle">
           <i class="icon" data-lucide="list-checks"></i>
@@ -98,6 +104,30 @@
       <input type="hidden" name="posicaoInicial" id="posicaoInicialInput" value="0">
 
       <div class="form-card etiqueta-config-painel">
+        <div class="etiqueta-grid-wrapper">
+          <label>A partir de qual célula começar?</label>
+          <p class="field-hint">Clique na primeira célula ainda disponível na folha física.</p>
+
+          <!-- Legendas de tabuleiro: C1, C2… em cima e L1, L2… à esquerda (montadas pelo JS) -->
+          <div class="etiqueta-quadro">
+            <span class="etiqueta-quadro__canto" aria-hidden="true"></span>
+            <div class="etiqueta-quadro__colunas" id="etiquetaGridColunas" aria-hidden="true"></div>
+            <div class="etiqueta-quadro__linhas" id="etiquetaGridLinhas" aria-hidden="true"></div>
+            <div class="etiqueta-grid" id="etiquetaGridPosicao"></div>
+          </div>
+
+          <div class="etiqueta-grid__legenda">
+            <span class="etiqueta-grid__legenda-item">
+              <span class="etiqueta-grid__legenda-swatch etiqueta-grid__legenda-swatch--pulada"></span>
+              Já ocupada na folha física
+            </span>
+            <span class="etiqueta-grid__legenda-item">
+              <span class="etiqueta-grid__legenda-swatch etiqueta-grid__legenda-swatch--disponivel"></span>
+              Disponível, a impressão começa aqui
+            </span>
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="modeloFolhaSelect">Modelo de folha</label>
           <div class="select-wrapper">
@@ -114,24 +144,6 @@
             <i class="select-icon icon" data-lucide="chevron-down"></i>
           </div>
           <p class="field-hint" id="modeloFolhaDescricao"></p>
-        </div>
-
-        <div class="etiqueta-grid-wrapper">
-          <label>A partir de qual célula começar?</label>
-          <p class="field-hint">Clique na primeira célula ainda disponível na folha física.</p>
-
-          <div class="etiqueta-grid" id="etiquetaGridPosicao"></div>
-
-          <div class="etiqueta-grid__legenda">
-            <span class="etiqueta-grid__legenda-item">
-              <span class="etiqueta-grid__legenda-swatch etiqueta-grid__legenda-swatch--pulada"></span>
-              Já ocupada na folha física
-            </span>
-            <span class="etiqueta-grid__legenda-item">
-              <span class="etiqueta-grid__legenda-swatch etiqueta-grid__legenda-swatch--disponivel"></span>
-              Disponível, a impressão começa aqui
-            </span>
-          </div>
         </div>
       </div>
 

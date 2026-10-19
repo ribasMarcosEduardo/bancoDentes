@@ -9,7 +9,7 @@
     gap: 1rem;
     flex-wrap: wrap;
 
-    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
 
     /*
         Acompanha a .toolbar (também sticky) quando ela gruda no topo,
@@ -45,6 +45,45 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+/* Rolando pra baixo, toolbar e paginação esmaecem com uma leve subida;
+   rolando pra cima voltam (barras-ocultas, setupStickyPagination em includes.js).
+   Transição da regra base = a de voltar (mais rápida); a de sumir fica nos
+   estados escondidos, mais longa e suave. */
+.main-panel > .toolbar,
+.main-panel .pagination {
+    transition:
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease;
+}
+
+html.barras-ocultas .main-panel > .toolbar {
+    transform: translateY(-12px);
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Abertas já escondidas (painelMovimentacoes.html, ?frasco=): sem a animação
+   de entrada, que sobreporia o transform de escondido */
+html.barras-sem-entrada .main-panel > .toolbar,
+html.barras-sem-entrada .main-panel .pagination {
+    animation: none;
+}
+
+/* Fora do topo ela ainda está no fluxo da página: só sai quando grudada */
+html.barras-ocultas .main-panel .pagination.is-stuck {
+    transform: translateY(-12px);
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pagination__actions {

@@ -16,8 +16,17 @@
     // Chegou por View Transition (navegação dentro do fluxo): a troca já é
     // animada, então a entrada em sequência da página é pulada (ver
     // css/pages/etiquetas.css). Precisa rodar no <head>, antes do 1º paint.
+    // Vindo de fora do fluxo (ex.: painéis, que também têm @view-transition),
+    // cancela o fade e a página entra animada.
     window.addEventListener("pagereveal", function (e) {
-        if (e.viewTransition) document.documentElement.classList.add("vt-nav");
+        if (!e.viewTransition) return;
+
+        var origem = document.referrer ? new URL(document.referrer).pathname : "";
+        if (origem.indexOf("/etiqueta/") === 0) {
+            document.documentElement.classList.add("vt-nav");
+        } else {
+            e.viewTransition.skipTransition();
+        }
     });
   </script>
 
@@ -43,12 +52,9 @@
 <main class="page">
   <section class="form-shell">
 
-    <header class="page-header">
-      <h1>Imprimir etiquetas</h1>
-      <p>Frascos aguardando etiqueta adesiva.<span class="page-header__extra"> Desmarque os que não devem ser impressos agora. Eles continuam na fila.</span></p>
-    </header>
-
     <div class="stepper etiquetas-stepper">
+      <h1 class="etiquetas-stepper__titulo">Imprimir etiquetas</h1>
+
       <div class="step step--active" data-step="selecao">
         <div class="step__circle">
           <i class="icon" data-lucide="list-checks"></i>
@@ -97,6 +103,19 @@
     </th:block>
 
     <form th:if="${!#lists.isEmpty(frascos)}" id="formFilaEtiquetas" th:action="@{/etiqueta/configurar}" method="post">
+      <!-- Só aparece com mais de uma página (etiquetas-fila.js) -->
+      <div class="pagination__nav etiqueta-fila-paginacao" id="filaPaginacao" hidden>
+        <span class="pagination__range" id="filaPaginacaoRange">1-20</span>
+
+        <button type="button" class="btn btn-pagination" id="filaPaginaAnterior" data-tooltip="Página anterior" aria-label="Página anterior">
+          <i class="icon" data-lucide="chevron-left"></i>
+        </button>
+
+        <button type="button" class="btn btn-pagination" id="filaPaginaProxima" data-tooltip="Próxima página" aria-label="Próxima página">
+          <i class="icon" data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
       <div class="result-table result-table--etiqueta-selecao">
         <div class="result-table__head">
           <span>

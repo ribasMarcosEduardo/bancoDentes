@@ -2,6 +2,8 @@
     flex: 1;
     width: 100%;
     padding: var(--page-pad);
+    /* Respiro extra antes do rodapé */
+    padding-bottom: calc(var(--page-pad) + 5rem);
 
     /*
         101vh (não 100%) força a página a sempre passar um pouco da
@@ -64,4 +66,46 @@
 .filter-sidebar p{
     margin: 0.5rem 0 0;
     color: var(--text-muted);
+}
+
+
+/*
+    Telas baixas (mesmo corte da navbar compacta, ver layout/navbar.css):
+    pagination mais perto da toolbar nos painéis — 1.5rem (gap do
+    .main-panel) - 0.75rem = 0.75rem. Margem só no .list-panel pra não
+    mexer nos outros espaços do .main-panel. O JS que calcula onde a
+    pagination gruda (setupStickyPagination, includes.js) lê esse valor
+    já computado, então não precisa de ajuste lá.
+*/
+@media (max-height: 800px) {
+
+    .main-panel > .toolbar + .list-panel {
+        margin-top: -0.75rem;
+    }
+}
+
+/*
+    Telas de cadastro (form/*.html): em notebooks a altura útil é
+    pequena, então a página usa menos respiro em volta. O título também
+    não tem .page-header próprio — vai dentro da toolbar
+    (.toolbar__title, ver components/toolbar.css).
+*/
+.page--compact {
+    --page-pad: 1rem;
+}
+
+/* Em telas baixas (mesmo corte da navbar compacta, ver layout/navbar.css),
+   toolbar mais perto do formulário — o padrão do .form-shell é 1.5rem,
+   ver components/forms.css */
+@media (max-height: 800px) {
+
+    .page--compact .form-shell {
+        gap: 0.75rem;
+    }
+
+    /* Padding interno do formulário: 2rem -> 1.25rem (mesmo valor que
+       ele já usa em telas estreitas, ver pages/cadastro_frasco.css) */
+    .page--compact .form-card {
+        padding: 1.25rem;
+    }
 }

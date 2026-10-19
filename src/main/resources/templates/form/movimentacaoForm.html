@@ -29,24 +29,23 @@
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
 
-<main class="page">
-    <section class="form-shell">
-
-        <header class="page-header">
-            <h1 th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
-            <p>Registre entradas e saídas de dentes vinculadas a um frasco.</p>
-        </header>
+<main class="page page--compact">
+    <section class="form-shell form-shell--scroll-nav">
 
         <div class="toolbar glass-frost">
-            <!-- Data de hoje -->
-            <div class="toolbar__identity">
-                <span class="toolbar__identity-icon" aria-hidden="true">
-                    <i class="icon" data-lucide="calendar-days"></i>
-                </span>
+            <div class="toolbar__lead">
+                <h1 class="toolbar__title" th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
 
-                <div class="toolbar__identity-text">
-                    <span class="toolbar__identity-label">Data da movimentação</span>
-                    <span class="toolbar__identity-value" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/06/2025</span>
+                <!-- Data de hoje -->
+                <div class="toolbar__identity">
+                    <span class="toolbar__identity-icon" aria-hidden="true">
+                        <i class="icon" data-lucide="calendar-days"></i>
+                    </span>
+
+                    <div class="toolbar__identity-text">
+                        <span class="toolbar__identity-label">Data da movimentação</span>
+                        <span class="toolbar__identity-value" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/06/2025</span>
+                    </div>
                 </div>
             </div>
 
@@ -92,7 +91,7 @@
                     <div class="form-group" id="tipoMovimentacaoGroup">
                         <label for="tipoMovimentacao">Tipo de movimentação <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
-                            <select class="form-control" th:field="*{tipoMovimentacao}" id="tipoMovimentacao" required>
+                            <select class="form-control" name="tipoMovimentacao" id="tipoMovimentacao" required>
                                 <option th:each="tipo : ${T(bancoDentes.model.enumModels.TipoMovimentacao).values()}"
                                         th:if="${tipo.name() != 'TRANSFERENCIA'}"
                                         th:value="${tipo.name()}" th:text="${tipo.nome}"
@@ -158,7 +157,8 @@
                                     type="number"
                                     min="1"
                                     id="quantidadeDoacao"
-                                    th:field="*{quantidade}"
+                                    name="quantidade"
+                                    th:value="${movimentacaoDTO.quantidade ?: 1}"
                             >
                             <div class="number-input__actions">
                                 <button type="button" class="number-input__btn" data-number-action="down">
@@ -235,6 +235,24 @@
               <span class="required-mark">*</span> Campos obrigatórios
             </p>
         </form>
+
+        <!-- Paradas além do topo da página; seções escondidas são puladas (forms.js) -->
+        <nav class="form-scroll-nav" aria-label="Navegar entre seções"
+             data-paradas="#origemDentesSection, #observacoesSection">
+            <div class="form-scroll-nav__inner glass">
+                <button type="button" class="form-scroll-nav__btn" data-scroll-nav="up"
+                        data-tooltip="Seção anterior" aria-label="Seção anterior" disabled>
+                    <i class="icon" data-lucide="arrow-up"></i>
+                </button>
+
+                <span class="form-scroll-nav__divider" aria-hidden="true"></span>
+
+                <button type="button" class="form-scroll-nav__btn tooltip-below" data-scroll-nav="down"
+                        data-tooltip="Próxima seção" aria-label="Próxima seção">
+                    <i class="icon" data-lucide="arrow-down"></i>
+                </button>
+            </div>
+        </nav>
     </section>
 </main>
 

@@ -12,9 +12,29 @@
         })();
     </script>
 
+    <script>
+        // Fade (css/layout/panel-transition.css) só na recarga do próprio painel
+        // (ação/redirect de form): aí pula as animações de entrada. Vindo de
+        // outro painel, cancela o fade e a página entra animada.
+        window.addEventListener("pagereveal", function (e) {
+            if (!e.viewTransition) return;
+
+            var origem = document.referrer ? new URL(document.referrer).pathname : "";
+            if (origem === location.pathname) {
+                document.documentElement.classList.add("vt-nav");
+            } else {
+                e.viewTransition.skipTransition();
+            }
+        });
+    </script>
+
+    <!-- Só pinta depois dos scripts do fim do <body> (filtros e ícones prontos) -->
+    <link rel="expect" href="#painel-fim" blocking="render">
+
     <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
+    <link rel="stylesheet" th:href="@{/css/layout/panel-transition.css}">
     <link rel="stylesheet" th:href="@{/css/pages/manutencoes.css(v=${#dates.createNow().getTime()})}">
 
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -261,7 +281,7 @@
                                             th:data-id="${m.codigo}"
                                             data-tooltip="Concluir manutenção"
                                             aria-label="Concluir manutenção">
-                                        <i class="icon" data-lucide="check-circle"></i>
+                                        <i class="icon" data-lucide="toolbox"></i>
                                     </button>
 
                                     <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir frasco">
@@ -338,7 +358,7 @@
                                          th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}">
                                         <button type="button" class="btn btn-outline btn-outline-success js-concluir-manutencao"
                                                 th:data-id="${m.codigo}">
-                                            <i class="icon" data-lucide="check-circle"></i>
+                                            <i class="icon" data-lucide="toolbox"></i>
                                             Concluir manutenção
                                         </button>
                                     </div>
@@ -361,5 +381,6 @@
 
 <script th:src="@{/js/manutencao-concluir.js}"></script>
 
+<span id="painel-fim" hidden></span>
 </body>
 </html>
