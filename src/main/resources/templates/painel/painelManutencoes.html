@@ -281,7 +281,7 @@
                                             th:data-id="${m.codigo}"
                                             data-tooltip="Concluir manutenção"
                                             aria-label="Concluir manutenção">
-                                        <i class="icon" data-lucide="check-circle"></i>
+                                        <i class="icon" data-lucide="toolbox"></i>
                                     </button>
 
                                     <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir frasco">
@@ -358,7 +358,7 @@
                                          th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}">
                                         <button type="button" class="btn btn-outline btn-outline-success js-concluir-manutencao"
                                                 th:data-id="${m.codigo}">
-                                            <i class="icon" data-lucide="check-circle"></i>
+                                            <i class="icon" data-lucide="toolbox"></i>
                                             Concluir manutenção
                                         </button>
                                     </div>
