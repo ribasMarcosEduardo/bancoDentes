@@ -490,6 +490,19 @@
     --status-frasco-impressao: #1d4ed8;
     --status-frasco-manutencao: #7e22ce;
     --status-frasco-inativo: #4b5563;
+
+    /* Tons dos efeitos de fundo (blob, gradientes, barra, borda do selo):
+       os de texto acima, escuros, sujam o fundo claro — aqui vão os médios */
+    --tint-frasco-disponivel: #22c55e;
+    --tint-frasco-impressao: #3b82f6;
+    --tint-frasco-manutencao: #a855f7;
+    --tint-frasco-inativo: #9ca3af;
+
+    --tint-blob-centro: 24%;
+    --tint-blob-meio: 11%;
+    --tint-linha: 13%;
+    --tint-barra-topo: 60%;
+    --tint-barra-base: 18%;
 }
 
 :root.dark {
@@ -497,6 +510,17 @@
     --status-frasco-impressao: #60a5fa;
     --status-frasco-manutencao: #c084fc;
     --status-frasco-inativo: #9ca3af;
+
+    --tint-frasco-disponivel: var(--status-frasco-disponivel);
+    --tint-frasco-impressao: var(--status-frasco-impressao);
+    --tint-frasco-manutencao: var(--status-frasco-manutencao);
+    --tint-frasco-inativo: var(--status-frasco-inativo);
+
+    --tint-blob-centro: 18%;
+    --tint-blob-meio: 8%;
+    --tint-linha: 9%;
+    --tint-barra-topo: 45%;
+    --tint-barra-base: 12%;
 }
 
 .status-pill--frasco {
@@ -522,28 +546,40 @@
     color: var(--status-frasco-inativo);
 }
 
-.request-row--frasco-disponivel .request-details::before {
-    background: var(--status-frasco-disponivel);
+/* Gradiente do status na linha da lista (como o blob dos cards): cor bem
+   leve no início, sumindo na metade. background-image pra o fundo do
+   hover (.result-list:hover) continuar por baixo. */
+.request-row--frasco-disponivel { --linha-status-cor: var(--tint-frasco-disponivel); }
+.request-row--frasco-impressao { --linha-status-cor: var(--tint-frasco-impressao); }
+.request-row--frasco-manutencao { --linha-status-cor: var(--tint-frasco-manutencao); }
+.request-row--frasco-inativo { --linha-status-cor: var(--tint-frasco-inativo); }
+
+.result-table--frascos .request-row .result-list,
+.result-table--frascos .request-row .request-details {
+    background-image: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--linha-status-cor) var(--tint-linha), transparent) 0%,
+        transparent 50%
+    );
 }
 
-.request-row--frasco-impressao .request-details::before {
-    background: var(--status-frasco-impressao);
+/* Barra lateral da área expandida no mesmo tom suave: translúcida e
+   esmaecendo pra baixo, em vez da cor sólida */
+.result-table--frascos .request-row .request-details::before {
+    background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--linha-status-cor, var(--border-strong)) var(--tint-barra-topo), transparent),
+        color-mix(in srgb, var(--linha-status-cor, var(--border-strong)) var(--tint-barra-base), transparent)
+    );
 }
 
-.request-row--frasco-manutencao .request-details::before {
-    background: var(--status-frasco-manutencao);
-}
-
-.request-row--frasco-inativo .request-details::before {
-    background: var(--status-frasco-inativo);
-}
 
 /* Blob do status: radial bem esfumado com centro no canto superior esquerdo,
    recortado pelo overflow:hidden do .card e atrás do conteúdo (z-index -1) */
-.card--frasco-disponivel { --card-status-cor: var(--status-frasco-disponivel); }
-.card--frasco-impressao { --card-status-cor: var(--status-frasco-impressao); }
-.card--frasco-manutencao { --card-status-cor: var(--status-frasco-manutencao); }
-.card--frasco-inativo { --card-status-cor: var(--status-frasco-inativo); }
+.card--frasco-disponivel { --card-status-cor: var(--tint-frasco-disponivel); }
+.card--frasco-impressao { --card-status-cor: var(--tint-frasco-impressao); }
+.card--frasco-manutencao { --card-status-cor: var(--tint-frasco-manutencao); }
+.card--frasco-inativo { --card-status-cor: var(--tint-frasco-inativo); }
 
 .card.card--status {
     position: relative;
@@ -559,8 +595,8 @@
 
     background: radial-gradient(
         circle at 0 0,
-        color-mix(in srgb, var(--card-status-cor) 18%, transparent) 0%,
-        color-mix(in srgb, var(--card-status-cor) 8%, transparent) 35%,
+        color-mix(in srgb, var(--card-status-cor) var(--tint-blob-centro), transparent) 0%,
+        color-mix(in srgb, var(--card-status-cor) var(--tint-blob-meio), transparent) 35%,
         transparent 75%
     );
 }
@@ -569,10 +605,10 @@
    trecho mais claro no canto superior direito, como luz vindo dali. Borda
    num ::before mascarado — o fundo do selo é translúcido no tema escuro.
    Classes sem "__": dentro de th:* o Thymeleaf lê __...__ como pré-processamento. */
-.code-status--frasco-disponivel { --code-cor: var(--status-frasco-disponivel); }
-.code-status--frasco-impressao { --code-cor: var(--status-frasco-impressao); }
-.code-status--frasco-manutencao { --code-cor: var(--status-frasco-manutencao); }
-.code-status--frasco-inativo { --code-cor: var(--status-frasco-inativo); }
+.code-status--frasco-disponivel { --code-cor: var(--tint-frasco-disponivel); }
+.code-status--frasco-impressao { --code-cor: var(--tint-frasco-impressao); }
+.code-status--frasco-manutencao { --code-cor: var(--tint-frasco-manutencao); }
+.code-status--frasco-inativo { --code-cor: var(--tint-frasco-inativo); }
 
 .card__code.code-status {
     position: relative;
