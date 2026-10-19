@@ -62,7 +62,15 @@ html.barras-ocultas .main-panel > .toolbar {
     pointer-events: none;
 }
 
-html.barras-ocultas .main-panel .pagination {
+/* Abertas já escondidas (painelMovimentacoes.html, ?frasco=): sem a animação
+   de entrada, que sobreporia o transform de escondido */
+html.barras-sem-entrada .main-panel > .toolbar,
+html.barras-sem-entrada .main-panel .pagination {
+    animation: none;
+}
+
+/* Fora do topo ela ainda está no fluxo da página: só sai quando grudada */
+html.barras-ocultas .main-panel .pagination.is-stuck {
     transform: translateY(calc(-1 * var(--pagination-sticky-top, 0px)));
     opacity: 0;
     pointer-events: none;

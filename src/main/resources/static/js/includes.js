@@ -329,12 +329,19 @@ function setupStickyPagination() {
     // com a busca/um select da toolbar em uso.
     let ultimoY = window.scrollY;
     let descidaAcumulada = 0;
+    let rolagemAutomatica = false;
+
+    // Mesma conta de setupScrollToTopButton: offsetTop é a posição "normal"
+    // da toolbar no fluxo, mesmo com ela grudada
+    const toolbarGrudada = () => window.scrollY >= toolbar.offsetTop - getToolbarStickyTop(toolbar);
 
     // Desktop só esconde depois de uma descida contínua maior, pra não ser
     // brusco logo no começo da rolagem; no toque segue imediato
     const LIMIAR_DESCIDA = window.matchMedia("(pointer: fine)").matches ? 80 : 0;
 
     function atualizarBarrasOcultas() {
+        if (rolagemAutomatica) return;
+
         const y = window.scrollY;
         const delta = y - ultimoY;
         if (Math.abs(delta) < 6) return;
@@ -351,7 +358,7 @@ function setupStickyPagination() {
         const ativo = document.activeElement;
         const editando = toolbar.contains(ativo) && ativo.matches("input, select, textarea");
 
-        if (delta < 0 || !pagination.classList.contains("is-stuck") || editando) {
+        if (delta < 0 || !toolbarGrudada() || editando) {
             descidaAcumulada = 0;
             raiz.classList.remove("barras-ocultas");
             return;
@@ -362,6 +369,38 @@ function setupStickyPagination() {
     }
 
     window.addEventListener("scroll", atualizarBarrasOcultas, { passive: true });
+
+    // Abertura já focada num trecho (ex.: "Ver movimentações" de um frasco):
+    // rola até ele logo abaixo da navbar, com as barras saindo junto da rolagem
+    const rolarPara = document.querySelector("[data-rolar-ao-abrir]");
+    if (rolarPara) {
+        setTimeout(() => {
+            const navbar = document.querySelector(".navbar");
+            const alvo = Math.max(rolarPara.getBoundingClientRect().top + window.scrollY - (navbar?.offsetHeight || 0) - 16, 0);
+
+            // Página curta: sem altura pra chegar ao alvo, completa o que falta embaixo
+            const falta = alvo + window.innerHeight - document.documentElement.scrollHeight;
+            const pagina = document.querySelector(".page");
+            if (falta > 0 && pagina) {
+                pagina.style.paddingBottom = `${parseFloat(getComputedStyle(pagina).paddingBottom) + falta}px`;
+            }
+
+            // Pausa a lógica do scroll durante a rolagem automática, senão ela
+            // reapareceria as barras enquanto a toolbar ainda não grudou
+            rolagemAutomatica = true;
+            const terminar = () => {
+                if (!rolagemAutomatica) return;
+                rolagemAutomatica = false;
+                ultimoY = window.scrollY;
+                descidaAcumulada = 0;
+            };
+            window.addEventListener("scrollend", terminar, { once: true });
+            setTimeout(terminar, 1200);
+
+            document.documentElement.classList.add("barras-ocultas");
+            window.scrollTo({ top: alvo, behavior: "smooth" });
+        }, 150);
+    }
     window.addEventListener("resize", () => {
         // A media query de altura muda o espaço sem mudar o tamanho da
         // toolbar/navbar necessariamente — recalcula aqui também.

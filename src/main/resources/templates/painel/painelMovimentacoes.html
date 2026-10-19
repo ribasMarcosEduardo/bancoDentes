@@ -13,6 +13,14 @@
     </script>
 
     <script>
+        // "Ver movimentações" de um frasco: a página rola direto pra ele (includes.js),
+        // então toolbar e paginação já nascem escondidas, sem entrar e sumir em seguida
+        if (new URLSearchParams(location.search).has("frasco")) {
+            document.documentElement.classList.add("barras-ocultas", "barras-sem-entrada");
+        }
+    </script>
+
+    <script>
         // Fade (css/layout/panel-transition.css) só na recarga do próprio painel
         // (ação/redirect de form): aí pula as animações de entrada. Vindo de
         // outro painel, cancela o fade e a página entra animada.
@@ -192,7 +200,7 @@
                 </div>
             </div>
 
-            <div class="frasco-filter-bar glass-frost" th:if="${frascoFiltro != null}">
+            <div class="frasco-filter-bar glass-frost" th:if="${frascoFiltro != null}" data-rolar-ao-abrir>
                 <span class="frasco-filter-bar__label">
                     <i class="icon" data-lucide="history" aria-hidden="true"></i>
                     Movimentações do frasco
