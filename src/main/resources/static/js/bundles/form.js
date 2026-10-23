@@ -2,7 +2,7 @@
     const base = document.currentScript.src;
 
     [
-        "https://unpkg.com/lucide@latest",
+        "../vendor/lucide.min.js",
         "../vendor/sweetalert2.min.js",
         "../includes.js",
         "../forms.js"
