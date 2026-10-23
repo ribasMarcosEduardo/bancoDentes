@@ -38,6 +38,28 @@
        "quique") — ver bloco ANIMAÇÕES no fim do arquivo. */
     --lp-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
+    /* Tokens do tema claro mantidos como eram antes do ajuste de
+       hierarquia das páginas internas (base/variables.css): a landing
+       tem paleta própria e não entrou nessa revisão */
+    --page-bg: #fcfcfc;
+    --surface-muted: rgba(245,245,245,0.6);
+    --surface-hover: rgba(255,255,255,0.88);
+    --text-muted: #6b7280;
+    --primary: rgba(44,48,54,0.95);
+    --primary-hover: rgba(44,48,54,1);
+    --glass-border: rgba(255,255,255,0.35);
+    --glass-inset-highlight: rgba(255,255,255,0.08);
+    --glass-frost-bg-end: rgba(255,255,255,0.52);
+    --glass-frost-border: rgba(255,255,255,0.55);
+    --glass-frost-strong-border: rgba(255,255,255,0.68);
+    --glass-light-border: rgba(255,255,255,0.45);
+    --btn-pagination-bg: rgba(245,245,245,0.72);
+    --badge-bg: rgba(31,41,55,0.92);
+    --badge-text: #ffffff;
+    --filter-chip-bg: rgba(31,41,55,0.92);
+    --filter-chip-text: #ffffff;
+    --step-line-active: #1f2937;
+
     background: var(--page-bg);
     color: var(--text);
 }

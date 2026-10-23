@@ -25,7 +25,7 @@ body.modal-open {
     opacity: 0;
     visibility: hidden;
 
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transition: opacity var(--dur-rapida) ease, visibility var(--dur-rapida) ease;
 }
 
 .modal-overlay.is-open {
@@ -69,7 +69,7 @@ body.modal-open {
     overflow: hidden;
 
     transform: translateY(12px) scale(0.98);
-    transition: transform 0.22s ease;
+    transition: transform var(--dur-media) var(--ease-suave);
 }
 
 .modal-overlay.is-open .modal {
@@ -141,7 +141,7 @@ body.modal-open {
 
     cursor: pointer;
 
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background var(--dur-rapida) ease, color var(--dur-rapida) ease;
 }
 
 .modal__close:hover {
@@ -441,7 +441,7 @@ body.modal-open {
     opacity: 0;
 
     transition:
-        block-size 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        block-size 0.35s var(--ease-suave),
         opacity 0.25s ease,
         content-visibility 0.35s allow-discrete;
 }
@@ -511,7 +511,7 @@ body.modal-open {
 
     cursor: pointer;
 
-    transition: color 0.2s ease, transform 0.2s ease;
+    transition: color var(--dur-rapida) ease, transform var(--dur-rapida) ease;
 }
 
 .modal-filter-toggle .icon {
@@ -605,10 +605,10 @@ body.modal-open {
     visibility: hidden;
 
     transition:
-        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.3s ease,
-        visibility 0s linear 0.4s;
+        grid-template-rows var(--dur-lenta) var(--ease-suave),
+        margin-top var(--dur-lenta) var(--ease-suave),
+        opacity var(--dur-media) ease,
+        visibility 0s linear var(--dur-lenta);
 }
 
 .modal-filters-collapse.is-open {
@@ -620,9 +620,9 @@ body.modal-open {
     visibility: visible;
 
     transition:
-        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.3s ease,
+        grid-template-rows var(--dur-lenta) var(--ease-suave),
+        margin-top var(--dur-lenta) var(--ease-suave),
+        opacity var(--dur-media) ease,
         visibility 0s;
 }
 
@@ -641,8 +641,8 @@ body.modal-open {
     transform: translateY(-8px);
 
     transition:
-        opacity 0.2s ease,
-        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity var(--dur-rapida) ease,
+        transform var(--dur-media) var(--ease-suave);
 }
 
 .modal-filters-collapse.is-open .modal-filters > * {
@@ -651,7 +651,7 @@ body.modal-open {
 
     transition:
         opacity 0.35s ease 0.08s,
-        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+        transform 0.45s var(--ease-suave) 0.08s;
 }
 
 .modal-filters-collapse.is-open .modal-filters > :nth-child(2) {
@@ -722,7 +722,7 @@ body.modal-open {
        cada linha do zero via createElement, então todo elemento novo
        já nasce com essa animação e ela dispara sozinha de novo a cada
        vez, igual .results-view-fade-in em view-switch.css. */
-    animation: fade-slide-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fade-slide-in 0.32s var(--ease-suave) both;
 }
 
 /* Atraso crescente por posição = efeito cascata, em vez de todas as

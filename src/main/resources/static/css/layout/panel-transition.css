@@ -36,7 +36,7 @@ i.icon[data-lucide] {
 /* Entrada em sequência, como a fila de etiquetas (pages/fila_etiquetas.css):
    cabeçalho -> toolbar -> paginação -> itens. */
 html:not(.vt-nav) .main-panel > .page-header {
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) backwards;
 }
 
 .main-panel > .toolbar {
@@ -51,6 +51,6 @@ html:not(.vt-nav) .main-panel > .page-header {
    reiniciaria a animação a cada troca de página/filtro. --ordem-entrada
    vem do JS (só os 8 primeiros visíveis); o resto entra junto. */
 html.painel-entrando:not(.vt-nav) .results :is(.request-row, .card) {
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
-    animation-delay: calc(0.18s + var(--ordem-entrada, 8) * 0.04s);
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) backwards;
+    animation-delay: calc(var(--entrada-atraso-base) + var(--ordem-entrada, 8) * var(--entrada-passo));
 }

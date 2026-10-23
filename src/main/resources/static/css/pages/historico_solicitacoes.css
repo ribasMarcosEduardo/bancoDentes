@@ -117,7 +117,7 @@
         transform-origin: top;
         transform: scaleY(1);
 
-        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        transition: opacity var(--dur-media) ease-out, transform var(--dur-media) ease-out;
     }
 
     .toolbar.toolbar--stuck .toolbar-stat:nth-child(2),
@@ -125,7 +125,7 @@
         opacity: 0;
         transform: scaleY(0);
 
-        transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+        transition: opacity var(--dur-media) ease-in, transform var(--dur-media) ease-in;
     }
 
     /*
@@ -161,7 +161,7 @@
         segurança caso o timing do JS varie.
     */
     .toolbar-stat:nth-child(1) {
-        transition: width 0.2s ease;
+        transition: width var(--dur-rapida) ease;
     }
 }
 

@@ -110,10 +110,12 @@
    --primary, que nunca se confunde com o fundo de nenhum estado da
    célula, e o z-index garante que a célula ampliada (scale) sempre
    apareça por cima das vizinhas, não por baixo. */
-.etiqueta-grid__cel:hover {
-    z-index: 2;
-    box-shadow: 0 0 0 2px var(--primary);
-    transform: scale(1.15);
+@media (hover: hover) {
+    .etiqueta-grid__cel:hover {
+        z-index: 2;
+        box-shadow: 0 0 0 2px var(--primary);
+        transform: scale(1.15);
+    }
 }
 
 .etiqueta-grid__cel:focus-visible {

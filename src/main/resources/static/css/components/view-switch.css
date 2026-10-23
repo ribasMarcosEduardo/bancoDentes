@@ -21,15 +21,17 @@
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
+        background var(--dur-rapida) ease,
+        color var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
-.view-switch__btn:hover {
-    background: var(--toggle-bg-hover);
+@media (hover: hover) {
+    .view-switch__btn:hover {
+        background: var(--toggle-bg-hover);
 
-    transform: translateY(-1px);
+        transform: translateY(-1px);
+    }
 }
 
 .view-switch__btn.active {
@@ -78,9 +80,9 @@
         raso/reto por um instante enquanto o vizinho já gruda).
     */
     transition:
-        background-image 0.4s ease,
-        border-color 0.4s ease,
-        box-shadow 0.4s ease;
+        background-image var(--dur-lenta) ease,
+        border-color var(--dur-lenta) ease,
+        box-shadow var(--dur-lenta) ease;
 }
 
 .sector-switch::before {
@@ -108,7 +110,7 @@
 
     opacity: 0;
 
-    transition: opacity 0.4s ease;
+    transition: opacity var(--dur-lenta) ease;
 }
 
 /*
@@ -172,23 +174,19 @@
     cursor: pointer;
 
     transition:
-        color 0.2s ease,
-        transform 0.2s ease;
+        color var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
-.sector-switch__btn:hover {
-    color: var(--text);
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .sector-switch__btn:hover {
+        color: var(--text);
+        transform: translateY(-1px);
+    }
 }
 
 .sector-switch__btn.active {
     color: var(--btn-tonal-text);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .sector-switch__indicator {
-        transition: none;
-    }
 }
 
 @media (max-width: 450px) {
@@ -229,13 +227,5 @@
 
 .results--grid .results-grid,
 .results--list .result-table {
-    animation: results-view-fade-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: results-view-fade-in 0.32s var(--ease-suave);
 }
-
-@media (prefers-reduced-motion: reduce) {
-    .results--grid .results-grid,
-    .results--list .result-table {
-        animation: none;
-    }
-}
-

@@ -9,7 +9,7 @@
     gap: 1rem;
     flex-wrap: wrap;
 
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) 0.08s backwards;
 
     /*
         Acompanha a .toolbar (também sticky) quando ela gruda no topo,
@@ -38,13 +38,13 @@
     resto quando funde/aparece.
 */
 .pagination .low-opacity {
-    transition: opacity 0.2s ease, visibility 0s linear 0s;
+    transition: opacity var(--dur-rapida) ease, visibility 0s linear 0s;
 }
 
 .pagination.is-stuck .low-opacity {
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+    transition: opacity var(--dur-rapida) ease, visibility 0s linear var(--dur-rapida);
 }
 
 /* Rolando pra baixo, toolbar e paginação esmaecem com uma leve subida;
@@ -54,8 +54,8 @@
 .main-panel > .toolbar,
 .main-panel .pagination {
     transition:
-        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.3s ease;
+        transform var(--dur-media) var(--ease-suave),
+        opacity var(--dur-media) ease;
 }
 
 html.barras-ocultas .main-panel > .toolbar {
@@ -64,8 +64,8 @@ html.barras-ocultas .main-panel > .toolbar {
     pointer-events: none;
 
     transition:
-        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        transform 0.45s var(--ease-padrao),
+        opacity 0.45s var(--ease-padrao);
 }
 
 /* Abertas já escondidas (painelMovimentacoes.html, ?frasco=): sem a animação
@@ -82,8 +82,8 @@ html.barras-ocultas .main-panel .pagination.is-stuck {
     pointer-events: none;
 
     transition:
-        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        transform 0.45s var(--ease-padrao),
+        opacity 0.45s var(--ease-padrao);
 }
 
 .pagination__actions {
@@ -144,8 +144,8 @@ html.barras-ocultas .main-panel .pagination.is-stuck {
         hora (sem transição), as duas mudam de estado no mesmo frame.
     */
     transition:
-        background-image 0.4s ease,
-        border-color 0.4s ease;
+        background-image var(--dur-lenta) ease,
+        border-color var(--dur-lenta) ease;
 }
 
 /* Ruído do glass-frost (mesmo SVG de components/glass.css) — some por
@@ -195,7 +195,7 @@ html.barras-ocultas .main-panel .pagination.is-stuck {
 
     opacity: 0;
 
-    transition: opacity 0.4s ease;
+    transition: opacity var(--dur-lenta) ease;
 }
 
 /*

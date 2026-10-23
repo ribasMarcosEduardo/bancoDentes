@@ -66,7 +66,7 @@
     opacity: 0.35;
     pointer-events: none;
 
-    transition: color 0.2s ease;
+    transition: color var(--dur-rapida) ease;
 }
 
 /* Quantidade solicitada completa (atual >= totalSolicitado, ver
@@ -74,7 +74,7 @@
    (.modal-header-progress__fill/.analysis-progress__fill), opacidade
    continua baixa, só a cor muda. */
 .modal-header-count--complete {
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .modal-header-progress {
@@ -264,7 +264,7 @@
         width: 100%;
         margin-top: 1rem;
 
-        transition: margin-top 0.3s ease;
+        transition: margin-top var(--dur-media) ease;
     }
 
     /* Quando Cancelar e Confirmar estão os dois escondidos (etapa

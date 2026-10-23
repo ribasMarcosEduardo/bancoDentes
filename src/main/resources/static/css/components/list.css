@@ -213,8 +213,8 @@
     cursor: pointer;
 
     transition:
-        transform 0.2s ease,
-        border-color 0.2s ease;
+        transform var(--dur-rapida) var(--ease-mola),
+        border-color var(--dur-rapida) ease;
 }
 
 .result-list__action .icon {
@@ -226,8 +226,10 @@
     color: var(--icon-muted);
 }
 
-.result-list__action:hover {
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .result-list__action:hover {
+        transform: translateY(-1px);
+    }
 }
 
 .result-list__action--blue {
@@ -272,17 +274,19 @@
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
-        transform 0.2s ease;
+        background var(--dur-rapida) ease,
+        transform var(--dur-rapida) var(--ease-mola);
 }
 
-.request-toggle:hover {
-    background: var(--btn-pagination-bg-hover);
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .request-toggle:hover {
+        background: var(--btn-pagination-bg-hover);
+        transform: translateY(-1px);
+    }
 }
 
 .request-toggle .icon {
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-media) var(--ease-suave);
 }
 
 .request-row.is-open .request-toggle .icon {
@@ -324,10 +328,10 @@
     opacity: 0;
 
     transition:
-        grid-template-rows 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        grid-template-rows 0.42s var(--ease-suave),
         opacity 0.25s ease,
-        border-width 0.2s ease,
-        border-color 0.2s ease;
+        border-width var(--dur-rapida) ease,
+        border-color var(--dur-rapida) ease;
 }
 
 .request-row.is-open .request-details {
@@ -404,8 +408,8 @@
     transform: translateY(-10px);
 
     transition:
-        padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+        padding 0.42s var(--ease-suave),
+        transform 0.42s var(--ease-suave);
 }
 
 .request-row.is-open .request-details__content {
@@ -560,15 +564,15 @@
 }
 
 .saldo-fluxo--entrada .saldo-fluxo__item--mov .saldo-fluxo__valor {
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .saldo-fluxo--saida .saldo-fluxo__item--mov .saldo-fluxo__valor {
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .saldo-fluxo--transferencia .saldo-fluxo__item--mov .saldo-fluxo__valor {
-    color: #f59e0b;
+    color: var(--status-ambar);
 }
 
 /* Celular: a área expandida fica com ~230px úteis pros 3 números + 2 setas;
@@ -686,67 +690,67 @@
 
 .status-pill--entrada {
     background: rgba(34,197,94,0.16);
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .status-pill--saida {
     background: rgba(239,68,68,0.16);
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .status-pill--transferencia {
     background: rgba(245,158,11,0.16);
-    color: #f59e0b;
+    color: var(--status-ambar);
 }
 
 .status-pill--pendente {
     background: rgba(245,158,11,0.16);
-    color: #f59e0b;
+    color: var(--status-ambar);
 }
 
 .status-pill--em_analise {
     background: rgba(59,130,246,0.16);
-    color: #3b82f6;
+    color: var(--status-azul);
 }
 
 .status-pill--em_separacao {
     background: rgba(99,102,241,0.16);
-    color: #6366f1;
+    color: var(--status-indigo);
 }
 
 .status-pill--aguardando_retirada {
     background: rgba(168,85,247,0.16);
-    color: #a855f7;
+    color: var(--status-roxo);
 }
 
 .status-pill--concluido {
     background: rgba(34,197,94,0.16);
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .status-pill--negado {
     background: rgba(239,68,68,0.16);
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .status-pill--edicao {
     background: rgba(20,184,166,0.16);
-    color: #14b8a6;
+    color: var(--status-teal);
 }
 
 .status-pill--ativo {
     background: rgba(34,197,94,0.16);
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .status-pill--nao-verificado {
     background: rgba(245,158,11,0.16);
-    color: #f59e0b;
+    color: var(--status-ambar);
 }
 
 .status-pill--bloqueado {
     background: rgba(239,68,68,0.16);
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 @media (max-width: 860px) {

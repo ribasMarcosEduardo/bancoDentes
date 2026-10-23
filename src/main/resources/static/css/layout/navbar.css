@@ -40,12 +40,17 @@
     font-weight: 800;
     letter-spacing: 0.04em;
 
-    transition: 0.2s ease;
+    transition:
+        background var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
-.navbar__logo:hover {
-    transform: translateY(-1px);
-    background: var(--surface);
+/* Hover que move só com mouse (no toque ficaria grudado) - ver buttons.css */
+@media (hover: hover) {
+    .navbar__logo:hover {
+        transform: translateY(-1px);
+        background: var(--surface);
+    }
 }
 
 .navbar__nav {
@@ -87,13 +92,15 @@
     text-decoration: none;
     cursor: pointer;
 
-    transition: 0.2s ease;
+    transition:
+        background var(--dur-rapida) ease,
+        color var(--dur-rapida) ease;
 }
 
 .navbar__link:hover,
 .navbar__dropdown-btn:hover,
 .navbar__dropdown.is-open .navbar__dropdown-btn {
-    background: var(--surface-elevated);
+    background: var(--surface-hover);
     color: var(--text);
 }
 
@@ -105,7 +112,7 @@
 
     margin-top: 2px;
 
-    transition: transform 0.2s ease;
+    transition: transform var(--dur-rapida) ease;
 }
 
 .navbar__dropdown.is-open .navbar__dropdown-btn .icon--chevron {
@@ -138,14 +145,19 @@
     font-size: 0.9rem;
     font-weight: 600;
 
-    transition: 0.2s ease;
+    transition:
+        background var(--dur-rapida) ease,
+        border-radius var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
-.navbar__login:hover {
-    background: var(--secondary-hover);
-    border-radius: 0.55rem;
+@media (hover: hover) {
+    .navbar__login:hover {
+        background: var(--secondary-hover);
+        border-radius: 0.55rem;
 
-    transform: translateY(-1px);
+        transform: translateY(-1px);
+    }
 }
 
 .navbar__config,
@@ -167,7 +179,9 @@
     box-shadow: var(--shadow);
 
     cursor: pointer;
-    transition: 0.2s ease;
+    transition:
+        background var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
 .navbar__config .icon,
@@ -178,21 +192,23 @@
     min-height: 22px;
     stroke-width: 2.2;
 
-    transition: transform 0.2s ease;
+    transition: transform var(--dur-rapida) ease;
 }
 
-.navbar__config:hover,
-.navbar__notifications:hover {
-    background: var(--surface);
-    transform: translateY(-1px);
-}
+@media (hover: hover) {
+    .navbar__config:hover,
+    .navbar__notifications:hover {
+        background: var(--surface);
+        transform: translateY(-1px);
+    }
 
-.navbar__config:hover .icon {
-    transform: rotate(90deg);
-}
+    .navbar__config:hover .icon {
+        transform: rotate(90deg);
+    }
 
-.navbar__notifications:hover .icon {
-    transform: rotate(-15deg);
+    .navbar__notifications:hover .icon {
+        transform: rotate(-15deg);
+    }
 }
 
 .navbar__notifications {
@@ -279,7 +295,10 @@
     visibility: hidden;
     transform: translateY(-6px);
 
-    transition: 0.2s ease;
+    transition:
+        opacity var(--dur-rapida) ease,
+        visibility var(--dur-rapida),
+        transform var(--dur-media) var(--ease-suave);
 }
 
 .navbar__dropdown.is-open .notif-panel {
@@ -341,12 +360,16 @@
 
     text-decoration: none;
 
-    transition: 0.2s ease;
+    transition:
+        background var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
-.notif-card:hover {
-    background: var(--surface-elevated);
-    transform: translateX(2px);
+@media (hover: hover) {
+    .notif-card:hover {
+        background: var(--surface-hover);
+        transform: translateX(2px);
+    }
 }
 
 .notif-card__icon {
@@ -430,11 +453,11 @@
 
 .notif-card--solicitacao .notif-card__icon {
     background: rgba(59, 130, 246, 0.16);
-    color: #3b82f6;
+    color: var(--status-azul);
 }
 
 .notif-card--solicitacao .notif-card__tag {
-    color: #3b82f6;
+    color: var(--status-azul);
 }
 
 .notif-card--manutencao-proxima {
@@ -443,11 +466,11 @@
 
 .notif-card--manutencao-proxima .notif-card__icon {
     background: rgba(245, 158, 11, 0.16);
-    color: #f59e0b;
+    color: var(--status-ambar);
 }
 
 .notif-card--manutencao-proxima .notif-card__tag {
-    color: #f59e0b;
+    color: var(--status-ambar);
 }
 
 .notif-card--manutencao-hoje {
@@ -456,11 +479,11 @@
 
 .notif-card--manutencao-hoje .notif-card__icon {
     background: rgba(239, 68, 68, 0.16);
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .notif-card--manutencao-hoje .notif-card__tag {
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .notif-panel__footer {
@@ -478,7 +501,9 @@
     text-align: center;
     text-decoration: none;
 
-    transition: 0.2s ease;
+    transition:
+        background var(--dur-rapida) ease,
+        color var(--dur-rapida) ease;
 }
 
 .notif-panel__footer:hover {
@@ -548,7 +573,10 @@
     visibility: hidden;
     transform: translateY(-6px);
 
-    transition: 0.2s ease;
+    transition:
+        opacity var(--dur-rapida) ease,
+        visibility var(--dur-rapida),
+        transform var(--dur-media) var(--ease-suave);
 }
 
 .navbar__dropdown.is-open .navbar__dropdown-menu {
@@ -672,19 +700,21 @@
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        border-color 0.2s ease;
+        background var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease,
+        border-color var(--dur-rapida) ease;
 }
 
-.navbar__theme-toggle:hover {
-    background: var(--surface-elevated);
+@media (hover: hover) {
+    .navbar__theme-toggle:hover {
+        background: var(--surface-elevated);
 
-    transform: translateY(-1px);
-}
+        transform: translateY(-1px);
+    }
 
-.navbar__theme-toggle:hover .theme-toggle-icon {
-    transform: translate(-50%, -50%) rotate(15deg);
+    .navbar__theme-toggle:hover .theme-toggle-icon {
+        transform: translate(-50%, -50%) rotate(15deg);
+    }
 }
 
 .theme-toggle-icon {
@@ -693,7 +723,7 @@
     left: 50%;
 
     transform: translate(-50%, -50%);
-    transition: transform 0.2s ease;
+    transition: transform var(--dur-rapida) ease;
 }
 
 .theme-toggle-icon--exit {

@@ -28,11 +28,14 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 
-    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-rapida) var(--ease-suave);
 }
 
-.card:hover {
-    transform: translateY(-1px);
+/* Hover só com mouse (no toque ficaria grudado) - ver buttons.css */
+@media (hover: hover) {
+    .card:hover {
+        transform: translateY(-1px);
+    }
 }
 
 .card__header {
@@ -160,8 +163,8 @@
     cursor: pointer;
 
     transition:
-        transform 0.2s ease,
-        border-color 0.2s ease;
+        transform var(--dur-rapida) var(--ease-mola),
+        border-color var(--dur-rapida) ease;
 }
 
 .card__action .icon {
@@ -173,8 +176,10 @@
     color: var(--icon-muted);
 }
 
-.card__action:hover {
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .card__action:hover {
+        transform: translateY(-1px);
+    }
 }
 
 .card__action--blue {

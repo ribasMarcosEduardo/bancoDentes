@@ -322,7 +322,7 @@
 ::view-transition-group(etiquetas-stepper),
 ::view-transition-group(etiquetas-acoes) {
     animation-duration: 0.35s;
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-timing-function: var(--ease-suave);
 }
 
 /* fill-mode backwards (e não both) em tudo: depois de entrar, o elemento
@@ -330,7 +330,7 @@
    opacidade reduzida, por exemplo. */
 
 html:not(.vt-nav) .form-shell > * {
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) backwards;
 }
 
 html:not(.vt-nav) .form-shell > :nth-child(2) {
@@ -354,7 +354,7 @@ html:not(.vt-nav) .form-shell > :nth-child(n + 3) {
 }
 
 html:not(.vt-nav) .etiqueta-acoes-bar {
-    animation: etiqueta-bar-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+    animation: etiqueta-bar-in var(--entrada-duracao) var(--ease-suave) 0.2s backwards;
 }
 
 /* ---- Stepper ---- */
@@ -399,7 +399,7 @@ html:not(.vt-nav) .etiquetas-stepper > .step--active:first-of-type .step__circle
     background: var(--step-line-active);
 
     transform-origin: left center;
-    animation: etiqueta-linha-preencher 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.1s backwards;
+    animation: etiqueta-linha-preencher 0.5s var(--ease-simetrica) 0.1s backwards;
 }
 
 /* Etapa compacta: o anel cresce desde o progresso da etapa anterior
@@ -419,5 +419,5 @@ html:not(.vt-nav) .etapa-compacta--etapa-1 .etapa-compacta__progresso {
 
 /* Etapa seguinte à linha preenchida: acende quando a linha chega nela */
 .etiquetas-stepper .stepper__line.is-filled + .step--active .step__circle {
-    animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+    animation: etiqueta-step-ativar 0.45s var(--ease-suave) 0.5s backwards;
 }

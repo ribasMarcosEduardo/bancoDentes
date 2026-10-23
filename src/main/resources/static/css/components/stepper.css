@@ -37,10 +37,10 @@
     box-shadow: var(--shadow);
 
     transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease;
+        background var(--dur-rapida) ease,
+        color var(--dur-rapida) ease,
+        border-color var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
 .step__circle .icon {
@@ -78,7 +78,8 @@
 .step--active .step__circle {
     border-color: var(--step-line-active);
     background: var(--step-line-active);
-    color: var(--badge-text);
+    /* Branco nos dois temas: fundo verde (--badge-text agora é escuro no claro) */
+    color: #ffffff;
 }
 
 .step--active .step__circle {

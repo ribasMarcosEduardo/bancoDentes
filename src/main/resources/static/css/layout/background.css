@@ -17,9 +17,10 @@
     opacity: 0.17;
 }
 
-/* No fundo claro (#fcfcfc) os 0.17 quase somem */
+/* No fundo claro os 0.17 quase somem; acima de ~0.2 tingem os vidros
+   (saturate do backdrop-filter) de azul/verde de forma desigual */
 :root.light .blob {
-    opacity: 0.3;
+    opacity: 0.2;
 }
 
 /* Blob azul */

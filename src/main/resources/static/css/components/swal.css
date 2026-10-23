@@ -156,7 +156,7 @@
     border-right: 1.5px solid var(--text-muted);
     border-bottom: 1.5px solid var(--text-muted);
     transform: rotate(45deg);
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), margin 0.3s ease;
+    transition: transform var(--dur-media) var(--ease-suave), margin var(--dur-media) ease;
 }
 
 .swal-resumo__grupo--expansivel.is-open .swal-resumo__grupo-toggle::after {
@@ -170,7 +170,7 @@
     opacity: 0;
 
     transition:
-        grid-template-rows 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        grid-template-rows 0.42s var(--ease-suave),
         opacity 0.25s ease;
 }
 
@@ -187,7 +187,7 @@
     gap: 0.4rem;
 
     transform: translateY(-10px);
-    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), padding 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.42s var(--ease-suave), padding 0.42s var(--ease-suave);
 }
 
 .swal-resumo__grupo--expansivel.is-open .swal-resumo__grupo-conteudo-inner {
@@ -301,9 +301,9 @@ body:has(.swal2-toast.glass-error) .swal2-container {
 }
 
 .swal2-toast.glass-error .swal2-error-ring {
-    border-color: #dc3545;
+    border-color: #ef4444;
 }
 
 .swal2-toast.glass-error .swal2-x-mark {
-    color: #dc3545;
+    color: #ef4444;
 }

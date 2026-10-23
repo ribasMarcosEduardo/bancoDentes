@@ -36,7 +36,7 @@
     transition:
         opacity 0.25s ease,
         transform 0.25s ease,
-        background 0.2s ease,
+        background var(--dur-rapida) ease,
         visibility 0s linear 0.25s;
 }
 
@@ -48,14 +48,16 @@
     transition:
         opacity 0.25s ease,
         transform 0.25s ease,
-        background 0.2s ease,
+        background var(--dur-rapida) ease,
         visibility 0s linear 0s;
 }
 
-.scroll-to-top:hover {
-    background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);
-    color: var(--text);
-    transform: translateY(-2px);
+@media (hover: hover) {
+    .scroll-to-top:hover {
+        background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);
+        color: var(--text);
+        transform: translateY(-2px);
+    }
 }
 
 .scroll-to-top .icon {
@@ -79,15 +81,5 @@
     .scroll-to-top {
         right: calc(1.25rem + 56px + 1rem);
         bottom: calc(1.25rem + 8px);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .scroll-to-top {
-        transition: opacity 0.15s linear, visibility 0s linear 0.15s;
-    }
-
-    .scroll-to-top.is-visible {
-        transition: opacity 0.15s linear, visibility 0s linear 0s;
     }
 }

@@ -24,7 +24,7 @@
 
     /* backwards (não both): o fim da animação não pode segurar transform/opacity,
        senão trava o esconder ao rolar (pagination.css) */
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) backwards;
 }
 
 /*
@@ -95,14 +95,16 @@
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
+        background var(--dur-rapida) ease,
+        color var(--dur-rapida) ease,
+        transform var(--dur-rapida) var(--ease-mola);
 }
 
-.toolbar__filter-toggle:hover {
-    background: var(--toggle-bg-hover);
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .toolbar__filter-toggle:hover {
+        background: var(--toggle-bg-hover);
+        transform: translateY(-1px);
+    }
 }
 
 .toolbar__filter-toggle .icon {
