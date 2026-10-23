@@ -36,9 +36,6 @@
             <div class="toolbar__lead">
                 <h1 class="toolbar__title" th:text="${frascoDTO.codigo != null} ? 'Edição de Frasco' : 'Cadastro de Frasco'">Cadastro de Frasco</h1>
 
-                <!-- Em cadastro o identificador só nasce depois do POST (variante --pending),
-                     mas o prefixo (grupo + local) já é mostrado pelo forms.js; em edição
-                     mostra o valor real. -->
                 <div class="toolbar__identity">
                     <span class="toolbar__identity-icon" aria-hidden="true">
                         <i class="icon" data-lucide="flask-conical"></i>

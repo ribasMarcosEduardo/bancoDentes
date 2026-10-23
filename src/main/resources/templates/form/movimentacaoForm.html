@@ -36,7 +36,6 @@
             <div class="toolbar__lead">
                 <h1 class="toolbar__title" th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
 
-                <!-- Data de hoje -->
                 <div class="toolbar__identity">
                     <span class="toolbar__identity-icon" aria-hidden="true">
                         <i class="icon" data-lucide="calendar-days"></i>
@@ -236,7 +235,6 @@
             </p>
         </form>
 
-        <!-- Paradas além do topo da página; seções escondidas são puladas (forms.js) -->
         <nav class="form-scroll-nav" aria-label="Navegar entre seções"
              data-paradas="#origemDentesSection, #observacoesSection">
             <div class="form-scroll-nav__inner glass">

@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Banco de Dentes Humanos e Biobanco do curso de Odontologia da Unoesc Joaçaba — armazenamento, higienização, controle e cessão de dentes humanos para o ensino pré-clínico e a pesquisa científica.">
 
-    <!-- Landing só tem tema claro por enquanto: a classe "light" vai fixa
-         no <html> (sem o script de tema salvo/prefers-color-scheme das
-         páginas internas), então todas as variáveis de base/variables.css
-         já nascem na variante clara. -->
-
     <script>
         // Liga as animações de entrada ANTES do primeiro paint: os blocos
         // com [data-reveal] só nascem invisíveis quando há JS pra revelá-los
@@ -28,12 +23,6 @@
 
 <body class="landing">
 
-    <!-- ======================================================
-         NAVBAR DA LANDING
-         Transparente por cima do hero (logo branca) e vira vidro
-         claro ao rolar (logo colorida) — ver .lp-nav.is-scrolled
-         em landing.css e js/landing.js.
-         ====================================================== -->
     <header class="lp-nav" id="lpNav">
         <div class="lp-nav__inner">
 
@@ -63,7 +52,6 @@
             </div>
         </div>
 
-        <!-- Menu mobile: painel de vidro que desce logo abaixo da barra -->
         <div class="lp-nav__menu glass-frost-strong" id="lpNavMenu">
             <a href="#o-bdh" class="lp-nav__menu-link">O BDH</a>
             <a href="#bdh-biobanco" class="lp-nav__menu-link">BDH e Biobanco</a>
@@ -81,11 +69,6 @@
 
     <main>
 
-        <!-- ======================================================
-             HERO
-             Foto do laboratório com blur leve + gradiente azul → verde
-             institucional (mesma direção do "Backgrounds" do brandbook).
-             ====================================================== -->
         <section class="lp-hero" id="inicio">
             <div class="lp-hero__media" aria-hidden="true"></div>
             <div class="lp-hero__overlay" aria-hidden="true"></div>
@@ -147,9 +130,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             O QUE É O BDH
-             ====================================================== -->
         <section class="lp-section" id="o-bdh">
             <div class="lp-container lp-split">
 
@@ -185,7 +165,6 @@
                         <img th:src="@{/assets/entrada_banco_dentes.jpg}" alt="Entrada do Banco de Dentes Humanos da Unoesc, com balcão de atendimento e porta de vidro com a identidade visual da instituição" loading="lazy">
                     </figure>
 
-                    <!-- Cartão flutuante sobre a imagem: linha do tempo da implantação -->
                     <div class="lp-timeline-card lp-glass-light">
                         <span class="lp-timeline-card__title">
                             <i class="icon" data-lucide="landmark"></i>
@@ -210,11 +189,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             BDH x BIOBANCO
-             Fundo com manchas de cor da marca pra dar o que o vidro
-             desfocar — os dois cartões grandes são .glass-frost.
-             ====================================================== -->
         <section class="lp-section lp-section--tinted" id="bdh-biobanco">
             <div class="lp-blobs" aria-hidden="true">
                 <span class="lp-blob lp-blob--blue"></span>
@@ -299,9 +273,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             BIOBANCO EM DETALHE (texto longo + imagem)
-             ====================================================== -->
         <section class="lp-section">
             <div class="lp-container lp-split lp-split--reverse">
 
@@ -330,9 +301,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             COMO FUNCIONA (fluxo do dente dentro do setor)
-             ====================================================== -->
         <section class="lp-section lp-section--soft" id="como-funciona">
             <div class="lp-container">
                 <header class="lp-section__head">
@@ -373,9 +341,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             O SISTEMA (acesso único — destaque dos CTAs)
-             ====================================================== -->
         <section class="lp-section" id="sistema">
             <div class="lp-container">
                 <div class="lp-system">
@@ -426,9 +391,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             ODONTOLOGIA UNOESC
-             ====================================================== -->
         <section class="lp-section lp-section--soft" id="odontologia">
             <div class="lp-container lp-split">
 
@@ -469,9 +431,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             UNOESC JOAÇABA
-             ====================================================== -->
         <section class="lp-section lp-section--tinted" id="campus">
             <div class="lp-blobs" aria-hidden="true">
                 <span class="lp-blob lp-blob--green lp-blob--top-left"></span>
@@ -523,7 +482,6 @@
                     </div>
                 </div>
 
-                <!-- A Unoesc em geral (brandbook: "A Unoesc" + missão) -->
                 <div class="lp-about">
                     <div class="lp-about__text">
                         <h3 class="lp-subtitle">A <strong>Unoesc</strong></h3>
@@ -563,9 +521,6 @@
             </div>
         </section>
 
-        <!-- ======================================================
-             CTA FINAL
-             ====================================================== -->
         <section class="lp-section lp-section--cta">
             <div class="lp-container">
                 <div class="lp-cta">
@@ -583,9 +538,6 @@
         </section>
     </main>
 
-    <!-- ======================================================
-         RODAPÉ DA LANDING
-         ====================================================== -->
     <footer class="lp-footer">
         <div class="lp-container lp-footer__inner">
             <div class="lp-footer__brand">

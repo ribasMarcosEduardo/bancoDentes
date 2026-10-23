@@ -28,7 +28,6 @@
         });
     </script>
 
-    <!-- Só pinta depois dos scripts do fim do <body> (filtros e ícones prontos) -->
     <link rel="expect" href="#painel-fim" blocking="render">
 
     <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
@@ -208,8 +207,6 @@
                         <strong id="paginationInfo" data-label="Manutenções Encontradas" th:text="${#lists.size(manutencoes)} + ' Manutenções Encontradas'">0 Manutenções Encontradas</strong>
                     </div>
                     <div class="pagination__actions">
-                        <!-- Status da manutenção: abre sempre em "Em andamento", sem
-                             opção de ver tudo junto (ver setupStatusSwitch em results.js) -->
                         <div class="sector-switch" id="statusSwitch" role="group" aria-label="Status da manutenção">
                             <span class="sector-switch__indicator"></span>
                             <button type="button" class="sector-switch__btn active" data-status="andamento" aria-pressed="true">Em andamento</button>
@@ -292,9 +289,6 @@
 
                             <div class="request-details">
                                 <div class="request-details__content">
-                                    <!-- Mesmo desenho dos detalhes de frasco no cadastro de movimentação
-                                         (.frasco-details, analysis.css): frasco em cima, manutenção embaixo.
-                                         Campo vazio some em vez de aparecer como "---". -->
                                     <div class="frasco-details">
                                         <span class="frasco-details__icon" aria-hidden="true">
                                             <i class="icon" data-lucide="toolbox"></i>
@@ -317,8 +311,6 @@
                                                     <span th:text="${m.frasco.denticao.nome}">Permanente</span>
                                                 </div>
 
-                                                <!-- Arcada só pra caninos, incisivos e endo; numeração só
-                                                     pra molares e pré-molares (TipoDente.usaArcada/usaNumeracao) -->
                                                 <div class="request-detail" th:if="${m.frasco != null && m.frasco.tipoDente != null && m.frasco.tipoDente.usaArcada}">
                                                     <span class="request-details__label">Arcada</span>
                                                     <span th:text="${m.frasco.arcada != null ? m.frasco.arcada.nome : '---'}">Superior</span>

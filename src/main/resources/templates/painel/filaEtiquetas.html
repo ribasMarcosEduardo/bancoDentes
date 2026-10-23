@@ -80,7 +80,6 @@
         <span>Gerar</span>
       </div>
 
-      <!-- Versão compacta do stepper (abaixo de tablet, ver css/pages/etiquetas.css) -->
       <div class="etapa-compacta etapa-compacta--etapa-1">
         <div class="etapa-compacta__anel">
           <svg viewBox="0 0 56 56" aria-hidden="true">
@@ -103,7 +102,6 @@
     </th:block>
 
     <form th:if="${!#lists.isEmpty(frascos)}" id="formFilaEtiquetas" th:action="@{/etiqueta/configurar}" method="post">
-      <!-- Só aparece com mais de uma página (etiquetas-fila.js) -->
       <div class="pagination__nav etiqueta-fila-paginacao" id="filaPaginacao" hidden>
         <span class="pagination__range" id="filaPaginacaoRange">1-20</span>
 
@@ -145,8 +143,6 @@
                   th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
             <span th:unless="${frasco.prazoManutencao != null}">---</span>
             <div class="result-list__actions">
-              <!-- Sem form próprio (não dá pra aninhar form): submete o form da
-                   fila com formaction apontando pra remoção deste frasco. -->
               <button type="submit" class="result-list__action result-list__action--red js-remover-fila"
                       th:formaction="@{/etiqueta/removerFila/{id}(id=${frasco.codigo})}"
                       th:data-identificacao="${frasco.identificacao}"
@@ -172,7 +168,6 @@
       <span class="btn__label">Voltar</span>
     </a>
 
-    <!-- Pra quando a aba de impressão foi fechada antes de confirmar -->
     <button type="submit" form="formFilaEtiquetas" class="btn btn-tonal" id="btnConfirmarImpressaoFila"
             th:formaction="@{/etiqueta/confirmar}"
             th:disabled="${#lists.isEmpty(frascos)}">

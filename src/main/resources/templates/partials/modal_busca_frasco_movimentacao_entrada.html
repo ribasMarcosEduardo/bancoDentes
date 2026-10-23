@@ -1,12 +1,6 @@
 <div class="modal-overlay" id="modalBuscaFrascoMovimentacaoEntrada">
     <div class="modal glass-frost" role="dialog" aria-modal="true" aria-labelledby="modalBuscaFrascoMovimentacaoEntradaTitle">
 
-        <!-- Mesmo miolo de modal_busca_frasco_movimentacao_saida.html
-             (busca + filtros + paginação) — só muda o que cada linha de
-             resultado oferece: aqui é seleção única (um botão
-             Selecionar/Selecionado por linha, sem rolagem de quantidade,
-             já que Entrada não escolhe quantidade nesse passo — ver
-             setupModalEntrada em frasco-search-movimentacao.js). -->
         <header class="modal__header">
             <h2 id="modalBuscaFrascoMovimentacaoEntradaTitle">
                 <i class="icon" data-lucide="search"></i>
@@ -29,9 +23,6 @@
                         <i class="search-icon" data-lucide="search"></i>
                     </div>
 
-                    <!-- Só o ícone (sem borda/fundo): revela/recolhe os filtros específicos do
-                         frasco logo abaixo. Recolhido, os filtros continuam valendo; o ponto no ícone
-                         avisa que há algum ativo (ver frasco-search-movimentacao.js). -->
                     <button type="button" class="modal-filter-toggle tooltip-below" aria-expanded="false"
                             data-tooltip="Filtros do frasco" aria-label="Mostrar filtros do frasco">
                         <i class="icon" data-lucide="filter"></i>
@@ -102,7 +93,6 @@
 
             <div class="modal-results-scroll">
                 <div class="modal-results" id="modalBuscaFrascoMovimentacaoEntradaResults">
-                    <!-- Linhas de resultado são renderizadas via JS (frasco-search-movimentacao.js) -->
                 </div>
 
                 <p class="modal-empty" id="modalBuscaFrascoMovimentacaoEntradaEmpty">

@@ -36,7 +36,6 @@
         });
     </script>
 
-    <!-- Só pinta depois dos scripts do fim do <body> (filtros e ícones prontos) -->
     <link rel="expect" href="#painel-fim" blocking="render">
 
     <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
@@ -108,7 +107,6 @@
 
                     <div class="filter-section__content">
                       <div class="filter-section__inner">
-                          <!-- Solicitação ainda não gera movimentação na v1: tirar o th:unless quando gerar -->
                           <label class="checkbox-filter" th:each="o : ${T(bancoDentes.model.enumModels.OrigemMovimentacao).values()}"
                                  th:unless="${o.name() == 'SOLICITACAO'}">
                               <input type="checkbox" th:value="${o}" data-filter-group="Origem">
@@ -305,7 +303,6 @@
                                         <section class="request-panel">
                                             <h4 class="request-panel__title">Movimentação</h4>
 
-                                            <!-- Saldo anterior -> quantidade movimentada (com o sinal e a cor do tipo) -> saldo após -->
                                             <div class="saldo-fluxo" th:classappend="'saldo-fluxo--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}">
                                                 <div class="saldo-fluxo__item">
                                                     <span class="request-details__label">Saldo anterior</span>
@@ -344,7 +341,6 @@
                                                     <span th:text="${mov.local != null ? mov.local.nome : 'Banco de Dentes Humanos'}">Banco de Dentes Humanos</span>
                                                 </div>
 
-                                                <!-- Já aparece na linha da lista; só reaparece aqui em telas estreitas -->
                                                 <div class="request-detail request-detail--data">
                                                     <span class="request-details__label">Data</span>
                                                     <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yyyy')}">-</span>
@@ -396,7 +392,6 @@
                                                     <span th:text="${mov.frasco != null && mov.frasco.denticao != null ? mov.frasco.denticao.nome : '---'}">-</span>
                                                 </div>
 
-                                                <!-- Molar/pré-molar se identificam pela numeração; os demais, pela arcada -->
                                                 <div class="request-detail" th:if="${mov.frasco != null && mov.frasco.tipoDente != null && mov.frasco.tipoDente.usaNumeracao}">
                                                     <span class="request-details__label">Numeração</span>
                                                     <span th:text="${mov.frasco.posicao != null ? mov.frasco.posicao : '---'}">-</span>
