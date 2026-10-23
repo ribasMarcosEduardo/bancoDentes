@@ -112,16 +112,13 @@
     }
 }
 
-/* Progresso de cada tela (de 0 a 100) e o da tela anterior, de onde o
-   anel parte na animação de entrada */
+/* Progresso de cada tela (de 0 a 100) */
 .etapa-compacta--etapa-1 {
     --progresso: 33.33;
-    --progresso-anterior: 0;
 }
 
 .etapa-compacta--etapa-2 {
     --progresso: 66.67;
-    --progresso-anterior: 33.33;
 }
 
 .etapa-compacta__anel {
@@ -375,9 +372,10 @@ html:not(.vt-nav) .etiqueta-acoes-bar {
     }
 }
 
-/* Etapa 1: o círculo acende ao carregar */
+/* Etapa 1: o círculo acende ao carregar - sem atraso: com ele, o círculo
+   ficava apagado no 1º paint e parecia ter carregado depois do resto */
 html:not(.vt-nav) .etiquetas-stepper > .step--active:first-of-type .step__circle {
-    animation: etiqueta-step-ativar 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+    animation: etiqueta-step-ativar 0.45s var(--ease-suave) backwards;
 }
 
 /* Linha preenchida desenhada por cima do trilho, crescendo da esquerda -
@@ -402,20 +400,10 @@ html:not(.vt-nav) .etiquetas-stepper > .step--active:first-of-type .step__circle
     animation: etiqueta-linha-preencher 0.5s var(--ease-simetrica) 0.1s backwards;
 }
 
-/* Etapa compacta: o anel cresce desde o progresso da etapa anterior
-   (--progresso-anterior) até o atual, mesma ideia da linha do stepper */
-@keyframes etiqueta-anel-avancar {
-    from {
-        stroke-dashoffset: calc(100 - var(--progresso-anterior, 0));
-    }
-}
-
-/* Na etapa 2 sempre (é o "avanço" vindo da fila); na etapa 1 só no
-   carregamento direto, como o círculo do stepper acima */
-.etapa-compacta--etapa-2 .etapa-compacta__progresso,
-html:not(.vt-nav) .etapa-compacta--etapa-1 .etapa-compacta__progresso {
-    animation: etiqueta-anel-avancar 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.15s backwards;
-}
+/* Etapa compacta: o enchimento do anel é animado em JS (script logo após o
+   .etapa-compacta em filaEtiquetas.html/configurarEtiquetas.html), não
+   aqui - a origem depende da página de onde se veio e o @keyframes com
+   var() não animava no celular */
 
 /* Etapa seguinte à linha preenchida: acende quando a linha chega nela */
 .etiquetas-stepper .stepper__line.is-filled + .step--active .step__circle {
