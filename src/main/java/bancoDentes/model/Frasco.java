@@ -68,20 +68,26 @@ public class Frasco {
     @PrePersist
     public void onPrePersist() {
         this.statusFrasco = StatusFrasco.DIS_IMPRESSAO;
-        limparCamposSeEndo();
+        limparCamposSeEndoOuSiso();
     }
 
     @PreUpdate
     public void onPreUpdate() {
-        limparCamposSeEndo();
+        limparCamposSeEndoOuSiso();
     }
 
-    private void limparCamposSeEndo() {
+    private void limparCamposSeEndoOuSiso() {
         if (this.tipoDente == TipoDente.ENDO) {
             this.posicao = null;
             this.arcada = null;
             this.estado = EstadoDente.MISTO;
             this.denticao = null;
+        }
+        if (this.tipoDente == TipoDente.SISO) {
+            this.posicao = null;
+            this.arcada = null;
+            this.estado = EstadoDente.MISTO;
+            this.denticao = Denticao.PERMANENTE;
         }
     }
 
