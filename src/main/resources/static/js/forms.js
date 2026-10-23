@@ -88,8 +88,9 @@ function setupCadastroFrasco() {
         return tipoDente.value ? tipoDente.value.toLowerCase() : "";
     }
 
-    function isEndo() {
-        return getGrupo() === "endo";
+    function isEndoOuSiso() {
+        const grupo = getGrupo();
+        return grupo === "endo" || grupo === "siso";
     }
 
     function usaNumeracao() {
@@ -103,11 +104,11 @@ function setupCadastroFrasco() {
     }
 
     function atualizarVisibilidadeCamposAtributos() {
-        const endo = isEndo();
+        const especial = isEndoOuSiso();
         const mostrarNumeracao = usaNumeracao();
 
-        if (denticaoGroup) denticaoGroup.hidden = endo;
-        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao || endo;
+        if (denticaoGroup) denticaoGroup.hidden = especial;
+        if (arcadaGroup) arcadaGroup.hidden = mostrarNumeracao || especial;
         if (numeracaoGroup) numeracaoGroup.hidden = !mostrarNumeracao;
 
         if (denticaoSelect) {
@@ -211,8 +212,6 @@ function setupCadastroFrasco() {
     function aplicarEstadoSelecionado() {
         const hasGrupo = tipoDente.value !== "";
 
-        // Na edição a quantidade fica travada: mudanças de quantidade passam
-        // por movimentação, pra ficarem registradas no histórico do frasco.
         const quantidadeLiberada = hasGrupo && !isEdicao;
         quantidadeGroup.classList.toggle("form-group--disabled", !quantidadeLiberada);
         quantidadeInput.disabled = !quantidadeLiberada;
@@ -231,7 +230,7 @@ function setupCadastroFrasco() {
 
     tipoDente.addEventListener("change", () => {
         const hasGrupo = tipoDente.value !== "";
-        const endo = isEndo();
+        const especial = isEndoOuSiso();
 
         if (hasGrupo) {
             enableSection(estadoFrascoSection);
@@ -239,7 +238,7 @@ function setupCadastroFrasco() {
             disableSection(estadoFrascoSection);
         }
 
-        if (endo) {
+        if (especial) {
             if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
             estadoDente.value = "misto";
@@ -252,8 +251,8 @@ function setupCadastroFrasco() {
         if (!isEdicao) {
             if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
             if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
-            if (!endo) {
-                estadoDente.value = "NAO_INFORMADA";
+            if (!especial) {
+                estadoDente.value = "";
             }
         }
 
@@ -275,8 +274,6 @@ function setupCadastroFrasco() {
         atualizarDicaNumeracao();
     });
 
-    // Dica "Escolha o grupo para liberar..." só faz sentido enquanto os
-    // campos seguintes ainda estão travados
     const grupoHint = document.querySelector("#grupoDentarioHint");
 
     function atualizarDicasLiberacao() {
@@ -289,7 +286,7 @@ function setupCadastroFrasco() {
     if (isEdicao && tipoDente.value !== "") {
         enableSection(estadoFrascoSection);
         estadoDente.disabled = false;
-        if (isEndo()) {
+        if (isEndoOuSiso()) {
             if (estadoDenteGroup) estadoDenteGroup.hidden = true;
             estadoDente.required = false;
         } else {
@@ -395,8 +392,10 @@ function setupCadastroSolicitacao() {
         return grupo === "molar" || grupo === "premolar" || grupo === "pre_molar";
     }
 
-    function isEndo() {
-        return grupoDentario.value.toLowerCase() === "endo";
+    // NOVA FUNÇÃO: Valida tanto Endo quanto Siso
+    function isEndoOuSiso() {
+        const grupo = grupoDentario.value.toLowerCase();
+        return grupo === "endo" || grupo === "siso";
     }
 
     function isPreMolar() {
@@ -405,7 +404,7 @@ function setupCadastroSolicitacao() {
     }
 
     function atualizarVisibilidadeCamposAtributos() {
-        const endo = isEndo();
+        const especial = isEndoOuSiso();
         const mostrarNumeracao = usaNumeracao();
         const grupo = grupoDentario.value.toLowerCase();
         const mostrarArcada = grupo === "canino" || grupo === "incisivo";
@@ -517,9 +516,9 @@ function setupCadastroSolicitacao() {
 
     grupoDentario.addEventListener("change", () => {
         const hasGrupo = grupoDentario.value !== "";
-        const endo = isEndo();
+        const especial = isEndoOuSiso();
 
-        if (grupoEndoHint) grupoEndoHint.hidden = !endo;
+        if (grupoEndoHint) grupoEndoHint.hidden = !especial;
 
         if (quantidadeGroup) quantidadeGroup.classList.toggle("form-group--disabled", !hasGrupo);
         quantidadeInput.disabled = !hasGrupo;
@@ -528,11 +527,11 @@ function setupCadastroSolicitacao() {
         if (observacoesSection) observacoesSection.classList.toggle("form-section--disabled", !hasGrupo);
         if (observacoesField) observacoesField.disabled = !hasGrupo;
 
-        avancadosSection.classList.toggle("is-collapsed", endo);
+        avancadosSection.classList.toggle("is-collapsed", especial);
         avancadosSection.classList.toggle("form-section--disabled", !hasGrupo);
-        avancadosToggle.disabled = !hasGrupo || endo;
+        avancadosToggle.disabled = !hasGrupo || especial;
 
-        if (!hasGrupo || endo) {
+        if (!hasGrupo || especial) {
             fecharAvancados();
         }
 

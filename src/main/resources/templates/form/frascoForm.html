@@ -125,6 +125,7 @@
                         <label>Estado do dente <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
                             <select class="form-control" th:field="*{estadoDente}" id="estadoDente" required disabled>
+                                <option value="">Selecione o estado</option>
                                 <option th:each="estado : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
                                         th:value="${estado.name()}" th:text="${estado}"></option>
                             </select>
