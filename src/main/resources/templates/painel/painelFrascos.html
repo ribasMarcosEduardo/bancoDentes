@@ -508,9 +508,9 @@
 
                 <span class="card__code" th:classappend="${frasco.statusFrasco != null} ? 'code-status code-status--' + ${frasco.statusFrasco.css}" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">Código</span>
 
-                <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco status-pill--sm"
-                      th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
-                      th:title="${frasco.statusFrasco.nome}"
+                <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco status-pill--sm"
+                      th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
+                      th:title="${frasco.statusFrasco.nome}"
                       th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
 
                 <div class="card__header-actions">
