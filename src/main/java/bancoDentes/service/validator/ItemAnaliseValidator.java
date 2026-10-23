@@ -7,6 +7,7 @@ import bancoDentes.model.AnaliseSolicitacao;
 import bancoDentes.model.Frasco;
 import bancoDentes.model.ItemAnalise;
 import bancoDentes.model.Solicitacao;
+import bancoDentes.model.enumModels.Local;
 import bancoDentes.repository.AnaliseSolicitacaoRepository;
 import bancoDentes.repository.FrascoRepository;
 import bancoDentes.repository.ItemAnaliseRepository;
@@ -39,6 +40,11 @@ public class ItemAnaliseValidator extends BaseService {
             Frasco frasco = frascoRepository
                     .findById(itemAnalise.getFrasco().getCodigo())
                     .orElseThrow(() -> new FrascoException(getText("error.frasco.nao.encontrado")));
+
+            // Solicitação é sempre retirada no Banco de Dentes Humanos
+            if (frasco.getLocal() != Local.BDH) {
+                throw new AnaliseException(getText("error.item.localInvalido"));
+            }
 
             itemAnalise.setAnaliseSolicitacao(analise);
             itemAnalise.setFrasco(frasco);

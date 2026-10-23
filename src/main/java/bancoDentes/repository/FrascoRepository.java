@@ -13,7 +13,8 @@ import java.util.Set;
 public interface FrascoRepository extends JpaRepository<Frasco, Long> {
 
     @Query("SELECT f FROM Frasco f " +
-            "WHERE f.tipoDente = :tipoDente " +
+            "WHERE f.local = 'BDH' " +
+            "AND f.tipoDente = :tipoDente " +
             "AND (:denticao IS NULL OR f.denticao = :denticao) " +
             "AND (:arcada IS NULL OR f.arcada = :arcada) " +
             "AND (:estadoDente IS NULL OR f.estado = :estadoDente) " +
