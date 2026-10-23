@@ -97,6 +97,14 @@ html.barras-ocultas .main-panel .pagination.is-stuck {
     margin-right: 0.75rem;
 }
 
+/* Ordenação depois da contagem ("12 Frascos Encontrados - Mais Recentes",
+   montada em applyPagination, filters.js). O separador fica no CSS pra o
+   layout do celular trocar por uma quebra de linha (layout/app-mobile.css) */
+.pagination-info__ordem::before {
+    content: " - ";
+    white-space: pre;
+}
+
 .pagination__range {
     color: var(--text-muted);
     font-size: 0.78rem;

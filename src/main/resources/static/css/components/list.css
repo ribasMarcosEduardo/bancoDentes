@@ -367,6 +367,8 @@
 .request-row--saida { --linha-status-cor: #ef4444; }
 .request-row--transferencia { --linha-status-cor: #f59e0b; }
 .request-row--manutencao-concluida { --linha-status-cor: #22c55e; }
+/* Mesmo âmbar da pill de Pendente (solicitações): ainda aguardando ação */
+.request-row--manutencao-andamento { --linha-status-cor: #f59e0b; }
 .request-row--edicao { --linha-status-cor: #14b8a6; }
 
 /* Linhas com status: gradiente leve da cor no início da linha e da área
@@ -512,6 +514,32 @@
    altura mínima pensada pro texto livre das solicitações */
 .request-notes--compact {
     min-height: 0;
+}
+
+/* Justificativa de um pedido negado (painelAnalise.html e
+   painelSolicitacao.html): vermelho translúcido sobre a superfície, nos
+   dois temas, no lugar do fundo claro fixo que destoava no escuro */
+.request-panel__title--negado {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    color: var(--danger-text);
+}
+
+.request-panel__title--negado .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.request-notes--negado {
+    border-color: color-mix(in srgb, #ef4444 28%, transparent);
+    border-left: 3px solid color-mix(in srgb, #ef4444 70%, transparent);
+
+    background: color-mix(in srgb, #ef4444 8%, var(--surface-soft));
+    color: var(--text-soft);
 }
 
 /*

@@ -362,3 +362,50 @@
         display: none;
     }
 }
+
+/*
+    Prazo de edição + Excluir/Editar na área expandida (solicitação
+    pendente, até 4h depois de enviada). Antes eram estilos inline no
+    painelSolicitacao.html; mesmos valores. No celular o bloco sobe pro
+    começo da área expandida (layout/app-mobile.css).
+*/
+.solicitacao-edicao {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.solicitacao-edicao__aviso {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 12px;
+
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 6px;
+
+    background: rgba(245, 158, 11, 0.14);
+    color: var(--text-soft);
+
+    font-size: 0.85rem;
+}
+
+.solicitacao-edicao__aviso .icon {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+
+    color: var(--status-ambar);
+}
+
+.solicitacao-edicao__botoes {
+    display: flex;
+    gap: 8px;
+}
+
+.solicitacao-edicao__botoes form {
+    margin: 0;
+}

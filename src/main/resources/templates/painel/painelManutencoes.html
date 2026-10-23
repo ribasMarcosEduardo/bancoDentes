@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
@@ -41,7 +41,7 @@
     <title>Painel de Manutenções</title>
 </head>
 
-<body>
+<body class="app-mobile">
 
 <div class="background">
     <div class="blob blob--blue"></div>
@@ -49,6 +49,7 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<div th:replace="~{partials/app_mobile :: appHeader('status')}"></div>
 
 <main class="page">
     <section class="dashboard">
@@ -213,13 +214,6 @@
                             <button type="button" class="sector-switch__btn" data-status="concluida" aria-pressed="false">Concluídas</button>
                         </div>
 
-                        <div class="sector-switch" id="sectorSwitch">
-                            <span class="sector-switch__indicator"></span>
-                            <button type="button" class="sector-switch__btn active" data-setor="todos">Todos</button>
-                            <button type="button" class="sector-switch__btn" data-setor="bdh">BDH</button>
-                            <button type="button" class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
-                        </div>
-
                         <div class="pagination__nav">
                             <span class="pagination__range" id="paginationRange">1-1</span>
 
@@ -254,10 +248,9 @@
 
                         <article th:each="m : ${manutencoes}"
                                  class="request-row"
-                                 th:classappend="${m.statusManutencao != null && m.statusManutencao.name() == 'FINALIZADA'} ? 'request-row--manutencao-concluida'"
+                                 th:classappend="${m.statusManutencao != null && m.statusManutencao.name() == 'FINALIZADA'} ? 'request-row--manutencao-concluida' : 'request-row--manutencao-andamento'"
                                  th:data-sort="${m.codigo}"
                                  th:data-busca="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : ''}"
-                                 th:data-setor="${m.frasco != null && m.frasco.local != null ? #strings.toLowerCase(m.frasco.local.name()) : ''}"
                                  th:data-status="${m.statusManutencao != null && m.statusManutencao.name() == 'FINALIZADA' ? 'concluida' : 'andamento'}"
                                  th:data-codigo="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : ''}"
                                  th:data-grupo="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : ''}"
@@ -269,7 +262,7 @@
                             <div class="result-list">
                                 <span class="result-list__code" th:text="${m.frasco != null && m.frasco.identificacao != null ? m.frasco.identificacao : (m.frasco != null ? 'FR-' + m.frasco.codigo : '---')}">FR-000</span>
                                 <span th:text="${m.frasco != null && m.frasco.tipoDente != null ? m.frasco.tipoDente : '---'}">Grupo</span>
-                                <span th:text="${m.frasco != null ? m.quantidade : 0}">0</span>
+                                <span data-rotulo-prefixo="Qtd." th:text="${m.frasco != null ? m.quantidade : 0}">0</span>
 
                                 <div class="result-list__actions">
                                     <button type="button"
@@ -285,6 +278,13 @@
                                         <i class="icon" data-lucide="chevron-down"></i>
                                     </button>
                                 </div>
+
+                                <span class="result-list__mobile result-list__local"
+                                      th:text="${m.frasco != null && m.frasco.local != null ? (m.frasco.local == T(bancoDentes.model.enumModels.Local).BDH ? 'BDH' : m.frasco.local.nome) : '---'}">BDH</span>
+                                <span class="result-list__mobile" data-rotulo="Origem"
+                                      th:text="${m.origem != null ? m.origem : '---'}">Solicitação</span>
+                                <span class="result-list__mobile" data-rotulo="Enviado em"
+                                      th:text="${m.datCadastro != null ? #temporals.format(m.datCadastro, 'dd/MM/yy') : '---'}">21/06/26</span>
                             </div>
 
                             <div class="request-details">
@@ -348,7 +348,7 @@
 
                                     <div class="request-details__actions"
                                          th:if="${m.statusManutencao != T(bancoDentes.model.enumModels.StatusManutencao).FINALIZADA}">
-                                        <button type="button" class="btn btn-outline btn-outline-success js-concluir-manutencao"
+                                        <button type="button" class="btn btn-outline btn-outline-success btn-degrade-status js-concluir-manutencao"
                                                 th:data-id="${m.codigo}">
                                             <i class="icon" data-lucide="toolbox"></i>
                                             Concluir manutenção
@@ -367,11 +367,13 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
+<div th:replace="~{partials/app_mobile :: appTabbar('manutencoes')}"></div>
 <th:block th:insert="~{partials/modal_concluir_manutencao}"></th:block>
 
 <script th:src="@{/js/bundles/painel.js}"></script>
 
 <script th:src="@{/js/manutencao-concluir.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 <span id="painel-fim" hidden></span>
 </body>

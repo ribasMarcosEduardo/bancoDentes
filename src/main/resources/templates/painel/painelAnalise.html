@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
@@ -41,7 +41,7 @@
     <title>Painel de Solicitações</title>
 </head>
 
-<body>
+<body class="app-mobile">
 
 <div class="background">
     <div class="blob blob--blue"></div>
@@ -49,6 +49,7 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<div th:replace="~{partials/app_mobile :: appHeader('etapa')}"></div>
 
 <main class="page">
     <section class="dashboard">
@@ -72,32 +73,32 @@
 
                     <div class="filter-section__content">
                       <div class="filter-section__inner">
-                          <label class="checkbox-filter">
+                          <label class="checkbox-filter" data-etapa-filtro="pendentes">
                               <input type="checkbox" value="Pendente" data-filter-group="Status">
                               <span>Pendente</span>
                           </label>
 
-                          <label class="checkbox-filter">
+                          <label class="checkbox-filter" data-etapa-filtro="andamento">
+                              <input type="checkbox" value="Em análise" data-filter-group="Status">
+                              <span>Em análise</span>
+                          </label>
+
+                          <label class="checkbox-filter" data-etapa-filtro="andamento">
                               <input type="checkbox" value="Em separação" data-filter-group="Status">
                               <span>Em separação</span>
                           </label>
 
-                          <label class="checkbox-filter">
-                              <input type="checkbox" value="Em analise" data-filter-group="Status">
-                              <span>Em análise</span>
-                          </label>
-
-                          <label class="checkbox-filter">
+                          <label class="checkbox-filter" data-etapa-filtro="andamento">
                               <input type="checkbox" value="Aguardando retirada" data-filter-group="Status">
                               <span>Aguardando retirada</span>
                           </label>
 
-                          <label class="checkbox-filter">
+                          <label class="checkbox-filter" data-etapa-filtro="finalizadas">
                               <input type="checkbox" value="Concluído" data-filter-group="Status">
                               <span>Concluído</span>
                           </label>
 
-                          <label class="checkbox-filter">
+                          <label class="checkbox-filter" data-etapa-filtro="finalizadas">
                               <input type="checkbox" value="Negado" data-filter-group="Status">
                               <span>Negado</span>
                           </label>
@@ -281,11 +282,11 @@
                     </div>
 
                     <div class="pagination__actions">
-                        <div class="sector-switch" id="sectorSwitch">
+                        <div class="sector-switch" id="etapaSwitch" role="group" aria-label="Etapa da solicitação">
                             <span class="sector-switch__indicator"></span>
-                            <button type="button" class="sector-switch__btn active" data-setor="todos">Todos</button>
-                            <button type="button" class="sector-switch__btn" data-setor="bdh">BDH</button>
-                            <button type="button" class="sector-switch__btn" data-setor="biobanco">Biobanco</button>
+                            <button type="button" class="sector-switch__btn active" data-etapa="pendentes" aria-pressed="true">Pendentes</button>
+                            <button type="button" class="sector-switch__btn" data-etapa="andamento" aria-pressed="false">Em andamento</button>
+                            <button type="button" class="sector-switch__btn" data-etapa="finalizadas" aria-pressed="false">Finalizadas</button>
                         </div>
 
                         <div class="pagination__nav">
@@ -332,16 +333,17 @@
                                  th:data-arcada="${solicitacao.arcada != null ? solicitacao.arcada.nome : ''}"
                                  th:data-denticao="${solicitacao.denticao != null ? solicitacao.denticao.nome : ''}"
                                  th:data-estudante="${solicitacao.estudante != null ? solicitacao.estudante.nome : ''}"
-                                 data-setor="bdh">
+                                 th:data-etapa="${solicitacao.statusSolicitacao.name() == 'PENDENTE' ? 'pendentes' : (solicitacao.statusSolicitacao.name() == 'CONCLUIDO' or solicitacao.statusSolicitacao.name() == 'NEGADO' ? 'finalizadas' : 'andamento')}"
+                                 th:data-busca="${'SOL-' + #numbers.formatInteger(solicitacao.codigo, 3) + ' ' + (solicitacao.estudante != null ? solicitacao.estudante.nome : '')}">
                             <div class="result-list">
                                 <span class="result-list__code" th:text="'SOL-' + ${#numbers.formatInteger(solicitacao.codigo, 3)}">SOL-001</span>
                                 <span th:text="${solicitacao.tipoDente}">Grupo</span>
-                                <span th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : 'Não informado'}">Solicitante</span>
-                                <span th:text="${solicitacao.quantidade}">10</span>
+                                <span data-rotulo="Solicitante" th:text="${solicitacao.estudante != null ? solicitacao.estudante.nome : 'Não informado'}">Solicitante</span>
+                                <span data-rotulo-prefixo="Qtd." th:text="${solicitacao.quantidade}">10</span>
                                 <span class="status-pill"
                                       th:classappend="'status-pill--' + ${#strings.toLowerCase(solicitacao.statusSolicitacao.name())}"
                                       th:text="${solicitacao.statusSolicitacao.nome ?: solicitacao.statusSolicitacao.name()}">Status</span>
-                                <span th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yy')}">21/06/25</span>
+                                <span data-rotulo="Data" th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yy')}">21/06/25</span>
 
                                 <button class="request-toggle request-toggle--plain" type="button" aria-label="Expandir solicitação">
                                     <i class="icon" data-lucide="chevron-down"></i>
@@ -361,6 +363,11 @@
                                                 </div>
 
                                                 <div class="request-detail">
+                                                    <span class="request-details__label">Grupo dentário</span>
+                                                    <span th:text="${solicitacao.tipoDente != null ? solicitacao.tipoDente : '---'}">Pré-Molar</span>
+                                                </div>
+
+                                                <div class="request-detail">
                                                     <span class="request-details__label">Estado</span>
                                                     <span th:text="${solicitacao.estado != null ? solicitacao.estado.nome : '---'}">Hígido</span>
                                                 </div>
@@ -375,19 +382,14 @@
                                                     <span th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '---'}">Permanente</span>
                                                 </div>
 
-                                                <div class="request-detail">
+                                                <div class="request-detail request-detail--na-linha">
                                                     <span class="request-details__label">Quantidade</span>
                                                     <span th:text="${solicitacao.quantidade}">10</span>
                                                 </div>
 
-                                                <div class="request-detail">
+                                                <div class="request-detail request-detail--na-linha">
                                                     <span class="request-details__label">Data da Solicitação</span>
                                                     <span th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy')}">21/06/25</span>
-                                                </div>
-
-                                                <div class="request-detail">
-                                                    <span class="request-details__label">Local de Retirada</span>
-                                                    <span>Banco de Dentes Humanos</span>
                                                 </div>
                                             </div>
                                         </section>
@@ -403,11 +405,11 @@
                                         </section>
 
                                         <section class="request-panel" th:if="${solicitacao.statusSolicitacao.name() == 'NEGADO'}">
-                                            <h4 class="request-panel__title" style="color: #dc3545; display: flex; align-items: center; gap: 6px;">
-                                                <i class="icon" data-lucide="message-square-x" style="width: 16px; height: 16px;"></i>
+                                            <h4 class="request-panel__title request-panel__title--negado">
+                                                <i class="icon" data-lucide="message-square-x"></i>
                                                 Justificativa do Avaliador
                                             </h4>
-                                            <div class="request-notes" style="background-color: #fff5f5; border-left: 4px solid #dc3545; color: #b02a37;">
+                                            <div class="request-notes request-notes--negado">
                                                 <span th:text="${solicitacao.analiseSolicitacao != null ? solicitacao.analiseSolicitacao.justificativa : 'O avaliador não deixou nenhuma justificativa.'}"></span>
                                             </div>
                                         </section>
@@ -418,28 +420,28 @@
                                               th:id="|formNegar-${solicitacao.codigo}|" th:action="@{/analiseSolicitacao/negarSolicitacao}" method="post" style="margin: 0;">
                                             <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
                                             <input type="hidden" th:id="|justificativa-${solicitacao.codigo}|" name="justificativa" />
-                                            <button type="button" class="btn btn-outline btn-outline-danger" th:onclick="abrirModalNegar([[${solicitacao.codigo}]])">
+                                            <button type="button" class="btn btn-outline btn-outline-danger btn-degrade-status" th:onclick="abrirModalNegar([[${solicitacao.codigo}]])">
                                                 Negar
                                             </button>
                                         </form>
 
                                         <form th:if="${solicitacao.isPendente()}"
                                               th:action="@{/analiseSolicitacao/analisar/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}" method="post" style="margin: 0;">
-                                            <button type="submit" class="btn btn-outline btn-outline-success">
+                                            <button type="submit" class="btn btn-outline btn-outline-success btn-degrade-status">
                                                 Iniciar Análise
                                             </button>
                                         </form>
 
                                         <a th:if="${solicitacao.isContinuar()}"
                                            th:href="@{/analiseSolicitacao/visualizaSolicitacao/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}"
-                                           class="btn btn-outline btn-outline-info">
+                                           class="btn btn-outline btn-outline-info btn-degrade-status">
                                             Continuar Análise
                                         </a>
 
                                         <form th:if="${solicitacao.isReabrir()}"
                                               th:action="@{/analiseSolicitacao/reabrirSolicitacao}" method="post" style="margin: 0;">
                                             <input type="hidden" name="solicitacao.codigo" th:value="${solicitacao.codigo}" />
-                                            <button type="submit" class="btn btn-outline btn-outline-warning">
+                                            <button type="submit" class="btn btn-outline btn-outline-warning btn-degrade-status">
                                                 Reabrir
                                             </button>
                                         </form>
@@ -457,28 +459,38 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
+<div th:replace="~{partials/app_mobile :: appTabbar('solicitacoes')}"></div>
 
 <script th:src="@{/js/bundles/painel.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
     });
 
+    // Mesmo padrão do "Cancelar pedido" da tela de análise (visualizaSolicitacao.html)
     function abrirModalNegar(codigo) {
         Swal.fire({
-            title: 'Negar Solicitação',
-            text: 'Por favor, informe a justificativa para negar esta solicitação:',
-            input: 'textarea',
-            inputPlaceholder: 'Digite a justificativa...',
+            icon: "warning",
+            title: "Negar solicitação?",
+            text: "Essa ação não pode ser desfeita. Descreva o motivo, que fica visível pro acadêmico.",
+            input: "textarea",
+            inputPlaceholder: "Justificativa...",
+            inputAttributes: { "aria-label": "Motivo da negação" },
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Confirmar Negação',
-            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            focusCancel: true,
+            confirmButtonText: "Negar solicitação",
+            cancelButtonText: "Voltar",
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: "btn btn-outline btn-outline-danger",
+                cancelButton: "btn btn-secondary",
+            },
             inputValidator: (value) => {
-                if (!value || value.trim() === '') {
-                    return 'A justificativa é obrigatória!';
+                if (!value || !value.trim()) {
+                    return "Informe o motivo da negação.";
                 }
             }
         }).then((result) => {
@@ -491,11 +503,7 @@
                     window.salvarEstadoPainel?.();
                     form.submit();
                 } else {
-                    Swal.fire(
-                        'Erro no Sistema',
-                        'Não consegui encontrar o formulário.',
-                        'error'
-                    );
+                    ToastError.fire({ icon: "error", title: "Não foi possível negar a solicitação." });
                 }
             }
         });

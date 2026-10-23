@@ -48,6 +48,11 @@
     font-size: 1rem;
 }
 
+/* Corpo do card com os detalhes no padrão .frasco-details (abaixo) */
+.analysis-card__body {
+    padding: 1.5rem;
+}
+
 .analysis-details {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -238,6 +243,11 @@
     padding: 2.75rem 1.5rem;
 
     color: var(--text-muted);
+
+    /* justify-items centraliza o bloco do texto, mas quebrando em 2 linhas
+       (ex.: "Nenhum frasco de destino selecionado ainda." no celular) as
+       linhas ficavam alinhadas à esquerda */
+    text-align: center;
 }
 
 .selected-flasks__empty .icon {
@@ -372,6 +382,34 @@
     color: var(--text-muted);
     font-style: italic;
     font-weight: 400;
+}
+
+/* Observações numa caixa (.request-notes, list.css) em vez de texto solto
+   (ex.: detalhes da solicitação em visualizaSolicitacao.html): rótulo em
+   cima, caixa embaixo */
+.frasco-details__note:has(.request-notes) {
+    display: grid;
+    gap: 0.45rem;
+}
+
+/* Ícone pequeno e apagado antes do valor (quantidade, solicitante, data),
+   como a data de cadastro dos cards de frasco */
+.frasco-details__icone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.frasco-details__icone .icon {
+    flex-shrink: 0;
+
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+
+    color: var(--icon-muted);
 }
 
 /* "30 → 25 após a saída" — o valor que vai ficar em destaque */

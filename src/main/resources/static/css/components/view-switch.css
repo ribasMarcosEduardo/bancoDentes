@@ -131,23 +131,29 @@
     opacity: var(--glass-frost-noise-opacity, 0.05);
 }
 
+/* Ocupa o switch inteiro e o clip-path recorta só o botão ativo
+   (--ind-x/--ind-w vêm do results.js). Animar o recorte não mexe no
+   layout, e o raio fica certo em qualquer largura (scaleX achataria) */
 .sector-switch__indicator {
     position: absolute;
     top: 0.3rem;
     left: 0;
+    right: 0;
 
     height: 32px;
-    width: 0;
 
-    border-radius: 0.6rem;
     background: var(--btn-tonal-bg-hover);
+
+    clip-path: inset(
+        0 calc(100% - var(--ind-x, 0px) - var(--ind-w, 0px))
+        0 var(--ind-x, 0px)
+        round 0.6rem
+    );
 
     pointer-events: none;
     z-index: 0;
 
-    transition:
-        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-        width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: clip-path var(--dur-media) var(--ease-suave);
 }
 
 .sector-switch__btn {

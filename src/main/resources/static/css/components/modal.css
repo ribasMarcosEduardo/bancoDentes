@@ -781,6 +781,34 @@ body.modal-open {
     line-height: 1.4;
 }
 
+/* Status do frasco nos modais de movimentação (montarPontoStatus/
+   montarDatasResultado em frasco-search-movimentacao.js): ponto antes do
+   identificador, nas cores de status do Painel de Frascos (pages/frascos.css);
+   o nome vai no começo da linha das datas */
+.modal-result__status {
+    display: inline-block;
+
+    width: 8px;
+    height: 8px;
+    margin-right: 0.45rem;
+
+    border-radius: 50%;
+
+    vertical-align: 0.12em;
+}
+
+.modal-result__status--disponivel {
+    background: #22c55e;
+}
+
+.modal-result__status--impressao {
+    background: #3b82f6;
+}
+
+.modal-result__status--manutencao {
+    background: #a855f7;
+}
+
 .modal-result__actions {
     display: flex;
     align-items: center;
@@ -828,6 +856,24 @@ body.modal-open {
        protótipo — até 2 dígitos de cada lado (ex. "99/99"), já que um
        frasco não costuma passar de ~99 dentes. */
     width: 130px;
+}
+
+/* "Máx." ao lado da rolagem de quantidade (frasco-search-solicitacao.js):
+   preenche o maior valor permitido. Na altura do campo, texto pequeno pra
+   não competir com a quantidade. */
+.modal-result__max {
+    flex-shrink: 0;
+
+    height: var(--input-height);
+    padding: 0 0.7rem;
+
+    font-size: 0.78rem;
+}
+
+.modal-result__max:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Distinção leve pro que já está na seleção — mesmo verde da barra de

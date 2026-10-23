@@ -34,3 +34,6 @@
 @import url("./pages/dashboard.css");
 @import url("./pages/login.css");
 @import url("./pages/confirmacao_email.css");
+
+/* Por último: sobrescreve componentes no layout de app do celular */
+@import url("./layout/app-mobile.css");

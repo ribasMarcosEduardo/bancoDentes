@@ -1,15 +1,62 @@
 const DADOS = window.DADOS_ANALISE || { frascosDisponiveis: [], itensSalvos: [], codAnalise: null, codSolicitacao: null, totalSolicitado: null };
 
+// Nomes de exibição dos enums do backend (getNome() de TipoDente, EstadoDente,
+// Arcada e Denticao, em model/enumModels). DADOS_ANALISE vem serializado pelo
+// Thymeleaf (Jackson), que manda o name() do enum ("PRE_MOLAR", "HIGIDO"...),
+// não o nome por extenso.
+const NOMES_ENUM = {
+    MOLAR: "Molar",
+    PRE_MOLAR: "Pré-Molar",
+    CANINO: "Canino",
+    INCISIVO: "Incisivo",
+    ENDO: "Endo",
+    NAO_INFORMADA: "Não informada",
+    CARIADO: "Cariado",
+    HIGIDO: "Hígido",
+    RESTAURADO: "Restaurado",
+    MISTO: "Misto",
+    INFERIOR: "Inferior",
+    SUPERIOR: "Superior",
+    DECIDUA: "Decídua",
+    PERMANENTE: "Permanente"
+};
+
+function nomeEnum(valor) {
+    if (!valor) return "---";
+    if (typeof valor === "object") return valor.nome || "---";
+    return NOMES_ENUM[valor] || valor;
+}
+
+// LocalDateTime chega como "2026-05-04T10:23:45.123" (ou [2026, 5, 4, ...],
+// conforme a configuração do Jackson). Fica só a data, em dd/MM/yy: mesmo
+// formato das listas e o que parseDataBr (ordenação por manutenção) espera.
+function formatarData(valor) {
+    if (!valor) return "---";
+
+    let ano, mes, dia;
+
+    if (Array.isArray(valor)) {
+        [ano, mes, dia] = valor;
+    } else {
+        const partes = String(valor).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!partes) return "---";
+        [, ano, mes, dia] = partes.map(Number);
+    }
+
+    const doisDigitos = (n) => String(n).padStart(2, "0");
+    return `${doisDigitos(dia)}/${doisDigitos(mes)}/${doisDigitos(ano % 100)}`;
+}
+
 const MOCK_FRASCOS = DADOS.frascosDisponiveis.map(f => ({
     id: f.identificacao || ('FR-' + f.codigo),
     codFrasco: f.codigo,
-    grupo: f.tipoDente || "---",
-    estado: f.estadoDente || "---",
-    arcada: f.arcada || "---",
-    denticao: f.denticao ? f.denticao.nome : "---",
+    grupo: nomeEnum(f.tipoDente),
+    estado: nomeEnum(f.estado),
+    arcada: nomeEnum(f.arcada),
+    denticao: nomeEnum(f.denticao),
     disponivel: f.quantidade,
-    dataCadastro: f.datCad || "---",
-    dataManutencao: f.datManutencao || "---"
+    dataCadastro: formatarData(f.datCad),
+    dataManutencao: formatarData(f.datManutencao)
 }));
 
 const mapaCodigosItem = new Map();
@@ -136,12 +183,18 @@ function setupFrascoSearchModal() {
         linha.className = jaAdicionado ? "modal-result modal-result--added" : "modal-result";
         linha.dataset.added = jaAdicionado ? "true" : "false";
 
+        // Só as características que o frasco tem (Endo não tem arcada nem
+        // dentição - ficava "Misto · --- · ---")
+        const caracteristicas = [frasco.estado, frasco.arcada, frasco.denticao]
+            .filter((valor) => valor && valor !== "---")
+            .join(" · ") || "---";
+
         linha.innerHTML = `
             <div class="modal-result__info">
                 <span class="modal-result__code">${frasco.id}</span>
 
                 <div class="modal-result__subinfo">
-                    <span class="modal-result__meta">${frasco.estado} · ${frasco.arcada} · ${frasco.denticao}</span>
+                    <span class="modal-result__meta">${caracteristicas}</span>
                     <span class="modal-result__dates">
                         <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                         <span class="modal-result__dates-sep">·</span>
@@ -169,10 +222,25 @@ function setupFrascoSearchModal() {
                         </button>
                     </div>
                 </div>
+
+                <button type="button" class="btn btn-tonal modal-result__max" aria-label="Usar a quantidade máxima">Máx.</button>
             </div>
         `;
 
+        atualizarBotaoMax(linha, limite);
+
         return linha;
+    }
+
+    // "Máx." preenche o maior valor permitido pra essa linha: o saldo do frasco
+    // ou o que falta pra completar a solicitação, o que for menor
+    // (maxPermitido). Apagado quando já está no máximo ou não cabe mais nada.
+    function atualizarBotaoMax(linha, limite) {
+        const botao = linha.querySelector(".modal-result__max");
+        const quantidadeInput = linha.querySelector(".number-input__field");
+        if (!botao || !quantidadeInput) return;
+
+        botao.disabled = limite === 0 || Number(quantidadeInput.value) >= limite;
     }
 
     function renderResultados() {
@@ -237,6 +305,8 @@ function setupFrascoSearchModal() {
 
             const maxLabel = linha.querySelector(".number-input__max");
             if (maxLabel) maxLabel.textContent = `/${limite}`;
+
+            atualizarBotaoMax(linha, limite);
         });
     }
 
@@ -261,7 +331,7 @@ function setupFrascoSearchModal() {
         }
 
         if (headerProgressFill) {
-            headerProgressFill.style.width = `${(atual / totalSolicitado) * 100}%`;
+            headerProgressFill.style.setProperty("--progresso", atual / totalSolicitado);
         }
 
         if (progressRemaining) {
@@ -411,6 +481,24 @@ function setupFrascoSearchModal() {
         } else {
             atualizarLimitesLinhasVisiveis();
         }
+    });
+
+    // Mesmo caminho de digitar no campo: o "input" abaixo salva no servidor,
+    // atualiza o progresso e os limites das outras linhas
+    resultsContainer.addEventListener("click", (event) => {
+        const maxBtn = event.target.closest(".modal-result__max");
+        if (!maxBtn) return;
+
+        const linha = maxBtn.closest(".modal-result");
+        const frasco = MOCK_FRASCOS.find((item) => item.id === linha?.dataset.frascoId);
+        const quantidadeInput = linha?.querySelector(".number-input__field");
+        if (!frasco || !quantidadeInput) return;
+
+        const limite = maxPermitido(frasco);
+        if (Number(quantidadeInput.value) === limite) return;
+
+        quantidadeInput.value = limite;
+        quantidadeInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
     resultsContainer.addEventListener("input", (event) => {

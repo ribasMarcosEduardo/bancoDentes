@@ -1,0 +1,125 @@
+<th:block th:fragment="appHeader(abas)">
+    <header class="app-header">
+        <div class="app-header__bar">
+            <a th:if="${appVoltar == null}" th:href="@{/}" class="app-header__btn" aria-label="Início">
+                <i class="icon" data-lucide="house"></i>
+            </a>
+            <a th:unless="${appVoltar == null}" th:href="${appVoltar}" class="app-header__btn app-header__voltar" aria-label="Voltar">
+                <i class="icon" data-lucide="arrow-left"></i>
+            </a>
+
+            <a th:href="@{/frasco/painel}" class="app-header__brand" aria-label="Banco de Dentes e Biobanco Unoesc">
+                <img th:src="@{/assets/LOGO%20BANCO%20DE%20DENTES%20COLORIDA.png}" alt="" class="app-header__logo app-header__logo--cor">
+                <img th:src="@{/assets/LOGO%20BANCO%20DE%20DENTES%20BRANCO.png}" alt="" class="app-header__logo app-header__logo--clara">
+            </a>
+
+            <div class="app-perfil">
+                <button type="button" class="app-header__btn app-perfil__btn" aria-label="Perfil" aria-haspopup="true" aria-expanded="false">
+                    <i class="icon" data-lucide="user-round"></i>
+                </button>
+
+                <div class="app-perfil__menu">
+                    <div class="app-perfil__item is-disabled" aria-disabled="true">
+                        <span class="app-perfil__avatar"><i class="icon" data-lucide="user-round"></i></span>
+                        <span class="app-perfil__texto">Perfil de acesso</span>
+                        <span class="link-soon">Em breve</span>
+                    </div>
+
+                    <div class="app-perfil__item">
+                        <span class="app-perfil__texto">Tema</span>
+                        <button type="button" class="app-perfil__tema theme-toggle-btn" aria-label="Alternar tema">
+                            <i class="icon" data-lucide="moon"></i>
+                        </button>
+                    </div>
+
+                    <a href="#" class="app-perfil__login">Login</a>
+                </div>
+            </div>
+        </div>
+
+        <nav th:if="${abas == 'setor'}" class="app-tabs" id="sectorTabs" aria-label="Setor">
+            <span class="app-tabs__indicator"></span>
+            <button type="button" class="app-tabs__btn active" data-setor="todos">Todos</button>
+            <button type="button" class="app-tabs__btn" data-setor="bdh">Banco de Dentes Humanos</button>
+            <button type="button" class="app-tabs__btn" data-setor="biobanco">Biobanco</button>
+        </nav>
+
+        <nav th:if="${abas == 'status'}" class="app-tabs" id="statusTabs" aria-label="Status da manutenção">
+            <span class="app-tabs__indicator"></span>
+            <button type="button" class="app-tabs__btn active" data-status="andamento" aria-pressed="true">Em andamento</button>
+            <button type="button" class="app-tabs__btn" data-status="concluida" aria-pressed="false">Concluídas</button>
+        </nav>
+
+        <nav th:if="${abas == 'tipo'}" class="app-tabs" id="tipoTabs" aria-label="Tipo de movimentação">
+            <span class="app-tabs__indicator"></span>
+            <button type="button" class="app-tabs__btn active" data-tipo="todas" aria-pressed="true">Todas</button>
+            <button type="button" class="app-tabs__btn" data-tipo="Entrada" aria-pressed="false">Entradas</button>
+            <button type="button" class="app-tabs__btn" data-tipo="Saída" aria-pressed="false">Saídas</button>
+            <button type="button" class="app-tabs__btn" data-tipo="Transferência" aria-pressed="false">Transferências</button>
+        </nav>
+
+        <nav th:if="${abas == 'etapa'}" class="app-tabs" id="etapaTabs" aria-label="Etapa da solicitação">
+            <span class="app-tabs__indicator"></span>
+            <button type="button" class="app-tabs__btn active" data-etapa="pendentes" aria-pressed="true">Pendentes</button>
+            <button type="button" class="app-tabs__btn" data-etapa="andamento" aria-pressed="false">Em andamento</button>
+            <button type="button" class="app-tabs__btn" data-etapa="finalizadas" aria-pressed="false">Finalizadas</button>
+        </nav>
+
+        <button type="button" class="app-header__alca" aria-label="Mostrar cabeçalho" tabindex="-1"></button>
+    </header>
+</th:block>
+
+<th:block th:fragment="appTabbar(ativo)">
+    <nav class="app-tabbar" aria-label="Navegação principal">
+        <a th:href="@{/frasco/painel}" class="app-tabbar__item"
+           th:classappend="${ativo == 'frascos'} ? 'is-active'"
+           th:aria-current="${ativo == 'frascos'} ? 'page'"
+           aria-label="Frascos">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="flask-conical"></i></span>
+        </a>
+
+        <a th:href="@{/movimentacao/painel}" class="app-tabbar__item"
+           th:classappend="${ativo == 'movimentacoes'} ? 'is-active'"
+           th:aria-current="${ativo == 'movimentacoes'} ? 'page'"
+           aria-label="Movimentações">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="square-arrow-right-enter"></i></span>
+        </a>
+
+        <span class="app-tabbar__item is-disabled" aria-disabled="true" aria-label="Usuários (em breve)" title="Usuários · Em breve">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="users"></i></span>
+        </span>
+
+        <a th:href="@{/analiseSolicitacao/painel}" class="app-tabbar__item"
+           th:classappend="${ativo == 'solicitacoes'} ? 'is-active'"
+           th:aria-current="${ativo == 'solicitacoes'} ? 'page'"
+           aria-label="Solicitações">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="shopping-bag"></i></span>
+        </a>
+
+        <a th:href="@{/manutencao/painel}" class="app-tabbar__item"
+           th:classappend="${ativo == 'manutencoes'} ? 'is-active'"
+           th:aria-current="${ativo == 'manutencoes'} ? 'page'"
+           aria-label="Manutenções">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="toolbox"></i></span>
+        </a>
+    </nav>
+</th:block>
+
+<th:block th:fragment="appTabbarEstudante(ativo)">
+    <nav class="app-tabbar app-tabbar--estudante" aria-label="Navegação principal">
+        <a th:href="@{/solicitacao/painel}" class="app-tabbar__item"
+           th:classappend="${ativo == 'solicitacoes'} ? 'is-active'"
+           th:aria-current="${ativo == 'solicitacoes'} ? 'page'"
+           aria-label="Minhas Solicitações">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="shopping-bag"></i></span>
+        </a>
+
+        <a th:href="@{/solicitacao/cadastrarSolicitacao}" class="app-tabbar__item app-tabbar__item--novo" aria-label="Nova solicitação">
+            <span class="app-tabbar__novo"><i class="icon" data-lucide="plus"></i></span>
+        </a>
+
+        <span class="app-tabbar__item is-disabled" aria-disabled="true" aria-label="Minhas Doações (em breve)" title="Minhas Doações · Em breve">
+            <span class="app-tabbar__pill"><i class="icon" data-lucide="hand-heart"></i></span>
+        </span>
+    </nav>
+</th:block>

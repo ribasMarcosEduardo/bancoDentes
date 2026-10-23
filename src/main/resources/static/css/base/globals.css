@@ -13,6 +13,16 @@ html {
     scrollbar-gutter: stable;
 }
 
+/* Até o JS montar o estado inicial (ícones, .is-pendente, tema no body...),
+   sem transições: o estado já aparece pronto em vez de entrar em fade.
+   Classe posta pelo script de tema no <head> e tirada em js/includes.js.
+   Não afeta animation (entradas das páginas, stepper) */
+html.carregando *,
+html.carregando *::before,
+html.carregando *::after {
+    transition: none !important;
+}
+
 /* Telas muito largas (ex.: 4K com escala 100%, ≥2800px úteis): fonte base
    cresce com a largura até 22px. QHD a 100% (2560px) fica como está. */
 @media (min-width: 2800px) {

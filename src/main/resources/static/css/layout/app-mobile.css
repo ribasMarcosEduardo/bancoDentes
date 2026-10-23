@@ -1,0 +1,2669 @@
+/*
+    Layout de app no celular (até 600px): header fixo no topo com as abas
+    de setor, barra de navegação embaixo e painel mais compacto. Marcação
+    em templates/partials/app_mobile.html; só vale nas páginas com
+    <body class="app-mobile">, as outras seguem com a navbar e o menu
+    hambúrguer até serem adaptadas.
+
+    Importado no fim do style.css pra vencer as regras de componente com
+    a mesma especificidade. Os CSS de página (ex.: pages/frascos.css) vêm
+    depois do style.css, por isso tudo aqui leva o body.app-mobile na
+    frente.
+*/
+
+/* .result-list__mobile: dado extra na linha da lista que só aparece no
+   item do celular (ex.: local/origem/envio em painelManutencoes.html).
+   .cadastro-* e .rotulo-curto: versão de celular do cadastro de frasco */
+.app-header,
+.app-tabbar,
+.acao-rotulo,
+.result-list__mobile,
+.filters-rodape,
+.resumo-solicitacoes,
+.cadastro-topo,
+.cadastro-opcionais,
+.data-texto,
+.modal-filter-toggle--app,
+.modal-filters-collapse--app,
+.rotulo-curto {
+    display: none;
+}
+
+:root {
+    --app-header-bar-h: 56px;
+    --app-tabbar-h: 64px;
+}
+
+/* Cópia congelada do conteúdo antigo na troca de aba dos cadastros
+   (trocarComDeslize, js/app-mobile.js): nada nela anima sozinho (entrada
+   do card, transições de campo) - só o deslize que o JS aplica */
+.deslize-camada,
+.deslize-camada * {
+    animation: none !important;
+    transition: none !important;
+}
+
+@media (max-width: 600px) {
+
+    /* ---------- Página ---------- */
+
+    body.app-mobile {
+        --page-pad: 1rem;
+
+        /* Sem o retângulo azul que o Chrome pinta em volta do que é tocado */
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /*
+        Nem o anel de foco que ficava preso depois do toque (Fechar do modal,
+        botões...): no toque o navegador também dá :focus. Pelo teclado
+        (:focus-visible) o anel continua aparecendo.
+    */
+    body.app-mobile :is(button, a, [role="button"], summary):focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    /* O que o header e a barra inferior substituem */
+    body.app-mobile .mobile-menu-toggle,
+    body.app-mobile .mobile-menu,
+    body.app-mobile .page-header,
+    body.app-mobile .footer {
+        display: none;
+    }
+
+    body.app-mobile .page {
+        padding-top: 1rem;
+        padding-bottom: calc(var(--app-tabbar-h) + env(safe-area-inset-bottom) + 2rem);
+    }
+
+    body.app-mobile .main-panel,
+    body.app-mobile .list-panel {
+        gap: 1rem;
+    }
+
+    /*
+        Sem tooltips (base/utilities.css) no celular: no toque não há hover,
+        o balão só pisca no tap e fica parado. E mais importante: invisível
+        (opacity:0) ele continua ocupando espaço - o do "Imprimir
+        etiquetas", na borda direita da toolbar, vazava ~15px pra fora da
+        tela. O Chrome do celular alarga o layout pra caber isso: dava pra
+        arrastar a página pro lado e a barra inferior (presa no fundo desse
+        layout maior) ficava um pouco abaixo da borda da tela.
+    */
+    body.app-mobile [data-tooltip]::after,
+    body.app-mobile [data-tooltip]::before {
+        display: none;
+    }
+
+    /* ---------- Header ---------- */
+
+    /*
+        Sticky (e não fixed): ocupa o próprio espaço no fluxo, sem precisar
+        empurrar a página. A altura entra em --navbar-height (includes.js,
+        setupNavbarHeight), então a toolbar e a paginação grudam logo abaixo.
+    */
+    .app-header {
+        display: block;
+
+        position: sticky;
+        top: 0;
+        z-index: 50;
+
+        padding-top: env(safe-area-inset-top);
+
+        border-bottom: 1px solid var(--border);
+        background: color-mix(in srgb, var(--surface) 82%, transparent);
+
+        user-select: none;
+
+        transition: transform var(--dur-media) var(--ease-suave);
+    }
+
+    /*
+        Desfoque num ::before em vez do próprio header: um ancestral com
+        backdrop-filter vira "backdrop root" e o menu de perfil só
+        desfocaria o header, não a página (mesmo caso da navbar, ver o fim
+        de layout/navbar.css).
+    */
+    .app-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+
+        backdrop-filter: blur(18px) saturate(150%);
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
+    }
+
+    /*
+        Rolando a lista pra baixo (barras-ocultas, setupStickyPagination em
+        includes.js), toolbar e paginação somem e o header minimiza: sobe
+        deixando só uma faixa fina com uma alça no centro (como a da folha de
+        ações, só que embaixo), em vez de sumir e deixar o topo vazio. Rolar
+        pra cima ou tocar na faixa expande de novo.
+    */
+    .app-header {
+        --app-header-faixa: 16px;
+    }
+
+    /* --header-arraste: quanto a alça foi puxada pra baixo (js/app-mobile.js) */
+    html.barras-ocultas .app-header {
+        transform: translateY(calc(-100% + var(--app-header-faixa) + env(safe-area-inset-top) + var(--header-arraste, 0px)));
+
+        transition: transform 0.45s var(--ease-padrao);
+    }
+
+    /* Acompanha o dedo sem atraso enquanto puxa a alça */
+    html.barras-ocultas .app-header.is-arrastando {
+        transition: none;
+    }
+
+    .app-header__bar,
+    .app-tabs {
+        transition: opacity 0.25s ease;
+    }
+
+    html.barras-ocultas .app-header__bar,
+    html.barras-ocultas .app-tabs {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Área de toque = a faixa inteira; o traço visível é o ::before */
+    .app-header__alca {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        height: var(--app-header-faixa);
+        padding: 0;
+
+        border: none;
+        background: transparent;
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+
+        /* Arrastar a alça puxa o header, não rola a página */
+        touch-action: none;
+
+        opacity: 0;
+        visibility: hidden;
+
+        transition:
+            opacity 0.25s ease,
+            visibility 0s linear 0.25s;
+    }
+
+    .app-header__alca::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+
+        width: 36px;
+        height: 4px;
+
+        border-radius: 999px;
+        background: var(--border-strong);
+
+        transform: translate(-50%, -50%);
+    }
+
+    html.barras-ocultas .app-header__alca {
+        opacity: 1;
+        visibility: visible;
+
+        transition:
+            opacity 0.25s ease 0.15s,
+            visibility 0s linear 0s;
+    }
+
+    /*
+        header-aberto: toolbar e paginação escondidas, mas o header
+        expandido - abertura já rolada até um trecho (ex.: "Ver
+        movimentações" de um frasco, script no <head> da página), onde
+        sobra espaço. Sai na primeira rolagem do usuário
+        (atualizarBarrasOcultas, includes.js) e o header volta ao normal.
+    */
+    html.barras-ocultas.header-aberto .app-header {
+        transform: none;
+    }
+
+    html.barras-ocultas.header-aberto .app-header__bar,
+    html.barras-ocultas.header-aberto .app-tabs {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    html.barras-ocultas.header-aberto .app-header__alca {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .app-header__bar {
+        height: var(--app-header-bar-h);
+
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        align-items: center;
+
+        padding: 0 0.5rem;
+    }
+
+    .app-header__btn {
+        width: 44px;
+        height: 44px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 0;
+
+        border: none;
+        border-radius: 999px;
+
+        background: transparent;
+        color: var(--text);
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+
+        transition: background var(--dur-rapida) ease;
+    }
+
+    .app-header__btn:active,
+    .app-perfil.is-open .app-perfil__btn {
+        background: var(--surface-hover);
+    }
+
+    .app-header__btn .icon {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        min-height: 22px;
+    }
+
+    .app-header__brand {
+        justify-self: center;
+        display: flex;
+    }
+
+    .app-header__logo {
+        display: block;
+        height: 38px;
+        width: auto;
+    }
+
+    body.dark .app-header__logo--cor,
+    body:not(.dark) .app-header__logo--clara {
+        display: none;
+    }
+
+    /* ---------- Menu de perfil ---------- */
+
+    .app-perfil {
+        position: relative;
+    }
+
+    /*
+        z-index: as abas de setor (.app-tabs) vêm depois no HTML e também
+        são posicionadas - sem um z próprio o menu ficava por trás delas.
+        Fundo quase opaco (o mesmo da folha de ações): o --surface-soft dos
+        dropdowns deixava as abas e a lista aparecerem através do menu.
+    */
+    .app-perfil__menu {
+        position: absolute;
+        top: calc(100% + 0.4rem);
+        right: 0;
+        z-index: 10;
+
+        width: 240px;
+
+        display: grid;
+        gap: 0.35rem;
+
+        padding: 0.5rem;
+
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+        backdrop-filter: blur(24px) saturate(150%);
+        -webkit-backdrop-filter: blur(24px) saturate(150%);
+        box-shadow: var(--shadow);
+
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-6px);
+
+        transition:
+            opacity var(--dur-rapida) ease,
+            transform var(--dur-rapida) ease,
+            visibility 0s linear var(--dur-rapida);
+    }
+
+    .app-perfil.is-open .app-perfil__menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+
+        transition:
+            opacity var(--dur-rapida) ease,
+            transform var(--dur-rapida) ease,
+            visibility 0s linear 0s;
+    }
+
+    .app-perfil__item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+
+        min-height: 44px;
+        padding: 0.35rem 0.6rem;
+
+        border-radius: 0.75rem;
+
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .app-perfil__item.is-disabled {
+        color: var(--text-muted);
+        opacity: 0.7;
+    }
+
+    .app-perfil__texto {
+        flex: 1;
+    }
+
+    .app-perfil__avatar {
+        width: 30px;
+        height: 30px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 999px;
+        background: var(--surface-muted);
+    }
+
+    .app-perfil__avatar .icon {
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        min-height: 16px;
+    }
+
+    /* position: relative pro ícone animado da troca de tema
+       (.theme-toggle-icon, absoluto - ver layout/navbar.css) */
+    .app-perfil__tema {
+        position: relative;
+
+        width: 38px;
+        height: 38px;
+
+        border: 1px solid var(--border);
+        border-radius: 999px;
+
+        background: transparent;
+        color: var(--text);
+
+        cursor: pointer;
+    }
+
+    .app-perfil__tema .icon {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        min-height: 18px;
+    }
+
+    .app-perfil__login {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        height: 42px;
+
+        border-radius: 0.75rem;
+
+        background: var(--secondary);
+        color: var(--text);
+
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    /* ---------- Abas de setor (no lugar do sector-switch) ---------- */
+
+    /*
+        Como as abas do X: texto solto, sublinhado na ativa. auto-margin nos
+        botões distribui a sobra como um space-around, mas, ao contrário
+        dele, vira 0 quando falta espaço - aí a linha rola na horizontal sem
+        cortar a primeira aba.
+    */
+    .app-tabs {
+        position: relative;
+
+        display: flex;
+
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .app-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .app-tabs__btn {
+        flex: 0 0 auto;
+        margin-inline: auto;
+
+        height: 44px;
+        padding: 0 0.75rem;
+
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+
+        transition: color var(--dur-rapida) ease;
+    }
+
+    .app-tabs__btn.active {
+        color: var(--text);
+    }
+
+    /*
+        Mesma ideia do .sector-switch__indicator: ocupa a faixa toda
+        (--ind-trilho = scrollWidth, pra alcançar abas fora da tela) e o
+        clip-path recorta o botão ativo, recuado o padding dele = largura
+        do texto. O gradiente acompanha o recorte via background-position/
+        size, pra continuar indo de azul a verde dentro de cada aba.
+    */
+    .app-tabs__indicator {
+        --ind-recuo: 0.75rem;
+
+        position: absolute;
+        left: 0;
+        bottom: 0;
+
+        width: var(--ind-trilho, 100%);
+        height: 3px;
+
+        /* Azul -> verde da marca (mesmo gradiente do "x" da busca) */
+        background-image: linear-gradient(90deg, #47a2ed, #42cc74);
+        background-repeat: no-repeat;
+        background-position: calc(var(--ind-x, 0px) + var(--ind-recuo)) 0;
+        background-size: calc(var(--ind-w, 0px) - 2 * var(--ind-recuo)) 100%;
+
+        clip-path: inset(
+            0 calc(100% - var(--ind-x, 0px) - var(--ind-w, 0px) + var(--ind-recuo))
+            0 calc(var(--ind-x, 0px) + var(--ind-recuo))
+            round 3px 3px 0 0
+        );
+
+        pointer-events: none;
+
+        transition:
+            clip-path var(--dur-media) var(--ease-suave),
+            background-position var(--dur-media) var(--ease-suave),
+            background-size var(--dur-media) var(--ease-suave);
+    }
+
+    /* Na página, o sector-switch da paginação dá lugar às abas do header */
+    body.app-mobile .pagination .sector-switch {
+        display: none;
+    }
+
+    /* ---------- Barra de navegação inferior ---------- */
+
+    .app-tabbar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 55;
+
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+
+        height: calc(var(--app-tabbar-h) + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
+
+        border-top: 1px solid var(--border);
+        background: color-mix(in srgb, var(--surface) 82%, transparent);
+
+        backdrop-filter: blur(18px) saturate(150%);
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
+
+        user-select: none;
+    }
+
+    .app-tabbar__item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: var(--text-muted);
+        text-decoration: none;
+
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Pílula atrás do ícone ativo (padrão do Material 3) */
+    .app-tabbar__pill {
+        width: 56px;
+        height: 34px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 999px;
+
+        transition:
+            background var(--dur-rapida) ease,
+            color var(--dur-rapida) ease,
+            transform 0.15s ease;
+    }
+
+    .app-tabbar__item:active .app-tabbar__pill {
+        transform: scale(0.92);
+    }
+
+    .app-tabbar__item.is-active {
+        color: var(--text);
+    }
+
+    .app-tabbar__item.is-active .app-tabbar__pill {
+        background: var(--btn-tonal-bg-hover);
+    }
+
+    .app-tabbar__item .icon {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
+    }
+
+    /* Usuários e Solicitações ainda não existem */
+    .app-tabbar__item.is-disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    .app-tabbar__item.is-disabled:active .app-tabbar__pill {
+        transform: none;
+    }
+
+    /* Barra do estudante: 3 itens, com o "+" de nova solicitação em
+       destaque no centro (botão cheio, como o primário da toolbar) */
+    .app-tabbar--estudante {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .app-tabbar__novo {
+        width: 52px;
+        height: 52px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 999px;
+
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+        box-shadow: var(--btn-shadow);
+
+        transition: transform 0.15s ease;
+    }
+
+    .app-tabbar__item--novo:active .app-tabbar__novo {
+        transform: scale(0.92);
+    }
+
+    .app-tabbar__novo .icon {
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        min-height: 26px;
+    }
+
+    /* Voltar ao topo logo acima da barra inferior, no canto direito
+       (sem o hambúrguer ao lado, ver components/scroll-to-top.css) */
+    body.app-mobile .scroll-to-top {
+        right: 1rem;
+        bottom: calc(var(--app-tabbar-h) + env(safe-area-inset-bottom) + 1rem);
+    }
+
+    /* ---------- Toolbar ---------- */
+
+    /*
+        Sem mexer na marcação da toolbar: toolbar__actions e toolbar__row
+        viram display:contents e os botões caem direto numa grade. Padrão
+        (ex.: manutenções) numa linha só:
+            busca .................. filtro ordenar
+        O "Exibir" some: no celular fica no padrão de itens por página.
+    */
+    body.app-mobile .toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-areas: "busca filtro ordem";
+        align-items: center;
+        gap: 0.6rem;
+
+        padding: 0.75rem;
+    }
+
+    /* Frascos, com mais botões, em duas linhas:
+            busca ........................ novo
+            grade lista ....... filtro ordenar imprimir */
+    body.app-mobile.painel-frascos .toolbar {
+        grid-template-columns: auto auto 1fr auto auto auto;
+        grid-template-areas:
+            "busca busca busca busca busca novo"
+            "grade lista .     filtro ordem imprimir";
+    }
+
+    /* Movimentações: o padrão + "Nova movimentação" no fim, ainda numa linha */
+    body.app-mobile.painel-movimentacoes .toolbar {
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        grid-template-areas: "busca filtro ordem novo";
+    }
+
+    /*
+        Minhas Solicitações: os contadores saem da toolbar (que gruda no
+        topo) pro resumo acima dela, que rola com a página; e o "+" vai pra
+        barra inferior do estudante. Sobram filtro e ordenar, à direita (a
+        área "busca" do padrão fica vazia: a página não tem busca).
+    */
+    body.app-mobile.painel-minhas-solicitacoes .toolbar__stats,
+    body.app-mobile.painel-minhas-solicitacoes .toolbar__novo {
+        display: none;
+    }
+
+    .resumo-solicitacoes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.6rem;
+    }
+
+    .resumo-solicitacoes__item {
+        display: grid;
+        gap: 0.2rem;
+
+        padding: 0.65rem 0.75rem;
+
+        border: 1px solid var(--border);
+        border-radius: 0.85rem;
+
+        background: var(--surface-soft);
+    }
+
+    .resumo-solicitacoes__item span {
+        color: var(--text-muted);
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .resumo-solicitacoes__item strong {
+        color: var(--text);
+        font-size: 1.1rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    body.app-mobile .toolbar__actions,
+    body.app-mobile .toolbar__row,
+    body.app-mobile .view-switch {
+        display: contents;
+    }
+
+    body.app-mobile .page-size-control {
+        display: none;
+    }
+
+    body.app-mobile .toolbar .search-wrapper {
+        grid-area: busca;
+        max-width: none;
+    }
+
+    body.app-mobile .view-switch__btn[data-view="grid"] {
+        grid-area: grade;
+    }
+
+    body.app-mobile .view-switch__btn[data-view="list"] {
+        grid-area: lista;
+    }
+
+    body.app-mobile .toolbar__filter-toggle {
+        grid-area: filtro;
+    }
+
+    body.app-mobile #btnSortOrder {
+        grid-area: ordem;
+    }
+
+    body.app-mobile .toolbar__row > .btn--icone {
+        grid-area: imprimir;
+    }
+
+    body.app-mobile .toolbar__novo {
+        grid-area: novo;
+    }
+
+    /* Todos os botões quadrados, na altura da busca */
+    body.app-mobile .view-switch__btn,
+    body.app-mobile .toolbar__filter-toggle,
+    body.app-mobile .toolbar .btn {
+        width: var(--btn-height);
+        height: var(--btn-height);
+
+        justify-content: center;
+        padding: 0;
+    }
+
+    body.app-mobile .toolbar__novo .btn__texto {
+        display: none;
+    }
+
+    /* ---------- Paginação ---------- */
+
+    /*
+        Uma linha só, igual em todo painel: contagem à esquerda, setas à
+        direita (o switch, quando a página tem, foi pras abas do header).
+        Sem depender de :has(.sector-switch) como as CSS de página:
+        movimentações não tem switch e caía no layout antigo, empilhado e
+        com as setas grandes. O "body.app-mobile .pagination" na frente vence
+        as regras com :has() delas.
+    */
+    body.app-mobile .pagination {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+
+        padding-inline: 0.25rem;
+    }
+
+    body.app-mobile .pagination .low-opacity {
+        order: 0;
+        flex: 1;
+        min-width: 0;
+
+        font-size: 0.8rem;
+    }
+
+    /* "Mais Recentes/Antigos" numa linha própria, sem o " - " do desktop
+       (quebrando no meio, "Mais" ficava em cima e o resto embaixo) */
+    body.app-mobile .pagination-info__ordem {
+        display: block;
+        font-weight: 500;
+    }
+
+    body.app-mobile .pagination-info__ordem::before {
+        content: none;
+    }
+
+    body.app-mobile .pagination .pagination__actions {
+        order: 1;
+        flex-direction: row;
+        width: auto;
+        margin: 0;
+        overflow: visible;
+    }
+
+    body.app-mobile .pagination .pagination__nav {
+        justify-content: flex-end;
+        margin-left: 0;
+    }
+
+    body.app-mobile .pagination .pagination__range {
+        order: 0;
+        margin-left: 0;
+    }
+
+    /* Setas compactas (o tamanho que frascos/manutenções já usavam até 450px) */
+    body.app-mobile .pagination .pagination__nav .btn-pagination {
+        order: 0;
+        width: 38px;
+        height: 28px;
+    }
+
+    body.app-mobile .pagination .pagination__nav .btn-pagination svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* ---------- Cards, um por linha ---------- */
+
+    /*
+        Na largura do celular o card fica do tamanho do mínimo no desktop
+        (--card-width), então o layout dele não muda - só os botões saem:
+        tocar no card abre a folha de ações (js/app-mobile.js), com alvos
+        de toque maiores que os de 32px do card.
+    */
+    body.app-mobile .results-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    body.app-mobile .results-grid .card {
+        min-height: 0;
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.app-mobile .results-grid .card:hover {
+        transform: none;
+    }
+
+    body.app-mobile .results-grid .card:active {
+        transform: scale(0.98);
+    }
+
+    body.app-mobile .results-grid .card:focus-visible {
+        outline: 2px solid var(--input-border-focus);
+        outline-offset: 2px;
+    }
+
+    body.app-mobile .results-grid .card__header-actions,
+    body.app-mobile .results-grid .card__footer .card__actions {
+        display: none;
+    }
+
+    /*
+        Destaque do card no centro da tela: conforme rola, o card cresce
+        até o tamanho cheio ao chegar no meio e encolhe saindo pelas
+        bordas, com o conteúdo esmaecido longe do centro. Animação guiada
+        pela rolagem (view-timeline): o navegador calcula sozinho, sem JS
+        nem trabalho a cada scroll. Sem suporte, os cards ficam normais.
+
+        As insets tiram do cálculo a área coberta pelo header e pela barra
+        inferior, pra o "centro" ser o da área em que a lista aparece.
+
+        Escala no card (propriedade scale, separada do transform do
+        :active) e opacidade nos filhos: a entrada em cascata do painel
+        (layout/panel-transition.css) anima transform e opacity do próprio
+        card, e as duas se somariam/brigariam na mesma propriedade.
+
+        Os itens da lista só esmaecem, sem encolher: são uma caixa contínua
+        com divisórias (ver "Lista" abaixo), e item encolhendo abriria
+        buracos nela.
+    */
+    @supports (animation-timeline: view()) {
+        @media (prefers-reduced-motion: no-preference) {
+
+            body.app-mobile :is(.results-grid .card, .result-table--frascos .request-row, .result-table--manutencoes .request-row, .result-table--movimentacoes .request-row, .result-table--solicitacoes .request-row, .result-table--historico .request-row) {
+                view-timeline: --card-foco block;
+                view-timeline-inset: var(--app-header-bar-h) var(--app-tabbar-h);
+            }
+
+            body.app-mobile .results-grid .card {
+                animation: card-foco-escala linear both;
+                animation-timeline: --card-foco;
+            }
+
+            body.app-mobile :is(.results-grid .card, .result-table--frascos .request-row, .result-table--manutencoes .request-row, .result-table--movimentacoes .request-row, .result-table--solicitacoes .request-row, .result-table--historico .request-row) > * {
+                animation: card-foco-conteudo linear both;
+                animation-timeline: --card-foco;
+            }
+
+            /*
+                Sem isso a página acabava antes dos últimos itens chegarem ao
+                centro, e eles nunca entravam em foco. Folga de ~meia área
+                visível (entre header e barra inferior) menos ~meio item e o
+                respiro que a .page já tem embaixo.
+            */
+            body.app-mobile .results {
+                padding-bottom: max(0px, calc((100dvh - var(--app-header-bar-h) - var(--app-tabbar-h)) / 2 - 5rem));
+            }
+
+            /* Item expandido pode ser mais alto que a tela: lendo os detalhes
+               perto da borda, o conteúdo não esmaece */
+            body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-row.is-open > * {
+                animation: none;
+            }
+
+            /* Cards durante a entrada em cascata: as duas juntas (a regra de
+               panel-transition.css é mais específica e trocaria a escala
+               pela entrada). timeline/delay depois do shorthand, que os reseta.
+               Os itens da lista não animam o próprio elemento, então a entrada
+               deles segue a de panel-transition.css sem conflito. */
+            html.painel-entrando:not(.vt-nav) body.app-mobile .results-grid .card {
+                animation:
+                    card-foco-escala linear both,
+                    fade-slide-in var(--entrada-duracao) var(--ease-suave) backwards;
+                animation-timeline: --card-foco, auto;
+                animation-delay: 0s, calc(var(--entrada-atraso-base) + var(--ordem-entrada, 8) * var(--entrada-passo));
+            }
+        }
+    }
+
+    /* ---------- Lista ---------- */
+
+    /*
+        Cada linha vira um item alto, no modelo da referência, em vez da
+        tabela espremida: os mesmos elementos da linha do desktop,
+        redistribuídos numa grade de 3 colunas.
+
+            Identificador ............... destaque
+            Grupo         | Qtd. 30           (v)
+            Rótulo        | Rótulo            (v)
+            valor         | valor
+
+        Aqui fica a parte comum às listas do app; onde cada informação cai
+        (grid-area) fica no bloco de cada painel, mais abaixo.
+
+        A 1ª coluna tem a largura do maior texto dela (com um piso), então
+        o divisor da 2ª coluna fica alinhado entre as linhas. Rótulos vêm
+        dos spans (painel*.html): data-rotulo = rótulo apagado em cima do
+        valor; data-rotulo-prefixo = antes do valor, na mesma linha
+        ("Qtd. 30"). Os seletores repetem os das CSS de página (que escondem
+        colunas até 600px) pra vencer.
+    */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-table__head {
+        display: none;
+    }
+
+    /*
+        Caixa única com divisórias entre os itens (borda, fundo e sombra da
+        .result-table, components/list.css), como na referência.
+
+        overflow: clip, NÃO hidden/auto (os da list.css): esses criam um
+        container de rolagem, e a view-timeline dos itens (destaque do
+        centro, acima) passava a medir a posição dentro desta caixa, que não
+        rola, em vez da tela - o foco ficava preso num item só. Sem o scroll
+        horizontal da list.css: no celular a linha não tem largura mínima.
+    */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) {
+        overflow: clip;
+    }
+
+    /*
+        Divisória = border-top de cada item (list.css) puxada 1px pra cima:
+        no 1º item visível ela cai em cima da borda da caixa e é cortada pelo
+        clip, sem linha dupla no topo - mesmo com o 1º item da lista
+        escondido pela paginação/filtro.
+    */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-row {
+        margin-top: -1px;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list {
+        min-width: 0;
+
+        grid-template-columns: minmax(7.5rem, max-content) minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.4rem 0.75rem;
+
+        padding: 1rem 1rem 1rem 1.15rem;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list > span {
+        display: block;
+        justify-self: start;
+        text-align: left;
+    }
+
+    /* Pills (status, tipo) mantêm o próprio layout centralizado - o
+       display:block/text-align:left acima deixava o texto encostado à
+       esquerda na largura fixa da pill (86px, list.css) */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list > .status-pill {
+        display: inline-flex;
+        justify-content: center;
+        text-align: center;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list > .result-list__actions {
+        grid-area: seta;
+        justify-self: end;
+    }
+
+    /* Identificador como título do item, sem a pílula escura */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list__code {
+        padding: 0;
+
+        background: none;
+        color: var(--text);
+
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list > span[data-rotulo-prefixo]::before {
+        content: attr(data-rotulo-prefixo) "\00a0";
+    }
+
+    /* Rótulo apagado em cima, valor embaixo */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list > span[data-rotulo] {
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .result-list > span[data-rotulo]::before {
+        content: attr(data-rotulo);
+        display: block;
+        grid-column: 1 / -1;
+
+        margin-bottom: 0.1rem;
+
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    /* Frascos - filhos da linha: 1 Identificador, 2 Grupo, 3 Estado,
+       4 Qtd., 5 Status, 6 Manutenção, 7 ações */
+    body.app-mobile .result-table--frascos .result-list {
+        grid-template-areas:
+            "codigo codigo status"
+            "grupo  qtd    seta"
+            "estado manut  seta";
+    }
+
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(1) {
+        grid-area: codigo;
+    }
+
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(2) {
+        grid-area: grupo;
+    }
+
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(3) {
+        grid-area: estado;
+    }
+
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(4) {
+        grid-area: qtd;
+    }
+
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(5) {
+        grid-area: status;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(6) {
+        grid-area: manut;
+    }
+
+    /* Divisor vertical antes da 2ª coluna */
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(4),
+    body.app-mobile .result-table--frascos .result-list > span:nth-child(6) {
+        align-self: stretch;
+
+        padding-left: 0.75rem;
+        border-left: 1px solid var(--border-strong);
+    }
+
+    /* Data com o ícone do prazo: grade pra o rótulo ocupar a linha de cima
+       e ícone + data ficarem lado a lado embaixo */
+    body.app-mobile .result-table--frascos .result-list > span.manutencao {
+        display: inline-grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        column-gap: 0.3rem;
+
+        font-weight: 600;
+    }
+
+    /* Manutenções - filhos da linha: 1 Identificador, 2 Grupo, 3 Qtd.,
+       4 ações e, só no celular (.result-list__mobile), 5 Local, 6 Origem,
+       7 Enviado em */
+    body.app-mobile .result-table--manutencoes .result-list {
+        grid-template-areas:
+            "codigo codigo local"
+            "grupo  qtd    seta"
+            "origem envio  seta";
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(1) {
+        grid-area: codigo;
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(2) {
+        grid-area: grupo;
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(3) {
+        grid-area: qtd;
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(5) {
+        grid-area: local;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(6) {
+        grid-area: origem;
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(7) {
+        grid-area: envio;
+    }
+
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(3),
+    body.app-mobile .result-table--manutencoes .result-list > span:nth-child(7) {
+        align-self: stretch;
+
+        padding-left: 0.75rem;
+        border-left: 1px solid var(--border-strong);
+    }
+
+    /* Local no canto (no lugar do sector switch, que saiu do painel) */
+    body.app-mobile .result-list__local {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+
+        background: var(--btn-tonal-bg);
+        color: var(--text-soft);
+
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Área expandida: "Concluir manutenção" primeiro (como as ações de
+       frascos), depois os detalhes */
+    body.app-mobile .result-table--manutencoes .request-details__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.app-mobile .result-table--manutencoes .request-details__actions {
+        order: -1;
+
+        margin: 0 0 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* Movimentações - filhos da linha: 1 MOV, 2 Frasco, 3 Grupo, 4 Tipo,
+       5 Qtd. (some: o saldo já mostra), 6 Data, 7 seta e, só no celular
+       (.result-list__mobile), 8 Saldo ("24 → 18") */
+    body.app-mobile .result-table--movimentacoes .result-list {
+        grid-template-areas:
+            "codigo codigo tipo"
+            "frasco grupo  seta"
+            "saldo  data   seta";
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(1) {
+        grid-area: codigo;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(2) {
+        grid-area: frasco;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(3) {
+        grid-area: grupo;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(4) {
+        grid-area: tipo;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(5) {
+        display: none;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(6) {
+        grid-area: data;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(8) {
+        grid-area: saldo;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Aqui a seta é filha direta da linha (sem .result-list__actions) */
+    body.app-mobile .result-table--movimentacoes .result-list > .request-toggle {
+        grid-area: seta;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(3),
+    body.app-mobile .result-table--movimentacoes .result-list > span:nth-child(6) {
+        align-self: stretch;
+
+        padding-left: 0.75rem;
+        border-left: 1px solid var(--border-strong);
+    }
+
+    /*
+        Área expandida enxuta: saldo no topo (sem o título "Movimentação",
+        o fluxo se explica sozinho), origem/local, vínculos, frasco só com o
+        que não está na linha, observações e, por último, "Ver movimentações
+        deste frasco" como botão largo. O painel do frasco vira
+        display:contents pra o link poder ir pro fim da área (order), depois
+        das observações.
+    */
+    body.app-mobile .result-table--movimentacoes .request-panel--mov .request-panel__title,
+    body.app-mobile .result-table--movimentacoes .request-detail--data {
+        display: none;
+    }
+
+    body.app-mobile .result-table--movimentacoes .request-panel--frasco {
+        display: contents;
+    }
+
+    /* Sem a caixa do painel, o gap da área já separa título e detalhes */
+    body.app-mobile .result-table--movimentacoes .request-panel--frasco .request-panel__title {
+        margin-bottom: 0;
+    }
+
+    body.app-mobile .result-table--movimentacoes .request-panel__link {
+        order: 1;
+
+        justify-content: center;
+
+        min-height: 44px;
+        margin-top: 0;
+
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+
+        background: var(--btn-secondary-bg);
+        color: var(--btn-secondary-text);
+
+        font-size: 0.88rem;
+    }
+
+    /* Painel de Solicitações - filhos da linha: 1 SOL, 2 Grupo,
+       3 Solicitante, 4 Qtd., 5 Status, 6 Data, 7 seta. O nome vai na 2ª
+       coluna (a larga) e corta com reticências se não couber */
+    body.app-mobile .result-table--solicitacoes .result-list {
+        grid-template-areas:
+            "codigo codigo      status"
+            "grupo  qtd         seta"
+            "data   solicitante seta";
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(1) {
+        grid-area: codigo;
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(2) {
+        grid-area: grupo;
+    }
+
+    /*
+        Nome longo esmaece nos últimos ~2rem em vez de cortar reto. Sem
+        text-overflow:ellipsis: com o rótulo (::before em bloco) no mesmo
+        span, o nome cai numa caixa anônima e as reticências nunca
+        apareciam. Nome curto não chega na faixa esmaecida.
+    */
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(3) {
+        grid-area: solicitante;
+        justify-self: stretch;
+
+        overflow: hidden;
+        white-space: nowrap;
+
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(4) {
+        grid-area: qtd;
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(5) {
+        grid-area: status;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(6) {
+        grid-area: data;
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > .request-toggle {
+        grid-area: seta;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(3),
+    body.app-mobile .result-table--solicitacoes .result-list > span:nth-child(4) {
+        align-self: stretch;
+
+        padding-left: 0.75rem;
+        border-left: 1px solid var(--border-strong);
+    }
+
+    /* Nome completo do solicitante na área expandida (na linha ele corta),
+       numa linha só; Grupo, Estado, Arcada e Dentição fecham 2x2 embaixo */
+    body.app-mobile .result-table--solicitacoes .request-detail--solicitante {
+        grid-column: 1 / -1;
+    }
+
+    /* Área expandida: ações (Negar, Iniciar/Continuar análise, Reabrir)
+       primeiro, em botões largos lado a lado; some quando não há nenhuma */
+    body.app-mobile .result-table--solicitacoes .request-details__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.app-mobile .result-table--solicitacoes .request-details__actions {
+        order: -1;
+
+        margin: 0 0 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* !important: o display:flex dela vem de um style inline no HTML
+       (painelAnalise.html), que só perde pra !important */
+    body.app-mobile .result-table--solicitacoes .request-details__actions:not(:has(.btn)) {
+        display: none !important;
+    }
+
+    body.app-mobile .result-table--solicitacoes .request-details__actions > * {
+        flex: 1;
+    }
+
+    /* Mesma altura lado a lado: o form (Negar, Iniciar análise, Reabrir)
+       estica até a altura do vizinho, mas o botão dentro dele não - com
+       "Continuar análise" quebrando em 2 linhas, o Negar ficava menor */
+    body.app-mobile .result-table--solicitacoes .request-details__actions > form {
+        display: flex;
+    }
+
+    body.app-mobile .result-table--solicitacoes .request-details__actions > form > .btn {
+        flex: 1;
+    }
+
+    /* Texto longo ("Continuar análise" em 360px) quebra em 2 linhas:
+       centralizado e com altura pra respirar, no lugar da altura fixa */
+    body.app-mobile .result-table--solicitacoes .request-details__actions .btn {
+        width: 100%;
+        height: auto;
+        min-height: var(--btn-height);
+
+        padding-block: 0.4rem;
+
+        line-height: 1.25;
+        text-align: center;
+    }
+
+    /* Minhas Solicitações - filhos da linha: 1 SOL, 2 Grupo, 3 Qtd.,
+       4 Status, 5 Data, 6 seta e, só no celular (.result-list__mobile),
+       7 Estado do dente */
+    body.app-mobile .result-table--historico .result-list {
+        grid-template-areas:
+            "codigo codigo status"
+            "grupo  qtd    seta"
+            "data   estado seta";
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(1) {
+        grid-area: codigo;
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(2) {
+        grid-area: grupo;
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(3) {
+        grid-area: qtd;
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(4) {
+        grid-area: status;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(5) {
+        grid-area: data;
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(7) {
+        grid-area: estado;
+    }
+
+    body.app-mobile .result-table--historico .result-list > .request-toggle {
+        grid-area: seta;
+        justify-self: end;
+    }
+
+    body.app-mobile .result-table--historico .result-list > span:nth-child(3),
+    body.app-mobile .result-table--historico .result-list > span:nth-child(7) {
+        align-self: stretch;
+
+        padding-left: 0.75rem;
+        border-left: 1px solid var(--border-strong);
+    }
+
+    /* Área expandida: prazo de edição + Excluir/Editar primeiro (quando a
+       solicitação ainda é editável), em botões largos lado a lado */
+    body.app-mobile .result-table--historico .request-details__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.app-mobile .result-table--historico .solicitacao-edicao {
+        order: -1;
+        align-items: stretch;
+
+        margin: 0 0 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    body.app-mobile .result-table--historico .solicitacao-edicao__botoes > * {
+        flex: 1;
+    }
+
+    body.app-mobile .result-table--historico .solicitacao-edicao__botoes .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Detalhes que já aparecem na linha do item (marcados no HTML) */
+    body.app-mobile .request-detail--na-linha {
+        display: none;
+    }
+
+    /* Seta de expandir num círculo, como a da referência */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-toggle--plain {
+        width: 32px;
+        height: 32px;
+
+        background: var(--btn-pagination-bg);
+        color: var(--btn-pagination-text);
+    }
+
+    /* Área expandida: ações primeiro, depois os detalhes em 2 colunas */
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-details__content,
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-row.is-open .request-details__content {
+        padding-inline: 1.15rem 1rem;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--manutencoes, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-row.is-open .request-details__content {
+        padding-block: 1rem 1.25rem;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-details__layout {
+        gap: 1.25rem;
+    }
+
+    body.app-mobile :is(.result-table--frascos, .result-table--movimentacoes, .result-table--solicitacoes, .result-table--historico) .request-details__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.85rem 1rem;
+    }
+
+    body.app-mobile .request-panel--frascos-actions {
+        order: -1;
+
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    body.app-mobile .request-panel--frascos-actions .request-panel__title {
+        display: none;
+    }
+
+    /* 5 ações sempre (editar, manutenção, impressão, histórico, apagar/inativar) */
+    body.app-mobile .request-panel--frascos-actions .request-panel__actions {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.25rem;
+    }
+
+    /*
+        Botão vira ícone num círculo + nome embaixo. A borda colorida sai do
+        botão e vai pro ícone: o <svg> externo aceita padding/borda como
+        qualquer caixa, e border-color: inherit pega a cor da variante
+        (--blue/--green/--red, components/list.css).
+    */
+    body.app-mobile .request-panel--frascos-actions .result-list__action {
+        width: 100%;
+        height: auto;
+
+        flex-direction: column;
+        gap: 0.35rem;
+
+        padding: 0.25rem 0;
+
+        border-style: none;
+        border-radius: 0.75rem;
+
+        background: none;
+        color: var(--text-soft);
+
+        font-family: inherit;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-decoration: none;
+
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.app-mobile .request-panel--frascos-actions .result-list__action .icon {
+        box-sizing: content-box;
+
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        min-height: 18px;
+        padding: 12px;
+
+        border: 1px solid;
+        border-color: inherit;
+        border-radius: 999px;
+
+        /* O <svg> vem com overflow:hidden do navegador; com o border-radius
+           o recorte do desenho virava um círculo de 18px e cortava os cantos
+           dos ícones (impressora, lixeira...) */
+        overflow: visible;
+    }
+
+    body.app-mobile .request-panel--frascos-actions .result-list__action:active:not(:disabled) .icon {
+        background: var(--surface-hover);
+    }
+
+    body.app-mobile .request-panel--frascos-actions .acao-rotulo {
+        display: block;
+        max-width: 100%;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ---------- Barra inferior (análise de solicitação e cadastros) ---------- */
+
+    /*
+        Nas telas de detalhe/cadastro (sem a barra de navegação) a toolbar
+        vira a barra inferior da tela: identificação em cima e as ações
+        embaixo, ao alcance do polegar enquanto rola a página.
+        - .analise-solicitacao (visualizaSolicitacao.html): ações da etapa
+          (Cancelar pedido, Confirmar Separação/Retirada); na etapa
+          concluído (o servidor não renderiza os forms) fica só a
+          identificação.
+        - .app-cadastro (form/*.html): Salvar e Continuar / Salvar e Sair.
+        Seletores com a classe da página pra vencer o grid de
+        pages/analise_solicitacao.css, o layout dos cadastros de
+        pages/cadastro_frasco.css e o sticky/empilhamento de toolbar.css.
+    */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 55;
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+
+        border: none;
+        border-top: 1px solid var(--glass-frost-border);
+        border-radius: 1.25rem 1.25rem 0 0;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
+
+        animation: none;
+    }
+
+    /* Identificação mais compacta que a do desktop */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar__identity-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 0.65rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar__identity-icon .icon {
+        width: 17px;
+        height: 17px;
+        min-width: 17px;
+        min-height: 17px;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar__identity-value {
+        font-size: 1rem;
+    }
+
+    /*
+        pages/cadastro_frasco.css (carregado nas duas) tem o layout dos
+        cadastros até 800px: desfaz o grupo de botões (display:contents) e
+        põe uma quebra de linha num ::after com flex-basis:100% - numa
+        coluna isso empilhava os botões e virava altura sobrando na barra.
+        Até 410px ela ainda escondia o ícone da identificação.
+    */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar::after {
+        content: none;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar__identity-icon {
+        display: grid;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar__actions {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 0.5rem;
+
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Botões mais baixos que os 42px padrão, lado a lado */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .toolbar__actions .btn {
+        width: 100%;
+        height: 38px;
+        padding: 0 0.85rem;
+
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    /*
+        Espaço no fim da página = altura real da barra inferior (medida em
+        js/app-mobile.js, setupAlturaBarraInferior), pra rolagem chegar até
+        o último componente sem a barra por cima. O valor fixo é só o
+        fallback antes do JS rodar.
+    */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) .page {
+        padding-bottom: calc(var(--barra-inferior-h, 8.5rem) + 1.25rem);
+    }
+
+    /* ---------- Análise de solicitação (visualizaSolicitacao.html) ---------- */
+
+    /* "Voltar ao Painel" vira o ← do header (appVoltar, partials/app_mobile.html) */
+    body.app-mobile.analise-solicitacao #backToPanelBtn {
+        display: none;
+    }
+
+    body.app-mobile.analise-solicitacao .toolbar__actions:not(:has(form)) {
+        display: none;
+    }
+
+    /* Ação principal larga; "Cancelar pedido" no tamanho do texto */
+    body.app-mobile.analise-solicitacao .toolbar__actions > form {
+        flex: 1 1 0;
+    }
+
+    body.app-mobile.analise-solicitacao .toolbar__actions > #formNegarAnalise {
+        flex: 0 0 auto;
+    }
+
+    /* Etapas sem a largura mínima de 140px (stepper.css): as três cabem em
+       360px, com as linhas absorvendo o espaço */
+    body.app-mobile.analise-solicitacao .step {
+        min-width: auto;
+    }
+
+    /* Na separação, o trabalho da etapa (progresso, frascos, "Adicionar
+       frasco") vem antes dos detalhes do pedido */
+    body.app-mobile.analise-solicitacao [data-step-panel="separacao"] .analysis-grid > .analysis-card:last-child {
+        order: -1;
+    }
+
+    /*
+        Modal "Buscar Frasco" em 360px: menos margem em volta (o modal
+        ganha ~24px de largura), cabeçalho/corpo/resultados mais justos e o
+        rodapé numa linha só - contagem menor, que pode encolher, e as
+        setas compactas da paginação das listas (38x28, acima). Altura em
+        dvh pra não ficar atrás da barra do navegador.
+        Vale também pros modais de busca do cadastro de movimentação
+        (.modal-busca-movimentacao), que por cima mudam o resultado (seção
+        do cadastro de movimentação, mais abaixo).
+    */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) {
+        padding: 0.75rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal {
+        height: min(760px, 88dvh);
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal__header {
+        padding: 1rem 1.1rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal__body {
+        gap: 0.85rem;
+        padding: 1rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-results {
+        gap: 0.6rem;
+    }
+
+    /*
+        Resultado em grade: identificador e características à esquerda, a
+        quantidade (menor) ao lado, e as datas numa linha própria embaixo.
+        info/subinfo viram display:contents pra os três textos caírem direto
+        na grade (a marcação vem do frasco-search-solicitacao.js).
+    */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-result {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "codigo acoes"
+            "meta   acoes"
+            "datas  datas";
+        align-items: center;
+        gap: 0.25rem 0.6rem;
+
+        padding: 0.75rem 0.85rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) :is(.modal-result__info, .modal-result__subinfo) {
+        display: contents;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-result__code {
+        grid-area: codigo;
+        align-self: end;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-result__meta {
+        grid-area: meta;
+        align-self: start;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-result__dates {
+        grid-area: datas;
+
+        margin-top: 0.35rem;
+        padding-top: 0.45rem;
+        border-top: 1px solid var(--border);
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-result__actions {
+        grid-area: acoes;
+        justify-content: flex-end;
+        gap: 0.35rem;
+    }
+
+    /* Rolagem e "Máx." mais baixos e estreitos que no desktop; os botões
+       +/- encolhem de 26px pra 20px */
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .number-input--fraction {
+        width: 92px;
+        height: 36px;
+        padding: 0 0.4rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .number-input__actions {
+        gap: 0.2rem;
+        padding-left: 0.25rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .number-input__btn {
+        width: 20px;
+        height: 20px;
+        border-radius: 0.35rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .number-input__btn svg {
+        width: 12px;
+        height: 12px;
+        min-width: 12px;
+        min-height: 12px;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal-result__max {
+        height: 36px;
+        padding: 0 0.55rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal__footer {
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .modal__footer-hint {
+        flex: 1;
+        min-width: 0;
+
+        font-size: 0.78rem;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .pagination__nav {
+        flex-shrink: 0;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .btn-pagination {
+        width: 38px;
+        height: 28px;
+    }
+
+    body.app-mobile:is(.analise-solicitacao, .app-cadastro) :is(#modalBuscaFrasco, .modal-busca-movimentacao) .btn-pagination svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* ---------- Telas de cadastro (form/*.html) ---------- */
+
+    /*
+        Título da toolbar ("Cadastro/Edição de Frasco") fora da barra
+        inferior: ali sobra só a identificação, e o título da primeira
+        seção do formulário já situa a tela. "Cancelar" vira o ← do header
+        (appVoltar, mesma URL).
+    */
+    body.app-mobile.app-cadastro .toolbar__title,
+    body.app-mobile.app-cadastro .toolbar__actions > a.btn-ghost {
+        display: none;
+    }
+
+    /* Os dois "Salvar" dividem a linha */
+    body.app-mobile.app-cadastro .toolbar__actions > .btn {
+        flex: 1 1 0;
+    }
+
+    /* Sem o botão flutuante do menu hambúrguer, que pages/cadastro_frasco.css
+       evitava encurtando os selects e datas até 400px */
+    body.app-mobile.app-cadastro :is(.select-wrapper, .date-wrapper) {
+        max-width: none;
+    }
+
+    body.app-mobile.app-cadastro .rotulo-longo {
+        display: none;
+    }
+
+    body.app-mobile.app-cadastro .rotulo-curto {
+        display: inline;
+    }
+
+    /* Setas flutuantes de navegação entre seções (movimentação): no
+       celular a página é curta e a barra inferior ocupa o canto */
+    body.app-mobile.app-cadastro .form-scroll-nav {
+        display: none;
+    }
+
+    body.app-mobile.app-cadastro .form-card {
+        --form-pad: 1.25rem;
+
+        padding: var(--form-pad);
+
+        /* Vidro um pouco transparente (cinza escuro no tema escuro), com
+           desfoque; o topo (título + abas, .cadastro-topo) continua sólido */
+        background: color-mix(in srgb, var(--surface) 82%, transparent);
+        backdrop-filter: blur(18px) saturate(150%);
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
+    }
+
+    /* Topo sólido até as bordas do card (sangra o padding dele); a linha
+       embaixo das abas separa do vidro */
+    body.app-mobile.app-cadastro .cadastro-topo {
+        display: grid;
+        gap: 0.75rem;
+
+        margin: calc(var(--form-pad) * -1) calc(var(--form-pad) * -1) 0;
+        padding: var(--form-pad) var(--form-pad) 0;
+
+        border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+        background: var(--surface);
+    }
+
+    body.app-mobile.app-cadastro .cadastro-titulo {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+
+        margin: 0;
+
+        color: var(--text);
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    body.app-mobile.app-cadastro .cadastro-titulo .icon {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+
+        color: var(--icon-muted);
+    }
+
+    /* Abas no lugar de um select (setupAbasCadastro, js/app-mobile.js): as do
+       header (.app-tabs), com uma linha embaixo de borda a borda do card */
+    body.app-mobile.app-cadastro .cadastro-abas {
+        margin-inline: calc(var(--form-pad) * -1);
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* Duas fileiras (movimentação: Tipo e Local) coladas, sem o gap do topo */
+    body.app-mobile.app-cadastro .cadastro-abas + .cadastro-abas {
+        margin-top: -0.75rem;
+    }
+
+    /* Metade da largura pra cada aba (no header elas têm o tamanho do texto) */
+    body.app-mobile.app-cadastro .cadastro-abas .app-tabs__btn {
+        flex: 1 1 0;
+        margin-inline: 0;
+    }
+
+    /*
+        Campos presos na coluna. O Chrome dá ao campo de data uma largura
+        mínima "natural" maior que meia coluna, e o grupo (item de grade,
+        min-width:auto, com a própria trilha de grade auto) crescia até ela:
+        as datas saíam da coluna, quase encostavam uma na outra e passavam
+        da margem do card, com um vão vazio depois do texto.
+        align-content:start: num par lado a lado o campo mais baixo (ex.:
+        Numeração, com a dica embaixo) esticava o vizinho até a altura dele,
+        e a sobra se dividia entre rótulo e select do vizinho - o select de
+        Dentição descia em relação ao de Numeração.
+    */
+    body.app-mobile.app-cadastro .form-group {
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+    }
+
+    /*
+        Destaque nos campos obrigatórios liberados e ainda sem valor
+        (.is-pendente, setupDestaquePendentes em js/app-mobile.js): segue a
+        liberação do form - no frasco primeiro o Grupo, depois o Estado, as
+        datas...; na movimentação a Origem e as Observações.
+        Azul da marca (o do gradiente das abas), mais forte que o foco.
+    */
+    body.app-mobile.app-cadastro .form-group.is-pendente > label {
+        color: var(--destaque-pendente);
+    }
+
+    body.app-mobile.app-cadastro .form-group.is-pendente .form-control {
+        border-color: rgba(71, 162, 237, 0.75);
+        background: color-mix(in srgb, #47a2ed 8%, var(--input-bg));
+        box-shadow: 0 0 0 3px rgba(71, 162, 237, 0.16);
+    }
+
+    body.app-mobile.app-cadastro .form-group :is(label, .form-control) {
+        transition:
+            color 0.25s ease,
+            border-color 0.25s ease,
+            background 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    /*
+        Botão que é o próximo passo (Escolher Frasco(s), "+" dos frascos de
+        origem): vidro com degradê no azul do destaque e texto azul - o
+        mesmo desenho do .btn-degrade-status (components/buttons.css) dos
+        botões das áreas expandidas do Painel de Solicitações, só que com a
+        cor fixa do destaque no lugar da cor do status.
+    */
+    body.app-mobile.app-cadastro .btn.is-pendente {
+        --degrade-canto: #47a2ed;
+
+        position: relative;
+
+        border-color: transparent;
+        color: var(--destaque-pendente);
+        background:
+            linear-gradient(
+                to bottom right,
+                color-mix(in srgb, var(--degrade-canto) 16%, transparent) 0%,
+                color-mix(in srgb, var(--degrade-canto) 5%, transparent) 20%,
+                transparent 45%,
+                color-mix(in srgb, currentColor 8%, transparent) 70%,
+                color-mix(in srgb, currentColor 22%, transparent) 100%
+            ),
+            var(--glass-thin-bg);
+
+        backdrop-filter: blur(14px) saturate(160%);
+        -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    body.app-mobile.app-cadastro .btn.is-pendente::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+
+        padding: 1px;
+        border-radius: inherit;
+
+        background: linear-gradient(
+            to bottom right,
+            color-mix(in srgb, var(--degrade-canto) 50%, transparent) 0%,
+            color-mix(in srgb, var(--degrade-canto) 40%, transparent) 22%,
+            color-mix(in srgb, currentColor 70%, transparent) 42%,
+            currentColor 60%
+        );
+
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+
+        pointer-events: none;
+    }
+
+    /* ---------- Cadastro de frasco (form/frascoForm.html) ---------- */
+
+    /*
+        Uma grade só, de 2 colunas, na ordem do HTML: seções e grades de
+        dentro viram display:contents e os campos passam a ser itens dela.
+        Título -> abas de Local -> Grupo -> Estado -> Quantidade + interruptor
+        dos opcionais -> Dentição e Arcada/Numeração (opcionais) -> datas.
+        Tudo ocupa a linha inteira, menos os pares lado a lado (abaixo).
+    */
+    body.app-mobile #cadastroFrascoForm {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem 1rem;
+    }
+
+    body.app-mobile #cadastroFrascoForm :is(.form-section, .form-grid, .form-grid-estado) {
+        display: contents;
+    }
+
+    body.app-mobile #cadastroFrascoForm :is(.cadastro-topo, .form-group, .form-legend) {
+        grid-column: 1 / -1;
+    }
+
+    body.app-mobile #cadastroFrascoForm :is(#quantidadeGroup, .cadastro-opcionais, #denticaoGroup, #arcadaGroup, #numeracaoGroup, #datCadGroup, #datManutencaoGroup) {
+        grid-column: auto;
+    }
+
+    /*
+        Dica da Numeração ("(1º Molar Superior Direito)", js/forms.js): vazia
+        não ocupa nada (nem o gap de 0.45rem do .form-group, desfeito pela
+        margem negativa); com texto abre deslizando, e as datas da linha de
+        baixo descem junto. Em meia coluna a dica quebra em até 3 linhas.
+    */
+    body.app-mobile #cadastroFrascoForm #numeracaoHint {
+        max-height: 3.6rem;
+        overflow: hidden;
+
+        line-height: 1.2;
+
+        transition:
+            max-height 0.35s var(--ease-suave),
+            margin-top 0.35s var(--ease-suave),
+            opacity 0.25s ease;
+    }
+
+    body.app-mobile #cadastroFrascoForm #numeracaoHint:empty {
+        max-height: 0;
+        margin-top: -0.45rem;
+        opacity: 0;
+    }
+
+    /* Títulos das seções e o select de Local (no lugar: título do form e abas) */
+    body.app-mobile #cadastroFrascoForm .form-section > .form-section__title,
+    body.app-mobile #cadastroFrascoForm #localGroup {
+        display: none;
+    }
+
+    /*
+        Seção travada (grupo ainda não escolhido): o .form-section--disabled
+        esmaece a seção inteira, mas opacity não passa por display:contents -
+        vai pros campos. O pointer-events:none dela é herdado e continua valendo.
+    */
+    body.app-mobile #cadastroFrascoForm .form-group {
+        transition: opacity var(--dur-media) ease;
+    }
+
+    body.app-mobile #cadastroFrascoForm .form-section--disabled .form-group {
+        opacity: 0.45;
+    }
+
+    /* Quantidade na largura da coluna (o 37%/74% dela é do layout de 1 coluna) */
+    body.app-mobile #cadastroFrascoForm .number-input--compact {
+        max-width: none;
+    }
+
+    /* Interruptor na altura do campo de Quantidade ao lado */
+    /* Sem o realce azul de toque/seleção de texto ao tocar no rótulo ou no
+       interruptor */
+    body.app-mobile #cadastroFrascoForm .cadastro-opcionais {
+        display: grid;
+        align-content: start;
+
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.app-mobile #cadastroFrascoForm .cadastro-opcionais__campo {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+
+        height: var(--input-height);
+    }
+
+    /* Mesmo ícone do "Campos avançados" do cadastro de solicitação */
+    body.app-mobile #cadastroFrascoForm .cadastro-opcionais__campo .icon {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+
+        color: var(--icon-muted);
+    }
+
+    /* "(opcional)" sai dos rótulos: o interruptor já diz, e em meia coluna
+       "Numeração (opcional)" quebrava em 2 linhas, descendo o select em
+       relação ao de Dentição ao lado */
+    body.app-mobile #cadastroFrascoForm :is(#denticaoGroup, #arcadaGroup, #numeracaoGroup) .optional-mark {
+        display: none;
+    }
+
+    /* Endo não tem opcionais (Dentição/Arcada/Numeração escondidos pelo
+       js/forms.js): o interruptor some, sem fechar a linha da Quantidade */
+    body.app-mobile #cadastroFrascoForm:has(#denticaoGroup[hidden]) .cadastro-opcionais {
+        visibility: hidden;
+    }
+
+    body.app-mobile #cadastroFrascoForm:not(.opcionais-abertos) :is(#denticaoGroup, #arcadaGroup, #numeracaoGroup) {
+        display: none;
+    }
+
+    body.app-mobile #cadastroFrascoForm.opcionais-abertos :is(#denticaoGroup, #arcadaGroup, #numeracaoGroup) {
+        animation: fade-slide-in 0.35s var(--ease-suave);
+    }
+
+    /*
+        Datas em meia largura: com o ícone na borda direita e o texto preso
+        à esquerda, toda a sobra da coluna ficava entre os dois (e o texto
+        chegava a passar por baixo do ícone). O ícone vem antes da data,
+        colado nela, e a sobra vai pro fim do campo. O valor alinhado à
+        esquerda sem margem interna (o Safari do iOS centraliza e o Chrome
+        do Android põe espaço próprio no campo de data). O clique no ícone
+        continua abrindo o calendário (setupDateIcons, js/forms.js).
+    */
+    body.app-mobile #cadastroFrascoForm .date-wrapper .form-control {
+        min-width: 0;
+        padding: 0 0.5rem 0 2.35rem;
+    }
+
+    /*
+        Campo de texto digitável (.data-texto, setupDatasDigitaveis em
+        js/app-mobile.js) no lugar do nativo, que fica por baixo, invisível
+        e sem receber toque - continua renderizado pro ícone abrir o
+        calendário dele (showPicker não funciona em display:none).
+    */
+    body.app-mobile #cadastroFrascoForm .data-texto {
+        display: block;
+    }
+
+    body.app-mobile #cadastroFrascoForm .date-wrapper input[type="date"] {
+        position: absolute;
+        inset: 0;
+
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    body.app-mobile #cadastroFrascoForm .date-wrapper .form-control::-webkit-date-and-time-value {
+        margin: 0;
+        text-align: left;
+    }
+
+    body.app-mobile #cadastroFrascoForm .date-wrapper .form-control::-webkit-datetime-edit {
+        padding: 0;
+    }
+
+    body.app-mobile #cadastroFrascoForm .date-wrapper .form-control::-webkit-calendar-picker-indicator {
+        left: 0;
+        right: auto;
+        width: 2.35rem;
+    }
+
+    body.app-mobile #cadastroFrascoForm .date-icon-trigger {
+        left: 0.85rem;
+        right: auto;
+    }
+
+    body.app-mobile #cadastroFrascoForm .date-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* ---------- Cadastro de movimentação (form/movimentacaoForm.html) ---------- */
+
+    body.app-mobile #cadastroMovimentacaoForm {
+        gap: 1.5rem;
+    }
+
+    /* Local e Tipo viram as abas do topo (.cadastro-topo); a seção dos
+       selects sai inteira, com o título dela */
+    body.app-mobile #infoMovimentacaoSection {
+        display: none;
+    }
+
+    /* Traço da aba de Tipo na cor do tipo (as das pílulas do painel de
+       movimentações, components/list.css): vermelho na Saída, verde na Entrada */
+    body.app-mobile .cadastro-abas--tipo:has(.active[data-valor="SAIDA"]) .app-tabs__indicator {
+        background-image: linear-gradient(90deg, #f87171, #dc2626);
+    }
+
+    body.app-mobile .cadastro-abas--tipo:has(.active[data-valor="ENTRADA"]) .app-tabs__indicator {
+        background-image: linear-gradient(90deg, #4ade80, #16a34a);
+    }
+
+    /*
+        Modais de busca de frasco (partials/modal_busca_frasco_movimentacao_*):
+        todos os filtros atrás do ícone de filtro ao lado da busca - Status e
+        Ordenar entram no recolhível junto com Grupo/Estado/Dentição
+        (setupFiltrosModaisMovimentacao, js/app-mobile.js). O de "outros
+        frascos" não tinha o ícone: ganha um igual (classes --app).
+    */
+    body.app-mobile .modal-filters-collapse__inner > .modal-filters + .modal-filters {
+        margin-top: 0.5rem;
+    }
+
+    body.app-mobile .modal-filter-toggle--app {
+        display: grid;
+    }
+
+    /*
+        Cabeçalho de cartão com resumo (Frascos de origem: "0 dentes
+        selecionados"): rótulo e botão na primeira linha, o resumo embaixo
+        como subtítulo. Antes o resumo ficava entre os dois, no meio do
+        cabeçalho. O grupo da direita (resumo + botão) some da grade.
+    */
+    body.app-mobile .field-card__head:has(.field-card__head-meta) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "rotulo botao"
+            "meta   meta";
+        align-items: center;
+        gap: 0.1rem 0.75rem;
+    }
+
+    body.app-mobile .field-card__head:has(.field-card__head-meta) .field-card__head-actions {
+        display: contents;
+    }
+
+    body.app-mobile .field-card__head:has(.field-card__head-meta) .field-card__head-label {
+        grid-area: rotulo;
+    }
+
+    body.app-mobile .field-card__head:has(.field-card__head-meta) .field-card__head-meta {
+        grid-area: meta;
+        font-size: 0.78rem;
+    }
+
+    body.app-mobile .field-card__head:has(.field-card__head-meta) .btn {
+        grid-area: botao;
+    }
+
+    /* "Selecionar Frascos" (frascos de origem, Entrada) só com o "+": com o
+       texto não cabia no cabeçalho do cartão ao lado do total */
+    body.app-mobile #selecionarFrascosOrigemBtn {
+        width: var(--btn-height);
+        padding: 0;
+    }
+
+    body.app-mobile #selecionarFrascosOrigemBtn .btn__label {
+        display: none;
+    }
+
+    /*
+        Rolagem de quantidade da Saída na largura do conteúdo: nos 92px do
+        modal da análise (acima) os botões +/- vazavam pra fora da caixa
+        quando o máximo tem 2 dígitos ("0/12"). Pelos ids pra vencer aquela
+        regra; o identificador ao lado é que encolhe (com reticências).
+    */
+    body.app-mobile.app-cadastro :is(#modalBuscaFrascoMovimentacao, #modalBuscaFrascoMovimentacaoEntrada, #modalBuscaFrascoMovimentacaoOutrosFrascos) .number-input--fraction {
+        width: auto;
+        flex-shrink: 0;
+    }
+
+    /*
+        Resultado: identificador maior com a ação na mesma linha (quantidade
+        na Saída, só o ícone de selecionar na Entrada/Outros frascos) e
+        características + datas embaixo, na largura toda. Pelos ids pra
+        vencer o layout do modal da análise (acima), que também vale aqui.
+    */
+    body.app-mobile.app-cadastro :is(#modalBuscaFrascoMovimentacao, #modalBuscaFrascoMovimentacaoEntrada, #modalBuscaFrascoMovimentacaoOutrosFrascos) .modal-result {
+        grid-template-areas:
+            "codigo acoes"
+            "meta   meta"
+            "datas  datas";
+    }
+
+    /* Identificador longo encurta com reticências em vez de empurrar a
+       quantidade ao lado pra fora da linha */
+    body.app-mobile.app-cadastro :is(#modalBuscaFrascoMovimentacao, #modalBuscaFrascoMovimentacaoEntrada, #modalBuscaFrascoMovimentacaoOutrosFrascos) .modal-result__code {
+        align-self: center;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    body.app-mobile.app-cadastro :is(#modalBuscaFrascoMovimentacao, #modalBuscaFrascoMovimentacaoEntrada, #modalBuscaFrascoMovimentacaoOutrosFrascos) .modal-result__meta {
+        margin-top: 0.2rem;
+    }
+
+    /* Selecionar/Selecionado só com o ícone (+ / ✓), quadrado na altura da
+       rolagem de quantidade da Saída; o texto fica pro leitor de tela (aria-label) */
+    body.app-mobile.app-cadastro .modal-busca-movimentacao .modal-result__select {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+    }
+
+    body.app-mobile.app-cadastro .modal-busca-movimentacao .modal-result__select-texto {
+        display: none;
+    }
+
+    body.app-mobile.app-cadastro .modal-busca-movimentacao .modal-result--added .modal-result__select {
+        color: var(--status-verde);
+    }
+    body.app-mobile .modal-filters-collapse--app {
+        display: grid;
+    }
+
+    /* ---------- Rodapé da gaveta de filtros ---------- */
+
+    /*
+        Criado pelo js/app-mobile.js (setupRodapeFiltros) quando há filtro
+        marcado, como último filho do painel de filtros. Sticky no fundo da
+        gaveta: os filtros passam por trás do vidro enquanto rola, e no fim
+        ele ocupa o próprio espaço, sem cobrir o último item.
+
+        Margens negativas = o padding do .filter-sidebar (2rem, layout/page.css):
+        vai de borda a borda do painel e encosta no fundo dele, com os cantos
+        de baixo cortados pelo arredondado do painel (overflow:clip,
+        components/filters.css).
+    */
+    .filters-rodape {
+        display: block;
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+
+        margin: 1.5rem -2rem -2rem;
+        padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom));
+
+        border-top: 1px solid var(--glass-frost-strong-border);
+        background: color-mix(in srgb, var(--surface) 45%, transparent);
+
+        backdrop-filter: blur(18px) saturate(150%);
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
+
+        animation: filters-rodape-entrada 0.25s var(--ease-suave);
+    }
+
+    .filters-rodape[hidden] {
+        display: none;
+    }
+
+    .filters-rodape__limpar {
+        width: 100%;
+        justify-content: center;
+    }
+
+    @keyframes filters-rodape-entrada {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+    }
+
+    /* ---------- Folha de ações do card ---------- */
+
+    .app-sheet-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 95;
+
+        background: rgba(0, 0, 0, 0.4);
+
+        /*
+            Arrastar no fundo escurecido não rola a página por trás. Sem
+            overflow:hidden no <html> de propósito: ele faz o body (que tem
+            overflow-x:hidden, base/globals.css) virar container de rolagem
+            e o header sticky pula.
+        */
+        touch-action: none;
+
+        opacity: 0;
+        visibility: hidden;
+
+        transition:
+            opacity var(--dur-media) ease,
+            visibility 0s linear var(--dur-media);
+    }
+
+    .app-sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 96;
+
+        max-height: 85dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        padding: 0.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+
+        border: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: 1.25rem 1.25rem 0 0;
+
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+        backdrop-filter: blur(24px) saturate(150%);
+        -webkit-backdrop-filter: blur(24px) saturate(150%);
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+
+        visibility: hidden;
+        transform: translateY(100%);
+
+        transition:
+            transform 0.35s var(--ease-suave),
+            visibility 0s linear 0.35s;
+    }
+
+    .app-sheet-overlay.is-open {
+        opacity: 1;
+        visibility: visible;
+
+        transition:
+            opacity var(--dur-media) ease,
+            visibility 0s linear 0s;
+    }
+
+    .app-sheet.is-open {
+        visibility: visible;
+        transform: translateY(var(--sheet-arraste, 0px));
+
+        transition:
+            transform 0.35s var(--ease-suave),
+            visibility 0s linear 0s;
+    }
+
+    /* Acompanha o dedo sem atraso enquanto arrasta pra fechar */
+    .app-sheet.is-arrastando {
+        transition: none;
+    }
+
+    .app-sheet__handle {
+        display: block;
+
+        width: 36px;
+        height: 4px;
+        margin: 0.25rem auto 0.75rem;
+
+        border-radius: 999px;
+        background: var(--border-strong);
+    }
+
+    .app-sheet__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+
+        padding: 0 0.25rem 0.85rem;
+        margin-bottom: 0.5rem;
+
+        border-bottom: 1px solid var(--border);
+    }
+
+    .app-sheet__titulo {
+        margin: 0;
+
+        color: var(--text);
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .app-sheet__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem 0.6rem;
+
+        margin: 0.3rem 0 0;
+
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .app-sheet__meta .status-pill {
+        padding: 0;
+        background: none;
+    }
+
+    .app-sheet__acoes {
+        display: grid;
+        gap: 0.15rem;
+    }
+
+    .app-sheet__acao {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+
+        width: 100%;
+        min-height: 52px;
+        padding: 0.5rem 0.5rem;
+
+        border: none;
+        border-radius: 0.85rem;
+
+        background: transparent;
+        color: var(--text);
+
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-align: left;
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .app-sheet__acao:active:not(:disabled) {
+        background: var(--surface-hover);
+    }
+
+    .app-sheet__acao:disabled {
+        cursor: not-allowed;
+    }
+
+    .app-sheet__acao:disabled .app-sheet__acao-icone,
+    .app-sheet__acao:disabled .app-sheet__acao-rotulo {
+        opacity: 0.4;
+    }
+
+    .app-sheet__acao-icone {
+        flex-shrink: 0;
+
+        width: 38px;
+        height: 38px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 1px solid rgba(59, 130, 246, 0.55);
+        border-radius: 999px;
+
+        color: var(--icon-active);
+    }
+
+    .app-sheet__acao--green .app-sheet__acao-icone {
+        border-color: rgba(34, 197, 94, 0.55);
+    }
+
+    .app-sheet__acao--red .app-sheet__acao-icone {
+        border-color: rgba(239, 68, 68, 0.55);
+    }
+
+    .app-sheet__acao--red .app-sheet__acao-rotulo {
+        color: var(--danger-text);
+    }
+
+    .app-sheet__acao-icone svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .app-sheet__acao-texto {
+        display: grid;
+        gap: 0.1rem;
+    }
+
+    /* Por que a ação está indisponível (o mesmo texto do tooltip no desktop) */
+    .app-sheet__acao-motivo {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+    }
+
+    .app-sheet__acao-motivo:empty {
+        display: none;
+    }
+}
+
+/*
+    Progresso da view-timeline do card (cards do celular, acima): 0% =
+    entrando por baixo, 50% = centralizado, 100% = saindo por cima. Tamanho
+    cheio numa faixa em volta do centro (40-60%) pra não ficar pulsando
+    enquanto o card está em foco.
+*/
+@keyframes card-foco-escala {
+    0%, 100% {
+        scale: 0.9;
+    }
+
+    40%, 60% {
+        scale: 1;
+    }
+}
+
+@keyframes card-foco-conteudo {
+    0%, 100% {
+        opacity: 0.45;
+    }
+
+    40%, 60% {
+        opacity: 1;
+    }
+}

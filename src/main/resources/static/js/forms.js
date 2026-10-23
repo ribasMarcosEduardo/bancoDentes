@@ -1,18 +1,15 @@
 const NUMERACAO_POR_GRUPO_E_DENTICAO = {
     molar: {
         permanente: [
+            // Sem os sisos (18, 28, 38, 48): viram grupo dentário próprio
             { value: "16", label: "1º Molar Superior Direito" },
             { value: "17", label: "2º Molar Superior Direito" },
-            { value: "18", label: "3º Molar / Siso Superior Direito" },
             { value: "26", label: "1º Molar Superior Esquerdo" },
             { value: "27", label: "2º Molar Superior Esquerdo" },
-            { value: "28", label: "3º Molar / Siso Superior Esquerdo" },
             { value: "36", label: "1º Molar Inferior Esquerdo" },
             { value: "37", label: "2º Molar Inferior Esquerdo" },
-            { value: "38", label: "3º Molar / Siso Inferior Esquerdo" },
             { value: "46", label: "1º Molar Inferior Direito" },
             { value: "47", label: "2º Molar Inferior Direito" },
-            { value: "48", label: "3º Molar / Siso Inferior Direito" },
         ],
         decidua: [
             { value: "54", label: "1º Molar Decíduo Superior Direito" },
@@ -701,7 +698,7 @@ function setupCadastroSolicitacaoCancel() {
             reverseButtons: true,
             focusCancel: true,
             confirmButtonText: "Sim, cancelar",
-            cancelButtonText: "Continuar solicitação",
+            cancelButtonText: "Continuar",
             buttonsStyling: false,
             customClass: {
                 confirmButton: "btn btn-outline btn-outline-danger",
@@ -858,7 +855,7 @@ function setupCadastroFrascoCancel() {
             reverseButtons: true,
             focusCancel: true,
             confirmButtonText: "Sim, cancelar",
-            cancelButtonText: "Continuar cadastro",
+            cancelButtonText: "Continuar",
             buttonsStyling: false,
             customClass: {
                 confirmButton: "btn btn-outline btn-outline-danger",
@@ -1208,7 +1205,7 @@ function setupCadastroMovimentacaoCancel() {
             reverseButtons: true,
             focusCancel: true,
             confirmButtonText: "Sim, cancelar",
-            cancelButtonText: "Continuar cadastro",
+            cancelButtonText: "Continuar",
             buttonsStyling: false,
             customClass: {
                 confirmButton: "btn btn-outline btn-outline-danger",

@@ -1,6 +1,12 @@
 function animateScrollToRow(row, duration) {
-    const navbar = document.querySelector(".navbar");
-    const navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
+    // Barra do topo visível (navbar, ou o header do celular - medido em
+    // setupNavbarHeight, includes.js) e a barra inferior do celular
+    // (partials/app_mobile.html; escondida, offsetHeight é 0). Páginas sem o
+    // includes.js (ex.: visualizaSolicitacao.html) não têm a variável: mede a navbar.
+    const navbarHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--navbar-height"))
+        || document.querySelector(".navbar")?.getBoundingClientRect().height
+        || 0;
+    const tabbarHeight = document.querySelector(".app-tabbar")?.offsetHeight || 0;
     const margin = 16;
     const topLimit = navbarHeight + margin;
 
@@ -22,7 +28,7 @@ function animateScrollToRow(row, duration) {
         if (!row.classList.contains("is-open")) return;
 
         const rect = row.getBoundingClientRect();
-        const bottomLimit = window.innerHeight - margin;
+        const bottomLimit = window.innerHeight - tabbarHeight - margin;
 
         let delta = 0;
 

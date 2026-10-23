@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <script>
     (function () {
         var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-        document.documentElement.classList.add(theme);
+        document.documentElement.classList.add(theme, "carregando");
     })();
   </script>
 
@@ -41,7 +41,7 @@
   <title>Painel de Frascos</title>
 </head>
 
-<body>
+<body class="app-mobile painel-frascos">
 
 <div class="background">
   <div class="blob blob--blue"></div>
@@ -49,6 +49,7 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<div th:replace="~{partials/app_mobile :: appHeader('setor')}"></div>
 
 <main class="page">
   <section class="dashboard">
@@ -189,8 +190,8 @@
               <span class="btn__label">Ordenar</span>
               <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
             </button>
-            <a th:href="@{/frasco/cadastraFrasco}" class="btn btn-primary">
-              <i class="orderBy-icon" data-lucide="plus"></i> Novo frasco
+            <a th:href="@{/frasco/cadastraFrasco}" class="btn btn-primary toolbar__novo" aria-label="Novo frasco">
+              <i class="orderBy-icon" data-lucide="plus"></i> <span class="btn__texto">Novo frasco</span>
             </a>
           </div>
         </div>
@@ -272,8 +273,8 @@
               <div class="result-list">
                 <span class="result-list__code" th:text="${frasco.identificacao != null ? frasco.identificacao : 'FR-' + frasco.codigo}">FR-01</span>
                 <span th:text="${frasco.tipoDente}">Grupo</span>
-                <span th:text="${frasco.estado != null ? frasco.estado : '---'}">Estado</span>
-                <span th:text="${frasco.quantidade}">0</span>
+                <span data-rotulo="Estado" th:text="${frasco.estado != null ? frasco.estado : '---'}">Estado</span>
+                <span data-rotulo-prefixo="Qtd." th:text="${frasco.quantidade}">0</span>
 
                 <span th:if="${frasco.statusFrasco != null}" class="status-pill status-pill--frasco"
                       th:classappend="'status-pill--' + ${frasco.statusFrasco.css}"
@@ -281,10 +282,10 @@
                       th:text="${frasco.statusFrasco.rotulo}">Disponível</span>
                 <span th:unless="${frasco.statusFrasco != null}">---</span>
 
-                <span th:if="${frasco.prazoManutencao != null}" class="manutencao"
+                <span th:if="${frasco.prazoManutencao != null}" class="manutencao" data-rotulo="Manutenção"
                       th:classappend="'manutencao--' + ${frasco.prazoManutencao.css}"
                       th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
-                <span th:unless="${frasco.prazoManutencao != null}">---</span>
+                <span th:unless="${frasco.prazoManutencao != null}" data-rotulo="Manutenção">---</span>
 
                 <div class="result-list__actions">
                   <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
@@ -417,16 +418,19 @@
                     <section class="request-panel request-panel--frascos-actions">
                       <h4 class="request-panel__title">Ações</h4>
                       <div class="request-panel__actions">
-                        <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar">
+                        <a th:unless="${frasco.inativo}" th:href="@{/frasco/edit/{id}(id=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar" aria-label="Editar">
                           <i class="icon" data-lucide="pen-line"></i>
+                          <span class="acao-rotulo">Editar</span>
                         </a>
                         <button th:if="${frasco.inativo}" type="button" class="result-list__action result-list__action--blue" disabled data-tooltip="Frasco inativo" aria-label="Editar">
                           <i class="icon" data-lucide="pen-line"></i>
+                          <span class="acao-rotulo">Editar</span>
                         </button>
 
                         <th:block th:with="manAberta=${frasco.emManutencao ? manutencoesAbertas.get(frasco.codigo) : null}">
                           <button th:unless="${manAberta != null}" type="button" class="result-list__action result-list__action--blue js-criar-manutencao" th:data-id="${frasco.codigo}" th:disabled="${frasco.emManutencao or frasco.inativo}" th:data-tooltip="${frasco.inativo ? 'Frasco inativo' : (frasco.emManutencao ? 'Já está em manutenção' : 'Manutenção')}" aria-label="Manutenção">
                             <i class="icon" data-lucide="toolbox"></i>
+                            <span class="acao-rotulo">Manutenção</span>
                           </button>
                           <button th:if="${manAberta != null}" type="button" class="result-list__action result-list__action--green js-concluir-manutencao"
                                   th:data-id="${manAberta.codigo}"
@@ -438,6 +442,7 @@
                                   th:data-qtd="${manAberta.quantidade != null ? manAberta.quantidade : 0}"
                                   data-tooltip="Concluir manutenção" aria-label="Concluir manutenção">
                             <i class="icon" data-lucide="toolbox"></i>
+                            <span class="acao-rotulo">Concluir</span>
                           </button>
                         </th:block>
 
@@ -446,6 +451,7 @@
                                   th:data-identificacao="${frasco.identificacao}"
                                   data-tooltip="Confirmar impressão" aria-label="Confirmar impressão">
                             <i class="icon" data-lucide="printer-check"></i>
+                            <span class="acao-rotulo">Confirmar</span>
                           </button>
                         </form>
                         <form th:unless="${frasco.naFilaImpressao}" th:action="@{/frasco/enviarImpressao/{id}(id=${frasco.codigo})}" method="post" class="print-form" style="display:inline;">
@@ -455,16 +461,19 @@
                                   th:data-tooltip="${frasco.podeEnviarParaImpressao ? 'Enviar para impressão' : 'Indisponível para impressão'}"
                                   aria-label="Enviar para impressão">
                             <i class="icon" data-lucide="printer"></i>
+                            <span class="acao-rotulo">Imprimir</span>
                           </button>
                         </form>
 
                         <a th:href="@{/movimentacao/painel(frasco=${frasco.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Ver movimentações" aria-label="Ver movimentações">
                           <i class="icon" data-lucide="history"></i>
+                          <span class="acao-rotulo">Histórico</span>
                         </a>
 
                         <form th:if="${!frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/excluirFrasco/{id}(id=${frasco.codigo})}" method="post" class="delete-form" style="display:inline;">
                           <button type="submit" class="result-list__action result-list__action--red" th:data-identificacao="${frasco.identificacao}" data-tooltip="Apagar" aria-label="Apagar">
                             <i class="icon" data-lucide="trash-2"></i>
+                            <span class="acao-rotulo">Apagar</span>
                           </button>
                         </form>
                         <form th:if="${frascosComVinculo.contains(frasco.codigo)}" th:action="@{/frasco/inativarFrasco/{id}(id=${frasco.codigo})}" method="post" class="inactivate-form" style="display:inline;">
@@ -474,6 +483,7 @@
                                   th:data-tooltip="${frasco.inativo ? 'Já está inativo' : (frasco.emManutencao ? 'Em manutenção' : 'Inativar')}"
                                   aria-label="Inativar">
                             <i class="icon" data-lucide="archive-x"></i>
+                            <span class="acao-rotulo">Inativar</span>
                           </button>
                         </form>
                       </div>
@@ -612,11 +622,13 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
+<div th:replace="~{partials/app_mobile :: appTabbar('frascos')}"></div>
 
 <th:block th:insert="~{partials/modal_concluir_manutencao}"></th:block>
 
 <script th:src="@{/js/bundles/painel.js}"></script>
 <script th:src="@{/js/manutencao-concluir.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {

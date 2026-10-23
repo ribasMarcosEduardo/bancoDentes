@@ -63,6 +63,15 @@
     gap: 0.75rem;
 }
 
+/* Celular (mesmo corte do layout de app, layout/app-mobile.css): botões nas
+   pontas - o de cancelar/voltar (à esquerda, reverseButtons) longe da ação */
+@media (max-width: 600px) {
+    :root.light, body.light,
+    :root.dark, body.dark {
+        --swal2-actions-justify-content: space-between;
+    }
+}
+
 /* Resumo do cadastro no modal "Confirmar cadastro?" (ver montarResumoCadastro
    em forms.js) — .swal2-html-container centraliza texto por padrão, então
    o wrapper reforça text-align:left pras linhas label/valor não ficarem
