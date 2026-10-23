@@ -195,7 +195,7 @@
                  th:style="'grid-template-columns: repeat(' + ${m.numColunas} + ', 1fr); --cel-aspect: ' + ${m.celulaLarguraMm} + ' / ' + ${m.celulaAlturaMm}"><span
                  class="etiqueta-grid__cel"
                  th:each="i : ${#numbers.sequence(0, cap - 1)}"
-                 th:classappend="${i < preenchidas} ? 'etiqueta-grid__cel--disponivel' : 'etiqueta-grid__cel--pulada'"></span></div>
+                 th:classappend="${i < preenchidas} ? 'etiqueta-grid\_\_cel--disponivel' : 'etiqueta-grid\_\_cel--pulada'"></span></div>
             <span class="etiqueta-preview__legenda"
                   th:text="${'Folha ' + (f + 1) + ': ' + preenchidas + ' etiqueta' + (preenchidas == 1 ? '' : 's')}">Folha 1: 12 etiquetas</span>
           </div>
