@@ -51,10 +51,24 @@
          th:classappend="${celula.vazia} ? 'etiqueta--vazia'"
          th:style="'top:' + ${celula.topMm} + 'mm;left:' + ${celula.leftMm} + 'mm;width:' + ${modelo.celulaLarguraMm} + 'mm;height:' + ${modelo.celulaAlturaMm} + 'mm;'">
       <th:block th:unless="${celula.vazia}">
-        <span class="etiqueta__codigo" th:text="${celula.frasco.identificacao}">PMbd-A001</span>
-        <span class="etiqueta__info" th:text="'Qtd. ' + ${celula.frasco.quantidade}">Qtd. 8</span>
+        <span class="etiqueta__codigo">
+          <span th:text="${celula.frasco.identificacao}">PMbd-A001</span>
+          <th:block th:switch="${celula.frasco.estado?.name()}">
+            <span class="etiqueta__extra" th:case="'HIGIDO'">Hig</span>
+            <span class="etiqueta__extra" th:case="'RESTAURADO'">Res</span>
+            <span class="etiqueta__extra" th:case="'CARIADO'">Car</span>
+            <span class="etiqueta__extra" th:case="'MISTO'">Mis</span>
+          </th:block>
+        </span>
+        <span class="etiqueta__info">
+          <span th:text="'Qtd. ' + ${celula.frasco.quantidade}">Qtd. 8</span>
+          <th:block th:switch="${celula.frasco.arcadaEfetiva?.name()}">
+            <span th:case="'SUPERIOR'">Sup.</span>
+            <span th:case="'INFERIOR'">Inf.</span>
+          </th:block>
+        </span>
         <span class="etiqueta__info" th:if="${celula.frasco.datManutencao != null}"
-              th:text="'Manut: ' + ${#temporals.format(celula.frasco.datManutencao, 'dd/MM/yyyy')}">Manut: 21/06/2026</span>
+              th:text="'Manut: ' + ${#temporals.format(celula.frasco.datManutencao, 'dd/MM/yy')}">Manut: 21/06/26</span>
       </th:block>
     </div>
   </section>

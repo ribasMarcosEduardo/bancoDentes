@@ -266,7 +266,7 @@
                      th:data-status="${frasco.statusFrasco != null ? frasco.statusFrasco.nome : ''}"
                      th:data-oculto-padrao="${frasco.inativo}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
-                     th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
+                     th:data-arcada="${frasco.arcadaEfetiva != null ? frasco.arcadaEfetiva : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <div class="result-list">
@@ -347,7 +347,7 @@
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Arcada</span>
-                          <span th:text="${frasco.arcada != null ? frasco.arcada : '---'}">-</span>
+                          <span th:text="${frasco.arcadaEfetiva != null ? frasco.arcadaEfetiva : '---'}">-</span>
                         </div>
                         <div class="request-detail">
                           <span class="request-details__label">Dentição</span>
@@ -494,7 +494,7 @@
                      th:data-status="${frasco.statusFrasco != null ? frasco.statusFrasco.nome : ''}"
                      th:data-oculto-padrao="${frasco.inativo}"
                      th:data-estado="${frasco.estado != null ? frasco.estado : ''}"
-                     th:data-arcada="${frasco.arcada != null ? frasco.arcada : ''}"
+                     th:data-arcada="${frasco.arcadaEfetiva != null ? frasco.arcadaEfetiva : ''}"
                      th:data-denticao="${frasco.denticao != null ? frasco.denticao.nome : ''}">
 
               <header class="card__header card__header--frasco">
@@ -546,7 +546,7 @@
                 </div>
                 <div class="card__row">
                   <span class="card__label">Arcada</span>
-                  <span class="card__value" th:text="${frasco.arcada != null ? frasco.arcada : '---'}">-</span>
+                  <span class="card__value" th:text="${frasco.arcadaEfetiva != null ? frasco.arcadaEfetiva : '---'}">-</span>
                 </div>
               </div>
 

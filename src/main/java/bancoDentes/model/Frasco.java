@@ -107,6 +107,21 @@ public class Frasco {
         return PrazoManutencao.EM_DIA;
     }
 
+    @Transient
+    public Arcada getArcadaEfetiva() {
+        if (tipoDente == null || !tipoDente.isUsaNumeracao()) {
+            return arcada;
+        }
+        if (posicao == null) {
+            return Arcada.NAO_INFORMADA;
+        }
+        return switch ((int) (posicao / 10)) {
+            case 1, 2, 5, 6 -> Arcada.SUPERIOR;
+            case 3, 4, 7, 8 -> Arcada.INFERIOR;
+            default -> Arcada.NAO_INFORMADA;
+        };
+    }
+
     public void gerarIdentificacao() {
         if (codigo == null) {
             throw new FrascoException("Impossível gerar etiqueta: ID do frasco ainda não foi gerado.");
