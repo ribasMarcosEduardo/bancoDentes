@@ -10,6 +10,7 @@ const NOMES_ENUM = {
     CANINO: "Canino",
     INCISIVO: "Incisivo",
     ENDO: "Endo",
+    SISO: "Siso",
     NAO_INFORMADA: "Não informada",
     CARIADO: "Cariado",
     HIGIDO: "Hígido",

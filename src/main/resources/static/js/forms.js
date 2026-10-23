@@ -535,7 +535,7 @@ function setupCadastroSolicitacao() {
             fecharAvancados();
         }
 
-        if (estadoDente) estadoDente.value = "NAO_INFORMADA";
+        if (estadoDente) estadoDente.value = "";
         if (denticaoSelect) denticaoSelect.value = "NAO_INFORMADA";
         if (arcadaSelect) arcadaSelect.value = "NAO_INFORMADA";
 

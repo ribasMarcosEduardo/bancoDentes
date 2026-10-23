@@ -128,10 +128,11 @@
                 <label>Estado do dente <span class="optional-mark">(opcional)</span></label>
                 <div class="select-wrapper">
                   <select class="form-control atributos-control" th:field="*{estadoDente}" id="estadoDente" disabled>
+                    <option value="">Não especificado</option>
                     <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
                             th:value="${e.name()}"
                             th:text="${e}"
-                            th:selected="${solicitacaoDTO.estadoDente == e or (solicitacaoDTO.estadoDente == null and e.name() == 'NAO_INFORMADA')}">
+                            th:selected="${solicitacaoDTO.estadoDente == e}">
                     </option>
                   </select>
                   <i class="select-icon icon" data-lucide="chevron-down"></i>

@@ -732,8 +732,6 @@ function setupDatasDigitaveis() {
 // campos) e quando disabled/required/hidden mudam direto, sem evento (ex.:
 // Observações e Origem na movimentação, liberadas pelo
 // frasco-search-movimentacao.js ao escolher frasco).
-// "Não informada" (padrão do Estado ao escolher o grupo) conta como sem
-// valor até a pessoa mexer no campo - escolher ela de propósito vale.
 // Quantidade (não obrigatória, já vem com 1) entra depois do Estado: fica
 // destacada até a pessoa mexer nela.
 function setupDestaquePendentes() {
@@ -770,7 +768,7 @@ function setupDestaquePendentes() {
     }
 
     function semValor(campo) {
-        return campo.value === "" || (campo.value === "NAO_INFORMADA" && !tocados.has(campo));
+        return campo.value === "";
     }
 
     function pendente(campo) {
@@ -822,7 +820,7 @@ function setupDestaquePendentes() {
         // Só mudança feita pela pessoa (as abas de Local disparam um change sintético)
         if (event.isTrusted) tocados.add(event.target);
 
-        // Trocar o Grupo no cadastro volta o Estado pra "Não informada" (js/forms.js)
+        // Trocar o Grupo no cadastro volta o Estado pra vazio (js/forms.js)
         if (event.target.id === "tipoDente" && !isEdicao) tocados.delete(estadoDente);
 
         // Trocar Tipo ou Origem volta a quantidade da doação pra 1 (frasco-search-movimentacao.js)
