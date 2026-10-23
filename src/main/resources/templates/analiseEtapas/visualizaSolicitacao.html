@@ -284,7 +284,7 @@
                 <div class="analysis-details">
                     <div class="analysis-detail">
                         <span>Data de conclusão</span>
-                        <strong>---</strong>
+                        <strong th:text="${analise.solicitacao.dataFinalizacao != null ? #temporals.format(analise.solicitacao.dataFinalizacao, 'dd/MM/yyyy') : '---'}">---</strong>
                     </div>
 
                     <div class="analysis-detail">
