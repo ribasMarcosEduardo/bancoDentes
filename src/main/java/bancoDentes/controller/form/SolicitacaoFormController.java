@@ -41,7 +41,8 @@ public class SolicitacaoFormController extends BaseController {
             solicitacaoService.save(dto);
             this.saveMessage(this.getText("msg.sucesso.solicitacao.enviada"));
 
-            if (cadastrarOutro) {
+            // Sem saldo sobrando, "Salvar e Continuar" volta pro painel
+            if (cadastrarOutro && this.estudanteService.buscarPorId(2L).getCredito() > 0) {
                 return "redirect:/solicitacao/cadastrarSolicitacao";
             }
 

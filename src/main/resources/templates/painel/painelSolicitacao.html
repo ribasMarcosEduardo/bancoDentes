@@ -41,7 +41,7 @@
     <title>Histórico de Solicitações</title>
 </head>
 
-<body class="app-mobile painel-minhas-solicitacoes">
+<body class="app-mobile painel-minhas-solicitacoes" th:data-saldo="${usuarioLogado.credito}">
 
 <div id="solicitacaoConteudo">
 
@@ -416,6 +416,29 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Sem saldo, o "+" da barra e o "Nova solicitação" avisam em vez de abrir o cadastro
+            const saldo = Number(document.body.dataset.saldo) || 0;
+
+            document.querySelectorAll("a[href$='/solicitacao/cadastrarSolicitacao']").forEach(link => {
+                link.addEventListener("click", function(e) {
+                    if (saldo > 0) return;
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Saldo insuficiente",
+                        text: "Você não possui saldo para fazer uma nova solicitação.",
+                        confirmButtonText: "Entendi",
+                        buttonsStyling: false,
+                        customClass: {
+                            actions: "swal-acoes--centro",
+                            confirmButton: "btn btn-primary",
+                        },
+                    });
+                });
+            });
+
             document.querySelectorAll(".delete-form").forEach(form => {
                 form.addEventListener("submit", function(e) {
                     e.preventDefault();

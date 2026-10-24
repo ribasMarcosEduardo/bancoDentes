@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <script>
     (function () {
@@ -20,7 +20,7 @@
   <title>Solicitação de Dentes</title>
 </head>
 
-<body>
+<body class="app-mobile app-cadastro">
 
 <div class="background">
   <div class="blob blob--blue"></div>
@@ -28,6 +28,9 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<th:block th:with="appVoltar=@{/solicitacao/painel}">
+  <div th:replace="~{partials/app_mobile :: appHeader('')}"></div>
+</th:block>
 
 <main class="page page--compact">
   <section class="form-shell">
@@ -72,6 +75,13 @@
       <input type="hidden" th:field="*{version}"/>
       <input type="hidden" th:field="*{codigo}"/>
 
+      <div class="cadastro-topo">
+        <h2 class="cadastro-titulo">
+          <i class="icon" data-lucide="clipboard-list" aria-hidden="true"></i>
+          <span th:text="${solicitacaoDTO.codigo != null} ? 'Editar solicitação' : 'Nova solicitação'">Nova solicitação</span>
+        </h2>
+      </div>
+
       <section class="form-section">
         <h2 class="form-section__title"><i class="icon" data-lucide="clipboard-list" aria-hidden="true"></i>Informações da Solicitação</h2>
 
@@ -115,7 +125,7 @@
             <i class="icon" data-lucide="sliders-horizontal" aria-hidden="true"></i>
 
             <span class="form-section__title-text">
-              <span>Campos avançados <span class="optional-mark">(opcional)</span></span>
+              <span><span class="rotulo-longo">Campos avançados <span class="optional-mark">(opcional)</span></span><span class="rotulo-curto">Campos opcionais</span></span>
               <span class="form-section__title-hint">Especifique estado, dentição e arcada/numeração.</span>
             </span>
 
@@ -202,6 +212,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 <script th:src="@{/js/bundles/form.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 </body>
 </html>

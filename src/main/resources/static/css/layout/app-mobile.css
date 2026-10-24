@@ -690,12 +690,57 @@
     /*
         Minhas Solicitações: os contadores saem da toolbar (que gruda no
         topo) pro resumo acima dela, que rola com a página; e o "+" vai pra
-        barra inferior do estudante. Sobram filtro e ordenar, à direita (a
-        área "busca" do padrão fica vazia: a página não tem busca).
+        barra inferior do estudante. Sobram filtro e ordenar: em vez de uma
+        barra com só os dois, a toolbar perde a caixa e eles ficam soltos
+        abaixo do resumo, cada um com o vidro, nas pontas da linha. Sem
+        sticky: rolam junto com o resumo, e a paginação gruda no lugar
+        deles (setupStickyPagination, includes.js).
     */
     body.app-mobile.painel-minhas-solicitacoes .toolbar__stats,
     body.app-mobile.painel-minhas-solicitacoes .toolbar__novo {
         display: none;
+    }
+
+    body.app-mobile.painel-minhas-solicitacoes .toolbar {
+        grid-template-columns: auto auto;
+        grid-template-areas: "filtro ordem";
+        justify-content: space-between;
+
+        padding: 0;
+
+        border: none;
+        background: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    body.app-mobile.painel-minhas-solicitacoes .toolbar {
+        position: static;
+    }
+
+    /* No fluxo da página, não some ao rolar pra baixo (barras-ocultas) */
+    html.barras-ocultas body.app-mobile.painel-minhas-solicitacoes .main-panel > .toolbar {
+        transform: none;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    body.app-mobile.painel-minhas-solicitacoes .toolbar::before {
+        content: none;
+    }
+
+    body.app-mobile.painel-minhas-solicitacoes .toolbar__filter-toggle,
+    body.app-mobile.painel-minhas-solicitacoes #btnSortOrder {
+        border: 1px solid var(--glass-frost-border);
+        border-radius: 0.85rem;
+
+        background: linear-gradient(to bottom right, var(--glass-frost-bg-start), var(--glass-frost-bg-end));
+        backdrop-filter: blur(24px) saturate(150%);
+        -webkit-backdrop-filter: blur(24px) saturate(150%);
+        box-shadow:
+            var(--glass-frost-shadow),
+            inset 0 1px 0 var(--glass-inset-highlight);
     }
 
     .resumo-solicitacoes {
@@ -778,7 +823,10 @@
         padding: 0;
     }
 
-    body.app-mobile .toolbar__novo .btn__texto {
+    /* Ordenar só com o ícone (historico_solicitacoes.css reafirma o
+       texto visível até 360px) */
+    body.app-mobile .toolbar__novo .btn__texto,
+    body.app-mobile .toolbar #btnSortOrder .btn__label {
         display: none;
     }
 
@@ -1991,7 +2039,21 @@
         box-shadow: 0 0 0 3px rgba(71, 162, 237, 0.16);
     }
 
-    body.app-mobile.app-cadastro .form-group :is(label, .form-control) {
+    /* Na variante fração (Quantidade da solicitação, "1/5") quem desenha a
+       caixa é o wrapper, não o <input> - o destaque vai pra ele */
+    body.app-mobile.app-cadastro .form-group.is-pendente .number-input--fraction {
+        border-color: rgba(71, 162, 237, 0.75);
+        background: color-mix(in srgb, #47a2ed 8%, var(--input-bg));
+        box-shadow: 0 0 0 3px rgba(71, 162, 237, 0.16);
+    }
+
+    body.app-mobile.app-cadastro .form-group.is-pendente .number-input--fraction .form-control {
+        border-color: transparent;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    body.app-mobile.app-cadastro .form-group :is(label, .form-control, .number-input--fraction) {
         transition:
             color 0.25s ease,
             border-color 0.25s ease,
@@ -2235,6 +2297,146 @@
     body.app-mobile #cadastroFrascoForm .date-icon {
         width: 16px;
         height: 16px;
+    }
+
+    /* ---------- Cadastro de solicitação (form/solicitacaoForm.html) ---------- */
+
+    /* Topo sem abas: a linha que separa do vidro vem dele mesmo */
+    body.app-mobile.app-cadastro .cadastro-topo:not(:has(.cadastro-abas)) {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /*
+        Mesma grade do frasco, na ordem do HTML: Título -> Grupo (e a dica
+        do Endo) -> Quantidade + interruptor dos opcionais -> Estado ->
+        Dentição e Arcada/Numeração -> Justificativa. O interruptor é o
+        próprio título de "Campos avançados" (o <label> com o .switch),
+        redesenhado como o "Campos opcionais" do frasco.
+    */
+    body.app-mobile #cadastroSolicitacaoForm {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem 1rem;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm :is(.form-section, .form-grid, .form-grid-estado, .form-section__collapse-inner, .advanced-fields, .advanced-fields__inner) {
+        display: contents;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm :is(.cadastro-topo, .form-group, .field-hint, .form-legend) {
+        grid-column: 1 / -1;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm :is(#quantidadeGroup, #denticaoGroup, #arcadaGroup, #numeracaoGroup) {
+        grid-column: auto;
+    }
+
+    /* A dica do Endo vem no HTML depois da Quantidade: sobe pra logo
+       abaixo do Grupo */
+    body.app-mobile #cadastroSolicitacaoForm :is(.cadastro-topo, .form-group:has(#grupoDentario), #grupoEndoHint) {
+        order: -1;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .form-section > .form-section__title {
+        display: none;
+    }
+
+    /* Seção travada (sem grupo): opacity não passa por display:contents */
+    body.app-mobile #cadastroSolicitacaoForm :is(.form-group, .form-section__title--toggle) {
+        transition: opacity var(--dur-media) ease;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .form-section--disabled :is(.form-group, .form-section__title--toggle) {
+        opacity: 0.45;
+    }
+
+    /* Quantidade na largura da coluna (os 180px são do desktop) */
+    body.app-mobile #cadastroSolicitacaoForm #quantidadeGroup .number-input--fraction {
+        max-width: none;
+    }
+
+    /*
+        "Campos opcionais": rótulo em cima, ícone + interruptor na altura
+        do campo de Quantidade ao lado. Sem a dica nem a linha de título
+        da seção do desktop.
+    */
+    body.app-mobile #cadastroSolicitacaoForm .form-section__title--toggle {
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-template-areas:
+            "texto  texto"
+            "icone  switch";
+        grid-template-rows: auto var(--input-height);
+        justify-content: start;
+        align-items: center;
+        align-content: start;
+        gap: 0.45rem 0.6rem;
+
+        padding: 0;
+        border: none;
+
+        font-size: 0.95rem;
+        font-weight: 600;
+
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .form-section__title--toggle > .icon {
+        grid-area: icone;
+        margin: 0;
+
+        color: var(--icon-muted);
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .form-section__title-text {
+        grid-area: texto;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .form-section__title--toggle > .switch {
+        grid-area: switch;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .form-section__title-hint {
+        display: none;
+    }
+
+    /* Endo/Siso não têm opcionais (.is-collapsed, js/forms.js): o
+       interruptor some, sem fechar a linha da Quantidade */
+    body.app-mobile #cadastroSolicitacaoForm #avancadosSection.is-collapsed .form-section__title--toggle {
+        visibility: hidden;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .advanced-fields:not(.is-open) .form-group {
+        display: none;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm .advanced-fields.is-open .form-group:not([hidden]) {
+        animation: fade-slide-in 0.35s var(--ease-suave);
+    }
+
+    /* "(opcional)" sai dos rótulos, como no frasco: o interruptor já diz */
+    body.app-mobile #cadastroSolicitacaoForm .advanced-fields .optional-mark {
+        display: none;
+    }
+
+    /* Dica da Numeração: vazia não ocupa nada; com texto abre deslizando */
+    body.app-mobile #cadastroSolicitacaoForm #numeracaoHint {
+        max-height: 3.6rem;
+        overflow: hidden;
+
+        line-height: 1.2;
+
+        transition:
+            max-height 0.35s var(--ease-suave),
+            margin-top 0.35s var(--ease-suave),
+            opacity 0.25s ease;
+    }
+
+    body.app-mobile #cadastroSolicitacaoForm #numeracaoHint:empty {
+        max-height: 0;
+        margin-top: -0.45rem;
+        opacity: 0;
     }
 
     /* ---------- Cadastro de movimentação (form/movimentacaoForm.html) ---------- */

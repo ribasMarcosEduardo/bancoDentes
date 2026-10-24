@@ -72,6 +72,11 @@
     }
 }
 
+/* Aviso com um botão só (customClass.actions), centralizado em qualquer largura */
+.swal2-actions.swal-acoes--centro {
+    --swal2-actions-justify-content: center;
+}
+
 /* Resumo do cadastro no modal "Confirmar cadastro?" (ver montarResumoCadastro
    em forms.js) — .swal2-html-container centraliza texto por padrão, então
    o wrapper reforça text-align:left pras linhas label/valor não ficarem

@@ -330,7 +330,15 @@ function setupStickyPagination() {
     let topoPagination = 0;
 
     function updateOffset() {
-        stickyTop = getToolbarStickyTop(toolbar) + toolbar.offsetHeight + gapBelowToolbar();
+        // Toolbar que rola com a página (Histórico de Solicitações no
+        // celular): a paginação gruda no lugar dela (o mesmo top do
+        // sticky de toolbar.css, navbar + 1rem), não abaixo
+        const raiz = getComputedStyle(document.documentElement);
+        const toolbarGruda = getComputedStyle(toolbar).position === "sticky";
+
+        stickyTop = toolbarGruda
+            ? getToolbarStickyTop(toolbar) + toolbar.offsetHeight + gapBelowToolbar()
+            : (parseFloat(raiz.getPropertyValue("--navbar-height")) || 0) + parseFloat(raiz.fontSize);
         pagination.style.setProperty("--pagination-sticky-top", `${stickyTop}px`);
 
         topoToolbar = getTopoNatural(toolbar);
