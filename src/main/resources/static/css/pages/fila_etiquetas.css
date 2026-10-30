@@ -51,6 +51,34 @@
     transform: translateY(0);
 }
 
+/* Paginação da fila: setas pequenas à direita, entre o stepper e a lista */
+.etiqueta-fila-paginacao {
+    justify-content: flex-end;
+    margin-bottom: 0.6rem;
+}
+
+.etiqueta-fila-paginacao[hidden] {
+    display: none;
+}
+
+.etiqueta-fila-paginacao .btn-pagination {
+    width: 36px;
+    height: 26px;
+    border-radius: 0.6rem;
+}
+
+.etiqueta-fila-paginacao .btn-pagination .icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* Trocando de página a entrada da carga não repete (cascata própria no JS) */
+#listaFrascosEtiqueta.sem-entrada .etiqueta-fila-row {
+    animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .etiqueta-fila-row {
         transition: none;
@@ -97,7 +125,7 @@
    transições em pages/etiquetas.css). Só as primeiras ganham atraso
    crescente; o resto entra junto, pra fila longa não ficar esperando. */
 html:not(.vt-nav) .etiqueta-fila-row {
-    animation: fade-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
 }
 
 html:not(.vt-nav) .etiqueta-fila-row:nth-child(1) { animation-delay: 0.18s; }

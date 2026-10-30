@@ -90,6 +90,55 @@ function setupFilaEtiquetas() {
     });
 
     atualizar();
+    setupPaginacaoFila(form);
+}
+
+// Paginação só visual (20 por página): as linhas das outras páginas ficam
+// escondidas mas continuam no form, então seleção e POST valem pra fila toda.
+function setupPaginacaoFila(form) {
+    const POR_PAGINA = 20;
+    const lista = document.querySelector("#listaFrascosEtiqueta");
+    const linhas = Array.from(form.querySelectorAll(".etiqueta-fila-row"));
+    const nav = document.querySelector("#filaPaginacao");
+    const range = document.querySelector("#filaPaginacaoRange");
+    const btnAnterior = document.querySelector("#filaPaginaAnterior");
+    const btnProxima = document.querySelector("#filaPaginaProxima");
+
+    const totalPaginas = Math.ceil(linhas.length / POR_PAGINA);
+    if (!nav || totalPaginas <= 1) return;
+
+    let pagina = 0;
+    nav.hidden = false;
+
+    function mostrar(animar) {
+        const inicio = pagina * POR_PAGINA;
+        const fim = Math.min(inicio + POR_PAGINA, linhas.length);
+
+        // style.display (não [hidden]): .result-list tem display:grid, que venceria o [hidden]
+        linhas.forEach((linha, i) => {
+            linha.style.display = i >= inicio && i < fim ? "" : "none";
+        });
+
+        range.textContent = `${inicio + 1}-${fim} de ${linhas.length}`;
+        btnAnterior.disabled = pagina === 0;
+        btnProxima.disabled = pagina === totalPaginas - 1;
+
+        if (!animar || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        // A entrada da carga (fila_etiquetas.css) repetiria com atraso; no lugar, cascata curta
+        lista?.classList.add("sem-entrada");
+        linhas.slice(inicio, fim).forEach((linha, i) => {
+            linha.animate(
+                [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
+                { duration: 320, delay: Math.min(i, 8) * 30, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "backwards" }
+            );
+        });
+    }
+
+    btnAnterior.addEventListener("click", () => { pagina--; mostrar(true); });
+    btnProxima.addEventListener("click", () => { pagina++; mostrar(true); });
+
+    mostrar(false);
 }
 
 document.addEventListener("DOMContentLoaded", setupFilaEtiquetas);

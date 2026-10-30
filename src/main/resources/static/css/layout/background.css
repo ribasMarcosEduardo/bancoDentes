@@ -11,33 +11,39 @@
 .blob {
     position: absolute;
     border-radius: 999px;
-    filter: blur(120px);
+    /* max(): igual ao valor fixo em telas comuns, cresce em telas grandes */
+    filter: blur(max(120px, 6.25vmax));
 
     opacity: 0.17;
+}
+
+/* No fundo claro (#fcfcfc) os 0.17 quase somem */
+:root.light .blob {
+    opacity: 0.3;
 }
 
 /* Blob azul */
 
 .blob--blue {
-    width: 900px;
-    height: 900px;
+    width: max(900px, 47vmax);
+    height: max(900px, 47vmax);
 
     background: rgb(9, 131, 231);
 
-    right: -200px;
-    bottom: 60px;
+    right: min(-200px, -10.5vmax);
+    bottom: max(60px, 3vmax);
 }
 
 /* Blob verde */
 
 .blob--green {
-    width: 900px;
-    height: 950px;
+    width: max(900px, 47vmax);
+    height: max(950px, 49.5vmax);
 
     background: rgb(3, 187, 70);
 
-    left: -210px;
-    bottom: -250px;
+    left: min(-210px, -11vmax);
+    bottom: min(-250px, -13vmax);
 }
 
 /* ==========================================================

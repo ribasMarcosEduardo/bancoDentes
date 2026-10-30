@@ -20,13 +20,43 @@ function parseDataBr(data) {
     return new Date(2000 + ano, mes - 1, dia);
 }
 
-// "Misto" sozinho pros frascos Endo (sem arcada/dentição) — "Hígido ·
-// Inferior · Permanente" pros demais. Filtra em vez de fixar 3 partes pra
-// não sobrar "· ·" quando os campos vêm vazios. Pura (só lê o frasco),
-// então fica no nível do módulo — os dois modais (Saída/Entrada) usam a
-// mesma, sem duplicar.
+// ajusta texto cru enviado pelo backend pros modais
+const ROTULOS_ATRIBUTO_FRASCO = {
+    "molar": "Molar",
+    "pre molar": "Pré-Molar",
+    "canino": "Canino",
+    "incisivo": "Incisivo",
+    "endo": "Endo",
+    "higido": "Hígido",
+    "cariado": "Cariado",
+    "restaurado": "Restaurado",
+    "misto": "Misto",
+    "inferior": "Inferior",
+    "superior": "Superior",
+    "decidua": "Decídua",
+    "permanente": "Permanente"
+};
+
+function rotuloAtributoFrasco(valor) {
+    const chave = normalizarTexto(valor);
+    if (!chave || chave === "nao informada" || chave === "nao informado" || chave === "---") return "";
+    return ROTULOS_ATRIBUTO_FRASCO[chave] || valor;
+}
+
 function formatarMeta(frasco) {
-    return [frasco.estado, frasco.arcada, frasco.denticao].filter(Boolean).join(" · ");
+    return [frasco.estado, frasco.arcada, frasco.denticao]
+        .map(rotuloAtributoFrasco)
+        .filter(Boolean)
+        .map((rotulo) => rotulo.toLocaleUpperCase("pt-BR"))
+        .join(" · ");
+}
+
+function formatarQtdDentes(qtd) {
+    return `${qtd} ${qtd === 1 ? "dente" : "dentes"}`;
+}
+
+function formatarMetaComQuantidade(frasco) {
+    return [formatarMeta(frasco), formatarQtdDentes(frasco.disponivel)].filter(Boolean).join(" · ");
 }
 
 // Miolo do painel de detalhes (expandir/recolher) de uma linha "tipo
@@ -41,12 +71,14 @@ function formatarMeta(frasco) {
 function montarDetalhesFrasco(frasco, { qtdApos = null, rotuloApos = "" } = {}) {
     // Endo não tem arcada/dentição (mesma regra de cadastro_frasco.html) —
     // "Não se aplica" diz isso melhor que um campo vazio
-    const vazio = frasco.grupo === "Endo" ? "Não se aplica" : "Não informado";
+    const vazio = normalizarTexto(frasco.grupo) === "endo" ? "Não se aplica" : "Não informado";
     const valor = (v, padrao = vazio) =>
         v ? v : `<span class="frasco-details__empty">${padrao}</span>`;
+    // nome cru do enum -> rótulo; NAO_INFORMADA cai no texto de vazio
+    const atributo = (v, padrao = vazio) => valor(rotuloAtributoFrasco(v), padrao);
 
     const quantidadeHtml = qtdApos === null
-        ? `<span>${frasco.disponivel} dentes</span>`
+        ? `<span>${formatarQtdDentes(frasco.disponivel)}</span>`
         : `<span class="frasco-details__qtd">
                 ${frasco.disponivel}
                 <i class="icon" data-lucide="arrow-right" aria-hidden="true"></i>
@@ -64,22 +96,22 @@ function montarDetalhesFrasco(frasco, { qtdApos = null, rotuloApos = "" } = {}) 
                 <div class="frasco-details__row">
                     <div class="request-detail">
                         <span class="request-details__label">Grupo dentário</span>
-                        <span>${valor(frasco.grupo, "Não informado")}</span>
+                        <span>${atributo(frasco.grupo, "Não informado")}</span>
                     </div>
 
                     <div class="request-detail">
                         <span class="request-details__label">Estado</span>
-                        <span>${valor(frasco.estado, "Não informado")}</span>
+                        <span>${atributo(frasco.estado, "Não informado")}</span>
                     </div>
 
                     <div class="request-detail">
                         <span class="request-details__label">Arcada</span>
-                        <span>${valor(frasco.arcada)}</span>
+                        <span>${atributo(frasco.arcada)}</span>
                     </div>
 
                     <div class="request-detail">
                         <span class="request-details__label">Dentição</span>
-                        <span>${valor(frasco.denticao)}</span>
+                        <span>${atributo(frasco.denticao)}</span>
                     </div>
                 </div>
 
@@ -718,7 +750,7 @@ function setupFrascoSearchModal() {
                     <span class="modal-result__code">${frasco.id}</span>
 
                     <div class="modal-result__subinfo">
-                        <span class="modal-result__meta">${formatarMeta(frasco)}</span>
+                        <span class="modal-result__meta">${formatarMetaComQuantidade(frasco)}</span>
                         <span class="modal-result__dates">
                             <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                             <span class="modal-result__dates-sep">·</span>
@@ -858,7 +890,7 @@ function setupFrascoSearchModal() {
                     <span class="modal-result__code">${frasco.id}</span>
 
                     <div class="modal-result__subinfo">
-                        <span class="modal-result__meta">${formatarMeta(frasco)}</span>
+                        <span class="modal-result__meta">${formatarMetaComQuantidade(frasco)}</span>
                         <span class="modal-result__dates">
                             <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                             <span class="modal-result__dates-sep">·</span>
@@ -955,7 +987,7 @@ function setupFrascoSearchModal() {
                     <span class="modal-result__code">${frasco.id}</span>
 
                     <div class="modal-result__subinfo">
-                        <span class="modal-result__meta">${formatarMeta(frasco)} · ${frasco.disponivel} dentes disponíveis</span>
+                        <span class="modal-result__meta">${formatarMetaComQuantidade(frasco)}</span>
                         <span class="modal-result__dates">
                             <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
                             <span class="modal-result__dates-sep">·</span>

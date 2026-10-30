@@ -29,29 +29,28 @@
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
 
-<main class="page">
+<main class="page page--compact">
   <section class="form-shell">
 
-    <header class="page-header">
-      <h1>Solicitação de Dentes</h1>
-      <p>Preencha os dados da solicitação de acordo com o necessário para sua atividade prática.</p>
-    </header>
-
     <div class="toolbar glass-frost">
-      <!-- data-saldo é o número lido pelo JS (limite de Quantidade e resumo da
-           confirmação, ver js/forms.js); o texto é só exibição. -->
-      <div class="toolbar__identity">
-        <span class="toolbar__identity-icon" aria-hidden="true">
-          <i class="icon" data-lucide="wallet"></i>
-        </span>
+      <div class="toolbar__lead">
+        <h1 class="toolbar__title">Solicitação de Dentes</h1>
 
-        <div class="toolbar__identity-text">
-          <span class="toolbar__identity-label">Saldo disponível</span>
-          <span class="toolbar__identity-value" id="saldoDisponivel"
-                th:data-saldo="${usuarioLogado.credito}"
-                th:text="${usuarioLogado.credito} + ' dentes'">0 dentes</span>
+        <!-- data-saldo é o número lido pelo JS (limite de Quantidade e resumo da
+             confirmação, ver js/forms.js); o texto é só exibição. -->
+        <div class="toolbar__identity">
+          <span class="toolbar__identity-icon" aria-hidden="true">
+            <i class="icon" data-lucide="wallet"></i>
+          </span>
+
+          <div class="toolbar__identity-text">
+            <span class="toolbar__identity-label">Saldo disponível</span>
+            <span class="toolbar__identity-value" id="saldoDisponivel"
+                  th:data-saldo="${usuarioLogado.credito}"
+                  th:text="${usuarioLogado.credito} + ' dentes'">0 dentes</span>
+          </div>
+          <input type="hidden" id="creditoEstudante" th:value="${usuarioLogado.credito}">
         </div>
-        <input type="hidden" id="creditoEstudante" th:value="${usuarioLogado.credito}">
       </div>
 
       <div class="toolbar__actions">

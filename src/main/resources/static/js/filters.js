@@ -6,6 +6,23 @@ function normalizarBusca(texto) {
         .trim();
 }
 
+// Estado do painel guardado antes de uma ação que recarrega a própria página
+// (salvarEstadoPainel) e restaurado uma única vez na carga seguinte.
+// Expira rápido pra não reaparecer se a ação acabar levando pra outra tela.
+const ESTADO_PAINEL_KEY = "estadoPainel:" + location.pathname;
+const ESTADO_PAINEL_TTL_MS = 60 * 1000;
+
+function lerEstadoPainelSalvo() {
+    try {
+        const bruto = sessionStorage.getItem(ESTADO_PAINEL_KEY);
+        sessionStorage.removeItem(ESTADO_PAINEL_KEY);
+        const estado = bruto ? JSON.parse(bruto) : null;
+        return estado && Date.now() - estado.salvoEm < ESTADO_PAINEL_TTL_MS ? estado : null;
+    } catch {
+        return null;
+    }
+}
+
 // Seleciona os elementos do DOM e inicializa as variáveis de controle
 function setupFilters() {
     const sections = document.querySelectorAll(".filter-section");
@@ -63,24 +80,54 @@ function setupFilters() {
         applyPagination();
     }
 
+    // Ao reordenar: itens visíveis reentram em cascata e o texto de ordenação
+    // troca com fade (WAAPI — a regra de movimento reduzido do CSS não pega)
+    function animarReordenacao() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+        [".results .request-row", ".results .card"].forEach(seletor => {
+            Array.from(document.querySelectorAll(seletor))
+                .filter(item => item.offsetParent !== null)
+                .forEach((item, i) => {
+                    item.animate(
+                        [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
+                        { duration: 380, delay: Math.min(i, 8) * 35, easing, fill: "backwards" }
+                    );
+                });
+        });
+
+        // Com a paginação grudada o texto fica escondido (is-stuck) — sem fade
+        if (paginationInfo && !paginationInfo.closest(".is-stuck")) paginationInfo.animate(
+            [{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }],
+            { duration: 300, easing }
+        );
+    }
+
+    function atualizarIconeOrdem() {
+        const icon = btnSortOrder?.querySelector(".orderBy-icon");
+        if (!icon) return false;
+
+        const newIcon = document.createElement("i");
+        newIcon.className = "orderBy-icon";
+        newIcon.setAttribute("data-lucide", sortAscending ? "arrow-down-up" : "arrow-up-down");
+        icon.replaceWith(newIcon);
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        return true;
+    }
+
     // Alterna a ordem e atualiza o ícone ao clicar no botão de ordenar
     if (btnSortOrder) {
         btnSortOrder.addEventListener("click", () => {
             sortAscending = !sortAscending;
             sortTable();
+            animarReordenacao();
 
-            let icon = btnSortOrder.querySelector(".orderBy-icon");
-            if (icon) {
-                const newIcon = document.createElement("i");
-                newIcon.className = "orderBy-icon";
-                newIcon.setAttribute("data-lucide", sortAscending ? "arrow-down-up" : "arrow-up-down");
-
-                icon.replaceWith(newIcon);
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-
+            if (atualizarIconeOrdem()) {
                 // lucide.createIcons() troca o <i data-lucide> por um <svg> novo
                 // (mesma classe, nó diferente) — precisa reconsultar depois de
                 // rodar, senão a animação tenta grudar num elemento que já não
@@ -107,6 +154,7 @@ function setupFilters() {
                 sortAscending = true;
             }
             sortTable();
+            animarReordenacao();
         });
     }
 
@@ -374,17 +422,90 @@ function setupFilters() {
     // Busca filtra enquanto digita; o "x" (search.js) dispara "input" ao limpar
     searchInput?.addEventListener("input", applyFilters);
 
+    window.salvarEstadoPainel = () => {
+        try {
+            sessionStorage.setItem(ESTADO_PAINEL_KEY, JSON.stringify({
+                salvoEm: Date.now(),
+                filtros: Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => [cb.getAttribute("data-filter-group"), cb.value]),
+                busca: searchInput?.value || "",
+                sortAscending,
+                sortSelect: sortSelect?.value,
+                pageSize: pageSizeSelect?.value,
+                page: currentPage,
+                scrollY: window.scrollY
+            }));
+        } catch {
+            // sessionStorage indisponível: só perde a restauração
+        }
+    };
+
+    const estadoSalvo = lerEstadoPainelSalvo();
+
+    if (estadoSalvo) {
+        const marcados = new Set(estadoSalvo.filtros.map(([grupo, valor]) => grupo + "|" + valor));
+        checkboxes.forEach(cb => {
+            cb.checked = marcados.has(cb.getAttribute("data-filter-group") + "|" + cb.value);
+        });
+
+        if (searchInput && estadoSalvo.busca) {
+            searchInput.value = estadoSalvo.busca;
+            searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        if (pageSizeSelect && estadoSalvo.pageSize) {
+            pageSizeSelect.value = estadoSalvo.pageSize;
+            rowsPerPage = parseInt(pageSizeSelect.value);
+        }
+
+        if (sortSelect && estadoSalvo.sortSelect) sortSelect.value = estadoSalvo.sortSelect;
+        sortAscending = !!estadoSalvo.sortAscending;
+        if (sortAscending) atualizarIconeOrdem();
+
+        renderActiveFilters();
+    }
+
     // Aplica os filtros já na carga para esconder os itens ocultos por padrão
     applyFilters();
 
-    if (paginationRange) {
+    if (paginationRange || estadoSalvo?.sortAscending) {
         sortTable();
     }
+
+    // applyPagination limita à última página existente
+    if (estadoSalvo?.page > 1) {
+        currentPage = estadoSalvo.page;
+        applyPagination();
+    }
+
+    // recarregarPagina (location.replace) e redirect de form não restauram a
+    // rolagem. rAF: depois dos outros scripts (results.js muda a altura com o
+    // setor) e antes do 1º frame
+    if (estadoSalvo?.scrollY) {
+        requestAnimationFrame(() => window.scrollTo(0, estadoSalvo.scrollY));
+    }
+
+    requestAnimationFrame(animarEntradaResultados);
 }
 
-// Inicializa o script garantindo que o DOM já foi completamente carregado
-if (document.readyState === 'loading') {
-    document.addEventListener("DOMContentLoaded", setupFilters);
-} else {
-    setupFilters();
+// Cascata de entrada dos itens visíveis (css/layout/panel-transition.css).
+// Ordem pelos visíveis de fato: nth-child contaria os escondidos pelo filtro.
+function animarEntradaResultados() {
+    const raiz = document.documentElement;
+    if (raiz.classList.contains("vt-nav")) return;
+
+    [".results .request-row", ".results .card"].forEach(seletor => {
+        Array.from(document.querySelectorAll(seletor))
+            .filter(item => item.style.display !== "none")
+            .slice(0, 8)
+            .forEach((item, i) => item.style.setProperty("--ordem-entrada", i));
+    });
+
+    raiz.classList.add("painel-entrando");
+    setTimeout(() => raiz.classList.remove("painel-entrando"), 1200);
 }
+
+// Roda já (carregado no fim do <body> via bundles/painel.js, DOM do painel
+// pronto): o estado restaurado entra antes do 1º frame da View Transition
+setupFilters();

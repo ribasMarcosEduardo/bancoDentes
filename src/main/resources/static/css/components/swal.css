@@ -100,6 +100,123 @@
    montarResumoMovimentacao em forms.js) — texto livre, não cabe no
    formato label/valor de .swal-resumo__row, por isso ganha um bloco
    próprio, separado por uma linha das linhas normais acima. */
+/* Blocos do resumo de movimentação (montarResumoMovimentacao em forms.js) */
+.swal-resumo__grupo {
+    display: grid;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.swal-resumo__grupo-titulo {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Grupo expansível: título + resumo no cabeçalho, seta à direita. Abre com a
+   mesma transição das linhas dos painéis (.request-details em list.css) */
+.swal-resumo__grupo--expansivel {
+    gap: 0;
+}
+
+.swal-resumo__grupo-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.swal-resumo__grupo-toggle strong {
+    margin-left: auto;
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-align: right;
+}
+
+.swal-resumo__grupo-toggle::after {
+    content: "";
+    flex-shrink: 0;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin: 0 0.15rem 0.2rem 0;
+
+    border-right: 1.5px solid var(--text-muted);
+    border-bottom: 1.5px solid var(--text-muted);
+    transform: rotate(45deg);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), margin 0.3s ease;
+}
+
+.swal-resumo__grupo--expansivel.is-open .swal-resumo__grupo-toggle::after {
+    margin-bottom: -0.2rem;
+    transform: rotate(-135deg);
+}
+
+.swal-resumo__grupo-conteudo {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+
+    transition:
+        grid-template-rows 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+}
+
+.swal-resumo__grupo--expansivel.is-open .swal-resumo__grupo-conteudo {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.swal-resumo__grupo-conteudo-inner {
+    min-height: 0;
+    overflow: hidden;
+
+    display: grid;
+    gap: 0.4rem;
+
+    transform: translateY(-10px);
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), padding 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.swal-resumo__grupo--expansivel.is-open .swal-resumo__grupo-conteudo-inner {
+    padding-top: 0.4rem;
+    transform: translateY(0);
+}
+
+/* Frasco: código + grupo/estado embaixo; à direita a variação + saldo */
+.swal-resumo__row--frasco {
+    align-items: center;
+}
+
+.swal-resumo__row--frasco span {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.swal-resumo__row--frasco small {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 400;
+}
+
+.swal-resumo__row--frasco strong {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
 .swal-resumo__obs {
     margin-top: 0.25rem;
     padding-top: 0.5rem;

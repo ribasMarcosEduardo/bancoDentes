@@ -13,6 +13,14 @@ html {
     scrollbar-gutter: stable;
 }
 
+/* Telas muito largas (ex.: 4K com escala 100%, ≥2800px úteis): fonte base
+   cresce com a largura até 22px. QHD a 100% (2560px) fica como está. */
+@media (min-width: 2800px) {
+    html {
+        font-size: clamp(16px, 0.58vw, 22px);
+    }
+}
+
 body::before {
     content: "";
     position: fixed;
