@@ -1,28 +1,39 @@
 package bancoDentes.service;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import bancoDentes.amqp.MailProducer;
+import bancoDentes.dto.EmailDTO;
 import org.springframework.stereotype.Service;
 
 /**
- * Service responsável por gerenciar o envio de emails.
+ * Service responsável por gerenciar o envio de emails via AMQP (RabbitMQ).
  *
  * @author Marcos Eduardo Ribas
  */
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final MailProducer mailProducer;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    private static final String EMAIL_REMETENTE = "biobancodedentes.jba@unoesc.edu.br";
+
+    public EmailService(MailProducer mailProducer) {
+        this.mailProducer = mailProducer;
     }
 
     public void enviarCodigoVerificacao(String destinatario, String codigo) {
-        SimpleMailMessage mensagem = new SimpleMailMessage();
-        mensagem.setTo(destinatario);
-        mensagem.setSubject("Portal BDH - Código de Confirmação");
-        mensagem.setText("Seu código de confirmação é: " + codigo + "\nEle expira em 15 minutos.");
-        mailSender.send(mensagem);
+        String assunto = "Portal BDH - Código de Confirmação";
+
+        String mensagem = "<p>Seu código de confirmação é: <strong>" + codigo + "</strong></p>"
+                + "<p>Ele expira em 15 minutos.</p>";
+
+        EmailDTO emailDTO = new EmailDTO(
+                EMAIL_REMETENTE,
+                new String[]{ destinatario },
+                assunto,
+                mensagem,
+                this.getClass().getSimpleName()
+        );
+
+        mailProducer.sendMail(emailDTO);
     }
 }
