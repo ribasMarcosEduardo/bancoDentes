@@ -18,8 +18,4 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-    @Bean
-    public Queue emailQueue() {
-        return new Queue(queueEmailStr, true);
-    }
 }

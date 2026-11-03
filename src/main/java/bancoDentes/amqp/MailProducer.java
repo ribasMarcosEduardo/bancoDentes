@@ -1,6 +1,7 @@
 package bancoDentes.amqp;
 
 import bancoDentes.dto.EmailDTO;
+import bancoDentes.dto.MessageWrapperDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,11 +23,7 @@ public class MailProducer {
     }
 
     public void sendMail(EmailDTO emailDTO) {
-        try {
-            this.rabbitTemplate.convertAndSend(this.queueEmailStr, emailDTO);
-            logger.info("E-mail enviado com sucesso para a fila: {}", emailDTO.para()[0]);
-        } catch (Exception e) {
-            logger.error("Erro ao enviar e-mail para a fila AMQP. Destino: {}", emailDTO.para()[0], e);
-        }
+        MessageWrapperDTO<EmailDTO> wrapper = new MessageWrapperDTO<>(emailDTO);
+        rabbitTemplate.convertAndSend(queueEmailStr, wrapper);
     }
 }
