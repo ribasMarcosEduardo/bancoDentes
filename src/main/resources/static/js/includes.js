@@ -251,22 +251,50 @@ function setupNavbarHeight() {
     // começar abaixo dela. A altura varia (quebra em 2 linhas entre
     // ~1150px e 1000px, display:none abaixo disso), então mede de
     // verdade e expõe em --navbar-height. Escondida, offsetHeight é 0.
-    const navbar = document.querySelector(".navbar");
+    // No celular, nas páginas com o layout de app, quem fica no topo é o
+    // .app-header (partials/app_mobile.html) - vale a que estiver visível.
+    const barras = [".navbar", ".app-header"]
+        .map((seletor) => document.querySelector(seletor))
+        .filter(Boolean);
 
-    if (!navbar) return;
+    if (!barras.length) return;
 
     function update() {
-        document.documentElement.style.setProperty("--navbar-height", `${navbar.offsetHeight}px`);
+        const altura = Math.max(...barras.map((barra) => barra.offsetHeight));
+        document.documentElement.style.setProperty("--navbar-height", `${altura}px`);
     }
 
     update();
-    new ResizeObserver(update).observe(navbar);
+    const resizeObserver = new ResizeObserver(update);
+    barras.forEach((barra) => resizeObserver.observe(barra));
 }
 
 // Distância do topo da tela em que a .toolbar gruda — lida do CSS
 // (navbar + 1rem, ver components/toolbar.css) em vez de fixa aqui.
 function getToolbarStickyTop(toolbar) {
     return parseFloat(getComputedStyle(toolbar).top) || 0;
+}
+
+// Posição normal (sem o efeito sticky) de um elemento position:sticky, a
+// partir do topo da página. Não dá pra usar o offsetTop direto: no Chrome
+// (e no Samsung Internet) ele já vem com o deslocamento do "grudar", então
+// grudado ele acompanha o scroll, e "scrollY >= offsetTop - top" ficava no
+// limite, virando a cada evento - no celular, com scroll fracionário, as
+// barras piscavam ao rolar devagar. Mede com o sticky desligado por um
+// instante; soma os offsetTop dos pais (ignoram transform, então a
+// animação de esconder não atrapalha). Custa um reflow: guardar o
+// resultado e refazer só quando algo muda de tamanho.
+function getTopoNatural(el) {
+    const posicao = el.style.position;
+    el.style.position = "static";
+
+    let topo = 0;
+    for (let atual = el; atual; atual = atual.offsetParent) {
+        topo += atual.offsetTop;
+    }
+
+    el.style.position = posicao;
+    return topo;
 }
 
 function setupStickyPagination() {
@@ -296,31 +324,61 @@ function setupStickyPagination() {
         return (Number.isNaN(gap) ? 24 : gap) + margin;
     }
 
+    // Posições normais (sem sticky) da toolbar e da pagination, guardadas
+    // (ver getTopoNatural) e refeitas em updateOffset
+    let topoToolbar = 0;
+    let topoPagination = 0;
+
     function updateOffset() {
-        stickyTop = getToolbarStickyTop(toolbar) + toolbar.offsetHeight + gapBelowToolbar();
+        // Toolbar que rola com a página (Histórico de Solicitações no
+        // celular): a paginação gruda no lugar dela (o mesmo top do
+        // sticky de toolbar.css, navbar + 1rem), não abaixo
+        const raiz = getComputedStyle(document.documentElement);
+        const toolbarGruda = getComputedStyle(toolbar).position === "sticky";
+
+        stickyTop = toolbarGruda
+            ? getToolbarStickyTop(toolbar) + toolbar.offsetHeight + gapBelowToolbar()
+            : (parseFloat(raiz.getPropertyValue("--navbar-height")) || 0) + parseFloat(raiz.fontSize);
         pagination.style.setProperty("--pagination-sticky-top", `${stickyTop}px`);
+
+        topoToolbar = getTopoNatural(toolbar);
+        topoPagination = getTopoNatural(pagination);
     }
 
-    // offsetTop reflete a posição normal (sem sticky) de .pagination no
-    // fluxo do documento, mesmo enquanto ela está grudada — dá pra
-    // comparar direto com o scroll atual pra saber se ela já colou.
     function updateStuckState() {
-        const isStuck = window.scrollY >= pagination.offsetTop - stickyTop;
+        const isStuck = window.scrollY >= topoPagination - stickyTop;
         pagination.classList.toggle("is-stuck", isStuck);
     }
 
     updateOffset();
     updateStuckState();
 
-    // Observa a navbar também: a altura dela muda o top da toolbar.
+    // Troca de página com a lista rolada (filters.js): volta até um pouco antes
+    // de a paginação grudar - grudada, o texto "X encontrados" some (is-stuck);
+    // a folga é o mesmo espaço entre a toolbar e ela. Lista ainda no começo:
+    // não mexe. behavior explícito ganha do CSS, então o movimento reduzido é
+    // checado aqui.
+    window.rolarParaInicioDaLista = () => {
+        // Mínimo de 16px: em telas baixas a margem negativa do .list-panel
+        // encolhe o gap e a paginação continuaria grudada
+        const alvo = Math.max(0, topoPagination - stickyTop - Math.max(gapBelowToolbar(), 16));
+        if (window.scrollY <= alvo + 1) return;
+
+        const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: alvo, behavior: reduzido ? "auto" : "smooth" });
+    };
+
+    // Observa a navbar também: a altura dela muda o top da toolbar. E o
+    // .main-panel: o que entra acima da pagination (ex.: barra de filtros
+    // ativos) muda a posição normal dela.
     const resizeObserver = new ResizeObserver(() => {
         updateOffset();
         updateStuckState();
     });
     resizeObserver.observe(toolbar);
+    resizeObserver.observe(toolbar.parentElement);
 
-    const navbar = document.querySelector(".navbar");
-    if (navbar) resizeObserver.observe(navbar);
+    document.querySelectorAll(".navbar, .app-header").forEach((barra) => resizeObserver.observe(barra));
 
     window.addEventListener("scroll", updateStuckState, { passive: true });
 
@@ -329,21 +387,59 @@ function setupStickyPagination() {
     // com a busca/um select da toolbar em uso.
     let ultimoY = window.scrollY;
     let descidaAcumulada = 0;
-    let rolagemAutomatica = false;
+    let subidaAcumulada = 0;
 
-    // Mesma conta de setupScrollToTopButton: offsetTop é a posição "normal"
-    // da toolbar no fluxo, mesmo com ela grudada
-    const toolbarGrudada = () => window.scrollY >= toolbar.offsetTop - getToolbarStickyTop(toolbar);
+    // No celular a barra de endereço do navegador aparece/some ao rolar e muda
+    // innerHeight (e mexe no scroll sem o usuário rolar). Os limites abaixo
+    // usam a altura da abertura - refeita só ao girar o aparelho - e as
+    // mudanças de altura no meio da rolagem são ignoradas (atualizarBarrasOcultas).
+    let alturaBase = window.innerHeight;
+    let ultimaAltura = window.innerHeight;
+    window.addEventListener("orientationchange", () => {
+        setTimeout(() => {
+            alturaBase = window.innerHeight;
+        }, 300);
+    });
+
+    // Posição normal guardada (topoToolbar), não o offsetTop, que grudado
+    // acompanha o scroll (ver getTopoNatural)
+    const toolbarGrudada = () => window.scrollY >= topoToolbar - getToolbarStickyTop(toolbar);
 
     // Desktop só esconde depois de descer ~30% da tela com a toolbar já grudada
     // (2-3 voltas da rodinha, que rola ~100px cada): o início do sticky não é
     // brusco. No toque segue imediato.
-    const limiarDescida = () => window.matchMedia("(pointer: fine)").matches ? window.innerHeight * 0.3 : 0;
+    const limiarDescida = () => window.matchMedia("(pointer: fine)").matches ? alturaBase * 0.3 : 0;
+
+    // Pra mostrar de novo: no mouse, qualquer rolagem pra cima; no toque, ~40px
+    // de subida acumulada - pequenas voltas no meio do arrasto do dedo faziam
+    // as barras piscarem (aparece, some, aparece)
+    const limiarSubida = () => window.matchMedia("(pointer: fine)").matches ? 0 : 40;
+
+    // No layout de app do celular (css/layout/app-mobile.css) a toolbar já
+    // nasce grudada no header: sem um piso, o header minimizava logo no
+    // começo da lista e deixava o topo vazio. Só minimiza passando de ~20%
+    // da tela rolados.
+    const inicioMinimo = () =>
+        document.body.classList.contains("app-mobile") && window.matchMedia("(max-width: 600px)").matches
+            ? alturaBase * 0.2
+            : 0;
 
     function atualizarBarrasOcultas() {
-        if (rolagemAutomatica) return;
-
         const y = window.scrollY;
+
+        // Barra de endereço do navegador mudando a altura da tela: o scroll
+        // que vem junto não é do usuário
+        if (window.innerHeight !== ultimaAltura) {
+            ultimaAltura = window.innerHeight;
+            ultimoY = y;
+            return;
+        }
+
+        // Efeito elástico nas pontas (iOS): a página passa do limite e volta
+        // sozinha - a volta parecia rolagem pra cima e mostrava as barras
+        const maxY = document.documentElement.scrollHeight - window.innerHeight;
+        if (y < 0 || y > maxY) return;
+
         const delta = y - ultimoY;
         if (Math.abs(delta) < 6) return;
         ultimoY = y;
@@ -352,19 +448,33 @@ function setupStickyPagination() {
         // depois de uma ação), não rolagem do usuário
         if (Math.abs(delta) > window.innerHeight) {
             descidaAcumulada = 0;
+            subidaAcumulada = 0;
             return;
         }
 
         const raiz = document.documentElement;
+
+        // Rolagem do usuário: acaba a exceção do header expandido da abertura
+        // já rolada (header-aberto, ver css/layout/app-mobile.css)
+        raiz.classList.remove("header-aberto");
         const ativo = document.activeElement;
         const editando = toolbar.contains(ativo) && ativo.matches("input, select, textarea");
 
-        if (delta < 0 || !toolbarGrudada() || editando) {
+        if (!toolbarGrudada() || y < inicioMinimo() || editando) {
             descidaAcumulada = 0;
+            subidaAcumulada = 0;
             raiz.classList.remove("barras-ocultas");
             return;
         }
 
+        if (delta < 0) {
+            descidaAcumulada = 0;
+            subidaAcumulada -= delta;
+            if (subidaAcumulada > limiarSubida()) raiz.classList.remove("barras-ocultas");
+            return;
+        }
+
+        subidaAcumulada = 0;
         descidaAcumulada += delta;
         if (descidaAcumulada > limiarDescida()) raiz.classList.add("barras-ocultas");
     }
@@ -372,12 +482,24 @@ function setupStickyPagination() {
     window.addEventListener("scroll", atualizarBarrasOcultas, { passive: true });
 
     // Abertura já focada num trecho (ex.: "Ver movimentações" de um frasco):
-    // rola até ele logo abaixo da navbar, com as barras saindo junto da rolagem
+    // a página já aparece cortada logo acima dele, sem rolar na frente do
+    // usuário. requestAnimationFrame roda depois de todos os scripts do fim do
+    // <body> (filtros e paginação já aplicados, então a altura final da página
+    // já vale) e antes do 1º quadro - a pintura fica segura até lá pelo
+    // <link rel="expect" blocking="render"> dos painéis. A cascata de entrada
+    // da lista (animarEntradaResultados, filters.js) vem no quadro seguinte.
+    // Toolbar e paginação já nascem escondidas (script no <head> da página).
     const rolarPara = document.querySelector("[data-rolar-ao-abrir]");
     if (rolarPara) {
-        setTimeout(() => {
-            const navbar = document.querySelector(".navbar");
-            const alvo = Math.max(rolarPara.getBoundingClientRect().top + window.scrollY - (navbar?.offsetHeight || 0) - 16, 0);
+        requestAnimationFrame(() => {
+            // O que fica por cima: a navbar (desktop/tablet) ou, no celular, a
+            // faixa do header minimizado. getBoundingClientRect já considera o
+            // header recolhido; o que está escondido mede 0.
+            const topo = Math.max(
+                0,
+                ...Array.from(document.querySelectorAll(".navbar, .app-header"), (barra) => barra.getBoundingClientRect().bottom)
+            );
+            const alvo = Math.max(rolarPara.getBoundingClientRect().top + window.scrollY - topo - 16, 0);
 
             // Página curta: sem altura pra chegar ao alvo, completa o que falta embaixo
             const falta = alvo + window.innerHeight - document.documentElement.scrollHeight;
@@ -386,21 +508,14 @@ function setupStickyPagination() {
                 pagina.style.paddingBottom = `${parseFloat(getComputedStyle(pagina).paddingBottom) + falta}px`;
             }
 
-            // Pausa a lógica do scroll durante a rolagem automática, senão ela
-            // reapareceria as barras enquanto a toolbar ainda não grudou
-            rolagemAutomatica = true;
-            const terminar = () => {
-                if (!rolagemAutomatica) return;
-                rolagemAutomatica = false;
-                ultimoY = window.scrollY;
-                descidaAcumulada = 0;
-            };
-            window.addEventListener("scrollend", terminar, { once: true });
-            setTimeout(terminar, 1200);
-
             document.documentElement.classList.add("barras-ocultas");
-            window.scrollTo({ top: alvo, behavior: "smooth" });
-        }, 150);
+            window.scrollTo({ top: alvo, behavior: "instant" });
+
+            // O scroll que essa rolagem dispara não é do usuário: parte daqui
+            ultimoY = window.scrollY;
+            descidaAcumulada = 0;
+            subidaAcumulada = 0;
+        });
     }
     window.addEventListener("resize", () => {
         // A media query de altura muda o espaço sem mudar o tamanho da
@@ -429,10 +544,18 @@ function setupScrollToTopButton() {
     document.body.appendChild(button);
     lucide.createIcons();
 
-    // offsetTop reflete a posição "normal" (sem sticky) da toolbar no
-    // fluxo do documento, mesmo enquanto ela está grudada — por isso
-    // dá pra comparar direto com o scroll atual pra saber se ela já
-    // colou no topo, sem precisar de sentinela.
+    // A posição normal (sem sticky) da toolbar vem do getTopoNatural,
+    // guardada e refeita quando algo muda de tamanho - o offsetTop,
+    // grudado, acompanha o scroll (ver getTopoNatural).
+    let topoToolbar = getTopoNatural(toolbar);
+
+    const resizeObserver = new ResizeObserver(() => {
+        topoToolbar = getTopoNatural(toolbar);
+    });
+    resizeObserver.observe(toolbar);
+    resizeObserver.observe(toolbar.parentElement);
+    document.querySelectorAll(".navbar, .app-header").forEach((barra) => resizeObserver.observe(barra));
+
     //
     // STUCK_HYSTERESIS existe por causa de historico_solicitacoes.css:
     // assim que .toolbar--stuck entra, Pendentes/Concluídas encolhem e
@@ -515,17 +638,32 @@ function setupScrollToTopButton() {
         }, REFLOW_MS + 50);
     }
 
+    const appMobileMQ = window.matchMedia("(max-width: 600px)");
+
+    function limiarExtraBotao() {
+        return document.body.classList.contains("app-mobile") && appMobileMQ.matches
+            ? window.innerHeight * 0.55
+            : 0;
+    }
+
+    function updateButton() {
+        button.classList.toggle("is-visible", isStuck && window.scrollY >= limiarExtraBotao());
+    }
+
     function updateVisibility() {
-        const threshold = toolbar.offsetTop - getToolbarStickyTop(toolbar);
+        const threshold = topoToolbar - getToolbarStickyTop(toolbar);
 
         const nowStuck = isStuck
             ? window.scrollY >= threshold - STUCK_HYSTERESIS
             : window.scrollY >= threshold;
 
-        if (nowStuck === isStuck) return;
+        if (nowStuck === isStuck) {
+            updateButton();
+            return;
+        }
         isStuck = nowStuck;
 
-        button.classList.toggle("is-visible", isStuck);
+        updateButton();
 
         // Reaproveitada por historico_solicitacoes.css: .toolbar--stuck
         // só dispara o fade de Pendentes/Concluídas (opacity+transform),
@@ -615,6 +753,16 @@ function setupFlashToast() {
 const savedTheme = localStorage.getItem("theme")
     || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 applyTheme(savedTheme);
+
+// Libera as transições (html.carregando, ver base/globals.css) depois que
+// todos os scripts da página rodaram e o estado inicial foi pintado: o
+// DOMContentLoaded espera os <script> síncronos, e o 2º frame garante
+// que o navegador já aplicou os estilos sem transição
+document.addEventListener("DOMContentLoaded", () => {
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => document.documentElement.classList.remove("carregando"));
+    });
+});
 
 // Campos numéricos (quantidades): focar já seleciona o valor, pra digitar por
 // cima. No clique, o mouseup desfaria a seleção — por isso é cancelado quando

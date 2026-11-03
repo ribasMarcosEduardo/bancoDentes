@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
@@ -20,7 +20,7 @@
     <title>Cadastro de Frasco</title>
 </head>
 
-<body>
+<body class="app-mobile app-cadastro">
 
 <div class="background">
     <div class="blob blob--blue"></div>
@@ -28,6 +28,9 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<th:block th:with="appVoltar=@{/frasco/painel}">
+    <div th:replace="~{partials/app_mobile :: appHeader('')}"></div>
+</th:block>
 
 <main class="page page--compact">
     <section class="form-shell">
@@ -36,9 +39,6 @@
             <div class="toolbar__lead">
                 <h1 class="toolbar__title" th:text="${frascoDTO.codigo != null} ? 'Edição de Frasco' : 'Cadastro de Frasco'">Cadastro de Frasco</h1>
 
-                <!-- Em cadastro o identificador só nasce depois do POST (variante --pending),
-                     mas o prefixo (grupo + local) já é mostrado pelo forms.js; em edição
-                     mostra o valor real. -->
                 <div class="toolbar__identity">
                     <span class="toolbar__identity-icon" aria-hidden="true">
                         <i class="icon" data-lucide="flask-conical"></i>
@@ -73,6 +73,21 @@
             <input type="hidden" th:field="*{codigo}"/>
             <input type="hidden" th:field="*{version}"/>
 
+            <div class="cadastro-topo">
+                <h2 class="cadastro-titulo">
+                    <i class="icon" data-lucide="flask-conical" aria-hidden="true"></i>
+                    <span th:text="${frascoDTO.codigo != null} ? 'Editar frasco' : 'Cadastrar frasco'">Cadastrar frasco</span>
+                </h2>
+
+                <nav class="app-tabs cadastro-abas" data-select="#localFrasco" aria-label="Local">
+                    <span class="app-tabs__indicator"></span>
+                    <button type="button" class="app-tabs__btn"
+                            th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
+                            th:data-valor="${l.name()}"
+                            th:text="${l.name() == 'BDH'} ? 'Banco de Dentes' : ${l.nome}"></button>
+                </nav>
+            </div>
+
             <section class="form-section">
                 <h2 class="form-section__title"><i class="icon" data-lucide="flask-conical" aria-hidden="true"></i>Informações do Frasco</h2>
 
@@ -91,7 +106,7 @@
                         <p class="field-hint field-hint--icon" id="grupoDentarioHint"><i class="icon" data-lucide="info" aria-hidden="true"></i>Escolha o grupo para liberar os demais campos.</p>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="localGroup">
                         <label>Local</label>
                         <div class="select-wrapper">
                             <select class="form-control" th:field="*{local}" id="localFrasco">
@@ -110,6 +125,7 @@
                         <label>Estado do dente <span class="required-mark">*</span></label>
                         <div class="select-wrapper">
                             <select class="form-control" th:field="*{estadoDente}" id="estadoDente" required disabled>
+                                <option value="">Selecione o estado</option>
                                 <option th:each="estado : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
                                         th:value="${estado.name()}" th:text="${estado}"></option>
                             </select>
@@ -131,6 +147,14 @@
                             </div>
                         </div>
                         <p class="field-hint field-hint--icon" th:if="${frascoDTO.codigo != null}"><i class="icon" data-lucide="info" aria-hidden="true"></i>Para alterar a quantidade, registre uma movimentação.</p>
+                    </div>
+
+                    <div class="form-group cadastro-opcionais">
+                        <label for="opcionaisToggle">Campos opcionais</label>
+                        <div class="cadastro-opcionais__campo">
+                            <i class="icon" data-lucide="sliders-horizontal" aria-hidden="true"></i>
+                            <input type="checkbox" class="switch" id="opcionaisToggle">
+                        </div>
                     </div>
                 </div>
             </section>
@@ -172,8 +196,8 @@
                         <p class="field-hint" id="numeracaoHint"></p>
                     </div>
 
-                    <div class="form-group">
-                        <label>Data de cadastro <span class="required-mark">*</span></label>
+                    <div class="form-group" id="datCadGroup">
+                        <label><span class="rotulo-longo">Data de cadastro</span><span class="rotulo-curto">Cadastro</span> <span class="required-mark">*</span></label>
                         <div class="date-wrapper">
                             <input class="form-control atributos-control"
                                    type="date"
@@ -187,8 +211,8 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Data de manutenção <span class="required-mark">*</span></label>
+                    <div class="form-group" id="datManutencaoGroup">
+                        <label><span class="rotulo-longo">Data de manutenção</span><span class="rotulo-curto">Manutenção</span> <span class="required-mark">*</span></label>
                         <div class="date-wrapper">
                             <input class="form-control atributos-control"
                                    type="date"
@@ -214,6 +238,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 <script th:src="@{/js/bundles/form.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 </body>
 </html>

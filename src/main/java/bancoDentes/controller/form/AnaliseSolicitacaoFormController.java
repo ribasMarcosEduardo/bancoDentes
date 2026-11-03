@@ -66,7 +66,8 @@ public class AnaliseSolicitacaoFormController extends BaseController {
     public String concluirSolicitacao(@RequestParam("codSolicitacao") Long codSolicitacao, RedirectAttributes redirectAttributes) {
         try {
             analiseSolicitacaoService.concluirSolicitacao(codSolicitacao);
-            return "redirect:/analiseSolicitacao/painel";
+            this.saveMessage(this.getText("msg.sucesso.solicitacao.concluida"));
+            return "redirect:/analiseSolicitacao/painel?etapa=finalizadas";
         } catch (AnaliseException e) {
             this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";

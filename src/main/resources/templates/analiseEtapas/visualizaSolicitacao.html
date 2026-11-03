@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
@@ -22,7 +22,7 @@
     <title>Análise de Solicitação</title>
 </head>
 
-<body>
+<body class="app-mobile analise-solicitacao">
 
 <div class="background">
     <div class="blob blob--blue"></div>
@@ -30,6 +30,9 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<th:block th:with="appVoltar=@{/analiseSolicitacao/painel}">
+    <div th:replace="~{partials/app_mobile :: appHeader('')}"></div>
+</th:block>
 
 <main class="page" th:with="status=${analise.solicitacao.statusSolicitacao.name()}">
     <section class="analysis-shell">
@@ -40,9 +43,15 @@
         </header>
 
         <div class="toolbar glass-frost">
-            <div class="toolbar__info">
-                <span class="toolbar__label">Código da Solicitação:</span>
-                <div class="toolbar__badge" th:text="'SOL-' + ${#numbers.formatInteger(analise.solicitacao.codigo, 3)}">SOL-000</div>
+            <div class="toolbar__identity">
+                <span class="toolbar__identity-icon" aria-hidden="true">
+                    <i class="icon" data-lucide="shopping-bag"></i>
+                </span>
+
+                <div class="toolbar__identity-text">
+                    <span class="toolbar__identity-label">Solicitação</span>
+                    <span class="toolbar__identity-value" th:text="'SOL-' + ${#numbers.formatInteger(analise.solicitacao.codigo, 3)}">SOL-000</span>
+                </div>
             </div>
 
             <div class="toolbar__actions-group">
@@ -78,25 +87,25 @@
         </div>
 
         <div class="stepper">
-            <div class="step" data-step="separacao" th:classappend="${status == 'EM_ANALISE' or status == 'EM_SEPARACAO' ? 'active' : 'completed'}">
+            <div class="step" data-step="separacao" th:classappend="${status == 'EM_ANALISE' or status == 'EM_SEPARACAO' ? 'step--active' : 'step--done'}">
                 <div class="step__circle">
                     <i class="icon" data-lucide="package"></i>
                 </div>
                 <span>Separação</span>
             </div>
 
-            <div class="stepper__line" th:classappend="${status != 'EM_ANALISE' and status != 'EM_SEPARACAO' ? 'completed' : ''}"></div>
+            <div class="stepper__line" th:classappend="${status != 'EM_ANALISE' and status != 'EM_SEPARACAO' ? 'is-filled' : ''}"></div>
 
-            <div class="step" data-step="retirada" th:classappend="${status == 'AGUARDANDO_RETIRADA' ? 'active' : (status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'completed' : '')}">
+            <div class="step" data-step="retirada" th:classappend="${status == 'AGUARDANDO_RETIRADA' ? 'step--active' : (status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'step--done' : '')}">
                 <div class="step__circle">
                     <i class="icon" data-lucide="package-check"></i>
                 </div>
                 <span>Retirada</span>
             </div>
 
-            <div class="stepper__line" th:classappend="${status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'completed' : ''}"></div>
+            <div class="stepper__line" th:classappend="${status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'is-filled' : ''}"></div>
 
-            <div class="step" data-step="concluido" th:classappend="${status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'active' : ''}">
+            <div class="step" data-step="concluido" th:classappend="${status == 'CONCLUIDO' or status == 'CONCLUIDA' ? 'step--active' : ''}">
                 <div class="step__circle">
                     <i class="icon" data-lucide="check-check"></i>
                 </div>
@@ -106,42 +115,70 @@
 
         <section class="analysis-step" data-step-panel="separacao" th:classappend="${status == 'EM_ANALISE' or status == 'EM_SEPARACAO' ? 'is-active' : ''}">
             <section class="analysis-grid">
-                <section class="analysis-card">
+                <section class="analysis-card" th:fragment="detalhesSolicitacao">
                     <header class="analysis-card__header">
                         <h2>Detalhes da Solicitação</h2>
                         <span class="status-pill" th:classappend="'status-pill--' + ${#strings.toLowerCase(status)}" th:text="${analise.solicitacao.statusSolicitacao.nome ?: status}"></span>
                     </header>
 
-                    <div class="analysis-details">
-                        <div class="analysis-detail">
-                            <span>Grupo dentário</span>
-                            <strong th:text="${analise.solicitacao.tipoDente}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Estado</span>
-                            <strong th:text="${analise.solicitacao.estado != null ? analise.solicitacao.estado : 'Não informado'}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Arcada</span>
-                            <strong th:text="${analise.solicitacao.arcada != null ? analise.solicitacao.arcada : 'Não informado'}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Dentição</span>
-                            <strong th:text="${analise.solicitacao.denticao != null ? analise.solicitacao.denticao.nome : 'Não informado'}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Quantidade solicitada</span>
-                            <strong th:text="${analise.solicitacao.quantidade} + ' dentes'">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Solicitante</span>
-                            <strong th:text="${analise.solicitacao.estudante.nome}">-</strong>
-                        </div>
-                    </div>
+                    <div class="analysis-card__body">
+                        <div class="frasco-details">
+                            <span class="frasco-details__icon" aria-hidden="true">
+                                <i class="icon" data-lucide="clipboard-list"></i>
+                            </span>
 
-                    <div class="analysis-notes">
-                        <h3>Observações</h3>
-                        <p th:text="${not #strings.isEmpty(analise.solicitacao.justificativa) ? analise.solicitacao.justificativa : 'Nenhuma observação informada.'}"></p>
+                            <div class="frasco-details__body">
+                                <div class="frasco-details__row">
+                                    <div class="request-detail">
+                                        <span class="request-details__label">Grupo dentário</span>
+                                        <span th:text="${analise.solicitacao.tipoDente}">Pré-Molar</span>
+                                    </div>
+
+                                    <div class="request-detail">
+                                        <span class="request-details__label">Estado</span>
+                                        <span th:if="${analise.solicitacao.estado != null}" th:text="${analise.solicitacao.estado}">Hígido</span>
+                                        <span th:unless="${analise.solicitacao.estado != null}" class="frasco-details__empty">Qualquer</span>
+                                    </div>
+
+                                    <div class="request-detail">
+                                        <span class="request-details__label">Arcada</span>
+                                        <span th:if="${analise.solicitacao.arcada != null}" th:text="${analise.solicitacao.arcada}">Superior</span>
+                                        <span th:unless="${analise.solicitacao.arcada != null}" class="frasco-details__empty">Qualquer</span>
+                                    </div>
+
+                                    <div class="request-detail">
+                                        <span class="request-details__label">Dentição</span>
+                                        <span th:if="${analise.solicitacao.denticao != null}" th:text="${analise.solicitacao.denticao.nome}">Permanente</span>
+                                        <span th:unless="${analise.solicitacao.denticao != null}" class="frasco-details__empty">Qualquer</span>
+                                    </div>
+                                </div>
+
+                                <div class="frasco-details__row">
+                                    <div class="request-detail">
+                                        <span class="request-details__label">Quantidade</span>
+                                        <span class="frasco-details__icone"><i class="icon" data-lucide="package" aria-hidden="true"></i><th:block th:text="${analise.solicitacao.quantidade} + ' dentes'">10 dentes</th:block></span>
+                                    </div>
+
+                                    <div class="request-detail frasco-details__span-2">
+                                        <span class="request-details__label">Solicitante</span>
+                                        <span class="frasco-details__icone"><i class="icon" data-lucide="user-round" aria-hidden="true"></i><th:block th:text="${analise.solicitacao.estudante.nome}">Nome do aluno</th:block></span>
+                                    </div>
+
+                                    <div class="request-detail">
+                                        <span class="request-details__label">Enviada em</span>
+                                        <span class="frasco-details__icone"><i class="icon" data-lucide="calendar" aria-hidden="true"></i><th:block th:text="${#temporals.format(analise.solicitacao.datSolicitacao, 'dd/MM/yyyy')}">21/06/2026</th:block></span>
+                                    </div>
+                                </div>
+
+                                <div class="frasco-details__note">
+                                    <span class="request-details__label">Observações</span>
+                                    <div class="request-notes request-notes--compact"
+                                         th:classappend="${#strings.isEmpty(analise.solicitacao.justificativa)} ? 'request-notes--empty'"
+                                         th:text="${not #strings.isEmpty(analise.solicitacao.justificativa) ? analise.solicitacao.justificativa : 'Nenhuma observação informada.'}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -202,44 +239,7 @@
             </section>
 
             <section class="analysis-grid">
-                <section class="analysis-card">
-                    <header class="analysis-card__header">
-                        <h2>Detalhes da Solicitação</h2>
-                        <span class="status-pill status-pill--aguardando_retirada">Aguardando Retirada</span>
-                    </header>
-
-                    <div class="analysis-details">
-                        <div class="analysis-detail">
-                            <span>Grupo dentário</span>
-                            <strong th:text="${analise.solicitacao.tipoDente}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Estado</span>
-                            <strong th:text="${analise.solicitacao.estado != null ? analise.solicitacao.estado : 'Não informado'}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Arcada</span>
-                            <strong th:text="${analise.solicitacao.arcada != null ? analise.solicitacao.arcada : 'Não informado'}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Dentição</span>
-                            <strong th:text="${analise.solicitacao.denticao != null ? analise.solicitacao.denticao.nome : 'Não informado'}">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Quantidade solicitada</span>
-                            <strong th:text="${analise.solicitacao.quantidade} + ' dentes'">-</strong>
-                        </div>
-                        <div class="analysis-detail">
-                            <span>Solicitante</span>
-                            <strong th:text="${analise.solicitacao.estudante.nome}">-</strong>
-                        </div>
-                    </div>
-
-                    <div class="analysis-notes">
-                        <h3>Observações</h3>
-                        <p th:text="${not #strings.isEmpty(analise.solicitacao.justificativa) ? analise.solicitacao.justificativa : 'Nenhuma observação informada.'}"></p>
-                    </div>
-                </section>
+                <section th:replace="~{analiseEtapas/visualizaSolicitacao :: detalhesSolicitacao}"></section>
 
                 <section class="analysis-card">
                     <header class="analysis-card__header">
@@ -284,7 +284,7 @@
                 <div class="analysis-details">
                     <div class="analysis-detail">
                         <span>Data de conclusão</span>
-                        <strong>---</strong>
+                        <strong th:text="${analise.solicitacao.dataFinalizacao != null ? #temporals.format(analise.solicitacao.dataFinalizacao, 'dd/MM/yyyy') : '---'}">---</strong>
                     </div>
 
                     <div class="analysis-detail">
@@ -310,7 +310,7 @@
                 <i class="icon" data-lucide="x"></i>
             </button>
             <div class="modal-header-progress">
-                <div class="modal-header-progress__fill" id="modalBuscaFrascoProgressFill" th:style="'width: ' + (${totSep} * 100.0 / ${analise.solicitacao.quantidade}) + '%;'"></div>
+                <div class="modal-header-progress__fill" id="modalBuscaFrascoProgressFill" th:style="'--progresso: ' + (${totSep} * 1.0 / ${analise.solicitacao.quantidade}) + ';'"></div>
             </div>
         </header>
 
@@ -367,8 +367,8 @@
 <div th:replace="~{partials/footer :: footer}"></div>
 
 <script th:src="@{/js/bundles/form.js}"></script>
-<script th:src="@{/js/analysis.js}"></script>
 <script th:src="@{/js/requests.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 <script th:inline="javascript">
     window.DADOS_ANALISE = {
@@ -379,80 +379,111 @@
         itensSalvos: /*[[${itensSalvos}]]*/ []
     };
 
+    // Confirmações no padrão dos painéis (ícone, botões .btn do app via
+    // buttonsStyling:false, Cancelar à esquerda com reverseButtons)
+    const SWAL_BOTOES = {
+        buttonsStyling: false,
+        reverseButtons: true,
+        showCancelButton: true,
+        cancelButtonText: "Voltar"
+    };
+
     function confirmarSeparacao(event) {
         event.preventDefault();
         const form = event.target;
+
+        // Números já na tela (barra de progresso e lista de frascos, mantidas
+        // em dia pelo frasco-search-solicitacao.js)
+        const progresso = document.querySelector('[data-step-panel="separacao"] .analysis-progress__text strong');
+        const numeros = progresso?.textContent.match(/(\d+)\s*\/\s*(\d+)/);
+        const separados = numeros ? Number(numeros[1]) : 0;
+        const total = numeros ? Number(numeros[2]) : 0;
+        const frascos = document.querySelectorAll('[data-step-panel="separacao"] .selected-flasks .request-row').length;
+        const plural = frascos === 1 ? "" : "s";
+        const incompleta = total > 0 && separados < total;
+
         Swal.fire({
-            title: 'Confirmar Separação',
-            text: 'Deseja realmente finalizar a separação e colocar o pedido como aguardando retirada?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sim, confirmar',
-            cancelButtonText: 'Cancelar'
+            ...SWAL_BOTOES,
+            icon: incompleta ? "warning" : "question",
+            title: incompleta ? "Separação incompleta" : "Confirmar separação?",
+            html: (incompleta
+                    ? `Foram separados <strong>${separados} de ${total} dentes</strong>. `
+                    : "")
+                + `Confirmar desconta <strong>${separados} dentes</strong> do${plural} ${frascos} frasco${plural} selecionado${plural}
+                   e deixa o pedido aguardando retirada. Essa ação não pode ser desfeita.`,
+            focusCancel: true,
+            confirmButtonText: incompleta ? "Confirmar mesmo assim" : "Confirmar separação",
+            customClass: {
+                confirmButton: "btn btn-primary",
+                cancelButton: "btn btn-secondary",
+            },
         }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
+            if (result.isConfirmed) form.submit();
         });
+
         return false;
     }
 
     function confirmarRetirada(event) {
         event.preventDefault();
         const form = event.target;
+
         Swal.fire({
-            title: 'Confirmar Retirada',
-            text: 'Deseja realmente concluir a solicitação?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sim, concluir',
-            cancelButtonText: 'Cancelar'
+            ...SWAL_BOTOES,
+            icon: "question",
+            title: "Confirmar retirada?",
+            text: "O acadêmico retirou os dentes? A solicitação será concluída.",
+            confirmButtonText: "Sim, concluir",
+            customClass: {
+                confirmButton: "btn btn-primary",
+                cancelButton: "btn btn-secondary",
+            },
         }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
-            }
+            if (result.isConfirmed) form.submit();
         });
+
         return false;
     }
 </script>
 
 <script th:src="@{/js/frasco-search-solicitacao.js}"></script>
 
-<script th:inline="javascript">
+<script>
     document.addEventListener("DOMContentLoaded", function() {
         lucide.createIcons();
 
-        const btnCancelar = document.getElementById('cancelRequestBtn');
-        if(btnCancelar) {
-            btnCancelar.addEventListener('click', function(e) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Cancelar Pedido',
-                    text: 'Informe o motivo do cancelamento/negação deste pedido:',
-                    input: 'textarea',
-                    inputPlaceholder: 'Digite a justificativa...',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Confirmar',
-                    cancelButtonText: 'Voltar',
-                    inputValidator: (value) => {
-                        if (!value || value.trim() === '') {
-                            return 'A justificativa é obrigatória!';
-                        }
+        const btnCancelar = document.getElementById("cancelRequestBtn");
+        if (!btnCancelar) return;
+
+        btnCancelar.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                ...SWAL_BOTOES,
+                icon: "warning",
+                title: "Cancelar pedido?",
+                text: "Essa ação não pode ser desfeita. Descreva o motivo do cancelamento, que fica visível pro acadêmico.",
+                input: "textarea",
+                inputPlaceholder: "Justificativa...",
+                inputAttributes: { "aria-label": "Motivo do cancelamento" },
+                focusCancel: true,
+                confirmButtonText: "Cancelar pedido",
+                customClass: {
+                    confirmButton: "btn btn-outline btn-outline-danger",
+                    cancelButton: "btn btn-secondary",
+                },
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return "Informe o motivo do cancelamento.";
                     }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('justificativaNegacao').value = result.value;
-                        document.getElementById('formNegarAnalise').submit();
-                    }
-                });
+                },
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                document.getElementById("justificativaNegacao").value = result.value;
+                document.getElementById("formNegarAnalise").submit();
             });
-        }
+        });
     });
 </script>
 

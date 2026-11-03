@@ -8,7 +8,7 @@
     (function () {
         var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-        document.documentElement.classList.add(theme);
+        document.documentElement.classList.add(theme, "carregando");
     })();
   </script>
 
@@ -57,7 +57,7 @@
 
       <div class="step step--active" data-step="selecao">
         <div class="step__circle">
-          <i class="icon" data-lucide="list-checks"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-checks icon" aria-hidden="true"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg>
         </div>
         <span>Selecionar frascos</span>
       </div>
@@ -66,7 +66,7 @@
 
       <div class="step" data-step="configurar">
         <div class="step__circle">
-          <i class="icon" data-lucide="layout-grid"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid icon" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
         </div>
         <span>Configurar folha</span>
       </div>
@@ -75,12 +75,11 @@
 
       <div class="step" data-step="gerar">
         <div class="step__circle">
-          <i class="icon" data-lucide="printer"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer icon" aria-hidden="true"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
         </div>
         <span>Gerar</span>
       </div>
 
-      <!-- Versão compacta do stepper (abaixo de tablet, ver css/pages/etiquetas.css) -->
       <div class="etapa-compacta etapa-compacta--etapa-1">
         <div class="etapa-compacta__anel">
           <svg viewBox="0 0 56 56" aria-hidden="true">
@@ -95,6 +94,33 @@
           <span class="etapa-compacta__proxima">Próxima: Configurar folha</span>
         </div>
       </div>
+
+      <script>
+        // Enchimento do anel do stepper compacto: parte do progresso da etapa
+        // de onde se veio e vai até o desta (--progresso, css/pages/etiquetas.css)
+        // - cresce ao avançar, esvazia ao voltar. Inline logo após o anel pra
+        // valer já no 1º paint (fill backwards). Dentro do fluxo (com View
+        // Transition) espera o card do stepper terminar de se transformar.
+        // Mesmo script em configurarEtiquetas.html.
+        (function () {
+          var anel = document.querySelector(".etapa-compacta__progresso");
+          if (!anel || !anel.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+          var progressoPorEtapa = { "/etiqueta/fila": 33.33, "/etiqueta/configurar": 66.67, "/etiqueta/imprimir": 100 };
+          var origem = document.referrer ? new URL(document.referrer).pathname : "";
+          var ate = parseFloat(getComputedStyle(anel).getPropertyValue("--progresso"));
+          var de = origem in progressoPorEtapa ? progressoPorEtapa[origem] : ate - 33.33;
+
+          if (isNaN(ate) || Math.abs(de - ate) < 1) return;
+
+          var comTransicao = origem.indexOf("/etiqueta/") === 0 && origem !== "/etiqueta/imprimir";
+
+          anel.animate(
+            [{ strokeDashoffset: String(100 - de) }, { strokeDashoffset: String(100 - ate) }],
+            { duration: 600, delay: comTransicao ? 350 : 150, easing: "cubic-bezier(0.65, 0, 0.35, 1)", fill: "backwards" }
+          );
+        })();
+      </script>
     </div>
 
     <th:block th:if="${#lists.isEmpty(frascos)}">
@@ -103,7 +129,6 @@
     </th:block>
 
     <form th:if="${!#lists.isEmpty(frascos)}" id="formFilaEtiquetas" th:action="@{/etiqueta/configurar}" method="post">
-      <!-- Só aparece com mais de uma página (etiquetas-fila.js) -->
       <div class="pagination__nav etiqueta-fila-paginacao" id="filaPaginacao" hidden>
         <span class="pagination__range" id="filaPaginacaoRange">1-20</span>
 
@@ -145,8 +170,6 @@
                   th:title="${frasco.prazoManutencao.descricao}"><i class="icon" th:attr="data-lucide=${frasco.prazoManutencao.icone}" aria-hidden="true"></i><th:block th:text="${#temporals.format(frasco.datManutencao, 'dd/MM/yy')}">21/06/26</th:block></span>
             <span th:unless="${frasco.prazoManutencao != null}">---</span>
             <div class="result-list__actions">
-              <!-- Sem form próprio (não dá pra aninhar form): submete o form da
-                   fila com formaction apontando pra remoção deste frasco. -->
               <button type="submit" class="result-list__action result-list__action--red js-remover-fila"
                       th:formaction="@{/etiqueta/removerFila/{id}(id=${frasco.codigo})}"
                       th:data-identificacao="${frasco.identificacao}"
@@ -172,7 +195,6 @@
       <span class="btn__label">Voltar</span>
     </a>
 
-    <!-- Pra quando a aba de impressão foi fechada antes de confirmar -->
     <button type="submit" form="formFilaEtiquetas" class="btn btn-tonal" id="btnConfirmarImpressaoFila"
             th:formaction="@{/etiqueta/confirmar}"
             th:disabled="${#lists.isEmpty(frascos)}">

@@ -64,6 +64,12 @@ public class SolicitacaoPainelController extends BaseController{
     public String cadastrarSolicitacao(Model model) {
         try {
             Estudante usuarioLogado = this.estudanteService.buscarPorId(2L);
+
+            if (usuarioLogado.getCredito() <= 0) {
+                this.saveError(this.getText("error.solicitacao.semSaldo"));
+                return "redirect:/solicitacao/painel";
+            }
+
             model.addAttribute("solicitacaoDTO", SolicitacaoDTO.empty());
             model.addAttribute("usuarioLogado", usuarioLogado);
 

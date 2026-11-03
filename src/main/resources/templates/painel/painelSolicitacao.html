@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
@@ -28,7 +28,6 @@
         });
     </script>
 
-    <!-- Só pinta depois dos scripts do fim do <body> (filtros e ícones prontos) -->
     <link rel="expect" href="#painel-fim" blocking="render">
 
     <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
@@ -42,7 +41,7 @@
     <title>Histórico de Solicitações</title>
 </head>
 
-<body>
+<body class="app-mobile painel-minhas-solicitacoes" th:data-saldo="${usuarioLogado.credito}">
 
 <div id="solicitacaoConteudo">
 
@@ -52,6 +51,7 @@
     </div>
 
     <div th:replace="~{partials/navbar :: navbar}"></div>
+    <div th:replace="~{partials/app_mobile :: appHeader('etapa')}"></div>
 
     <main class="page">
         <section class="dashboard">
@@ -73,15 +73,15 @@
                         </button>
                         <div class="filter-section__content">
                           <div class="filter-section__inner">
-                              <label class="checkbox-filter"><input type="checkbox" value="Pendente"
+                              <label class="checkbox-filter" data-etapa-filtro="pendentes"><input type="checkbox" value="Pendente"
                                                                     data-filter-group="Status"><span>Pendente</span></label>
-                              <label class="checkbox-filter"><input type="checkbox" value="Em analise"
+                              <label class="checkbox-filter" data-etapa-filtro="andamento"><input type="checkbox" value="Em análise"
                                                                     data-filter-group="Status"><span>Em análise</span></label>
-                              <label class="checkbox-filter"><input type="checkbox" value="Aguardando retirada"
+                              <label class="checkbox-filter" data-etapa-filtro="andamento"><input type="checkbox" value="Aguardando retirada"
                                                                     data-filter-group="Status"><span>Aguardando retirada</span></label>
-                              <label class="checkbox-filter"><input type="checkbox" value="Concluído"
+                              <label class="checkbox-filter" data-etapa-filtro="finalizadas"><input type="checkbox" value="Concluído"
                                                                     data-filter-group="Status"><span>Concluído</span></label>
-                              <label class="checkbox-filter"><input type="checkbox" value="Negado"
+                              <label class="checkbox-filter" data-etapa-filtro="finalizadas"><input type="checkbox" value="Negado"
                                                                     data-filter-group="Status"><span>Negado</span></label>
                           </div>
                         </div>
@@ -162,6 +162,21 @@
                     <p>Acompanhe e gerencie suas solicitações acadêmicas.</p>
                 </header>
 
+                <div class="resumo-solicitacoes" aria-label="Resumo">
+                    <div class="resumo-solicitacoes__item">
+                        <span>Saldo atual</span>
+                        <strong th:text="${usuarioLogado.credito}">0</strong>
+                    </div>
+                    <div class="resumo-solicitacoes__item">
+                        <span>Pendentes</span>
+                        <strong th:text="${pendentes}">0</strong>
+                    </div>
+                    <div class="resumo-solicitacoes__item">
+                        <span>Concluídas</span>
+                        <strong th:text="${concluidas}">0</strong>
+                    </div>
+                </div>
+
                 <div class="toolbar glass-frost">
                     <div class="toolbar__stats">
                         <div class="toolbar-stat">
@@ -205,7 +220,7 @@
                                 <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                             </button>
 
-                            <a th:href="@{/solicitacao/cadastrarSolicitacao}" class="btn btn-primary">
+                            <a th:href="@{/solicitacao/cadastrarSolicitacao}" class="btn btn-primary toolbar__novo" aria-label="Nova solicitação">
                                 <i class="orderBy-icon" data-lucide="plus"></i>
                                 <span class="btn-label--full">Nova solicitação</span>
                                 <span class="btn-label--short">Solicitar</span>
@@ -236,6 +251,13 @@
                         </div>
 
                         <div class="pagination__actions">
+                            <div class="sector-switch" id="etapaSwitch" role="group" aria-label="Etapa da solicitação">
+                                <span class="sector-switch__indicator"></span>
+                                <button type="button" class="sector-switch__btn active" data-etapa="pendentes" aria-pressed="true">Pendentes</button>
+                                <button type="button" class="sector-switch__btn" data-etapa="andamento" aria-pressed="false">Em andamento</button>
+                                <button type="button" class="sector-switch__btn" data-etapa="finalizadas" aria-pressed="false">Finalizadas</button>
+                            </div>
+
                             <div class="pagination__nav">
                                 <span class="pagination__range" id="paginationRange">1-1</span>
 
@@ -254,7 +276,7 @@
                         </div>
                     </th:block>
 
-                    <section th:if="${!#lists.isEmpty(solicitacoes)}" class="results results--list">
+                    <section th:if="${!#lists.isEmpty(solicitacoes)}" class="results results--list" id="resultsView">
 
                         <div id="emptyStateFiltro" hidden
                              th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhuma solicitação encontrada', 'Nenhuma solicitação corresponde aos filtros aplicados. Tente ajustar ou resetar os filtros.', true)}">
@@ -278,22 +300,26 @@
                                      th:data-grupo="${solicitacao.tipoDente}"
                                      th:data-estado="${solicitacao.estado != null ? solicitacao.estado.nome : ''}"
                                      th:data-arcada="${solicitacao.arcada != null ? solicitacao.arcada.nome : ''}"
-                                     th:data-denticao="${solicitacao.denticao != null ? solicitacao.denticao.nome : ''}">
+                                     th:data-denticao="${solicitacao.denticao != null ? solicitacao.denticao.nome : ''}"
+                                     th:data-etapa="${solicitacao.statusSolicitacao.name() == 'PENDENTE' ? 'pendentes' : (solicitacao.statusSolicitacao.name() == 'CONCLUIDO' or solicitacao.statusSolicitacao.name() == 'NEGADO' ? 'finalizadas' : 'andamento')}">
 
                                 <div class="result-list">
                                     <span class="result-list__code"
                                           th:text="'SOL-' + ${#numbers.formatInteger(solicitacao.codigo, 3)}"></span>
                                     <span th:text="${solicitacao.tipoDente}"></span>
-                                    <span th:text="${solicitacao.quantidade}"></span>
+                                    <span data-rotulo-prefixo="Qtd." th:text="${solicitacao.quantidade}"></span>
 
                                     <span class="status-pill"
                                           th:classappend="'status-pill--' + ${#strings.toLowerCase(solicitacao.statusSolicitacao.name())}"
                                           th:text="${solicitacao.statusSolicitacao.nome}"></span>
 
-                                    <span th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy')}"></span>
+                                    <span data-rotulo="Data" th:text="${#temporals.format(solicitacao.datSolicitacao, 'dd/MM/yyyy')}"></span>
                                     <button class="request-toggle request-toggle--plain" type="button" aria-label="Expandir solicitação"><i class="icon"
                                                                                                           data-lucide="chevron-down"></i>
                                     </button>
+
+                                    <span class="result-list__mobile" data-rotulo="Estado"
+                                          th:text="${solicitacao.estado != null ? solicitacao.estado.nome : '---'}"></span>
                                 </div>
 
                                 <div class="request-details">
@@ -304,6 +330,10 @@
                                                 <h4 class="request-panel__title">Detalhes da Solicitação</h4>
                                                 <div class="request-details__grid">
                                                     <div class="request-detail">
+                                                        <span class="request-details__label">Grupo dentário</span>
+                                                        <span th:text="${solicitacao.tipoDente != null ? solicitacao.tipoDente : '---'}"></span>
+                                                    </div>
+                                                    <div class="request-detail">
                                                         <span class="request-details__label">Arcada</span>
                                                         <span th:text="${solicitacao.arcada != null ? solicitacao.arcada.nome : '---'}"></span>
                                                     </div>
@@ -311,7 +341,7 @@
                                                         <span class="request-details__label">Dentição</span>
                                                         <span th:text="${solicitacao.denticao != null ? solicitacao.denticao.nome : '---'}"></span>
                                                     </div>
-                                                    <div class="request-detail">
+                                                    <div class="request-detail request-detail--na-linha">
                                                         <span class="request-details__label">Estado</span>
                                                         <span th:text="${solicitacao.estado != null ? solicitacao.estado.nome : '---'}"></span>
                                                     </div>
@@ -319,7 +349,7 @@
                                                         <span class="request-details__label">Posição</span>
                                                         <span th:text="${solicitacao.posicao != null ? solicitacao.posicao : '---'}"></span>
                                                     </div>
-                                                    <div class="request-detail">
+                                                    <div class="request-detail request-detail--na-linha">
                                                         <span class="request-details__label">Quantidade</span>
                                                         <span th:text="${solicitacao.quantidade}"></span>
                                                     </div>
@@ -336,41 +366,35 @@
 
                                             <section class="request-panel"
                                                      th:if="${solicitacao.statusSolicitacao.name() == 'NEGADO'}">
-                                                <h4 class="request-panel__title"
-                                                    style="color: #dc3545; display: flex; align-items: center; gap: 6px;">
-                                                    <i class="icon" data-lucide="message-square-x"
-                                                       style="width: 16px; height: 16px;"></i>
+                                                <h4 class="request-panel__title request-panel__title--negado">
+                                                    <i class="icon" data-lucide="message-square-x"></i>
                                                     Justificativa do Avaliador
                                                 </h4>
-                                                <div class="request-notes"
-                                                     style="background-color: #fff5f5; border-left: 4px solid #dc3545; color: #b02a37;">
+                                                <div class="request-notes request-notes--negado">
                                                     <span th:text="${solicitacao.analiseSolicitacao != null ? solicitacao.analiseSolicitacao.justificativa : 'O avaliador não deixou nenhuma justificativa.'}"></span>
                                                 </div>
                                             </section>
 
                                         </div>
 
-                                        <div class="request-details__actions" th:if="${solicitacao.editavel}"
-                                             style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
-                                            <div style="font-size: 0.85rem; color: #6c757d; display: flex; align-items: center; gap: 6px; background: rgba(255, 206, 86, 0.2); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255, 206, 86, 0.4);">
-                                                <i class="icon" data-lucide="clock"
-                                                   style="width: 14px; height: 14px; color: #d39e00;"></i>
+                                        <div class="request-details__actions solicitacao-edicao" th:if="${solicitacao.editavel}">
+                                            <div class="solicitacao-edicao__aviso">
+                                                <i class="icon" data-lucide="clock"></i>
                                                 <span>Disponível para edição até às <strong
                                                         th:text="${#temporals.format(solicitacao.datSolicitacao.plusHours(4), 'HH:mm')}"></strong>
                                                 de <strong th:text="${#temporals.format(solicitacao.datSolicitacao.plusHours(4), 'dd/MM/yyyy')}"></strong></span>
                                             </div>
 
-                                            <div style="display: flex; gap: 8px;">
+                                            <div class="solicitacao-edicao__botoes">
                                                 <form method="post"
                                                       th:action="@{/solicitacao/excluir/{codigo}(codigo=${solicitacao.codigo})}"
-                                                      class="delete-form"
-                                                      style="margin: 0;">
-                                                    <button type="submit" class="btn btn-outline btn-outline-danger">
+                                                      class="delete-form">
+                                                    <button type="submit" class="btn btn-outline btn-outline-danger btn-degrade-status">
                                                         Excluir
                                                     </button>
                                                 </form>
                                                 <a th:href="@{/solicitacao/edit/{codSolicitacao}(codSolicitacao=${solicitacao.codigo})}"
-                                                   class="btn btn-outline btn-outline-info">Editar</a>
+                                                   class="btn btn-outline btn-outline-info btn-degrade-status">Editar</a>
                                             </div>
                                         </div>
                                     </div>
@@ -385,11 +409,36 @@
     </main>
 
     <div th:replace="~{partials/footer :: footer}"></div>
+    <div th:replace="~{partials/app_mobile :: appTabbarEstudante('solicitacoes')}"></div>
 
     <script th:src="@{/js/bundles/painel.js}"></script>
+    <script th:src="@{/js/app-mobile.js}"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Sem saldo, o "+" da barra e o "Nova solicitação" avisam em vez de abrir o cadastro
+            const saldo = Number(document.body.dataset.saldo) || 0;
+
+            document.querySelectorAll("a[href$='/solicitacao/cadastrarSolicitacao']").forEach(link => {
+                link.addEventListener("click", function(e) {
+                    if (saldo > 0) return;
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Saldo insuficiente",
+                        text: "Você não possui saldo para fazer uma nova solicitação.",
+                        confirmButtonText: "Entendi",
+                        buttonsStyling: false,
+                        customClass: {
+                            actions: "swal-acoes--centro",
+                            confirmButton: "btn btn-primary",
+                        },
+                    });
+                });
+            });
+
             document.querySelectorAll(".delete-form").forEach(form => {
                 form.addEventListener("submit", function(e) {
                     e.preventDefault();

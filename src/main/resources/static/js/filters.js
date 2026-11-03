@@ -23,6 +23,50 @@ function lerEstadoPainelSalvo() {
     }
 }
 
+// Linha visível = sem nenhuma classe is-hidden-by-*: a dos filtros/busca
+// (is-hidden-by-filter, aqui) e as dos switches e abas de results.js
+// (-sector, -status, -tipo, -etapa...), sem precisar listar cada uma
+const CLASSE_OCULTA = /(^|\s)is-hidden-by-/;
+const estaVisivel = (row) => !CLASSE_OCULTA.test(row.className);
+
+// Entrada em cascata dos itens visíveis depois de uma troca feita pelo usuário
+// (página, aba, filtro, ordenação). WAAPI: a regra de movimento reduzido do CSS
+// não pega. direcao: 1 = vem da direita (próxima página), -1 = da esquerda,
+// 0 = de baixo. Só transform/opacity no próprio item - no celular o foco por
+// scroll usa scale no card e opacity nos filhos (app-mobile.css), sem conflito.
+function animarItensVisiveis(direcao = 0) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // No app do celular sempre de baixo: card da largura da tela vindo de lado
+    // passaria da borda, e no iOS a página chega a balançar na horizontal
+    const appCelular = document.body.classList.contains("app-mobile")
+        && window.matchMedia("(max-width: 600px)").matches;
+    const deslocamento = direcao && !appCelular ? `translateX(${direcao * 12}px)` : "translateY(8px)";
+
+    [".results .request-row", ".results .card"].forEach(seletor => {
+        Array.from(document.querySelectorAll(seletor))
+            .filter(item => item.offsetParent !== null)
+            .forEach((item, i) => {
+                // Cliques seguidos (ex.: avançar várias páginas): a entrada
+                // anterior ainda no atraso seguraria o item invisível
+                item.getAnimations()
+                    .filter(animacao => animacao.id === "entrada-item")
+                    .forEach(animacao => animacao.cancel());
+
+                item.animate(
+                    [{ opacity: 0, transform: deslocamento }, { opacity: 1, transform: "none" }],
+                    {
+                        id: "entrada-item",
+                        duration: 280,
+                        delay: Math.min(i, 8) * 30,
+                        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                        fill: "backwards"
+                    }
+                );
+            });
+    });
+}
+
 // Seleciona os elementos do DOM e inicializa as variáveis de controle
 function setupFilters() {
     const sections = document.querySelectorAll(".filter-section");
@@ -85,23 +129,12 @@ function setupFilters() {
     function animarReordenacao() {
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-        const easing = "cubic-bezier(0.22, 1, 0.36, 1)";
-
-        [".results .request-row", ".results .card"].forEach(seletor => {
-            Array.from(document.querySelectorAll(seletor))
-                .filter(item => item.offsetParent !== null)
-                .forEach((item, i) => {
-                    item.animate(
-                        [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
-                        { duration: 380, delay: Math.min(i, 8) * 35, easing, fill: "backwards" }
-                    );
-                });
-        });
+        animarItensVisiveis();
 
         // Com a paginação grudada o texto fica escondido (is-stuck) — sem fade
         if (paginationInfo && !paginationInfo.closest(".is-stuck")) paginationInfo.animate(
             [{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }],
-            { duration: 300, easing }
+            { duration: 280, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
         );
     }
 
@@ -233,11 +266,7 @@ function setupFilters() {
             cardByCodigo.set(card.getAttribute("data-codigo"), card);
         });
 
-        const visibleRows = currentRows.filter(row =>
-            !row.classList.contains('is-hidden-by-filter') &&
-            !row.classList.contains('is-hidden-by-sector') &&
-            !row.classList.contains('is-hidden-by-status')
-        );
+        const visibleRows = currentRows.filter(estaVisivel);
         const totalRows = visibleRows.length;
         const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
 
@@ -257,8 +286,12 @@ function setupFilters() {
 
         if (paginationInfo) {
             if (paginationRange) {
-                const ordenacao = sortAscending ? "Mais Antigos" : "Mais Recentes";
-                paginationInfo.textContent = `${totalRows} ${paginationLabel} - ${ordenacao}`;
+                // Ordenação num span à parte: o " - " vem do CSS
+                // (components/pagination.css) e no celular vira quebra de linha
+                const ordem = document.createElement("span");
+                ordem.className = "pagination-info__ordem";
+                ordem.textContent = sortAscending ? "Mais Antigos" : "Mais Recentes";
+                paginationInfo.replaceChildren(`${totalRows} ${paginationLabel}`, ordem);
             } else {
                 paginationInfo.innerHTML = `${totalRows} ${paginationLabel} <span style="font-weight: normal; margin-left: 8px;">(Página ${currentPage} de ${totalPages})</span>`;
             }
@@ -286,10 +319,10 @@ function setupFilters() {
         }
     }
 
-    // Exposto global pro setSector/setStatus (results.js) recalcular
-    // contagem/paginação/estado vazio ao trocar Todos/BDH/Biobanco ou
-    // Em andamento/Concluídas — eles só marcam is-hidden-by-sector /
-    // is-hidden-by-status em cada item, quem decide
+    // Exposto global pro setSector/setStatus/setTipo (results.js) recalcular
+    // contagem/paginação/estado vazio ao trocar Todos/BDH/Biobanco, Em
+    // andamento/Concluídas ou a aba de tipo das movimentações — eles só
+    // marcam uma classe is-hidden-by-* em cada item (ver estaVisivel), quem decide
     // o que fica visível de fato é sempre esta função. results.js roda
     // depois de filters.js (ver ordem dos <script> nas páginas que têm
     // #sectorSwitch), então já encontra isto definido.
@@ -312,6 +345,7 @@ function setupFilters() {
             checkbox.checked = false;
             renderActiveFilters();
             applyFilters();
+            animarItensVisiveis();
         });
 
         if (activeFilters) activeFilters.appendChild(chip);
@@ -363,14 +397,23 @@ function setupFilters() {
             rowsPerPage = parseInt(e.target.value);
             currentPage = 1;
             applyPagination();
+            animarItensVisiveis();
         });
+    }
+
+    // Troca de página: volta pro começo da lista se ela já estava rolada
+    // (includes.js) e os itens entram vindo do lado da navegação
+    function irParaPagina(pagina, direcao) {
+        currentPage = pagina;
+        applyPagination();
+        window.rolarParaInicioDaLista?.();
+        animarItensVisiveis(direcao);
     }
 
     if (btnPrevPage) {
         btnPrevPage.addEventListener("click", () => {
             if (currentPage > 1) {
-                currentPage--;
-                applyPagination();
+                irParaPagina(currentPage - 1, -1);
             }
         });
     }
@@ -378,16 +421,11 @@ function setupFilters() {
     if (btnNextPage) {
             btnNextPage.addEventListener("click", () => {
                 const currentRows = document.querySelectorAll(".request-row");
-                const visibleRows = Array.from(currentRows).filter(row =>
-                    !row.classList.contains('is-hidden-by-filter') &&
-                    !row.classList.contains('is-hidden-by-sector') &&
-                    !row.classList.contains('is-hidden-by-status')
-                );
+                const visibleRows = Array.from(currentRows).filter(estaVisivel);
                 const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
 
                 if (currentPage < totalPages) {
-                    currentPage++;
-                    applyPagination();
+                    irParaPagina(currentPage + 1, 1);
                 }
             });
     }
@@ -397,6 +435,7 @@ function setupFilters() {
         checkbox.addEventListener("change", () => {
             renderActiveFilters();
             applyFilters();
+            animarItensVisiveis();
         });
     });
 
@@ -416,10 +455,12 @@ function setupFilters() {
             }
             renderActiveFilters();
             applyFilters();
+            animarItensVisiveis();
         });
     });
 
-    // Busca filtra enquanto digita; o "x" (search.js) dispara "input" ao limpar
+    // Busca filtra enquanto digita; o "x" (search.js) dispara "input" ao limpar.
+    // Sem animação aqui: reentrar a cada tecla ficaria piscando
     searchInput?.addEventListener("input", applyFilters);
 
     window.salvarEstadoPainel = () => {

@@ -9,9 +9,6 @@
             </a>
 
             <nav class="navbar__nav glass-soft">
-                <!-- Frascos é link (vai direto pro painel); o menu abre no
-                     hover ou ao focar pelo teclado (ver setupNavbarDropdowns
-                     em includes.js) -->
                 <div class="navbar__dropdown">
                     <a th:href="@{/frasco/painel}" class="navbar__link navbar__dropdown-btn">
                         Frascos
@@ -57,91 +54,11 @@
                     <i class="icon" id="themeIcon" data-lucide="moon"></i>
                 </button>
 
-                <!-- Notificações ainda não implementadas: botão desabilitado e sem a
-                     classe navbar__dropdown (includes.js abre qualquer .navbar__dropdown
-                     no hover). O painel abaixo é o mock do protótipo, mantido como
-                     comentário do Thymeleaf (não é renderizado) pra quando for implementado. -->
                 <div class="navbar__notifications-dropdown">
                     <button class="navbar__notifications glass tooltip-below" type="button" disabled data-tooltip="Notificações · Em breve" aria-label="Notificações (em breve)">
                         <i class="icon icon--md" data-lucide="bell"></i>
                     </button>
 
-                    <!--/*
-                    <div class="notif-panel">
-                        <div class="notif-panel__header">
-                            <span class="notif-panel__title">Notificações</span>
-                            <span class="notif-panel__badge">4 novas</span>
-                        </div>
-
-                        <div class="notif-panel__list">
-                            <a th:href="@{/frasco/painel}" class="notif-card notif-card--manutencao-hoje">
-                                <span class="notif-card__icon">
-                                    <i class="icon" data-lucide="toolbox"></i>
-                                </span>
-
-                                <span class="notif-card__body">
-                                    <span class="notif-card__head">
-                                        <span class="notif-card__tag">Manutenção hoje</span>
-                                        <span class="notif-card__time">há 40 min</span>
-                                    </span>
-
-                                    <span class="notif-card__title">Frasco PMbd-a0001</span>
-                                    <span class="notif-card__meta">Pré-Molar &middot; 30 dentes &middot; Bdh</span>
-                                </span>
-                            </a>
-
-                            <a href="solicitacoes.html" class="notif-card notif-card--solicitacao">
-                                <span class="notif-card__icon">
-                                    <i class="icon" data-lucide="clipboard-list"></i>
-                                </span>
-
-                                <span class="notif-card__body">
-                                    <span class="notif-card__head">
-                                        <span class="notif-card__tag">Solicitação</span>
-                                        <span class="notif-card__time">há 1h</span>
-                                    </span>
-
-                                    <span class="notif-card__title">Larissa Souza</span>
-                                    <span class="notif-card__meta">Molar &middot; 12 dentes solicitados</span>
-                                </span>
-                            </a>
-
-                            <a th:href="@{/frasco/painel}" class="notif-card notif-card--manutencao-proxima">
-                                <span class="notif-card__icon">
-                                    <i class="icon" data-lucide="toolbox"></i>
-                                </span>
-
-                                <span class="notif-card__body">
-                                    <span class="notif-card__head">
-                                        <span class="notif-card__tag">Manutenção próxima</span>
-                                        <span class="notif-card__time">há 3h</span>
-                                    </span>
-
-                                    <span class="notif-card__title">Frasco CNbb-b0032</span>
-                                    <span class="notif-card__meta">Canino &middot; vence em 3 dias &middot; Biobanco</span>
-                                </span>
-                            </a>
-
-                            <a href="solicitacoes.html" class="notif-card notif-card--solicitacao">
-                                <span class="notif-card__icon">
-                                    <i class="icon" data-lucide="clipboard-list"></i>
-                                </span>
-
-                                <span class="notif-card__body">
-                                    <span class="notif-card__head">
-                                        <span class="notif-card__tag">Solicitação</span>
-                                        <span class="notif-card__time">há 5h</span>
-                                    </span>
-
-                                    <span class="notif-card__title">Pedro Martins</span>
-                                    <span class="notif-card__meta">Incisivo &middot; 6 dentes solicitados</span>
-                                </span>
-                            </a>
-                        </div>
-
-                        <a href="#" class="notif-panel__footer">Ver todas as notificações</a>
-                    </div>
-                    */-->
                 </div>
 
                 <button class="navbar__config glass tooltip-below" type="button" disabled data-tooltip="Configurações · Em breve" aria-label="Configurações (em breve)">
@@ -211,7 +128,6 @@
         </div>
     </aside>
 
-    <!-- Mensagens de Sucesso -->
     <th:block th:if="${mensagemSucesso}">
         <script th:inline="javascript">
             document.addEventListener("DOMContentLoaded", function() {
@@ -223,7 +139,6 @@
         </script>
     </th:block>
 
-    <!-- Mensagens de Erro -->
     <th:block th:if="${mensagemErro}">
         <script th:inline="javascript">
             document.addEventListener("DOMContentLoaded", function() {

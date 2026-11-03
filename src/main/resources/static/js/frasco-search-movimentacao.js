@@ -59,6 +59,39 @@ function formatarMetaComQuantidade(frasco) {
     return [formatarMeta(frasco), formatarQtdDentes(frasco.disponivel)].filter(Boolean).join(" · ");
 }
 
+// Status do frasco nos resultados dos modais (css/components/modal.css):
+// ponto colorido antes do identificador e o nome no começo da linha das
+// datas. Em manutenção não repete o nome: a linha já diz "Em manutenção" no
+// lugar da data.
+const STATUS_FRASCO_RESULTADO = {
+    DISPONIVEL: { classe: "disponivel", rotulo: "Disponível" },
+    DIS_IMPRESSAO: { classe: "impressao", rotulo: "Para impressão" },
+    EM_MANUTENCA: { classe: "manutencao", rotulo: "Em manutenção" },
+};
+
+function montarPontoStatus(frasco) {
+    const status = STATUS_FRASCO_RESULTADO[frasco.status];
+    return status ? `<span class="modal-result__status modal-result__status--${status.classe}" aria-hidden="true"></span>` : "";
+}
+
+// rotulo-longo/rotulo-curto: "Cad."/"Man." no celular, pra linha caber com o status
+function montarDatasResultado(frasco) {
+    const status = STATUS_FRASCO_RESULTADO[frasco.status];
+    const rotuloStatus = status && !frasco.emManutencao
+        ? `<span class="modal-result__status-texto">${status.rotulo}</span><span class="modal-result__dates-sep modal-result__status-texto">·</span>`
+        : "";
+    const manutencao = frasco.emManutencao
+        ? "Em manutenção"
+        : `<span class="rotulo-longo">Manutenção</span><span class="rotulo-curto">Man.</span> ${frasco.dataManutencao}`;
+
+    return `
+        ${rotuloStatus}
+        <span class="modal-result__date"><span class="rotulo-longo">Cadastro</span><span class="rotulo-curto">Cad.</span> ${frasco.dataCadastro}</span>
+        <span class="modal-result__dates-sep">·</span>
+        <span class="modal-result__date">${manutencao}</span>
+    `;
+}
+
 // Miolo do painel de detalhes (expandir/recolher) de uma linha "tipo
 // selected-flasks" — reaproveitado pelas duas listas da tela (Frascos
 // selecionados/Frascos de Origem). Mesmo desenho dos detalhes do estudante
@@ -199,7 +232,6 @@ function obterRefsModalBusca(sufixo) {
 
 function setupFrascoSearchModal() {
     const trigger = document.querySelector("#escolherFrascosBtn");
-    const triggerLabel = trigger?.querySelector(".btn__label");
 
     const refsSaida = obterRefsModalBusca("");
     const refsEntrada = obterRefsModalBusca("Entrada");
@@ -238,6 +270,31 @@ function setupFrascoSearchModal() {
 
     function isEntrada() {
         return tipoSelect?.value?.toUpperCase() === "ENTRADA";
+    }
+
+    // Texto/ícone do botão de escolher: em Entrada com o destino já escolhido
+    // vira "Trocar Frasco" com ícone de troca. Rótulo e ícone buscados de
+    // novo a cada vez: o "Carregando..." da abertura dos modais troca o
+    // innerHTML do botão, e uma referência guardada antes ficaria solta.
+    function atualizarGatilho() {
+        const trocar = isEntrada() && selecionados.size > 0;
+        const rotulo = trigger.querySelector(".btn__label");
+
+        if (rotulo) {
+            rotulo.textContent = trocar ? "Trocar Frasco" : isEntrada() ? "Escolher Frasco" : "Escolher Frascos";
+        }
+
+        const nomeIcone = trocar ? "refresh-cw" : "plus";
+        const icone = trigger.querySelector("svg, i");
+
+        if (icone && icone.getAttribute("data-lucide") !== nomeIcone) {
+            const novoIcone = document.createElement("i");
+            novoIcone.className = "icon";
+            novoIcone.setAttribute("data-lucide", nomeIcone);
+            icone.replaceWith(novoIcone);
+
+            if (window.lucide) lucide.createIcons();
+        }
     }
 
     function setorAtual() {
@@ -435,6 +492,7 @@ function setupFrascoSearchModal() {
         }
 
         sincronizarObservacoes();
+        atualizarGatilho();
 
         limparOrigemFrascos();
         atualizarOrigemDentes();
@@ -514,9 +572,7 @@ function setupFrascoSearchModal() {
         renderSelecionados();
         resetarOrigemDentes();
 
-        if (triggerLabel) {
-            triggerLabel.textContent = isEntrada() ? "Escolher Frasco" : "Escolher Frascos";
-        }
+        atualizarGatilho();
     });
 
     localSelect?.addEventListener("change", () => {
@@ -537,6 +593,7 @@ function setupFrascoSearchModal() {
         estaSelecionado,
         obterCatalogo = () => window.catalogoFrascosCache || [],
         semGatilho = false,
+        ordemPadrao = "",
     }) {
         const {
             overlay, modal, closeBtn, searchInput, searchClearBtn,
@@ -573,7 +630,9 @@ function setupFrascoSearchModal() {
             const estado = filtroEstado?.value || "";
             const denticao = filtroDenticao?.value || "";
             const status = filtroStatus?.value || "todos";
-            const ordenacao = ordenarSelect?.value || "";
+            // "Ordenar por" vazio: ordem padrão do modal (sem ela, valia a
+            // ordem em que o banco devolve - a consulta não tem ORDER BY)
+            const ordenacao = ordenarSelect?.value || ordemPadrao;
             const setor = setorAtual();
 
             const filtrados = obterCatalogo().filter((frasco) => {
@@ -598,6 +657,8 @@ function setupFrascoSearchModal() {
                 filtrados.sort((a, b) => parseDataBr(a.dataManutencao) - parseDataBr(b.dataManutencao));
             } else if (ordenacao === "manutencao-desc") {
                 filtrados.sort((a, b) => parseDataBr(b.dataManutencao) - parseDataBr(a.dataManutencao));
+            } else if (ordenacao === "identificador") {
+                filtrados.sort((a, b) => a.id.localeCompare(b.id, "pt-BR", { numeric: true }));
             }
 
             return filtrados;
@@ -654,7 +715,7 @@ function setupFrascoSearchModal() {
             paginaAtual = 1;
         }
 
-        ligarInteracaoResultados(resultsContainer, { renderResultados });
+        ligarInteracaoResultados(resultsContainer, { renderResultados, close });
 
         closeBtn?.addEventListener("click", close);
 
@@ -747,15 +808,11 @@ function setupFrascoSearchModal() {
 
             linha.innerHTML = `
                 <div class="modal-result__info">
-                    <span class="modal-result__code">${frasco.id}</span>
+                    <span class="modal-result__code">${montarPontoStatus(frasco)}${frasco.id}</span>
 
                     <div class="modal-result__subinfo">
                         <span class="modal-result__meta">${formatarMetaComQuantidade(frasco)}</span>
-                        <span class="modal-result__dates">
-                            <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
-                            <span class="modal-result__dates-sep">·</span>
-                            <span class="modal-result__date">${frasco.emManutencao ? "Em manutenção" : `Manutenção ${frasco.dataManutencao}`}</span>
-                        </span>
+                        <span class="modal-result__dates">${montarDatasResultado(frasco)}</span>
                     </div>
                 </div>
 
@@ -855,6 +912,7 @@ function setupFrascoSearchModal() {
             criarLinhaResultado: criarLinhaResultadoSaida,
             ligarInteracaoResultados: ligarInteracaoSaida,
             estaSelecionado: (frasco) => selecionados.has(frasco.id),
+            ordemPadrao: "identificador",
         });
 
         trigger.addEventListener("click", async () => {
@@ -887,22 +945,18 @@ function setupFrascoSearchModal() {
 
             linha.innerHTML = `
                 <div class="modal-result__info">
-                    <span class="modal-result__code">${frasco.id}</span>
+                    <span class="modal-result__code">${montarPontoStatus(frasco)}${frasco.id}</span>
 
                     <div class="modal-result__subinfo">
                         <span class="modal-result__meta">${formatarMetaComQuantidade(frasco)}</span>
-                        <span class="modal-result__dates">
-                            <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
-                            <span class="modal-result__dates-sep">·</span>
-                            <span class="modal-result__date">${frasco.emManutencao ? "Em manutenção" : `Manutenção ${frasco.dataManutencao}`}</span>
-                        </span>
+                        <span class="modal-result__dates">${montarDatasResultado(frasco)}</span>
                     </div>
                 </div>
 
                 <div class="modal-result__actions">
-                    <button type="button" class="btn btn-tonal modal-result__select">
+                    <button type="button" class="btn btn-tonal modal-result__select" aria-label="${selecionado ? "Selecionado" : "Selecionar"}">
                         <i class="icon" data-lucide="${selecionado ? "check" : "plus"}"></i>
-                        ${selecionado ? "Selecionado" : "Selecionar"}
+                        <span class="modal-result__select-texto">${selecionado ? "Selecionado" : "Selecionar"}</span>
                     </button>
                 </div>
             `;
@@ -910,7 +964,7 @@ function setupFrascoSearchModal() {
             return linha;
         }
 
-        function ligarInteracaoEntrada(resultsContainer, { renderResultados }) {
+        function ligarInteracaoEntrada(resultsContainer, { renderResultados, close }) {
             resultsContainer.addEventListener("click", (event) => {
                 const selectBtn = event.target.closest(".modal-result__select");
                 if (!selectBtn) return;
@@ -932,6 +986,11 @@ function setupFrascoSearchModal() {
 
                 renderSelecionados();
                 renderResultados();
+
+                // Entrada só tem um frasco de destino: escolheu, fecha. A pausa
+                // deixa ver o "Selecionado" antes da saída (fade/escala do
+                // .modal-overlay, components/modal.css)
+                if (!jaEraSelecionado) setTimeout(close, 350);
             });
         }
 
@@ -939,6 +998,7 @@ function setupFrascoSearchModal() {
             criarLinhaResultado: criarLinhaResultadoEntrada,
             ligarInteracaoResultados: ligarInteracaoEntrada,
             estaSelecionado: (frasco) => selecionados.has(frasco.id),
+            ordemPadrao: "manutencao-asc",
         });
 
         trigger.addEventListener("click", async () => {
@@ -984,22 +1044,18 @@ function setupFrascoSearchModal() {
 
             linha.innerHTML = `
                 <div class="modal-result__info">
-                    <span class="modal-result__code">${frasco.id}</span>
+                    <span class="modal-result__code">${montarPontoStatus(frasco)}${frasco.id}</span>
 
                     <div class="modal-result__subinfo">
                         <span class="modal-result__meta">${formatarMetaComQuantidade(frasco)}</span>
-                        <span class="modal-result__dates">
-                            <span class="modal-result__date">Cadastro ${frasco.dataCadastro}</span>
-                            <span class="modal-result__dates-sep">·</span>
-                            <span class="modal-result__date">${frasco.emManutencao ? "Em manutenção" : `Manutenção ${frasco.dataManutencao}`}</span>
-                        </span>
+                        <span class="modal-result__dates">${montarDatasResultado(frasco)}</span>
                     </div>
                 </div>
 
                 <div class="modal-result__actions">
-                    <button type="button" class="btn btn-tonal modal-result__select">
+                    <button type="button" class="btn btn-tonal modal-result__select" aria-label="${selecionado ? "Selecionado" : "Selecionar"}">
                         <i class="icon" data-lucide="${selecionado ? "check" : "plus"}"></i>
-                        ${selecionado ? "Selecionado" : "Selecionar"}
+                        <span class="modal-result__select-texto">${selecionado ? "Selecionado" : "Selecionar"}</span>
                     </button>
                 </div>
             `;
@@ -1033,12 +1089,13 @@ function setupFrascoSearchModal() {
             estaSelecionado: (frasco) => origemFrascosSelecionados.has(frasco.id),
             obterCatalogo: candidatosOutrosFrascos,
             semGatilho: true,
+            ordemPadrao: "manutencao-asc",
         });
 
         if (selecionarFrascosOrigemBtn) {
             selecionarFrascosOrigemBtn.addEventListener("click", async () => {
                 const originalHtml = selecionarFrascosOrigemBtn.innerHTML;
-                selecionarFrascosOrigemBtn.innerHTML = '<i class="icon" data-lucide="loader"></i> Carregando...';
+                selecionarFrascosOrigemBtn.innerHTML = '<i class="icon" data-lucide="loader"></i> <span class="btn__label">Carregando...</span>';
                 selecionarFrascosOrigemBtn.disabled = true;
                 if (window.lucide) lucide.createIcons();
 

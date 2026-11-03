@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <script>
     (function () {
         var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-        document.documentElement.classList.add(theme);
+        document.documentElement.classList.add(theme, "carregando");
     })();
   </script>
 
@@ -20,7 +20,7 @@
   <title>Solicitação de Dentes</title>
 </head>
 
-<body>
+<body class="app-mobile app-cadastro">
 
 <div class="background">
   <div class="blob blob--blue"></div>
@@ -28,6 +28,9 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<th:block th:with="appVoltar=@{/solicitacao/painel}">
+  <div th:replace="~{partials/app_mobile :: appHeader('')}"></div>
+</th:block>
 
 <main class="page page--compact">
   <section class="form-shell">
@@ -36,8 +39,6 @@
       <div class="toolbar__lead">
         <h1 class="toolbar__title">Solicitação de Dentes</h1>
 
-        <!-- data-saldo é o número lido pelo JS (limite de Quantidade e resumo da
-             confirmação, ver js/forms.js); o texto é só exibição. -->
         <div class="toolbar__identity">
           <span class="toolbar__identity-icon" aria-hidden="true">
             <i class="icon" data-lucide="wallet"></i>
@@ -73,6 +74,13 @@
       <input type="hidden" name="codEstudante" th:value="${usuarioLogado.codEstudante}"/>
       <input type="hidden" th:field="*{version}"/>
       <input type="hidden" th:field="*{codigo}"/>
+
+      <div class="cadastro-topo">
+        <h2 class="cadastro-titulo">
+          <i class="icon" data-lucide="clipboard-list" aria-hidden="true"></i>
+          <span th:text="${solicitacaoDTO.codigo != null} ? 'Editar solicitação' : 'Nova solicitação'">Nova solicitação</span>
+        </h2>
+      </div>
 
       <section class="form-section">
         <h2 class="form-section__title"><i class="icon" data-lucide="clipboard-list" aria-hidden="true"></i>Informações da Solicitação</h2>
@@ -113,16 +121,11 @@
 
       <section class="form-section form-section--disabled" id="avancadosSection">
         <div class="form-section__collapse-inner">
-          <!-- Cabeçalho que abre/fecha os campos avançados: mesmo visual dos
-               .form-section__title, com um interruptor (.switch) à direita. O cabeçalho
-               inteiro é o <label>, então clicar em qualquer parte dele liga e desliga.
-               Por baixo continua o mesmo checkbox #avancadosToggle que
-               setupCadastroSolicitacao (js/forms.js) escuta. -->
           <label class="form-section__title form-section__title--toggle" for="avancadosToggle">
             <i class="icon" data-lucide="sliders-horizontal" aria-hidden="true"></i>
 
             <span class="form-section__title-text">
-              <span>Campos avançados <span class="optional-mark">(opcional)</span></span>
+              <span><span class="rotulo-longo">Campos avançados <span class="optional-mark">(opcional)</span></span><span class="rotulo-curto">Campos opcionais</span></span>
               <span class="form-section__title-hint">Especifique estado, dentição e arcada/numeração.</span>
             </span>
 
@@ -135,10 +138,11 @@
                 <label>Estado do dente <span class="optional-mark">(opcional)</span></label>
                 <div class="select-wrapper">
                   <select class="form-control atributos-control" th:field="*{estadoDente}" id="estadoDente" disabled>
+                    <option value="">Não especificado</option>
                     <option th:each="e : ${T(bancoDentes.model.enumModels.EstadoDente).values()}"
                             th:value="${e.name()}"
                             th:text="${e}"
-                            th:selected="${solicitacaoDTO.estadoDente == e or (solicitacaoDTO.estadoDente == null and e.name() == 'NAO_INFORMADA')}">
+                            th:selected="${solicitacaoDTO.estadoDente == e}">
                     </option>
                   </select>
                   <i class="select-icon icon" data-lucide="chevron-down"></i>
@@ -208,6 +212,7 @@
 
 <div th:replace="~{partials/footer :: footer}"></div>
 <script th:src="@{/js/bundles/form.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 </body>
 </html>

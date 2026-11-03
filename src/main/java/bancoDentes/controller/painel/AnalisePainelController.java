@@ -78,7 +78,7 @@ public class AnalisePainelController extends BaseController{
         try {
             analiseSolicitacaoService.negarSolicitacao(dto);
             this.saveMessage(this.getText("msg.sucesso.analise.finalizada"));
-            return "redirect:/analiseSolicitacao/painel";
+            return "redirect:/analiseSolicitacao/painel?etapa=finalizadas";
         } catch (AnaliseException e) {
             this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";
@@ -99,7 +99,7 @@ public class AnalisePainelController extends BaseController{
         try {
             analiseSolicitacaoService.reabrirSolicitacao(dto);
             this.saveMessage(this.getText("msg.sucesso.analise.reaberta"));
-            return "redirect:/analiseSolicitacao/painel";
+            return "redirect:/analiseSolicitacao/painel?etapa=andamento";
         } catch (AnaliseException e) {
             this.saveError(e.getMessage());
             return "redirect:/analiseSolicitacao/painel";

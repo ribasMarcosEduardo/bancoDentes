@@ -25,7 +25,7 @@
 .etiqueta-fila-row {
     cursor: pointer;
 
-    transition: opacity 0.2s ease;
+    transition: opacity var(--dur-rapida) ease;
 }
 
 .etiqueta-fila-row:has(.etiqueta-selecao-checkbox:not(:checked)) {
@@ -79,12 +79,6 @@
     animation: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .etiqueta-fila-row {
-        transition: none;
-    }
-}
-
 @media (max-width: 860px) {
 
     /*
@@ -124,18 +118,22 @@
 /* Linhas da fila entram em cascata depois do cabeçalho da página (ver
    transições em pages/etiquetas.css). Só as primeiras ganham atraso
    crescente; o resto entra junto, pra fila longa não ficar esperando. */
+/* Mesmo ritmo da cascata dos painéis (layout/panel-transition.css) */
 html:not(.vt-nav) .etiqueta-fila-row {
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+    --ordem-entrada: 8;
+
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) backwards;
+    animation-delay: calc(var(--entrada-atraso-base) + var(--ordem-entrada) * var(--entrada-passo));
 }
 
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(1) { animation-delay: 0.18s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(2) { animation-delay: 0.22s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(3) { animation-delay: 0.26s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(4) { animation-delay: 0.30s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(5) { animation-delay: 0.34s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(6) { animation-delay: 0.38s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(7) { animation-delay: 0.42s; }
-html:not(.vt-nav) .etiqueta-fila-row:nth-child(8) { animation-delay: 0.46s; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(1) { --ordem-entrada: 0; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(2) { --ordem-entrada: 1; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(3) { --ordem-entrada: 2; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(4) { --ordem-entrada: 3; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(5) { --ordem-entrada: 4; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(6) { --ordem-entrada: 5; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(7) { --ordem-entrada: 6; }
+html:not(.vt-nav) .etiqueta-fila-row:nth-child(8) { --ordem-entrada: 7; }
 
 @media (max-width: 420px) {
 

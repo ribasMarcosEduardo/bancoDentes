@@ -2,13 +2,13 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
@@ -20,7 +20,7 @@
     <title>Cadastro de Movimentação</title>
 </head>
 
-<body>
+<body class="app-mobile app-cadastro">
 
 <div class="background">
     <div class="blob blob--blue"></div>
@@ -28,6 +28,9 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<th:block th:with="appVoltar=@{/movimentacao/painel}">
+    <div th:replace="~{partials/app_mobile :: appHeader('')}"></div>
+</th:block>
 
 <main class="page page--compact">
     <section class="form-shell form-shell--scroll-nav">
@@ -36,7 +39,6 @@
             <div class="toolbar__lead">
                 <h1 class="toolbar__title" th:text="${movimentacaoDTO.codigo != null} ? 'Edição de Movimentação' : 'Cadastro de Movimentação'">Cadastro de Movimentação</h1>
 
-                <!-- Data de hoje -->
                 <div class="toolbar__identity">
                     <span class="toolbar__identity-icon" aria-hidden="true">
                         <i class="icon" data-lucide="calendar-days"></i>
@@ -72,7 +74,32 @@
             <input type="hidden" th:field="*{codFrasco}" id="frascoSelecionadoInput" />
             <input type="hidden" name="datManutencao" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" />
 
-            <section class="form-section">
+            <div class="cadastro-topo">
+                <h2 class="cadastro-titulo">
+                    <i class="icon" data-lucide="arrow-left-right" aria-hidden="true"></i>
+                    <span th:text="${movimentacaoDTO.codigo != null} ? 'Editar movimentação' : 'Nova movimentação'">Nova movimentação</span>
+                </h2>
+
+                <nav class="app-tabs cadastro-abas cadastro-abas--tipo" data-select="#tipoMovimentacao" aria-label="Tipo de movimentação"
+                     data-confirmar-se="#selectedFlasksEmpty[hidden]"
+                     data-confirmar-texto="Os frascos selecionados serão removidos.">
+                    <span class="app-tabs__indicator"></span>
+                    <button type="button" class="app-tabs__btn" data-valor="SAIDA">Saída</button>
+                    <button type="button" class="app-tabs__btn" data-valor="ENTRADA">Entrada</button>
+                </nav>
+
+                <nav class="app-tabs cadastro-abas" data-select="#localMovimentacao" aria-label="Local da movimentação"
+                     data-confirmar-se="#selectedFlasksEmpty[hidden]"
+                     data-confirmar-texto="Os frascos selecionados serão removidos.">
+                    <span class="app-tabs__indicator"></span>
+                    <button type="button" class="app-tabs__btn"
+                            th:each="l : ${T(bancoDentes.model.enumModels.Local).values()}"
+                            th:data-valor="${l.name()}"
+                            th:text="${l.name() == 'BDH'} ? 'Banco de Dentes' : ${l.nome}"></button>
+                </nav>
+            </div>
+
+            <section class="form-section" id="infoMovimentacaoSection">
                 <h2 class="form-section__title"><i class="icon" data-lucide="arrow-left-right" aria-hidden="true"></i>Informações da Movimentação</h2>
 
                 <div class="form-grid">
@@ -182,9 +209,9 @@
                             <div class="field-card__head-actions">
                                 <span class="field-card__head-meta" id="origemFrascosTotalValor">0 dentes selecionados</span>
 
-                                <button type="button" class="btn btn-tonal" id="selecionarFrascosOrigemBtn" aria-describedby="origemFrascosLabel">
+                                <button type="button" class="btn btn-tonal" id="selecionarFrascosOrigemBtn" aria-describedby="origemFrascosLabel" aria-label="Selecionar Frascos">
                                     <i class="icon" data-lucide="plus"></i>
-                                    Selecionar Frascos
+                                    <span class="btn__label">Selecionar Frascos</span>
                                 </button>
                             </div>
                         </div>
@@ -236,7 +263,6 @@
             </p>
         </form>
 
-        <!-- Paradas além do topo da página; seções escondidas são puladas (forms.js) -->
         <nav class="form-scroll-nav" aria-label="Navegar entre seções"
              data-paradas="#origemDentesSection, #observacoesSection">
             <div class="form-scroll-nav__inner glass">
@@ -303,6 +329,7 @@
                 disponivel: item.quantidade || 0,
                 dataCadastro: formatarData(item.datCad),
                 emManutencao: !!item.emManutencao,
+                status: item.statusFrasco || "",
                 dataManutencao: item.emManutencao ? "---" : formatarData(item.datManutencao)
             }));
 
@@ -317,6 +344,7 @@
 </script>
 
 <script th:src="@{/js/frasco-search-movimentacao.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 </body>
 </html>

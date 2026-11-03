@@ -10,7 +10,7 @@
     gap: 1rem;
     margin-bottom: 1rem;
 
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) both;
 
     user-select: none;
 }
@@ -41,21 +41,37 @@
 
         width: min(320px, 85vw);
         height: 100vh;
+        /* No celular, 100vh inclui a área atrás da barra do navegador */
+        height: 100dvh;
+
+        /*
+            Quem rola é a gaveta, não o painel de vidro dentro dela: o
+            granulado do vidro (.glass-frost-strong::before, inset:0) cobria
+            só a altura visível ao abrir e rolava junto com o conteúdo - a
+            parte de baixo ficava sem textura e com outro tom. Assim o painel
+            cresce até a altura do conteúdo e o vidro cobre tudo.
+        */
+        overflow-y: auto;
+        overscroll-behavior: contain;
 
         transform: translateX(100%);
-        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        transition: transform 0.35s var(--ease-suave);
     }
 
     .filters-sidebar-desktop.is-open {
         transform: translateX(0);
     }
 
+    /*
+        Ocupa no mínimo a altura da gaveta; com mais filtros, cresce.
+        overflow: clip no lugar do hidden do .glass-frost-strong: corta o
+        granulado nos cantos do mesmo jeito, mas sem virar container de
+        rolagem - senão um sticky aqui dentro (rodapé de filtros do
+        celular, layout/app-mobile.css) grudaria no painel, não na gaveta.
+    */
     .filters-sidebar-desktop .filter-sidebar {
-        flex: 1;
-        min-height: 0;
-
-        /* Permite rolar quando o conteúdo dos filtros não cabe na tela */
-        overflow-y: auto;
+        flex: 1 0 auto;
+        overflow: clip;
     }
 
     .filters-mobile-close {
@@ -106,7 +122,7 @@
 
     cursor: pointer;
     user-select: none;
-    transition: color 0.2s ease;
+    transition: color var(--dur-rapida) ease;
 }
 
 .filters-clear:hover {
@@ -146,8 +162,8 @@
     transform: scale(1);
     user-select: none;
     transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
+        opacity var(--dur-rapida) ease,
+        transform var(--dur-rapida) ease;
 }
 
 .filter-chip--hidden {
@@ -188,9 +204,9 @@
     margin-block: -0.75rem;
 
     transition:
-        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        margin 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.3s ease;
+        grid-template-rows var(--dur-lenta) var(--ease-suave),
+        margin var(--dur-lenta) var(--ease-suave),
+        opacity var(--dur-media) ease;
 }
 
 .active-filters-bar.has-active {
@@ -236,7 +252,7 @@
     border-top: 1px solid var(--border);
     padding: 0.85rem 0;
 
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) both;
 }
 
 .filter-sidebar .filter-section:nth-child(2) { animation-delay: 0.05s; }
@@ -268,7 +284,7 @@
 .filter-section__toggle .icon {
     width: 17px;
     height: 17px;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-media) var(--ease-suave);
 }
 
 .filter-section.is-closed .filter-section__toggle .icon {
@@ -291,8 +307,8 @@
     opacity: 1;
 
     transition:
-        grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        grid-template-rows var(--dur-lenta) var(--ease-suave),
+        margin-top var(--dur-lenta) var(--ease-suave),
         opacity 0.25s ease;
 }
 
@@ -342,9 +358,9 @@
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+        background var(--dur-rapida) ease,
+        border-color var(--dur-rapida) ease,
+        box-shadow var(--dur-rapida) ease;
 }
 
 .checkbox-filter input::before {

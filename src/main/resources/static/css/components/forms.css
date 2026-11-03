@@ -87,7 +87,7 @@
 }
 
 .required-mark {
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .optional-mark {
@@ -164,9 +164,9 @@
     outline: none;
 
     transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
+        border-color var(--dur-rapida) ease,
+        box-shadow var(--dur-rapida) ease,
+        background var(--dur-rapida) ease;
 }
 
 .form-control option {
@@ -549,10 +549,12 @@ body.dark select.form-control {
     height: 13px;
 }
 
-.number-input__btn:hover {
-    background: var(--surface-soft);
+@media (hover: hover) {
+    .number-input__btn:hover {
+        background: var(--surface-soft);
 
-    transform: scale(1.04);
+        transform: scale(1.04);
+    }
 }
 
 .number-input__btn:disabled {
@@ -590,7 +592,7 @@ body.dark select.form-control {
        excesso empurrava os botões +/- visualmente pra fora da borda. */
     overflow: hidden;
 
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: border-color var(--dur-rapida) ease, box-shadow var(--dur-rapida) ease, background var(--dur-rapida) ease;
 }
 
 .number-input--fraction:focus-within {
@@ -701,7 +703,7 @@ body.dark select.form-control {
    estado controlado via JS (forms.js) pelo mesmo motivo: :focus sozinho
    continua ativo após escolher uma opção, o que prende a seta girada. */
 .form-card .select-icon {
-    transition: transform 0.2s ease;
+    transition: transform var(--dur-rapida) ease;
 }
 
 .form-card .select-wrapper.is-open .select-icon {
@@ -836,8 +838,8 @@ body.dark select.form-control {
 
     /* mesmo ritmo da abertura de .advanced-fields (cadastro_frasco.css) */
     transition:
-        padding-bottom 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        border-color 0.3s ease;
+        padding-bottom var(--dur-lenta) var(--ease-suave),
+        border-color var(--dur-media) ease;
 }
 
 .form-section:has(.advanced-fields.is-open) .form-section__title--toggle {
@@ -916,7 +918,7 @@ body.dark select.form-control {
     background: var(--surface);
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-media) var(--ease-suave);
 }
 
 .switch:checked {
@@ -1026,7 +1028,7 @@ body.dark select.form-control {
 }
 
 .reveal-on-show > * {
-    animation: form-reveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: form-reveal 0.45s var(--ease-suave) both;
 }
 
 .reveal-on-show > :nth-child(2) {
@@ -1040,7 +1042,7 @@ body.dark select.form-control {
 /* Seção inteira: a divisória/espaço de cima aparece junto, sem ficar
    "esperando" os filhos entrarem */
 .form-section.reveal-on-show:not([hidden]) {
-    animation: form-reveal-fade 0.3s ease both;
+    animation: form-reveal-fade var(--dur-media) ease both;
 }
 
 @keyframes form-reveal-fade {
@@ -1066,7 +1068,7 @@ body.dark select.form-control {
     width: 44px;
     margin-right: calc(-44px - 1rem);
 
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.3s backwards;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) 0.3s backwards;
 }
 
 .form-scroll-nav__inner {
@@ -1094,7 +1096,7 @@ body.dark select.form-control {
     color: var(--text-soft);
 
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+    transition: background var(--dur-rapida) ease, color var(--dur-rapida) ease, opacity var(--dur-rapida) ease;
 }
 
 .form-scroll-nav__btn .icon {
@@ -1106,7 +1108,7 @@ body.dark select.form-control {
 }
 
 .form-scroll-nav__btn:hover:not(:disabled) {
-    background: var(--surface-elevated);
+    background: var(--surface-hover);
     color: var(--text);
 }
 

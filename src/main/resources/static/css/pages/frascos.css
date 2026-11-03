@@ -374,7 +374,7 @@
 /* Discretos: borda cinza apagada; a cor da ação só aparece no hover/foco */
 .card__header-actions .card__action {
     border-color: color-mix(in srgb, var(--border) 55%, transparent);
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: border-color var(--dur-rapida) ease, transform var(--dur-rapida) ease;
 }
 
 .card__header-actions .card__action--blue:not(:disabled):is(:hover, :focus-visible) {

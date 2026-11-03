@@ -6,7 +6,8 @@ public enum TipoDente {
     PRE_MOLAR("Pré-Molar", "PM"),
     CANINO("Canino", "CN"),
     INCISIVO("Incisivo", "IN"),
-    ENDO("Endo", "EN");
+    ENDO("Endo", "EN"),
+    SISO("Siso", "SI");
 
     private final String nome;
     private final String sigla;
@@ -37,11 +38,11 @@ public enum TipoDente {
     }
 
     /**
-     * Caninos e incisivos são identificados pela arcada. Endo entra junto só pra
-     * manter o mesmo formato na visualização (a arcada dele é sempre vazia).
+     * Caninos e incisivos são identificados pela arcada. Endo e Siso entram junto só pra
+     * manter o mesmo formato na visualização (a arcada deles é sempre vazia).
      */
     public boolean isUsaArcada() {
-        return this == CANINO || this == INCISIVO || this == ENDO;
+        return this == CANINO || this == INCISIVO || this == ENDO || this == SISO;
     }
 
     public static String getSiglaDente(TipoDente tipoDente) {

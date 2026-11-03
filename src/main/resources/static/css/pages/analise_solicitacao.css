@@ -66,7 +66,7 @@
     opacity: 0.35;
     pointer-events: none;
 
-    transition: color 0.2s ease;
+    transition: color var(--dur-rapida) ease;
 }
 
 /* Quantidade solicitada completa (atual >= totalSolicitado, ver
@@ -74,7 +74,7 @@
    (.modal-header-progress__fill/.analysis-progress__fill), opacidade
    continua baixa, só a cor muda. */
 .modal-header-count--complete {
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .modal-header-progress {
@@ -89,13 +89,18 @@
     background: var(--border);
 }
 
+/* --progresso (0 a 1) vem do template e do frasco-search-solicitacao.js;
+   scaleX em vez de width pra animar sem recalcular layout */
 .modal-header-progress__fill {
     height: 100%;
 
     /* mesmo verde de .analysis-progress__fill (components/analysis.css) */
     background: #22c55e;
 
-    transition: width 0.3s ease;
+    transform: scaleX(var(--progresso, 0));
+    transform-origin: left;
+
+    transition: transform var(--dur-media) var(--ease-suave);
 }
 
 /* Abaixo de uns 350px, "Cadastro dd/mm/aa · Manutenção dd/mm/aa"
@@ -117,18 +122,6 @@
     }
 }
 
-/* toolbar.css (componente compartilhado) centraliza os filhos da
-   .toolbar pelo meio da altura total do grupo (align-items:center) —
-   como .toolbar__info empilha o rótulo "Código da Solicitação:" em
-   cima do badge, esse "meio" fica um pouco acima do centro do badge
-   em si, e os botões (mesma altura do badge) acompanham esse desvio.
-   Alinhando pela base em vez do centro, badge e botões — que têm a
-   mesma altura — ficam com a base (e por consequência o centro
-   deles mesmos) coincidindo exatamente. */
-.toolbar {
-    align-items: flex-end;
-}
-
 /* Agrupa o "Voltar ao Painel" com os botões de ação (Cancelar/
    Confirmar) só pra manter o mesmo espaçamento/alinhamento de hoje
    em telas largas (.toolbar continua um flex de 2 grupos: info |
@@ -142,64 +135,6 @@
 
     gap: 0.75rem;
     flex-wrap: wrap;
-}
-
-/* Some suave de Cancelar/Confirmar conforme a etapa da análise muda
-   (analysis.js alterna a classe "is-hidden" em vez de display:none
-   direto). O botão encolhe até 0 e o(s) vizinho(s) com flex:1 tomam
-   o espaço liberado — é o que dá o efeito de toolbar "enxutando".
-   Fica fora do @media porque vale em qualquer largura de tela. */
-.toolbar__actions > .btn {
-    /* max-width parte de "none" (o valor inicial do CSS) por padrão
-       — "none" não é interpolável, então a transição pra max-width:0
-       (abaixo) não tinha de onde partir e aplicava tudo de uma vez
-       no primeiro frame, antes mesmo da opacity/flex-grow começarem
-       a se mexer. 100% é um valor real (nunca chega a restringir o
-       botão de verdade, já que ele nunca seria mais largo que o
-       próprio espaço que ocupa) e dá pra transição um ponto de
-       partida de verdade. */
-    max-width: 100%;
-
-    transition:
-        flex-grow 0.3s ease,
-        max-width 0.3s ease,
-        height 0.3s ease,
-        opacity 0.25s ease,
-        padding 0.3s ease,
-        margin 0.3s ease,
-        border-width 0.3s ease,
-        /* visibility não interpola — sem o delay ela aplicaria na
-           hora e o botão sumiria instantaneamente em vez de encolher
-           junto com o resto (max-width/height/opacity acima) */
-        visibility 0s linear 0.3s;
-}
-
-.toolbar__actions > .btn.is-hidden {
-    flex-grow: 0;
-    flex-shrink: 1;
-    flex-basis: 0;
-
-    max-width: 0;
-    height: 0;
-
-    padding-left: 0;
-    padding-right: 0;
-    margin: 0;
-
-    border-width: 0;
-
-    opacity: 0;
-    overflow: hidden;
-
-    pointer-events: none;
-    visibility: hidden;
-}
-
-/* Reaparecendo (is-hidden removida), a visibilidade tem que voltar
-   já no início da transição — senão o botão fica invisível durante
-   todo o crescimento e só aparece no fim. */
-.toolbar__actions > .btn:not(.is-hidden) {
-    transition-delay: 0s;
 }
 
 @media (max-width: 900px) {
@@ -228,17 +163,8 @@
         column-gap: 1rem;
     }
 
-    .toolbar__info {
+    .toolbar__identity {
         grid-area: info;
-
-        width: auto;
-
-        align-items: flex-start;
-        text-align: left;
-    }
-
-    .toolbar__label {
-        padding-left: 0.5rem;
     }
 
     .toolbar__actions-group {
@@ -264,13 +190,13 @@
         width: 100%;
         margin-top: 1rem;
 
-        transition: margin-top 0.3s ease;
+        transition: margin-top var(--dur-media) ease;
     }
 
-    /* Quando Cancelar e Confirmar estão os dois escondidos (etapa
-       concluído), fecha o espaço reservado pra segunda linha —
-       controlado por analysis.js junto com "is-hidden". */
-    .toolbar__actions.toolbar__actions--empty {
+    /* Quando não há Cancelar nem Confirmar (etapa concluído: o
+       servidor não renderiza os forms), fecha o espaço reservado pra
+       segunda linha. */
+    .toolbar__actions:not(:has(form)) {
         margin-top: 0;
     }
 
@@ -353,16 +279,6 @@
     .stepper__line {
         margin-left: 0;
         margin-right: 0;
-    }
-
-    /* toolbar.css dá um min-width:220px fixo pro badge do código —
-       pensado pra telas largas, mas é o que estoura a toolbar um
-       pouco abaixo de 380px (linha 1 do grid vira código+Voltar, e o
-       badge sozinho já não cabe dividindo espaço com o botão). Sem
-       o piso, ele encolhe até a largura do próprio texto ("SOL-002"
-       é bem curto). */
-    .toolbar__badge {
-        min-width: auto;
     }
 
     /* h2 + status-pill (Detalhes da Solicitação) ou h2 + botão

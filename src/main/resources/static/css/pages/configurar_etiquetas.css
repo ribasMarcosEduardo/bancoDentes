@@ -118,7 +118,7 @@
 /* Os dois cards entram um depois do outro, logo após o stepper (ver
    transições em pages/etiquetas.css). */
 html:not(.vt-nav) .etiqueta-config-layout > .form-card {
-    animation: fade-slide-in var(--entrada-duracao) cubic-bezier(0.22, 1, 0.36, 1) 0.16s backwards;
+    animation: fade-slide-in var(--entrada-duracao) var(--ease-suave) 0.16s backwards;
 }
 
 html:not(.vt-nav) .etiqueta-config-layout > .form-card + .form-card {

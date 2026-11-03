@@ -43,8 +43,8 @@
         visibility: hidden;
 
         transition:
-            opacity 0.3s ease,
-            visibility 0.3s;
+            opacity var(--dur-media) ease,
+            visibility var(--dur-media);
     }
 
     .mobile-menu-overlay.is-open {
@@ -67,7 +67,7 @@
         padding: 1.25rem;
 
         transform: translateX(100%);
-        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        transition: transform 0.35s var(--ease-suave);
     }
 
     .mobile-menu.is-open {
@@ -139,12 +139,12 @@
         font-size: 0.95rem;
 
         transition:
-            background 0.2s ease,
-            color 0.2s ease;
+            background var(--dur-rapida) ease,
+            color var(--dur-rapida) ease;
     }
 
     .mobile-menu__link:hover {
-        background: var(--surface-elevated);
+        background: var(--surface-hover);
         color: var(--text);
     }
 
@@ -179,7 +179,7 @@
     }
 
     .mobile-menu__group .mobile-menu__link:hover {
-        background: var(--surface-elevated);
+        background: var(--surface-hover);
     }
 
     .mobile-menu__footer {
@@ -211,7 +211,7 @@
         text-decoration: none;
 
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: background var(--dur-rapida) ease;
     }
 
     .mobile-menu__login:hover {
@@ -246,13 +246,15 @@
         cursor: pointer;
 
         transition:
-            background 0.2s ease,
-            transform 0.2s ease;
+            background var(--dur-rapida) ease,
+            transform var(--dur-rapida) ease;
     }
 
-    .mobile-menu__icon-btn:hover {
-        background: var(--surface-muted);
-        transform: translateY(-1px);
+    @media (hover: hover) {
+        .mobile-menu__icon-btn:hover {
+            background: var(--surface-muted);
+            transform: translateY(-1px);
+        }
     }
 
     .mobile-menu__icon-btn .icon {

@@ -29,14 +29,20 @@ button {
     cursor: pointer;
     user-select: none;
 
+    /* --ease-mola passa um pouco do alvo: ao soltar o clique o botão volta
+       do scale(0.96) com um "pop" leve */
     transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+        background var(--dur-rapida) ease,
+        transform var(--dur-rapida) var(--ease-mola),
+        box-shadow var(--dur-rapida) ease;
 }
 
-.btn:hover {
-    transform: translateY(-1px);
+/* Hover só com mouse: no toque o :hover fica "grudado" depois do toque,
+   deixando o botão levantado. O :active logo abaixo vale pros dois */
+@media (hover: hover) {
+    .btn:hover {
+        transform: translateY(-1px);
+    }
 }
 
 /* Feedback de "apertar" ao clicar (o anel de foco fica logo abaixo). */
@@ -101,7 +107,7 @@ button {
 }
 
 .btn-outline-success {
-    color: #22c55e;
+    color: var(--status-verde);
 }
 
 .btn-outline-success:hover {
@@ -109,7 +115,7 @@ button {
 }
 
 .btn-outline-danger {
-    color: #ef4444;
+    color: var(--status-vermelho);
 }
 
 .btn-outline-danger:hover {
@@ -117,11 +123,99 @@ button {
 }
 
 .btn-outline-info {
-    color: #3b82f6;
+    color: var(--status-azul);
 }
 
 .btn-outline-info:hover {
     background: rgba(59,130,246,0.12);
+}
+
+/* Reabrir (pedido negado, painelAnalise.html): mesmo âmbar da pill de Pendente */
+.btn-outline-warning {
+    color: var(--status-ambar);
+}
+
+.btn-outline-warning:hover {
+    background: rgba(245,158,11,0.12);
+}
+
+/*
+    Botão de ação na área expandida de uma linha com status (ex.: Concluir
+    manutenção, Iniciar análise). Combina com a btn-outline-* e mistura a
+    cor de status da linha (--linha-status-cor, components/list.css) com a
+    do próprio botão (currentColor, da variante):
+
+    - fundo de vidro fino (--glass-thin-bg) com desfoque e saturação, pra
+      pegar as cores em volta (o degradê da linha);
+    - brilho da cor da linha no canto superior esquerdo, neutro no meio e
+      a cor do botão translúcida no canto oposto;
+    - borda no mesmo degradê, translúcida na cor da linha e sólida na do
+      botão. Num ::before mascarado: border-color não aceita degradê (mesma
+      técnica do .card__code.code-status, pages/frascos.css).
+
+    Fora de uma linha com status, o canto fica na cor do próprio botão.
+    Texto e ícone seguem na cor do botão: ficam no centro, onde o degradê
+    já é dela.
+*/
+.btn-degrade-status {
+    --degrade-canto: var(--linha-status-cor, currentColor);
+
+    position: relative;
+
+    border-color: transparent;
+    background:
+        linear-gradient(
+            to bottom right,
+            color-mix(in srgb, var(--degrade-canto) 16%, transparent) 0%,
+            color-mix(in srgb, var(--degrade-canto) 5%, transparent) 20%,
+            transparent 45%,
+            color-mix(in srgb, currentColor 8%, transparent) 70%,
+            color-mix(in srgb, currentColor 22%, transparent) 100%
+        ),
+        var(--glass-thin-bg);
+
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.btn-degrade-status:hover {
+    background:
+        linear-gradient(
+            to bottom right,
+            color-mix(in srgb, var(--degrade-canto) 20%, transparent) 0%,
+            color-mix(in srgb, var(--degrade-canto) 7%, transparent) 22%,
+            transparent 42%,
+            color-mix(in srgb, currentColor 12%, transparent) 65%,
+            color-mix(in srgb, currentColor 28%, transparent) 100%
+        ),
+        var(--glass-thin-bg);
+}
+
+.btn-degrade-status::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+
+    padding: 1px;
+    border-radius: inherit;
+
+    background: linear-gradient(
+        to bottom right,
+        color-mix(in srgb, var(--degrade-canto) 50%, transparent) 0%,
+        color-mix(in srgb, var(--degrade-canto) 40%, transparent) 22%,
+        color-mix(in srgb, currentColor 70%, transparent) 42%,
+        currentColor 60%
+    );
+
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
 }
 
 /* PAGINATION */
@@ -153,10 +247,12 @@ button {
     pointer-events: none;
 }
 
-.btn-pagination:hover {
-    background: var(--btn-pagination-bg-hover);
+@media (hover: hover) {
+    .btn-pagination:hover {
+        background: var(--btn-pagination-bg-hover);
 
-    transform: translateY(-1px);
+        transform: translateY(-1px);
+    }
 }
 
 /* Ação de menor peso (ex.: Cancelar ao lado de Salvar) — só texto, o

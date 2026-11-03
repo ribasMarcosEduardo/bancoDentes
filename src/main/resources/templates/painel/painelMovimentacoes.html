@@ -2,21 +2,23 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <script>
         (function () {
             var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
             var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
-            document.documentElement.classList.add(theme);
+            document.documentElement.classList.add(theme, "carregando");
         })();
     </script>
 
     <script>
         // "Ver movimentações" de um frasco: a página rola direto pra ele (includes.js),
-        // então toolbar e paginação já nascem escondidas, sem entrar e sumir em seguida
+        // então toolbar e paginação já nascem escondidas, sem entrar e sumir em seguida.
+        // header-aberto: no celular o header fica expandido mesmo assim (sobra
+        // espaço) até a primeira rolagem do usuário (css/layout/app-mobile.css)
         if (new URLSearchParams(location.search).has("frasco")) {
-            document.documentElement.classList.add("barras-ocultas", "barras-sem-entrada");
+            document.documentElement.classList.add("barras-ocultas", "barras-sem-entrada", "header-aberto");
         }
     </script>
 
@@ -36,7 +38,6 @@
         });
     </script>
 
-    <!-- Só pinta depois dos scripts do fim do <body> (filtros e ícones prontos) -->
     <link rel="expect" href="#painel-fim" blocking="render">
 
     <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
@@ -51,7 +52,7 @@
     <title>Painel de Movimentações</title>
 </head>
 
-<body>
+<body class="app-mobile painel-movimentacoes">
 
 <div class="background">
     <div class="blob blob--blue"></div>
@@ -59,6 +60,7 @@
 </div>
 
 <div th:replace="~{partials/navbar :: navbar}"></div>
+<div th:replace="~{partials/app_mobile :: appHeader('tipo')}"></div>
 
 <main class="page">
     <section class="dashboard">
@@ -108,7 +110,6 @@
 
                     <div class="filter-section__content">
                       <div class="filter-section__inner">
-                          <!-- Solicitação ainda não gera movimentação na v1: tirar o th:unless quando gerar -->
                           <label class="checkbox-filter" th:each="o : ${T(bancoDentes.model.enumModels.OrigemMovimentacao).values()}"
                                  th:unless="${o.name() == 'SOLICITACAO'}">
                               <input type="checkbox" th:value="${o}" data-filter-group="Origem">
@@ -192,9 +193,9 @@
                             <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
                         </button>
 
-                        <a th:href="@{/movimentacao/cadastrarMovimentacao}" class="btn btn-primary">
+                        <a th:href="@{/movimentacao/cadastrarMovimentacao}" class="btn btn-primary toolbar__novo" aria-label="Nova movimentação">
                             <i class="orderBy-icon" data-lucide="plus"></i>
-                            <span class="btn-label--prefix">Nova </span>Movimentação
+                            <span class="btn__texto"><span class="btn-label--prefix">Nova </span>Movimentação</span>
                         </a>
                     </div>
                 </div>
@@ -292,20 +293,22 @@
                                       th:text="${mov.tipoMovimentacao.nome}">Tipo</span>
 
                                 <span th:text="${mov.quantidade != null ? mov.quantidade : 0}">0</span>
-                                <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yy')}">00/00/00</span>
+                                <span data-rotulo="Data" th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yy')}">00/00/00</span>
 
                                 <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir movimentação">
                                     <i class="icon" data-lucide="chevron-down"></i>
                                 </button>
+
+                                <span class="result-list__mobile" data-rotulo="Saldo"
+                                      th:text="${(mov.saldoAnterior != null ? mov.saldoAnterior : '---') + ' → ' + (mov.saldoPosterior != null ? mov.saldoPosterior : '---')}">24 → 18</span>
                             </div>
 
                             <div class="request-details">
                                 <div class="request-details__content">
                                     <div class="request-details__layout">
-                                        <section class="request-panel">
+                                        <section class="request-panel request-panel--mov">
                                             <h4 class="request-panel__title">Movimentação</h4>
 
-                                            <!-- Saldo anterior -> quantidade movimentada (com o sinal e a cor do tipo) -> saldo após -->
                                             <div class="saldo-fluxo" th:classappend="'saldo-fluxo--' + ${#strings.toLowerCase(mov.tipoMovimentacao.name())}">
                                                 <div class="saldo-fluxo__item">
                                                     <span class="request-details__label">Saldo anterior</span>
@@ -344,7 +347,6 @@
                                                     <span th:text="${mov.local != null ? mov.local.nome : 'Banco de Dentes Humanos'}">Banco de Dentes Humanos</span>
                                                 </div>
 
-                                                <!-- Já aparece na linha da lista; só reaparece aqui em telas estreitas -->
                                                 <div class="request-detail request-detail--data">
                                                     <span class="request-details__label">Data</span>
                                                     <span th:text="${#temporals.format(mov.datMovimentacao, 'dd/MM/yyyy')}">-</span>
@@ -372,16 +374,16 @@
                                             </div>
                                         </section>
 
-                                        <section class="request-panel">
+                                        <section class="request-panel request-panel--frasco">
                                             <h4 class="request-panel__title">Frasco</h4>
 
                                             <div class="request-details__grid">
-                                                <div class="request-detail">
+                                                <div class="request-detail request-detail--na-linha">
                                                     <span class="request-details__label">Identificação</span>
                                                     <span th:text="${mov.frasco != null && mov.frasco.identificacao != null ? mov.frasco.identificacao : (mov.frasco != null ? 'FR-' + mov.frasco.codigo : '---')}">-</span>
                                                 </div>
 
-                                                <div class="request-detail">
+                                                <div class="request-detail request-detail--na-linha">
                                                     <span class="request-details__label">Grupo dentário</span>
                                                     <span th:text="${mov.frasco != null ? mov.frasco.tipoDente : '---'}">-</span>
                                                 </div>
@@ -396,7 +398,6 @@
                                                     <span th:text="${mov.frasco != null && mov.frasco.denticao != null ? mov.frasco.denticao.nome : '---'}">-</span>
                                                 </div>
 
-                                                <!-- Molar/pré-molar se identificam pela numeração; os demais, pela arcada -->
                                                 <div class="request-detail" th:if="${mov.frasco != null && mov.frasco.tipoDente != null && mov.frasco.tipoDente.usaNumeracao}">
                                                     <span class="request-details__label">Numeração</span>
                                                     <span th:text="${mov.frasco.posicao != null ? mov.frasco.posicao : '---'}">-</span>
@@ -437,7 +438,9 @@
 </main>
 
 <div th:replace="~{partials/footer :: footer}"></div>
+<div th:replace="~{partials/app_mobile :: appTabbar('movimentacoes')}"></div>
 <script th:src="@{/js/bundles/painel.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
 
 <span id="painel-fim" hidden></span>
 </body>

@@ -89,6 +89,12 @@ public class Solicitacao {
 
     public void negar() {
         this.statusSolicitacao = StatusSolicitacao.NEGADO;
+        this.dataFinalizacao = LocalDateTime.now();
+    }
+
+    public void reabrir() {
+        this.iniciarAnalise();
+        this.dataFinalizacao = null;
     }
 
     public void aguardandoRetirada() {
@@ -97,6 +103,7 @@ public class Solicitacao {
 
     public void concluir() {
         this.statusSolicitacao = StatusSolicitacao.CONCLUIDO;
+        this.dataFinalizacao = LocalDateTime.now();
     }
 
     public boolean isApto() {

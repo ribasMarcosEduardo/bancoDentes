@@ -33,7 +33,7 @@
     min-width: 15px;
     min-height: 15px;
 
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--dur-media) var(--ease-suave);
 }
 
 /* Estado controlado via JS (page-size.js) — :focus sozinho não dá pra

@@ -51,7 +51,7 @@ public class AnaliseSolicitacao {
 
     public void reabrir() {
         this.justificativa = null;
-        this.solicitacao.iniciarAnalise();
+        this.solicitacao.reabrir();
     }
 
     public void emSeparacao() {

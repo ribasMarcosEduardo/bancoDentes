@@ -84,7 +84,7 @@
 
     outline: none;
 
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: border-color var(--dur-rapida) ease, box-shadow var(--dur-rapida) ease, background var(--dur-rapida) ease;
 }
 
 .otp-input:focus {
@@ -98,7 +98,7 @@
    digitar (qualquer input limpa as classes de estado, ver JS). */
 .otp-row--error .otp-input {
     border-color: #ef4444;
-    animation: otp-shake 0.4s ease;
+    animation: otp-shake var(--dur-lenta) ease;
 }
 
 .otp-row--success .otp-input {
@@ -121,7 +121,7 @@
     gap: 0.4rem;
     margin: -0.5rem 0 0;
 
-    color: #ef4444;
+    color: var(--status-vermelho);
     font-size: 0.82rem;
     text-align: center;
 }

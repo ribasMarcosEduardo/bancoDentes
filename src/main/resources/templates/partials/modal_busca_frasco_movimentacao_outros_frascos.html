@@ -1,15 +1,6 @@
-<div class="modal-overlay" id="modalBuscaFrascoMovimentacaoOutrosFrascos">
+<div class="modal-overlay modal-busca-movimentacao" id="modalBuscaFrascoMovimentacaoOutrosFrascos">
     <div class="modal glass-frost" role="dialog" aria-modal="true" aria-labelledby="modalBuscaFrascoMovimentacaoOutrosFrascosTitle">
 
-        <!-- Sem Grupo dentário/Estado do dente/Dentição aqui — diferente
-             dos outros dois modais de movimentação, a busca já nasce
-             recortada pelos mesmos atributos do frasco de destino
-             escolhido em "Escolher Frasco" (ver setupModalOutrosFrascos em
-             frasco-search-movimentacao.js), então não sobra escolha pro
-             usuário fazer nesses campos — só Status e Ordenar por, junto
-             da busca por identificador. Seleção múltipla: cada frasco
-             marcado entra INTEIRO no destino (toda a quantidade
-             disponível, sem rolagem de quantidade aqui). -->
         <header class="modal__header">
             <h2 id="modalBuscaFrascoMovimentacaoOutrosFrascosTitle">
                 <i class="icon" data-lucide="search"></i>
@@ -56,7 +47,6 @@
 
             <div class="modal-results-scroll">
                 <div class="modal-results" id="modalBuscaFrascoMovimentacaoOutrosFrascosResults">
-                    <!-- Linhas de resultado são renderizadas via JS (frasco-search-movimentacao.js) -->
                 </div>
 
                 <p class="modal-empty" id="modalBuscaFrascoMovimentacaoOutrosFrascosEmpty">

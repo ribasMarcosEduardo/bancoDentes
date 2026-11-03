@@ -1,11 +1,6 @@
-<div class="modal-overlay" id="modalBuscaFrascoMovimentacao">
+<div class="modal-overlay modal-busca-movimentacao" id="modalBuscaFrascoMovimentacao">
     <div class="modal glass-frost" role="dialog" aria-modal="true" aria-labelledby="modalBuscaFrascoMovimentacaoTitle">
 
-        <!-- Sem progress bar/contador aqui (ver modal_busca_frasco_solicitacao.html
-             pro padrão com progresso) — essa busca não tem uma quantidade
-             prévia exigida pra completar, é controlada livremente pelo
-             estagiário, então .modal__header fica no padrão simples
-             (título + fechar). -->
         <header class="modal__header">
             <h2 id="modalBuscaFrascoMovimentacaoTitle">
                 <i class="icon" data-lucide="search"></i>
@@ -19,9 +14,6 @@
 
         <div class="modal__body">
 
-            <!-- Busca + filtros ficam FORA da área com scroll — sempre
-                 visíveis, não somem quando a lista de resultados precisa
-                 rolar (ver .modal-results-scroll logo abaixo). -->
             <div class="modal__body-fixed">
                 <div class="modal-search-row">
                     <div class="search-wrapper modal-search">
@@ -31,9 +23,6 @@
                         <i class="search-icon" data-lucide="search"></i>
                     </div>
 
-                    <!-- Só o ícone (sem borda/fundo): revela/recolhe os filtros específicos do
-                         frasco logo abaixo. Recolhido, os filtros continuam valendo; o ponto no ícone
-                         avisa que há algum ativo (ver frasco-search-movimentacao.js). -->
                     <button type="button" class="modal-filter-toggle tooltip-below" aria-expanded="false"
                             data-tooltip="Filtros do frasco" aria-label="Mostrar filtros do frasco">
                         <i class="icon" data-lucide="filter"></i>
@@ -41,13 +30,6 @@
                     </button>
                 </div>
 
-                <!-- Grupo dentário é o filtro primário — junto com a busca
-                     acima, é o que tira a listagem do estado "vazio"
-                     inicial (ver frasco-search-movimentacao.js). Estado do
-                     dente/Dentição só refinam um resultado que já existe.
-                     O recorte por Local (BDH/Biobanco) não aparece aqui:
-                     já foi decidido lá em cima no formulário
-                     (#localMovimentacao), então o JS aplica ele sozinho. -->
                 <div class="modal-filters-collapse">
                     <div class="modal-filters-collapse__inner">
                         <div class="modal-filters">
@@ -86,11 +68,6 @@
                     </div>
                 </div>
 
-                <!-- Linha extra: status da seleção (livremente reversível,
-                     "Todos" é uma opção de verdade, não um placeholder) e
-                     ordenação (mesma trava sem "Qualquer" de Grupo
-                     dentário — ver travarPlaceholderDoFiltro em
-                     frasco-search-movimentacao.js). -->
                 <div class="modal-filters">
                     <div class="select-wrapper">
                         <select class="form-control" id="modalFiltroStatusMovimentacao">
@@ -114,17 +91,10 @@
                 </div>
             </div>
 
-            <!-- Única parte que rola — altura do .modal é fixa (ver
-                 modal.css), então isso é o que sobra depois de header,
-                 rodapé e .modal__body-fixed reservarem seu espaço. -->
             <div class="modal-results-scroll">
                 <div class="modal-results" id="modalBuscaFrascoMovimentacaoResults">
-                    <!-- Linhas de resultado são renderizadas via JS (frasco-search-movimentacao.js) -->
                 </div>
 
-                <!-- Um texto só, trocado via JS entre o aviso inicial
-                     ("escolha um grupo ou pesquise") e "nenhum encontrado"
-                     depois que a busca de verdade roda. -->
                 <p class="modal-empty" id="modalBuscaFrascoMovimentacaoEmpty">
                     Escolha um grupo dentário ou pesquise por um identificador para ver os frascos disponíveis.
                 </p>
@@ -134,10 +104,6 @@
         <footer class="modal__footer">
             <span class="modal__footer-hint" id="modalBuscaFrascoMovimentacaoCount">Nenhuma busca realizada</span>
 
-            <!-- Mesmo miolo (pagination__nav + range + setas) da paginação
-                 usada nas listas (ver frascos.html) — só sem o wrapper
-                 .pagination (que carrega o sticky/glass da barra de
-                 página inteira, sem sentido dentro de um rodapé de modal). -->
             <div class="pagination__nav">
                 <span class="pagination__range" id="modalPaginationRangeMovimentacao">0-0</span>
 
