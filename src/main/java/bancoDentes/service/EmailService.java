@@ -20,10 +20,11 @@ public class EmailService {
         this.mailProducer = mailProducer;
     }
 
-    public void enviarCodigoVerificacao(String destinatario, String codigo) {
+    public void enviarCodigoVerificacao(String destinatario, String nome, String codigo) {
         String assunto = "Portal BDH - Código de Confirmação";
 
-        String mensagem = "<p>Seu código de confirmação é: <strong>" + codigo + "</strong></p>"
+        String mensagem = "<p>Olá, <strong>" + nome + "</strong>!</p>"
+                + "<p>Seu código de confirmação é: <strong>" + codigo + "</strong></p>"
                 + "<p>Ele expira em 15 minutos.</p>";
 
         EmailDTO emailDTO = new EmailDTO(

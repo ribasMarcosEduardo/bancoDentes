@@ -19,6 +19,9 @@ public class Usuario {
     @Column(name = "CODESTUDANTE")
     private Long codUsuario;
 
+    @Column(name = "NOME")
+    private String nome;
+
     @Column(name = "CREDITO")
     private Long credito;
 

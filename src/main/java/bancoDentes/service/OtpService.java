@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Service responsável por gerara e gerenciar a OTP (One-Time Password)
+ * Service responsável por gerar e gerenciar a OTP (One-Time Password)
  *
  * @author Marcos Eduardo Ribas
  */
@@ -17,25 +17,35 @@ public class OtpService {
 
     private final ConcurrentHashMap<String, OtpDataDTO> otpCache = new ConcurrentHashMap<>();
     private final SecureRandom secureRandom = new SecureRandom();
+    private static final String ALPHA_NUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     /**
-     * Gera um código numérico seguro de 6 dígitos e armazena-o temporariamente na memória.
+     * Gera um código alfanumérico seguro baseado no timestamp da data atual e em caracteres aleatórios.
      * O código gerado possui uma validade predefinida de 15 minutos a partir do momento da criação.
      * Se o utilizador já possuir um código ativo, este será sobrescrito.
      *
      * @param codigoAd
      */
     public String gerarEArmazenarCodigo(String codigoAd) {
-        String codigo = String.format("%06d", secureRandom.nextInt(1000000));
+        String timeBase36 = Long.toString(System.currentTimeMillis(), 36).toUpperCase();
+        String timePart = timeBase36.substring(Math.max(0, timeBase36.length() - 3));
+
+        StringBuilder randomPart = new StringBuilder(3);
+        for (int i = 0; i < 3; i++) {
+            randomPart.append(ALPHA_NUMERIC.charAt(secureRandom.nextInt(ALPHA_NUMERIC.length())));
+        }
+
+        String codigo = timePart + randomPart.toString();
+
         otpCache.put(codigoAd, new OtpDataDTO(codigo, LocalDateTime.now().plusMinutes(15)));
 
         return codigo;
     }
 
     /**
-     * Valida um código OTP introduzido pelo USUÁRIO.
+     * Valida um código OTP introduzido pelo USUÁRIO (insensível a maiúsculas/minúsculas).
      * Para que a validação seja bem-sucedida, o código deve existir no cache,
-     * corresponder exatamente ao valor recebido e não ter ultrapassado o seu limite de validade.
+     * corresponder ao valor recebido e não ter ultrapassado o seu limite de validade.
      *
      * @param codigoAd
      * @param codigoRecebido
@@ -44,7 +54,7 @@ public class OtpService {
         OtpDataDTO dadosTemporarios = otpCache.get(codigoAd);
 
         if (dadosTemporarios != null
-                && dadosTemporarios.codigo().equals(codigoRecebido)
+                && dadosTemporarios.codigo().equalsIgnoreCase(codigoRecebido != null ? codigoRecebido.trim() : "")
                 && dadosTemporarios.expiracao().isAfter(LocalDateTime.now())) {
 
             otpCache.remove(codigoAd);

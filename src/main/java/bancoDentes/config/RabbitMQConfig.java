@@ -13,9 +13,4 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.emailJson.created}")
     private String queueEmailStr;
 
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
-
 }

@@ -4,6 +4,7 @@ const RESEND_COOLDOWN_SECONDS = 30;
 
 const panelEmail = document.getElementById("panel-email");
 const panelCodigo = document.getElementById("panel-codigo");
+const nomeInput = document.getElementById("confirm-nome");
 const emailInput = document.getElementById("confirm-email");
 const sentEmailLabel = document.getElementById("confirm-sent-email");
 const btnEnviar = document.getElementById("btn-enviar-codigo");
@@ -71,6 +72,12 @@ function goToEmailStep() {
 panelEmail.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    nomeInput.value = nomeInput.value.trim();
+    if (!nomeInput.checkValidity()) {
+        nomeInput.reportValidity();
+        return;
+    }
+
     if (!emailInput.checkValidity()) {
         emailInput.reportValidity();
         return;
@@ -79,13 +86,16 @@ panelEmail.addEventListener("submit", async (event) => {
     setButtonLoading(btnEnviar, true, "Enviando...");
 
     try {
-        const response = await fetch("/api/confirmacao/enviar", {
+        const response = await fetch("/confirmacao/enviar", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 [csrfHeader]: csrfToken
             },
-            body: JSON.stringify({ email: emailInput.value.trim() })
+            body: JSON.stringify({
+                nome: nomeInput.value,
+                email: emailInput.value.trim()
+            })
         });
 
         if (response.ok) {
@@ -127,13 +137,16 @@ btnReenviar.addEventListener("click", async () => {
     reenviarLabel.textContent = "Reenviando...";
 
     try {
-        await fetch("/api/confirmacao/enviar", {
+        await fetch("/confirmacao/enviar", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 [csrfHeader]: csrfToken
             },
-            body: JSON.stringify({ email: emailInput.value.trim() })
+            body: JSON.stringify({
+                nome: nomeInput.value.trim(),
+                email: emailInput.value.trim()
+            })
         });
         clearOtp();
         otpInputs[0].focus();
@@ -158,7 +171,7 @@ function checkCodeComplete() {
 
 async function validateCode(code) {
     try {
-        const response = await fetch("/api/confirmacao/validar", {
+        const response = await fetch("/confirmacao/validar", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -186,18 +199,21 @@ async function validateCode(code) {
     }
 }
 
-// --- Comportamento visual dos inputs do código ---
 otpInputs.forEach((input, index) => {
     input.addEventListener("focus", () => input.select());
+
     input.addEventListener("input", () => {
-        input.value = input.value.replace(/\D/g, "").slice(0, 1);
+        input.value = input.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 1);
+
         otpRow.classList.remove("otp-row--error", "otp-row--success");
         otpError.hidden = true;
+
         if (input.value && index < otpInputs.length - 1) {
             focusOtp(index + 1);
         }
         checkCodeComplete();
     });
+
     input.addEventListener("keydown", (event) => {
         if (event.key === "Backspace" && !input.value && index > 0) {
             focusOtp(index - 1);
@@ -211,11 +227,12 @@ otpInputs.forEach((input, index) => {
             focusOtp(index + 1);
         }
     });
+
     input.addEventListener("paste", (event) => {
         event.preventDefault();
-        const digits = (event.clipboardData.getData("text").match(/\d/g) || []).slice(0, otpInputs.length);
-        digits.forEach((digit, i) => { otpInputs[i].value = digit; });
-        focusOtp(Math.min(digits.length, otpInputs.length - 1));
+        const chars = (event.clipboardData.getData("text").match(/[a-zA-Z0-9]/g) || []).slice(0, otpInputs.length);
+        chars.forEach((char, i) => { otpInputs[i].value = char.toUpperCase(); });
+        focusOtp(Math.min(chars.length, otpInputs.length - 1));
         checkCodeComplete();
     });
 });

@@ -2,8 +2,7 @@ package bancoDentes.amqp;
 
 import bancoDentes.dto.EmailDTO;
 import bancoDentes.dto.MessageWrapperDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,19 +10,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class MailProducer {
 
-    private static final Logger logger = LoggerFactory.getLogger(MailProducer.class);
-
     private final RabbitTemplate rabbitTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${rabbitmq.emailJson.created}")
     private String queueEmailStr;
 
-    public MailProducer(RabbitTemplate rabbitTemplate) {
+    public MailProducer(RabbitTemplate rabbitTemplate, ObjectMapper objectMapper) {
         this.rabbitTemplate = rabbitTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public void sendMail(EmailDTO emailDTO) {
-        MessageWrapperDTO<EmailDTO> wrapper = new MessageWrapperDTO<>(emailDTO);
-        rabbitTemplate.convertAndSend(queueEmailStr, wrapper);
+        try {
+            MessageWrapperDTO<EmailDTO> wrapper = new MessageWrapperDTO<>(emailDTO);
+            String jsonPayload = objectMapper.writeValueAsString(wrapper);
+            rabbitTemplate.convertAndSend(queueEmailStr, jsonPayload);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

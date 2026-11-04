@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Serviço responsável por gerir as operações e regras de negócio relacionados ao usuário.
+ *
  * Integra a lógica de pesquisa de estudantes e o fluxo de segurança para verificação de e-mail utilizando códigos de uso único (OTP).
  *
  * @author Marcos Eduardo Ribas
@@ -34,8 +35,9 @@ public class UsuarioService extends BaseService {
 
     /**
      * Procura um usuário pelo seu código do Active Directory.
+     *
      * Caso seja o seu primeiro acesso ao sistema,
-     * cria imediatamente um novo registo com os valores padrão.
+     * cria imediatamente um novo registro com os valores padrão.
      *
      * @param codigoAd
      */
@@ -51,26 +53,30 @@ public class UsuarioService extends BaseService {
 
     /**
      * Inicia o processo de verificação de e-mail de um usuário.
-     * Atualiza o registo do usuário com o novo e-mail fornecido, solicita a geração de um código
-     * temporário (OTP) e aciona o envio de e-mail.
+     *
+     * Atualiza o registro do usuário com o nome completo e o e-mail fornecidos, solicita a geração de um código
+     * temporário (OTP) e aciona o envio de e-mail personalizado.
      *
      * @param codigoAd
+     * @param nome
      * @param email
      */
-    public void processarEnvioCodigo(String codigoAd, String email) throws UsuarioException{
+    public void processarEnvioCodigo(String codigoAd, String nome, String email) throws UsuarioException {
         Usuario usuario = usuarioRepository.findByCodigoAd(codigoAd)
                 .orElseThrow(() -> new UsuarioException(getText("error.usuario.naoEncontrado")));
 
+        usuario.setNome(nome);
         usuario.setEmail(email);
         usuarioRepository.save(usuario);
 
         String codigoGerado = otpService.gerarEArmazenarCodigo(codigoAd);
 
-        emailService.enviarCodigoVerificacao(email, codigoGerado);
+        emailService.enviarCodigoVerificacao(email, usuario.getNome(), codigoGerado);
     }
 
     /**
-     * confirmarEmail o código de verificação introduzido pelo usuário.
+     * Confirma o código de verificação introduzido pelo usuário.
+     *
      * Se o código corresponder ao gerado e não tiver expirado, o estado do utilizador
      * é atualizado para "verificado".
      *
@@ -103,7 +109,7 @@ public class UsuarioService extends BaseService {
     /**
      * Recupera o usuário que está atualmente logado na sessão da aplicação.
      *
-     * @return A entidade {@link Usuario} do utilizador ativo.
+     * @return
      */
     public Usuario getUsuarioLogado() throws UsuarioException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

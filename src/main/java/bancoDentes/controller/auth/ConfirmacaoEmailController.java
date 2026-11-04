@@ -42,14 +42,15 @@ public class ConfirmacaoEmailController extends BaseController {
      * @param payload
      * @param authentication
      */
-    @PostMapping("/api/confirmacao/enviar")
+    @PostMapping("/confirmacao/enviar")
     @ResponseBody
     public ResponseEntity<?> enviarCodigo(@RequestBody Map<String, String> payload, Authentication authentication) {
+        String nome = payload.get("nome");
         String email = payload.get("email");
         String codigoAd = authentication.getName();
 
         try {
-            usuarioService.processarEnvioCodigo(codigoAd, email);
+            usuarioService.processarEnvioCodigo(codigoAd, nome, email);
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
@@ -58,12 +59,12 @@ public class ConfirmacaoEmailController extends BaseController {
     }
 
     /**
-     * Recebe a requisição AJAX para validar os 6 dígitos inseridos pelo utilizador.
+     * Recebe a requisição AJAX para validar os dígitos inseridos pelo utilizador.
      *
      * @param payload
      * @param authentication
      */
-    @PostMapping("/api/confirmacao/validar")
+    @PostMapping("/confirmacao/validar")
     @ResponseBody
     public ResponseEntity<?> validarCodigo(@RequestBody Map<String, String> payload, Authentication authentication) {
         String codigoDigitado = payload.get("codigo");

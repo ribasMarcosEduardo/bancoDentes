@@ -55,8 +55,8 @@
         <div class="confirm-intro">
             <h1 class="confirm-title">Confirme seu e-mail</h1>
             <p class="confirm-subtitle">
-                O Portal de Ensino só confirma que seu acesso existe — não compartilha seu e-mail.
-                Cadastre um endereço para receber notificações e confirmações das suas solicitações.
+                O Portal de Ensino só confirma que seu acesso existe — não compartilha seu nome nem seu e-mail.
+                Informe seu nome completo e um endereço para receber notificações e confirmações das suas solicitações.
             </p>
         </div>
 
@@ -79,6 +79,22 @@
         </div>
 
         <form class="confirm-panel" id="panel-email" novalidate onsubmit="return false;">
+            <div class="form-group">
+                <label for="confirm-nome">Nome completo</label>
+                <div class="login-field">
+                    <i class="icon login-field__icon" data-lucide="user"></i>
+                    <span class="login-field__divider"></span>
+                    <input
+                            id="confirm-nome"
+                            name="nome"
+                            type="text"
+                            class="form-control"
+                            placeholder="Seu nome completo"
+                            autocomplete="name"
+                            required>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="confirm-email">Seu e-mail</label>
                 <div class="login-field">
