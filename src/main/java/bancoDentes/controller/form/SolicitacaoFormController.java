@@ -2,18 +2,12 @@ package bancoDentes.controller.form;
 
 import bancoDentes.controller.auxiliares.BaseController;
 import bancoDentes.dto.SolicitacaoDTO;
-import bancoDentes.exception.EstudanteException;
 import bancoDentes.exception.SolicitacaoException;
-import bancoDentes.model.Estudante;
-import bancoDentes.model.Solicitacao;
-import bancoDentes.service.EstudanteService;
+import bancoDentes.service.UsuarioService;
 import bancoDentes.service.SolicitacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Controlador responsável pelo gerenciamento das requisições web
@@ -27,7 +21,7 @@ import java.util.List;
 public class SolicitacaoFormController extends BaseController {
 
     private final SolicitacaoService solicitacaoService;
-    private final EstudanteService estudanteService;
+    private final UsuarioService usuarioService;
 
     /**
      * Processa a submissão do formulário para salvar (criar ou atualizar) uma solicitação.

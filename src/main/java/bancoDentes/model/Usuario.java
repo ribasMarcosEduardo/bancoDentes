@@ -11,20 +11,26 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ESTUDANTE")
-public class Estudante {
-//classe teste
+@Table(name = "USUARIO")
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CODESTUDANTE")
-    private Long codEstudante;
+    private Long codUsuario;
 
     @Column(name = "NOME")
     private String nome;
 
     @Column(name = "CREDITO")
-    private Long Credito;
+    private Long credito;
 
+    @Column(name = "CODIGO_AD", unique = true, nullable = false)
+    private String codigoAd;
 
+    @Column(name = "EMAIL")
+    private String email;
+
+    @Column(name = "VERIFICADO")
+    private boolean verificado = false;
 }

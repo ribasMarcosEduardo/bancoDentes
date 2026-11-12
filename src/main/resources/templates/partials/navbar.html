@@ -58,14 +58,19 @@
                     <button class="navbar__notifications glass tooltip-below" type="button" disabled data-tooltip="Notificações · Em breve" aria-label="Notificações (em breve)">
                         <i class="icon icon--md" data-lucide="bell"></i>
                     </button>
-
                 </div>
 
                 <button class="navbar__config glass tooltip-below" type="button" disabled data-tooltip="Configurações · Em breve" aria-label="Configurações (em breve)">
                     <i class="icon icon--md" data-lucide="settings"></i>
                 </button>
 
-                <a href="#" class="navbar__login glass">Login</a>
+                <!-- BOTÃO DE LOGOUT (DESKTOP) -->
+                <form th:action="@{/logout}" method="post" style="margin: 0; display: inline-flex;">
+                    <button type="submit" class="navbar__login glass" style="border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" title="Sair do sistema">
+                        Sair
+                        <i class="icon" data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </form>
             </div>
 
         </div>
@@ -110,7 +115,14 @@
         </nav>
 
         <div class="mobile-menu__footer">
-            <a href="#" class="mobile-menu__login">Login</a>
+
+            <!-- BOTÃO DE LOGOUT (MOBILE) -->
+            <form th:action="@{/logout}" method="post" style="margin: 0; width: 100%;">
+                <button type="submit" class="mobile-menu__login" style="border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; background: transparent; font-family: inherit; font-size: inherit; color: inherit;">
+                    Sair
+                    <i class="icon" data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+                </button>
+            </form>
 
             <div class="mobile-menu__icons">
                 <button class="mobile-menu__icon-btn theme-toggle-btn" type="button" aria-label="Alternar tema">
@@ -128,6 +140,7 @@
         </div>
     </aside>
 
+    <!-- Mensagens de Sucesso -->
     <th:block th:if="${mensagemSucesso}">
         <script th:inline="javascript">
             document.addEventListener("DOMContentLoaded", function() {
@@ -139,6 +152,7 @@
         </script>
     </th:block>
 
+    <!-- Mensagens de Erro -->
     <th:block th:if="${mensagemErro}">
         <script th:inline="javascript">
             document.addEventListener("DOMContentLoaded", function() {

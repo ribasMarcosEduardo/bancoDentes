@@ -4,10 +4,11 @@ import bancoDentes.dto.SolicitacaoDTO;
 import bancoDentes.exception.EstudanteSolicitacaoException;
 import bancoDentes.exception.SolicitacaoException;
 import bancoDentes.exception.SolicitacaoNaoEncontradaException;
-import bancoDentes.model.Estudante;
+import bancoDentes.exception.UsuarioException;
+import bancoDentes.model.Usuario;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.model.enumModels.StatusSolicitacao;
-import bancoDentes.repository.EstudanteRepository;
+import bancoDentes.repository.UsuarioRepository;
 import bancoDentes.repository.SolicitacaoRepository;
 import bancoDentes.service.validator.SolicitacaoValidator;
 import jakarta.transaction.Transactional;
@@ -28,9 +29,10 @@ import java.util.List;
 public class SolicitacaoService extends BaseService {
 
     private final SolicitacaoRepository solicitacaoRepository;
-    private final EstudanteRepository estudanteRepository; // TODO: Apenas teste, remover ao implementar Spring Security
+    private final UsuarioRepository usuarioRepository;
     private final SolicitacaoValidator solicitacaoValidator;
     private final CreditoService creditoService;
+    private final UsuarioService usuarioService;
 
     /**
      * Salva uma nova solicitação ou atualiza uma já existente no banco de dados.
@@ -42,22 +44,22 @@ public class SolicitacaoService extends BaseService {
      * @param solicitacaoDTO
      */
     @Transactional
-    public Solicitacao save(SolicitacaoDTO solicitacaoDTO) throws SolicitacaoException {
-        Estudante estudante = estudanteRepository.findById(2L)
-                .orElseThrow(() -> new EstudanteSolicitacaoException(this.getText("error.estudante.nao.encontrado")));
+    public Solicitacao save(SolicitacaoDTO solicitacaoDTO) throws Exception {
 
-        solicitacaoValidator.saveValidator(solicitacaoDTO, estudante);
-        Solicitacao solicitacao = solicitacaoDTO.mapearSolicitacao(estudante);
+        Usuario usuario = usuarioService.getUsuarioLogado();
+
+        solicitacaoValidator.saveValidator(solicitacaoDTO, usuario);
+        Solicitacao solicitacao = solicitacaoDTO.mapearSolicitacao(usuario);
 
         if (solicitacao.getCodigo() != null) {
             Solicitacao solBanco = buscarPorCodigo(solicitacao.getCodigo());
             if (!solBanco.getQuantidade().equals(solicitacao.getQuantidade())) {
-                creditoService.manipulaCredito(estudante, solBanco.getQuantidade(), solicitacao.getQuantidade());
+                creditoService.manipulaCredito(usuario, solBanco.getQuantidade(), solicitacao.getQuantidade());
             }
             BeanUtils.copyProperties(solicitacao, solBanco, "codigo", "statusSolicitacao", "datSolicitacao");
             solicitacao = solBanco;
         } else {
-            creditoService.manipulaCredito(estudante, 0L, solicitacao.getQuantidade());
+            creditoService.manipulaCredito(usuario, 0L, solicitacao.getQuantidade());
         }
 
         return solicitacaoRepository.save(solicitacao);
@@ -83,17 +85,17 @@ public class SolicitacaoService extends BaseService {
     public void excluirSolicitacao(Long codigoSol) throws SolicitacaoException {
         Solicitacao solicitacao = buscarPorCodigo(codigoSol);
         solicitacaoValidator.exclusaoValidator(solicitacao);
-        creditoService.manipulaCredito(solicitacao.getEstudante(), solicitacao.getQuantidade(), 0L);
+        creditoService.manipulaCredito(solicitacao.getUsuario(), solicitacao.getQuantidade(), 0L);
         solicitacaoRepository.delete(solicitacao);
     }
 
     /**
      * Recupera todas as solicitações vinculadas a um estudante específico.
      *
-     * @param codEstudante
+     * @param codUsuario
      */
-    public List<Solicitacao> buscarPorEstudante(Long codEstudante) {
-        return solicitacaoRepository.findByEstudante_CodEstudante(codEstudante);
+    public List<Solicitacao> buscarPorUsuario(Long codUsuario) {
+        return solicitacaoRepository.findByUsuario_CodUsuario(codUsuario);
     }
 
     /**

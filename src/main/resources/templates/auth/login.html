@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        // Login/confirmação não têm alternância manual de tema — seguem
+        // direto a preferência do sistema operacional/navegador
+        // (prefers-color-scheme), sem nada gravado em localStorage (ver,
+        // em contraste, o theme "salvo" nas demais páginas, ex.:
+        // historico_solicitacoes.html). Aplicado antes do primeiro paint
+        // pra não piscar o tema errado, e ouvindo mudanças ao vivo (troca
+        // do tema do SO com a página já aberta).
+        (function () {
+            var query = window.matchMedia("(prefers-color-scheme: dark)");
+
+            function applyTheme(isDark) {
+                document.documentElement.classList.remove("dark", "light");
+                document.documentElement.classList.add(isDark ? "dark" : "light");
+            }
+
+            applyTheme(query.matches);
+            query.addEventListener("change", (event) => applyTheme(event.matches));
+        })();
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/login.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Login - Portal BDH</title>
+</head>
+
+<body class="login-page">
+<div class="aurora-bg">
+    <div class="aurora-blob aurora-blob--blue aurora-blob--blue-1"></div>
+    <div class="aurora-blob aurora-blob--blue aurora-blob--blue-2"></div>
+    <div class="aurora-blob aurora-blob--green aurora-blob--green-1"></div>
+    <div class="aurora-blob aurora-blob--green aurora-blob--green-2"></div>
+</div>
+<div class="aurora-frost"></div>
+<div class="aurora-grain"></div>
+
+<div class="login-brand">
+</div>
+
+<main class="login-shell">
+
+    <form class="login-card glass-frost-strong" autocomplete="on" th:action="@{/login}" method="post">
+
+        <a th:href="@{/}" class="login-back">
+            <i class="icon" data-lucide="arrow-left"></i>
+            Voltar
+        </a>
+
+        <img th:src="@{/assets/LOGO BANCO DE DENTES BRANCO.png}" alt="BancoDentesBiobanco" class="login-card__logo login-card__logo--dark">
+        <img th:src="@{/assets/LOGO BANCO DE DENTES COLORIDA.png}" alt="BancoDentesBiobanco" class="login-card__logo login-card__logo--light">
+
+        <div th:if="${param.error}" style="color: #d9534f; background-color: #f2dede; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 14px;">
+            Usuário ou senha incorretos.
+        </div>
+        <div th:if="${param.logout}" style="color: #3c763d; background-color: #dff0d8; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-size: 14px;">
+            Sua sessão foi finalizada com sucesso.
+        </div>
+
+        <div class="login-form">
+
+            <div class="form-group">
+                <label for="login-identifier">Código</label>
+                <div class="login-field">
+                    <i class="icon login-field__icon" data-lucide="id-card"></i>
+                    <span class="login-field__divider"></span>
+                    <input
+                            id="login-identifier"
+                            name="username"
+                    type="text"
+                    class="form-control"
+                    placeholder="Digite seu código aqui"
+                    autocomplete="username"
+                    maxlength="50"
+                    required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="login-password">Senha</label>
+                <div class="login-field">
+                    <i class="icon login-field__icon" data-lucide="lock"></i>
+                    <span class="login-field__divider"></span>
+                    <input
+                            id="login-password"
+                            name="password"
+                            type="password"
+                            class="form-control"
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                            required>
+                    <button type="button" class="login-field__toggle" aria-label="Mostrar senha">
+                        <i class="icon" data-lucide="eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="login-options">
+                <a href="https://acad.unoesc.edu.br/academico/portal/modules/comum/senha.jspa?t=1">
+                    <i class="icon" data-lucide="rectangle-ellipsis"></i>
+                    Esqueci minha senha
+                </a>
+            </div>
+
+            <button type="submit" class="btn btn-primary login-submit">Entrar</button>
+
+        </div>
+
+        <p class="login-card__footer">
+            É necessário ter acesso ao Portal de Ensino - Unoesc
+        </p>
+
+    </form>
+</main>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/login.js}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+    });
+</script>
+
+</body>
+</html>

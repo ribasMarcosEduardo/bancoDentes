@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <script>
+        (function () {
+            var query = window.matchMedia("(prefers-color-scheme: dark)");
+
+            function applyTheme(isDark) {
+                document.documentElement.classList.remove("dark", "light");
+                document.documentElement.classList.add(isDark ? "dark" : "light");
+            }
+
+            applyTheme(query.matches);
+            query.addEventListener("change", (event) => applyTheme(event.matches));
+        })();
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/confirmacao_email.css}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Confirme seu e-mail - Portal BDH</title>
+</head>
+
+<body class="login-page">
+<div class="aurora-bg">
+    <div class="aurora-blob aurora-blob--blue aurora-blob--blue-1"></div>
+    <div class="aurora-blob aurora-blob--blue aurora-blob--blue-2"></div>
+    <div class="aurora-blob aurora-blob--green aurora-blob--green-1"></div>
+    <div class="aurora-blob aurora-blob--green aurora-blob--green-2"></div>
+</div>
+<div class="aurora-frost"></div>
+<div class="aurora-grain"></div>
+
+<div class="login-brand"></div>
+
+<main class="login-shell">
+    <div class="login-card confirm-card glass-frost-strong">
+
+        <a th:href="@{/login}" class="login-back">
+            <i class="icon" data-lucide="arrow-left"></i>
+            Sair
+        </a>
+
+        <img th:src="@{/assets/LOGO BANCO DE DENTES BRANCO.png}" alt="BancoDentesBiobanco" class="login-card__logo login-card__logo--dark">
+        <img th:src="@{/assets/LOGO BANCO DE DENTES COLORIDA.png}" alt="BancoDentesBiobanco" class="login-card__logo login-card__logo--light">
+
+        <div class="confirm-intro">
+            <h1 class="confirm-title">Confirme seu e-mail</h1>
+            <p class="confirm-subtitle">
+                O Portal de Ensino só confirma que seu acesso existe — não compartilha seu nome nem seu e-mail.
+                Informe seu nome completo e um endereço para receber notificações e confirmações das suas solicitações.
+            </p>
+        </div>
+
+        <div class="stepper confirm-stepper">
+            <div class="step step--active" data-step="email" id="stepper-email">
+                <div class="step__circle">
+                    <i class="icon" data-lucide="mail"></i>
+                </div>
+                <span>E-mail</span>
+            </div>
+
+            <div class="stepper__line" id="stepper-line"></div>
+
+            <div class="step" data-step="codigo" id="stepper-codigo">
+                <div class="step__circle">
+                    <i class="icon" data-lucide="shield-check"></i>
+                </div>
+                <span>Confirmação</span>
+            </div>
+        </div>
+
+        <form class="confirm-panel" id="panel-email" novalidate onsubmit="return false;">
+            <div class="form-group">
+                <label for="confirm-nome">Nome completo</label>
+                <div class="login-field">
+                    <i class="icon login-field__icon" data-lucide="user"></i>
+                    <span class="login-field__divider"></span>
+                    <input
+                            id="confirm-nome"
+                            name="nome"
+                            type="text"
+                            class="form-control"
+                            placeholder="Seu nome completo"
+                            autocomplete="name"
+                            required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-email">Seu e-mail</label>
+                <div class="login-field">
+                    <i class="icon login-field__icon" data-lucide="mail"></i>
+                    <span class="login-field__divider"></span>
+                    <input
+                            id="confirm-email"
+                            name="email"
+                            type="email"
+                            class="form-control"
+                            placeholder="seu.email@exemplo.com"
+                            autocomplete="email"
+                            required>
+                </div>
+                <p class="field-hint">Vamos enviar um código de 6 dígitos para confirmar esse endereço.</p>
+            </div>
+
+            <button type="submit" class="btn btn-primary login-submit" id="btn-enviar-codigo">
+                <span class="btn-label">Enviar código</span>
+                <i class="icon btn-spinner" data-lucide="loader-circle"></i>
+            </button>
+        </form>
+
+        <div class="confirm-panel" id="panel-codigo" hidden>
+            <p class="confirm-sent-to">
+                Enviamos um código para <strong id="confirm-sent-email">—</strong>
+            </p>
+
+            <div class="otp-row" id="otp-row">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-otp-index="0" aria-label="Dígito 1 do código">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-otp-index="1" aria-label="Dígito 2 do código">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-otp-index="2" aria-label="Dígito 3 do código">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-otp-index="3" aria-label="Dígito 4 do código">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-otp-index="4" aria-label="Dígito 5 do código">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-otp-index="5" aria-label="Dígito 6 do código">
+            </div>
+
+            <p class="otp-error" id="otp-error" role="alert" hidden>
+                <i class="icon" data-lucide="circle-alert"></i>
+                Código inválido. Confira os dígitos e tente novamente.
+            </p>
+
+            <p class="field-hint otp-demo-hint">Dica: verifique a caixa de entrada e a pasta de spam do e-mail informado.</p>
+
+            <div class="confirm-actions">
+                <button type="button" class="confirm-link" id="btn-trocar-email">
+                    <i class="icon" data-lucide="pencil-line"></i>
+                    Usar outro e-mail
+                </button>
+
+                <button type="button" class="confirm-link" id="btn-reenviar">
+                    <i class="icon" data-lucide="rotate-cw"></i>
+                    <span id="btn-reenviar-label">Reenviar código</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script th:src="@{/js/confirmacao-email.js}"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const temCodigoAtivo = /*[[${temCodigoAtivo}]]*/ false;
+        const emailUsuario = /*[[${emailUsuario}]]*/ '';
+
+        if (temCodigoAtivo) {
+            goToCodigoStep(emailUsuario);
+        }
+    });
+</script>
+
+</body>
+</html>

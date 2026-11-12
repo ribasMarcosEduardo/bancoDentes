@@ -4,7 +4,7 @@ import bancoDentes.dto.SolicitacaoDTO;
 import bancoDentes.exception.SolicitacaoCreditoException;
 import bancoDentes.exception.SolicitacaoException;
 import bancoDentes.exception.SolicitacaoStatusException;
-import bancoDentes.model.Estudante;
+import bancoDentes.model.Usuario;
 import bancoDentes.model.Solicitacao;
 import bancoDentes.model.enumModels.StatusSolicitacao;
 import bancoDentes.service.BaseService;
@@ -27,7 +27,7 @@ public class SolicitacaoValidator extends BaseService {
      * @param dto
      * @param estudante
      */
-    public void saveValidator(SolicitacaoDTO dto, Estudante estudante) throws SolicitacaoException {
+    public void saveValidator(SolicitacaoDTO dto, Usuario estudante) throws SolicitacaoException {
         validaCreditos(estudante.getCredito(), dto.quantidade());
     }
 

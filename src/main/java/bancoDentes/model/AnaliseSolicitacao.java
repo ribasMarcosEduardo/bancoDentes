@@ -36,7 +36,7 @@ public class AnaliseSolicitacao {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CODUSUARIO")
-    private Estudante analista;
+    private Usuario analista;
 
     @PrePersist
     @PreUpdate
