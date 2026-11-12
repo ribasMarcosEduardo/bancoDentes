@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   banco-de-dentes:
     build:
@@ -12,6 +10,10 @@ services:
     environment:
       SPRING_PROFILE: "desenvolvimento"
       MYSQL_HOST: "banco-de-dentes-db"
+    extra_hosts:
+      - "jba-dom-clu:172.16.154.14"
+      - "jba-dom-clu.unoesc.lan:172.16.154.14"
+      - "jba-dom-01.unoesc.lan:172.16.154.14"
     depends_on:
       - banco-de-dentes-db
 
