@@ -4,11 +4,13 @@ import bancoDentes.exception.FrascoException;
 import bancoDentes.model.enumModels.*;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Audited
 @Getter
 @Setter
 @NoArgsConstructor

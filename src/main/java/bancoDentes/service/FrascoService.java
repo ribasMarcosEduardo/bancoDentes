@@ -240,7 +240,7 @@ public class FrascoService extends BaseService{
     /**
      * Recupera os códigos dos frascos que possuem histórico e por isso só podem ser inativados.
      */
-    public Set<Long> getCodigosComVinculo() {
+    public Set<Long> getFrascosComVinculo() {
         return frascoRepository.findCodigosComVinculo();
     }
 

@@ -32,7 +32,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         Usuario usuario = usuarioService.obterOuCriarUsuario(codigoAd);
 
-        if (!usuario.isVerificado()) {
+        if (!"S".equals(usuario.getVerificado())) {
             response.sendRedirect("/confirmacao-email");
         } else {
             response.sendRedirect("/frasco/painel");

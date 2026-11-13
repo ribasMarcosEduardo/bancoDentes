@@ -95,7 +95,7 @@ public class SolicitacaoService extends BaseService {
      * @param codUsuario
      */
     public List<Solicitacao> buscarPorUsuario(Long codUsuario) {
-        return solicitacaoRepository.findByUsuario_CodUsuario(codUsuario);
+        return solicitacaoRepository.findByUsuario_Codigo(codUsuario);
     }
 
     /**

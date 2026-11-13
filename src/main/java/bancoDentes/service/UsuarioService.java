@@ -8,9 +8,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Serviço responsável por gerir as operações e regras de negócio relacionados ao usuário.
- *
+ * <p>
  * Integra a lógica de pesquisa de estudantes e o fluxo de segurança para verificação de e-mail utilizando códigos de uso único (OTP).
  *
  * @author Marcos Eduardo Ribas
@@ -35,7 +37,7 @@ public class UsuarioService extends BaseService {
 
     /**
      * Procura um usuário pelo seu código do Active Directory.
-     *
+     * <p>
      * Caso seja o seu primeiro acesso ao sistema,
      * cria imediatamente um novo registro com os valores padrão.
      *
@@ -45,7 +47,6 @@ public class UsuarioService extends BaseService {
         return usuarioRepository.findByCodigoAd(codigoAd).orElseGet(() -> {
             Usuario novoUsuario = new Usuario();
             novoUsuario.setCodigoAd(codigoAd);
-            novoUsuario.setVerificado(false);
             novoUsuario.setCredito(0L);
             return usuarioRepository.save(novoUsuario);
         });
@@ -53,7 +54,7 @@ public class UsuarioService extends BaseService {
 
     /**
      * Inicia o processo de verificação de e-mail de um usuário.
-     *
+     * <p>
      * Atualiza o registro do usuário com o nome completo e o e-mail fornecidos, solicita a geração de um código
      * temporário (OTP) e aciona o envio de e-mail personalizado.
      *
@@ -76,7 +77,7 @@ public class UsuarioService extends BaseService {
 
     /**
      * Confirma o código de verificação introduzido pelo usuário.
-     *
+     * <p>
      * Se o código corresponder ao gerado e não tiver expirado, o estado do utilizador
      * é atualizado para "verificado".
      *
@@ -88,7 +89,7 @@ public class UsuarioService extends BaseService {
             Usuario usuario = usuarioRepository.findByCodigoAd(codigoAd)
                     .orElseThrow(() -> new UsuarioException(getText("error.usuario.naoEncontrado")));
 
-            usuario.setVerificado(true);
+            usuario.setVerificado("S");
             usuarioRepository.save(usuario);
             return true;
         }
@@ -124,4 +125,15 @@ public class UsuarioService extends BaseService {
                 .orElseThrow(() -> new UsuarioException(getText("error.usuario.naoEncontrado")));
     }
 
+
+    /**
+     * Retorna uma lista com todos os usuários no sistema.
+     *
+     * @return
+     */
+    public List<Usuario> getListUsuarios() {
+        return usuarioRepository.findAll();
+    }
+
 }
+

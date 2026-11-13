@@ -39,7 +39,7 @@ public class FrascoPainelController extends BaseController {
     @GetMapping("/painel")
     public String exibePainelFrascos(Model model) {
         model.addAttribute("frascos", frascoService.getFrascos());
-        model.addAttribute("frascosComVinculo", frascoService.getCodigosComVinculo());
+        model.addAttribute("frascosComVinculo", frascoService.getFrascosComVinculo());
         model.addAttribute("historicoFrascos", frascoService.getHistoricoFrascos());
         model.addAttribute("manutencoesAbertas", manutencaoService.getManutencoesAbertasPorFrasco());
         return "painel/painelFrascos";

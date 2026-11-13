@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <script>
+        (function () {
+            var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+            document.documentElement.classList.add(theme, "carregando");
+        })();
+    </script>
+
+    <script>
+        // Fade (css/layout/panel-transition.css) só na recarga do próprio painel
+        window.addEventListener("pagereveal", function (e) {
+            if (!e.viewTransition) return;
+            var origem = document.referrer ? new URL(document.referrer).pathname : "";
+            if (origem === location.pathname) {
+                document.documentElement.classList.add("vt-nav");
+            } else {
+                e.viewTransition.skipTransition();
+            }
+        });
+    </script>
+
+    <link rel="expect" href="#painel-fim" blocking="render">
+
+    <link rel="stylesheet" th:href="@{/css/vendor/sweetalert2.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/generic.css}">
+    <link rel="stylesheet" th:href="@{/css/layout/panel-transition.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/usuarios.css(v=${#dates.createNow().getTime()})}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <title>Painel de Usuários</title>
+</head>
+
+<body class="app-mobile painel-usuarios">
+
+<div class="background">
+    <div class="blob blob--blue"></div>
+    <div class="blob blob--green"></div>
+</div>
+
+<div th:replace="~{partials/navbar :: navbar}"></div>
+<div th:replace="~{partials/app_mobile :: appHeader('usuarios')}"></div>
+
+<main class="page">
+    <section class="dashboard">
+
+        <div class="filters-sidebar-desktop">
+            <aside class="filter-sidebar glass-frost-strong">
+                <div class="filters-header">
+                    <i class="icon" data-lucide="filter"></i>
+                    <h2>Filtros</h2>
+
+                    <button type="button" class="filters-mobile-close" aria-label="Fechar filtros">
+                        <i class="icon" data-lucide="x"></i>
+                    </button>
+                </div>
+
+                <div class="filter-section">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
+                        Status
+                        <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="filter-section__content">
+                        <div class="filter-section__inner">
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Ativo" data-filter-group="Status">
+                                <span>Ativo (Validado)</span>
+                            </label>
+
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Pendente" data-filter-group="Status">
+                                <span>Pendente</span>
+                            </label>
+
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Bloqueado" data-filter-group="Status">
+                                <span>Bloqueado</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <button type="button" class="filter-section__toggle" aria-expanded="true">
+                        Permissão
+                        <i class="icon" data-lucide="chevron-down"></i>
+                    </button>
+
+                    <div class="filter-section__content">
+                        <div class="filter-section__inner">
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Estudante" data-filter-group="Permissão">
+                                <span>Estudante</span>
+                            </label>
+
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Estagiário" data-filter-group="Permissão">
+                                <span>Estagiário</span>
+                            </label>
+
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Admin" data-filter-group="Permissão">
+                                <span>Admin</span>
+                            </label>
+
+                            <label class="checkbox-filter">
+                                <input type="checkbox" value="Professor" data-filter-group="Permissão">
+                                <span>Professor</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="main-panel">
+
+            <header class="page-header">
+                <h1>Painel de Usuários</h1>
+                <p>Consulte, filtre e gerencie os usuários cadastrados.</p>
+            </header>
+
+            <div class="toolbar glass-frost">
+                <div class="search-wrapper">
+                    <input type="search" id="searchInput" placeholder="Buscar usuário...">
+
+                    <button type="button" class="search-clear" aria-label="Limpar busca" tabindex="-1"></button>
+                    <i class="search-icon" data-lucide="search"></i>
+                </div>
+
+                <div class="toolbar__actions">
+                    <div class="toolbar__row toolbar__row--controls">
+                        <div class="page-size-control">
+                            <label for="pageSize">Exibir</label>
+
+                            <div class="select-wrapper page-size-control__select">
+                                <select class="form-control" id="pageSize">
+                                    <option value="10" selected>10</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                </select>
+
+                                <i class="select-icon icon" data-lucide="chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbar__row toolbar__row--buttons">
+                        <button type="button" class="toolbar__filter-toggle" aria-label="Filtros">
+                            <i class="icon" data-lucide="filter"></i>
+                        </button>
+
+                        <button type="button" class="btn btn-secondary" id="btnSortOrder">
+                            <span class="btn__label">Ordenar</span>
+                            <i class="orderBy-icon" data-lucide="arrow-up-down"></i>
+                        </button>
+
+                        <a th:href="@{/usuario/cadastrar}" class="btn btn-primary">
+                            <i class="orderBy-icon" data-lucide="plus"></i>
+                            <span class="btn-label--prefix">Novo </span>Usuário
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="active-filters-bar glass-frost" id="activeFiltersBar">
+                <div class="active-filters-bar__inner">
+                    <div class="active-filters-bar__header">
+                        <span class="active-filters-bar__label">Filtros ativos:</span>
+
+                        <button class="filters-clear" type="button">
+                            <i class="icon" data-lucide="rotate-ccw"></i>
+                            Limpar filtros
+                        </button>
+                    </div>
+
+                    <div class="active-filters" id="activeFilters"></div>
+                </div>
+            </div>
+
+            <div class="list-panel">
+                <div class="pagination">
+                    <div class="low-opacity">
+                        <strong id="paginationInfo" data-label="Usuários Encontrados" th:text="${#lists.size(usuarios)} + ' Usuários Encontrados'">0 Usuários Encontrados</strong>
+                    </div>
+
+                    <div class="pagination__actions">
+                        <div class="pagination__nav">
+                            <span class="pagination__range" id="paginationRange">1-1</span>
+
+                            <button type="button" class="btn btn-pagination" id="btnPrevPage" data-tooltip="Página Anterior" aria-label="Página Anterior">
+                                <i data-lucide="chevron-left"></i>
+                            </button>
+                            <button type="button" class="btn btn-pagination" id="btnNextPage" data-tooltip="Próxima Página" aria-label="Próxima Página">
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <th:block th:if="${#lists.isEmpty(usuarios)}">
+                    <div th:replace="~{partials/empty_state :: empty_state('users', 'Nenhum usuário cadastrado', 'Não há registros de usuários no momento.', false)}">
+                    </div>
+                </th:block>
+
+                <section th:if="${!#lists.isEmpty(usuarios)}" class="results results--list" id="resultsView">
+
+                    <div id="emptyStateFiltro" hidden
+                         th:insert="~{partials/empty_state :: empty_state('search-x', 'Nenhum usuário encontrado', 'Nenhum usuário corresponde aos filtros aplicados.', true)}">
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(usuarios)}" class="result-table result-table--usuarios">
+                        <div class="result-table__head">
+                            <span>Código</span>
+                            <span>Nome</span>
+                            <span>Email</span>
+                            <span>Permissão</span>
+                            <span>Status</span>
+                            <span>Saldo Atual</span>
+                            <span>Ações</span>
+                        </div>
+
+                        <article class="request-row" th:each="usuario : ${usuarios}"
+                                 th:data-codigo="${usuario.codigo}"
+                                 th:data-busca="${usuario.nome + ' ' + usuario.email + ' ' + usuario.codigo}"
+                                 th:data-status="${usuario.verificado == 'S' ? 'Ativo' : (usuario.verificado == 'N' ? 'Pendente' : 'Bloqueado')}"
+                                 th:data-permissao="${usuario.permissao.nome}">
+
+                            <div class="result-list">
+                                <span class="result-list__code" th:text="${usuario.codigo}">-</span>
+                                <span class="result-list__name" th:text="${usuario.nome != null ? usuario.nome : 'Não informado'}">Nome Completo</span>
+                                <span class="result-list__email" th:text="${usuario.email != null ? usuario.email : '---'}">email@unoesc.edu.br</span>
+
+                                <span th:text="${usuario.permissao.nome}">Estudante</span>
+
+                                <span class="status-pill"
+                                      th:classappend="${usuario.verificado == 'S'} ? 'status-pill--ativo' : (${usuario.verificado == 'N'} ? 'status-pill--pendente' : 'status-pill--bloqueado')"
+                                      th:text="${usuario.verificado == 'S'} ? 'Ativo' : (${usuario.verificado == 'N'} ? 'Pendente' : 'Bloqueado')">Status</span>
+
+                                <span data-rotulo-prefixo="Créditos: " th:text="${usuario.credito}">0</span>
+
+                                <div class="result-list__actions">
+                                    <a th:href="@{/usuario/editar/{id}(id=${usuario.codigo})}" class="result-list__action result-list__action--blue" data-tooltip="Editar" aria-label="Editar">
+                                        <i class="icon" data-lucide="pen-line"></i>
+                                    </a>
+
+                                    <form th:action="@{/usuario/bloquear/{id}(id=${usuario.codigo})}" method="post" class="block-form" style="display:inline;">
+                                        <button type="submit" class="result-list__action result-list__action--red" th:data-nome="${usuario.nome}" data-tooltip="Bloquear" aria-label="Bloquear">
+                                            <i class="icon" data-lucide="lock"></i>
+                                        </button>
+                                    </form>
+
+                                    <button type="button" class="request-toggle request-toggle--plain" aria-label="Expandir usuário">
+                                        <i class="icon" data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="request-details">
+                                <div class="request-details__content">
+                                    <section class="request-panel">
+                                        <h4 class="request-panel__title">Detalhes do Usuário</h4>
+
+                                        <div class="request-details__grid">
+                                            <div class="request-detail">
+                                                <span class="request-details__label">Código</span>
+                                                <span th:text="${usuario.codigo}">-</span>
+                                            </div>
+
+                                            <div class="request-detail">
+                                                <span class="request-details__label">Nome completo</span>
+                                                <span th:text="${usuario.nome != null ? usuario.nome : 'Não informado'}">-</span>
+                                            </div>
+
+                                            <div class="request-detail">
+                                                <span class="request-details__label">Email</span>
+                                                <span th:text="${usuario.email != null ? usuario.email : '---'}">-</span>
+                                            </div>
+
+                                            <div class="request-detail">
+                                                <span class="request-details__label">Permissão</span>
+                                                <span th:text="${usuario.permissao.nome}">Estudante</span>
+                                            </div>
+
+                                            <div class="request-detail">
+                                                <span class="request-details__label">Status</span>
+                                                <span><span class="status-pill"
+                                                            th:classappend="${usuario.verificado == 'S'} ? 'status-pill--ativo' : 'status-pill--pendente'"
+                                                            th:text="${usuario.verificado == 'S'} ? 'Ativo' : 'Pendente'">Status</span></span>
+                                            </div>
+
+                                            <div class="request-detail">
+                                                <span class="request-details__label">Saldo Atual</span>
+                                                <span th:text="${usuario.credito}">0</span>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section class="request-panel">
+                                        <h4 class="request-panel__title">Ações</h4>
+
+                                        <div class="request-panel__actions">
+                                            <a th:href="@{/usuario/editar/{id}(id=${usuario.codigo})}" class="btn btn-outline btn-outline-info btn-degrade-status">
+                                                <i class="icon" data-lucide="pen-line"></i> Editar Usuário
+                                            </a>
+
+                                            <form th:action="@{/usuario/bloquear/{id}(id=${usuario.codigo})}" method="post" class="block-form" style="display:inline;">
+                                                <button type="submit" class="btn btn-outline btn-outline-danger btn-degrade-status" th:data-nome="${usuario.nome}">
+                                                    <i class="icon" data-lucide="lock"></i> Bloquear Acesso
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            </div>
+
+        </section>
+
+    </section>
+</main>
+
+<div th:replace="~{partials/footer :: footer}"></div>
+<!-- Tabbar mobile (opcional, adicione a view correspondente caso exista no enum de abas) -->
+<!-- <div th:replace="~{partials/app_mobile :: appTabbar('usuarios')}"></div> -->
+
+<script th:src="@{/js/bundles/painel.js}"></script>
+<script th:src="@{/js/app-mobile.js}"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.createIcons();
+
+        // Interação de Bloqueio com SweetAlert
+        document.querySelectorAll(".block-form").forEach(form => {
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                const nome = form.querySelector("button")?.dataset.nome || "este usuário";
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Deseja bloquear o acesso?",
+                    text: `O usuário ${nome} não poderá mais acessar o sistema.`,
+                    showCancelButton: true,
+                    reverseButtons: true,
+                    focusCancel: true,
+                    confirmButtonText: "Sim, bloquear",
+                    cancelButtonText: "Cancelar",
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: "btn btn-outline btn-outline-danger",
+                        cancelButton: "btn btn-secondary",
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.salvarEstadoPainel?.();
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+<span id="painel-fim" hidden></span>
+</body>
+</html>

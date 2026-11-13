@@ -44,7 +44,7 @@ public record SolicitacaoDTO(
                 return new SolicitacaoDTO(
                         solicitacao.getCodigo(),
                         solicitacao.getVersion(),
-                        solicitacao.getUsuario().getCodUsuario(),
+                        solicitacao.getUsuario().getCodigo(),
                         solicitacao.getDatSolicitacao(),
                         solicitacao.getQuantidade(),
                         solicitacao.getPosicao(),

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> {
 
-    List<Solicitacao> findByUsuario_CodUsuario(Long codUsuario);
+    List<Solicitacao> findByUsuario_Codigo(Long codUsuario);
 }

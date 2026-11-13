@@ -40,7 +40,7 @@ public class SolicitacaoPainelController extends BaseController{
     public String exibePainelSolicitacoes(Model model) {
         try {
             Usuario usuarioLogado = this.usuarioService.getUsuarioLogado();
-            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorUsuario(usuarioLogado.getCodUsuario());
+            List<Solicitacao> solicitacoes = solicitacaoService.buscarPorUsuario(usuarioLogado.getCodigo());
 
             model.addAttribute("solicitacoes", solicitacoes);
             model.addAttribute("pendentes", solicitacaoService.getPendentes(solicitacoes));
